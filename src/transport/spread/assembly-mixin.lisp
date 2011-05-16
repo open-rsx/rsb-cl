@@ -1,0 +1,44 @@
+;;; assembly-mixin.lisp ---
+;;
+;; Copyright (C) 2011 Jan Moringen
+;;
+;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+;;
+;; This Program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; This Program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program. If not, see <http://www.gnu.org/licenses>.
+
+(in-package :rsb.transport.spread)
+
+(defclass assembly-mixin ()
+  ((assembly-pool :initarg  :assembly-pool
+		  :type     assembly-pool
+		  :documentation
+		  ""))
+  (:documentation
+   "TODO(jmoringe): document"))
+
+(defmethod initialize-instance :after ((instance assembly-mixin)
+                                       &key
+				       age-limit)
+  (setf (slot-value instance 'assembly-pool)
+	(if age-limit
+	    (make-instance 'pruning-assembly-pool
+			   :age-limit age-limit)
+	    (make-instance 'assembly-pool))))
+
+(defmethod notification->event ((notification t)
+				(connector    assembly-mixin))
+  "TODO(jmoringe): document"
+  (bind (((:slots-r/o assembly-pool) connector))
+    (notification->event notification assembly-pool))) ;; TODO decoding usually depends on the domain
+                                                       ;; type requested by the listener
