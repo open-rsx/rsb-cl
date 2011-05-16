@@ -42,6 +42,7 @@
 		:iterate
 		:metabang-bind
 
+		#+sbcl sb-concurrency
 		:bordeaux-threads ;; or eager-future
 
 		:cl-hooks
