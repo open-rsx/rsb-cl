@@ -60,19 +60,17 @@ listeners. An event is a composite structure consisting of
 	   :datum         data
 	   :expected-type type)))
 
-(defmethod event= ((left event) (right event)
-		   &key
-		   (compare-ids? t)
-		   (data-test    #'equal))
+(defun event= (left right
+	       &key
+	       (compare-ids? t)
+	       (data-test    #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal."
-  (bind (((:slots-r/o (id1 id) (scope1 scope) (type1 type) (data1 data)) left)
-	 ((:slots-r/o (id2 id) (scope2 scope) (type2 type) (data2 data)) right))
-    (and (or (not compare-ids?)
-	     (equal (uuid:uuid-to-byte-array id1)
-		    (uuid:uuid-to-byte-array id2)))
-	 (scope= scope1 scope2)
-	 (equal type1 type2)
-	 (funcall data-test data1 data2))))
+  (and (or (not compare-ids?)
+	   (equal (uuid:uuid-to-byte-array (event-id left))
+		  (uuid:uuid-to-byte-array (event-id right))))
+       (scope= (event-scope left) (event-scope right))
+       (type= (event-type left) (event-type right))
+       (funcall data-test (event-data left) (event-data right))))
 
 (defmethod print-object ((object event) stream)
   (bind (((:slots scope type data) object)
