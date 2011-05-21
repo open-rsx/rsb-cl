@@ -36,6 +36,12 @@
 
 (deftestsuite root ()
   ()
+  (:setup
+   (let ((spread-port (asdf:component-property
+		       (asdf:find-system :cl-rsb-test) :spread-port)))
+     (setf *default-configuration*
+	   `(((:transport :spread :host) . "localhost")
+	     ((:transport :spread :port) . ,spread-port)))))
   (:documentation
    "Root unit test suite of the cl-rsb system."))
 

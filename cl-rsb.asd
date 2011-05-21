@@ -24,6 +24,8 @@
 
 (cl:in-package :cl-rsb-system)
 
+#+sbcl (asdf:load-system :sb-posix)
+
 (when (find-system :asdf-system-connections)
   (load-system :asdf-system-connections))
 
@@ -165,6 +167,9 @@
 		:cl-protobuf
 		:cl-spread
 		:cl-rsb)
+  :properties  ((:spread-port  . #.(or #+sbcl (let ((value (sb-posix:getenv "SPREAD_PORT")))
+						(when value (read-from-string value)))
+				       5678)))
   :components  ((:module     "test"
 		 :components ((:file       "package")
 
@@ -187,7 +192,10 @@
   :in-order-to ((test-op (load-op :cl-rsb-test))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
-  (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
+  (eval (read-from-string
+	 "(SPREAD:WITH-DAEMON (:PORT (ASDF:COMPONENT-PROPERTY
+                                       (ASDF:FIND-SYSTEM :CL-RSB-TEST) :SPREAD-PORT))
+            (LIFT:RUN-TESTS :CONFIG :GENERIC))")))
 
 
 ;;; System connection with cl-spread
