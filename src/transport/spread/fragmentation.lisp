@@ -173,16 +173,19 @@ necessary when fragments are submitted by calls to
 ;;
 
 (defclass pruning-assembly-pool (assembly-pool)
-  ((lock   :initform (bt:make-lock "Assemblies Lock"))
-   (thread :initarg  :thread
-	   :type     bt:thread
+  ((lock   :initform (bt:make-lock "Assemblies Lock")
 	   :documentation
-	   "")
-   (stop?  :initarg  :stop?
-	   :type     boolean
+	   "This lock protects the collection of `assembly' instances
+from concurrent modification by the pruning thread and calls to
+`merge-fragment'.")
+   (thread :type     bt:thread
+	   :documentation
+	   "Stores the thread in the context of which the pruning of
+incomplete assemblies is done. ")
+   (stop?  :type     boolean
 	   :initform nil
 	   :documentation
-	   ""))
+	   "This flag controls termination of the pruning thread."))
   (:documentation
    "This instances of this subclass of `assembly-pool' manage a thread
 that periodically deletes partial assemblies which are older than
@@ -191,6 +194,7 @@ MIN-AGE."))
 (defmethod initialize-instance :after ((instance pruning-assembly-pool)
                                        &key
 				       (age-limit 60))
+  ;; Create a thread that periodically deletes partial assemblies.
   (setf (slot-value instance 'thread)
 	(bt:make-thread #'(lambda ()
 			    (iter (until (slot-value instance 'stop?))
@@ -210,7 +214,8 @@ MIN-AGE."))
     (call-next-method)))
 
 (defun delete-partial-assemblies (pool min-age)
-  "DOC"
+  "Find `assembly' instance in POOL whose age is at least MIN-AGE and
+delete them."
   (bind (((:slots-r/o assemblies lock) pool))
     (bt:with-lock-held (lock)
       (let ((old (remove min-age (hash-table-values assemblies)
