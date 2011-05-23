@@ -19,6 +19,15 @@
 
 (in-package :rsb.transport.spread)
 
+
+;;; Generic utility functions
+;;
+
+(defun internal-real-time-in-seconds ()
+  "Return the current \"internal\" time in seconds."
+  (/ (get-internal-real-time)
+     internal-time-units-per-second))
+
 (defun parse-spread-name (name)
   "DOC"
   (let ((@ (position #\@ name)))

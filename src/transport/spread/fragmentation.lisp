@@ -19,11 +19,9 @@
 
 (in-package :rsb.transport.spread)
 
-;; TODO where to put this function?
-(defun internal-real-time-in-seconds ()
-  "DOC"
-  (/ (get-internal-real-time)
-     internal-time-units-per-second))
+
+;;; `assembly' class
+;;
 
 (defclass assembly ()
   ((id         :initarg  :id
