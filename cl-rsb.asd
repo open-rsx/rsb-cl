@@ -222,7 +222,7 @@ on the spread group communication system."
 			      (:file       "util"
 			       :depends-on ("package"))
 			      (:file       "fragmentation"
-			       :depends-on ("package"))
+			       :depends-on ("package" "util"))
 			      (:file       "conversion"
 			       :depends-on ("package" "fragmentation"))
 
