@@ -96,7 +96,7 @@ listeners. An event is a composite structure consisting of
 optionally, meta-data consisting of the keys and values in the plist
 META-DATA."
   (make-instance 'event
-		 :scope     scope
+		 :scope     (make-scope scope)
 		 :data      data
 		 :meta-data meta-data))
 
@@ -107,7 +107,7 @@ META-DATA."
 Optionally, add meta-data consisting of the keys and values in the
 plist META-DATA."
   (make-instance 'event
-		 :scope     scope
+		 :scope     (make-scope scope)
 		 :data      data
 		 :type      type
 		 :meta-data meta-data))
