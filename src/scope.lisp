@@ -118,9 +118,9 @@ names."))
   "Return non-nil if THING1 is a super-scope of THING2."
   (sub-scope? thing2 thing1))
 
-(defmethod super-scopes ((scope scope)
-			 &key
-			 include-self?)
+(defun super-scopes (scope
+		     &key
+		     include-self?)
   "Return the list of superscopes of SCOPE. If INCLUDE-SELF? is
 non-nil, SCOPE is contained in the list. Otherwise, only proper
 superscopes are returned."
