@@ -107,3 +107,32 @@ instance.")
 					 (shuffle notifications))))))
       (ensure-same (octetify data) result
 		   :test #'equalp))))
+
+(deftestsuite pruning-assembly-pool-root (fragmentation-root)
+  ()
+  (:documentation
+   "Unit tests for the `pruning-assembly-pool' class."))
+
+(addtest (pruning-assembly-pool-root
+          :documentation
+	  "Check that old incomplete assemblies actually get pruned.")
+  prune
+
+  (let ((pool (make-instance 'pruning-assembly-pool
+			     :age-limit 1)))
+    (merge-fragment pool (make-notification
+			  (uuid:make-v1-uuid) 2 0 (octetify "bla")))
+    (let ((count (assembly-pool-count pool)))
+      (ensure-same
+       count 1
+       :test      #'=
+       :report    "~@<After submitting a fragment, the count of the pool was ~D, not ~D.~@:>"
+       :arguments (count 1)))
+    (sleep 2)
+    (let ((count (assembly-pool-count pool)))
+      (ensure-same
+       count 0
+       :test #'=
+       :report    "~@<After submitting a fragment and waiting for it to
+get pruned, the count of the pool was ~D, not ~D.~@:>"
+       :arguments (count 0)))))
