@@ -23,6 +23,27 @@
 ;;; Meta data protocol
 ;;
 
+(defgeneric meta-data-count (object)
+  (:documentation
+   "Return the number of meta-data items stored in OBJECT."))
+
+(defgeneric meta-data-keys (object)
+  (:documentation
+   "Return a list of the keys of meta-data items stored in OBJECT."))
+
+(defgeneric meta-data-values (object)
+  (:documentation
+   "Return a list of the values of meta-data items stored in
+OBJECT."))
+
+(defgeneric meta-data-plist (object)
+  (:documentation
+   "Return a plist of the meta-data items stored in OBJECT."))
+
+(defgeneric meta-data-alist (object)
+  (:documentation
+   "Return an alist of the meta-data items stored in OBJECT."))
+
 (defgeneric meta-data (object key)
   (:documentation
    "Return the meta-data item of OBJECT identified by KEY."))
