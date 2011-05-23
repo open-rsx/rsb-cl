@@ -1,4 +1,4 @@
-;;; receiver.lisp ---
+;;; receiver.lisp --- Pull-based receiving participant class.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -23,12 +23,12 @@
 		    rsb.ep:client)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class provide a pull-based interface for
+receiving events."))
 
 (defmethod receive ((receiver receiver)
 		    &key
 		    (block? t))
-  "TODO(jmoringe): document"
   ;; TODO how to handle multiple connectors?
   ;; TODO who should be responsible for calling emit on the connector?
   (let ((connector (first
@@ -39,7 +39,6 @@
 ;; TODO maybe restart should be installed in transport layer
 (defmethod receive :around ((receiver receiver)
 			    &key &allow-other-keys)
-  "TODO(jmoringe): document"
   (let (result)
     (tagbody
      skip
