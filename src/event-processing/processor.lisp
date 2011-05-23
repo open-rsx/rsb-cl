@@ -19,12 +19,7 @@
 
 (in-package :rsb.event-processing)
 
-(defclass processor () ;; TODO necessary?
-  ()
-  (:documentation
-   "DOC"))
-
-(defclass broadcast-processor (processor) ;; TODO -mixin?
+(defclass broadcast-processor ()
   ((handlers :initarg  :handlers
 	     :type     list
 	     :accessor handlers
@@ -43,13 +38,3 @@
 		     (event     event))
   "Dispatch EVENT to handlers of PROCESSOR."
   (handle (handlers processor) event))
-
-(defclass in-processor (processor) ;; TODO necessary?
-  ()
-  (:documentation
-   "DOC"))
-
-(defclass out-processor (processor) ;; TODO necessary?
-  ()
-  (:documentation
-   "DOC"))

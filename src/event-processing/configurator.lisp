@@ -28,7 +28,6 @@
 	       :documentation
 	       "")
    (processor  :initarg  :processor
-	       :type     processor
 	       :accessor configurator-processor
 	       :initform (make-instance 'broadcast-processor)
 	       :documentation
