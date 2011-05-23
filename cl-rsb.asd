@@ -69,7 +69,8 @@
 			       :depends-on ("package" "util"))
 
 			      (:file       "util"
-			       :depends-on ("package" "scope"))))
+			       :depends-on ("package" "scope"
+					    "protocol"))))
 
 		(:module      "src"
 		 :depends-on  ("src-early"
