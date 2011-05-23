@@ -48,23 +48,34 @@ data/notifications."))
 instance.")
   assemble-smoke
 
-  (let* ((uuid      (uuid:make-v1-uuid))
-	 (parts     '("foo" "bar" "baz" "a" "b"))
-	 (fragments (iter (for part in parts)
-			  (for i :from 0)
-			  (collect (make-notification
-				    uuid 5 i (octetify part)))))
-	 (pool      (make-instance 'assembly-pool))
-	 (returns   (map 'list (curry #'merge-fragment pool)
-			 (shuffle fragments)))
-	 (assembly  (lastcar returns))
-	 (result    (assembly-concatenated-data assembly)))
-    (ensure (assembly-complete? assembly))
-    (ensure-same
-     result
-     (octetify
-      (apply #'concatenate 'string parts))
-     :test #'equalp)))
+  (ensure-cases (uuid num-parts parts part-ids expected)
+      `((,(uuid:make-v1-uuid)
+	 5
+	 ("foo" "bar" "baz" "a" "b")
+	 (0 1 2 3 4)
+	 "foobarbazab")
+	(,(uuid:make-v1-uuid)
+	 2
+	 ("foo" "baz" "foo" "a" "bar")
+	 (0     5     0     2   1)
+	 "foobar"))
+    ;; We repeat the assembly for all permutation of the fragments.
+    (let* ((fragments (iter (for part in parts)
+			    (for i    in part-ids)
+			    (collect (make-notification
+				      uuid num-parts i (octetify part))))))
+      (map-permutations
+       (lambda (permutation)
+	 (let* ((pool      (make-instance 'assembly-pool))
+		(returns   (map 'list (curry #'merge-fragment pool)
+				permutation))
+		(assembly  (find-if (complement #'null) returns))
+		(result    (assembly-concatenated-data assembly)))
+	   (ensure (assembly-complete? assembly))
+	   (ensure-same
+	    result (octetify expected)
+	    :test #'equalp)))
+       fragments))))
 
 (addtest (fragmentation-root
           :documentation
@@ -77,7 +88,11 @@ instance.")
 	,(octetify '(98 97 114))
 	,(octetify '(98 97 122))
 	,(octetify '(98)))
-       3))
+       3)
+      ("fooobaar"
+       (,(octetify "fooo")
+	,(octetify "baar"))
+       4))
 
     (let ((result (fragment-data (octetify data) chunk-size)))
       (ensure-same
@@ -92,7 +107,8 @@ instance.")
   roundtrip
 
   (ensure-cases (data chunk-size)
-      '(("foobarbazb" 3))
+      '(("foobarbazb" 3)
+	("fooobaar"   4))
 
     (let* ((fragments     (fragment-data (octetify data) chunk-size))
 	   (uuid          (uuid:make-v1-uuid))
