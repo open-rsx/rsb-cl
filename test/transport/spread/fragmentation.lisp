@@ -108,6 +108,15 @@ instance.")
       (ensure-same (octetify data) result
 		   :test #'equalp))))
 
+(addtest (fragmentation-root
+          :documentation
+	  "Test `print-object' method on `assembly-pool'.")
+  print-smoke
+
+  (let ((pool (make-instance 'assembly-pool)))
+    (with-output-to-string (stream)
+      (format stream "~A" pool))))
+
 (deftestsuite pruning-assembly-pool-root (fragmentation-root)
   ()
   (:documentation
@@ -136,3 +145,12 @@ instance.")
        :report    "~@<After submitting a fragment and waiting for it to
 get pruned, the count of the pool was ~D, not ~D.~@:>"
        :arguments (count 0)))))
+
+(addtest (pruning-assembly-pool-root
+          :documentation
+	  "Test `print-object' method on `pruning-assembly-pool'.")
+  print-smoke
+
+  (let ((pool (make-instance 'pruning-assembly-pool)))
+    (with-output-to-string (stream)
+      (format stream "~A" pool))))
