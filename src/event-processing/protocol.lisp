@@ -1,4 +1,4 @@
-;;; protocol.lisp ---
+;;; protocol.lisp --- Protocols provided by the event-processing module.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -62,6 +62,15 @@ DATA."))
   "If SINK is a list, treat it as a list of sinks and let each
 contained sink handle DATA."
   (map nil (rcurry #'handle data) sink))
+
+
+;;; Dispatching processor protocol
+;;
+
+(defgeneric dispatch (processor event)
+  (:documentation
+   "Dispatch EVENT in the manner implemented by PROCESSOR. This may
+mean to call some handlers, for example."))
 
 
 ;;; Notification protocol

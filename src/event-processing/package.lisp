@@ -43,6 +43,10 @@
   (:export
    :handle)
 
+  ;; Dispatching processor protocol
+  (:export
+   :dispatch)
+
   ;; Notification protocol
   (:export
    :notify)
