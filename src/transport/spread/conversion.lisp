@@ -143,7 +143,7 @@ into one notification."
 (defun make-notification (id scope wire-schema data
 			  &key
 			  meta-data
-			  (num-data-parts 0)
+			  (num-data-parts 1)
 			  (data-part      0))
   "Make a `rsb.protocol:notification' instance with ID, SCOPE,
 WIRE-SCHEMA, DATA and optionally META-DATA. When NUM-DATA-PARTS and
