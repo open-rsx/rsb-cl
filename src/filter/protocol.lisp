@@ -19,6 +19,18 @@
 
 (in-package :rsb.filter)
 
+
+;;; Filter protocol
+;;
+
+(defgeneric matches? (filter event)
+  (:documentation
+   "Return non-nil if EVENT matches the criteria of FILTER."))
+
+
+;;;
+;;
+
 (dynamic-classes:define-findable-class-family filter
     "")
 
