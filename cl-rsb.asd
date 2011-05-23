@@ -175,6 +175,8 @@
   :components  ((:module     "test"
 		 :components ((:file       "package")
 
+			      (:file       "event"
+			       :depends-on ("package"))
 			      (:file       "listener"
 			       :depends-on ("package"))
 			      (:file       "informer"
