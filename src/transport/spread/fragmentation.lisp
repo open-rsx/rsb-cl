@@ -172,7 +172,7 @@ necessary when fragments are submitted by calls to
 
 (defmethod print-object ((object assembly-pool) stream)
   (print-unreadable-object (object stream :type t :identity t)
-    (format stream "(~D)" (assembly-pool-count pool))))
+    (format stream "(~D)" (assembly-pool-count object))))
 
 
 ;;; Automatic pruning of old incomplete assemblies
