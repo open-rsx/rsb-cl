@@ -122,7 +122,9 @@ returned."
 	       "This hash-table maps event ids to `assembly'
 instances."))
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class create and update `assembly' instances as
+necessary when fragments are submitted by calls to
+`merge-fragment'."))
 
 (defmethod ensure-assembly ((pool assembly-pool)
 			    (id   string)
