@@ -29,10 +29,6 @@
    :rsb
    :rsb.event-processing)
 
-  ;; Port protocol
-  ;(:export
-   ;:handle)
-
   ;; Transport class family and port creation
   (:export
    :no-such-transport
