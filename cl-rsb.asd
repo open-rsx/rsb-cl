@@ -187,7 +187,7 @@
 
 		(:module     "spread"
 		 :pathname   "test/transport/spread"
-		 :depends-on ("test")
+		 :depends-on ("test" "transport")
 		 :components ((:file       "package")
 			      (:file       "util"
 			       :depends-on ("package"))
