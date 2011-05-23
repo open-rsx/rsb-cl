@@ -115,6 +115,10 @@ returned."
 ;;; Partial assembly storage protocol
 ;;
 
+(defgeneric assembly-pool-count (pool)
+  (:documentation
+   "Return the number of `assembly' instances in POOL."))
+
 (defgeneric ensure-assembly (pool id size)
   (:documentation
    "Find or create an assembly with SIZE total fragments for the event
@@ -140,6 +144,9 @@ instances."))
    "Instances of this class create and update `assembly' instances as
 necessary when fragments are submitted by calls to
 `merge-fragment'."))
+
+(defmethod assembly-pool-count ((pool assembly-pool))
+  (hash-table-count (slot-value pool 'assemblies)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
 			    (id   string)
@@ -214,6 +221,10 @@ MIN-AGE."))
 			    (with-slots (thread stop?) instance
 			      (setf stop? t)
 			      (bt:join-thread thread)))))
+
+(defmethod assembly-pool-count :around ((pool pruning-assembly-pool))
+  (bt:with-lock-held ((slot-value pool 'lock))
+    (call-next-method)))
 
 (defmethod merge-fragment :around ((pool         pruning-assembly-pool)
 				   (notification t))

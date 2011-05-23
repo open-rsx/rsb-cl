@@ -39,9 +39,11 @@
    :assembly-complete?
    :assembly-concatenated-data
 
+   :assembly-pool-count
+   :merge-fragment
+
    :assembly-pool
    :pruning-assembly-pool
-   :merge-fragment
 
    :fragment-data
 
