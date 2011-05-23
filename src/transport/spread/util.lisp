@@ -37,8 +37,31 @@ specified and the port component as string."
         (values (subseq name (1+ @)) (subseq name 0 @))
 	(values nil name))))
 
-;; TODO cache this?
+
+;;; Scope -> spread group mapping
+;;
+
+(defvar *scope-group-cache* (make-hash-table :test #'eq)
+  "This cache maps `scope' instances to the corresponding spread
+groups.")
+
+(defvar *scope-group-cache-max-size* 1024
+  "The maximum number of allowed entries in the scope -> group mapping
+cache.")
+
 (defun scope->group (scope)
+  "Return a spread group name derived from the SCOPE.
+This function uses a caching implementation which only works
+efficiently, if SCOPE is interned."
+  (or (gethash scope *scope-group-cache*)
+      (progn
+	(when (> (hash-table-count *scope-group-cache*)
+		 *scope-group-cache-max-size*)
+	  (clrhash *scope-group-cache*))
+	(setf (gethash scope *scope-group-cache*)
+	      (scope->group/no-cache scope)))))
+
+(defun scope->group/no-cache (scope)
   "Return a spread group name derived from SCOPE."
   (let* ((octets (sb-ext:string-to-octets (rsb:scope-string scope)))
 	 (hash   (ironclad:digest-sequence :md5 octets))
