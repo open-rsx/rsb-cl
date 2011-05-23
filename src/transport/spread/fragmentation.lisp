@@ -171,9 +171,8 @@ necessary when fragments are submitted by calls to
 	  assembly))))
 
 (defmethod print-object ((object assembly-pool) stream)
-  (with-slots (assemblies) object
-    (print-unreadable-object (object stream :type t :identity t)
-      (format stream "(~D)" (hash-table-count assemblies)))))
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "(~D)" (assembly-pool-count pool))))
 
 
 ;;; Automatic pruning of old incomplete assemblies
