@@ -22,6 +22,7 @@
 (defpackage :rsb.test
   (:use
    :cl
+   :alexandria
    :iterate
 
    :lift
