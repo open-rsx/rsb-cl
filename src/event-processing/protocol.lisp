@@ -62,3 +62,13 @@ DATA."))
   "If SINK is a list, treat it as a list of sinks and let each
 contained sink handle DATA."
   (map nil (rcurry #'handle data) sink))
+
+
+;;; Notification protocol
+;;
+
+(defgeneric notify (recipient subject action)
+  (:documentation
+   "Methods should return one of the symbols :not-implemented
+or :implemented to indicate whether the combination of SUBJECT and
+ACTION could be implemented by RECIPIENT."))

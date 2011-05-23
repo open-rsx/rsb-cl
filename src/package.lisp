@@ -129,10 +129,6 @@
 
    :make-informer)
 
-  ;; Notification protocol
-  (:export
-   :notify)
-
   ;; Macros
   (:export
    ;:with-channel

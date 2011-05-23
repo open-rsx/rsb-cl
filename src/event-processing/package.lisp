@@ -43,6 +43,10 @@
   (:export
    :handle)
 
+  ;; Notification protocol
+  (:export
+   :notify)
+
   ;;
   (:export
    :configurator

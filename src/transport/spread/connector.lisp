@@ -51,7 +51,7 @@ connectors."))
 	      (make-instance 'connection
 			     :name name)))))
 
-(defmethod rsb:notify ((connector connector)
+(defmethod notify ((connector connector)
 		   (scope     scope)
 		   (action    (eql :attached)))
   (bind (((:accessors-r/o (connection connector-connection)) connector)
@@ -59,7 +59,7 @@ connectors."))
     (ref-group connection group-name))
   :implemented)
 
-(defmethod rsb:notify ((connector connector)
+(defmethod notify ((connector connector)
 		   (scope     scope)
 		   (action    (eql :detached)))
   (bind (((:accessors-r/o (connection connector-connection)) connector)

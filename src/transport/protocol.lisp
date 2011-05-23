@@ -33,13 +33,6 @@ CONNECTOR."))
    "Return a complete URL suitable for locating the resource THING via
  CONNECTOR."))
 
-;; TODO the symbol is in package rsb; move this generic to some file in src?
-(defgeneric notify (connector thing action) ;; or maybe part of the filter protocol?
-  (:documentation
-   "Methods should one of the symbols :not-implemented or :implemented
-to indicate whether the combination of THING and ACTION could be
-implemented by CONNECTOR on the transport level."))
-
 
 ;;; Default behavior
 ;;

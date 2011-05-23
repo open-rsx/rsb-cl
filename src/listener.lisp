@@ -49,7 +49,7 @@ a mechanism for dispatching matching events to these handlers."))
 
 (defmethod (setf rsb.ep:handlers) ((new-value list) (listener listener))
   "DOC"
-  (notify (rsb.ep:client-configurator listener) (first new-value) :handler-added))
+  (rsb.ep:notify (rsb.ep:client-configurator listener) (first new-value) :handler-added))
   ;(setf (rsb.ep:handlers (rsb.ep:client-configurator listener))
 ;	new-value))
 
@@ -60,9 +60,9 @@ a mechanism for dispatching matching events to these handlers."))
     (prog1
 	(call-next-method)
       (unless (eq old-value new-value)
-	(notify (rsb.ep:client-configurator listener)
-		listener
-		(if new-value :enabled :disabled))))))
+	(rsb.ep:notify (rsb.ep:client-configurator listener)
+		       listener
+		       (if new-value :enabled :disabled))))))
 
 (defmethod print-object ((object listener) stream)
   (print-unreadable-id-object (object stream :type t)

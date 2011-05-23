@@ -26,7 +26,8 @@
    :alexandria
    :iterate
 
-   :rsb)
+   :rsb
+   :rsb.event-processing)
 
   ;; Port protocol
   ;(:export
