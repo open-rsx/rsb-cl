@@ -195,9 +195,10 @@ of incomplete assemblies is done. ")
    (age-limit :initarg  :age-limit
 	      :type     positive-real
 	      :accessor assembly-pool-age-limit
+	      :initform 10
 	      :documentation
-	      "Controls the minimum age that `assembly' instances have
-to reach before they can be pruned."))
+	      "Controls the minimum age in seconds that `assembly'
+instances have to reach before they can be pruned."))
   (:documentation
    "This instances of this subclass of `assembly-pool' manage a thread
 that periodically deletes partial assemblies which are older than
