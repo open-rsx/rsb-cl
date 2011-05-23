@@ -112,6 +112,21 @@ returned."
 	      (assembly-age object)))))
 
 
+;;; Partial assembly storage protocol
+;;
+
+(defgeneric ensure-assembly (pool id size)
+  (:documentation
+   "Find or create an assembly with SIZE total fragments for the event
+identified by ID."))
+
+(defgeneric merge-fragment (pool notification)
+  (:documentation
+   "Merge NOTIFICATION into the appropriate assembly within POOL. If
+NOTIFICATION completes the assembly, return a notification instance
+built from the complete assembly. Otherwise, return nil."))
+
+
 ;;; Partial assembly storage
 ;;
 
@@ -129,7 +144,6 @@ necessary when fragments are submitted by calls to
 (defmethod ensure-assembly ((pool assembly-pool)
 			    (id   string)
 			    (size integer))
-  "Find or create an assembly with SIZE total fragments for event ID."
   (bind (((:slots-r/o assemblies) pool))
     (or (gethash id assemblies)
 	(setf (gethash id assemblies)
@@ -139,9 +153,6 @@ necessary when fragments are submitted by calls to
 
 (defmethod merge-fragment ((pool         assembly-pool)
 			   (notification t))
-  "Merge NOTIFICATION into the appropriate assembly. If NOTIFICATION
-completes the assembly, return a notification instance built from the
-complete assembly. Otherwise, return nil."
     (bind (((:slots-r/o assemblies) pool)
 	   ((:accessors-r/o
 	     (id rsb.protocol::notification-id)
