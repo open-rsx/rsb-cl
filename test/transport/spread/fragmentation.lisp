@@ -44,7 +44,8 @@ data/notifications."))
 
 (addtest (fragmentation-root
           :documentation
-	  "TODO(jmoringe): document")
+	  "Smoke test for the `merge-fragment' with an `assembly-pool'
+instance.")
   assemble-smoke
 
   (let* ((uuid      (uuid:make-v1-uuid))
@@ -85,7 +86,9 @@ data/notifications."))
 
 (addtest (fragmentation-root
           :documentation
-	  "TODO(jmoringe): document")
+	  "Do full roundtrips of fragmenting data using
+`fragment-data' and then re-assemble the fragments using
+`merge-fragments'")
   roundtrip
 
   (ensure-cases (data chunk-size)
