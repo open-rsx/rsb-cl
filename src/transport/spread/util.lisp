@@ -1,4 +1,4 @@
-;;; util.lisp ---
+;;; util.lisp --- Utility functions used in the spread backend.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
