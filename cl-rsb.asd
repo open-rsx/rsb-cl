@@ -58,32 +58,33 @@
 		 :components ((:file       "package")
 			      (:file       "types"
 			       :depends-on ("package"))
-			      (:file       "scope"
-			       :depends-on ("package"))
-			      (:file       "util"
-			       :depends-on ("package" "scope"))
 			      (:file       "conditions"
 			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package"))
+
+			      (:file       "scope"
+			       :depends-on ("package"))
 			      (:file       "event"
-			       :depends-on ("package"))))
+			       :depends-on ("package"))
+
+			      (:file       "util"
+			       :depends-on ("package" "scope"))))
 
 		(:module      "src"
 		 :depends-on  ("src-early"
 			       "event-processing")
-		 :components ((:file       "protocol")
-
-			      (:file       "configuration")
+		 :components ((:file       "configuration")
 			      (:file       "variables"
 			       :depends-on ("configuration"))
 
-			      (:file       "participant"
-			       :depends-on ("protocol"))
+			      (:file       "participant")
 			      (:file       "listener"
 			       :depends-on ("participant"))
 			      (:file       "receiver"
 			       :depends-on ("participant"))
 			      (:file       "informer"
-			       :depends-on ("protocol" "participant"))
+			       :depends-on ("participant"))
 
 			      (:file       "macros"
 			       :depends-on ("listener" "receiver"
