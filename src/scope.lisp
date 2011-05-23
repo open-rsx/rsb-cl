@@ -46,7 +46,13 @@
 	       :type     scope-components
 	       :reader   scope-components
 	       :documentation
-	       "The name components of the scope."))
+	       "The name components of the scope.")
+   (interned?  :initarg  :interned?
+	       :type     boolean
+	       :accessor scope-interned?
+	       :initform nil
+	       :documentation
+	       "Non-nil if the scope has been interned."))
   (:default-initargs
    :components (missing-required-initarg 'scope :components))
   (:documentation
@@ -68,26 +74,30 @@ names."))
 (defmethod make-scope ((thing scope)
 		       &key
 		       intern?)
-  thing)
+  (if intern?
+      (intern-scope thing)
+      thing))
 
 (defmethod make-scope ((thing list)
 		       &key
 		       intern?)
   (check-type thing scope-components "a list of component strings")
 
-  (make-instance 'scope
-		 :components thing))
+  (make-scope (make-instance 'scope
+			     :components thing)
+	      :intern? intern?))
 
 (defmethod make-scope ((thing sequence)
 		       &key
 		       intern?)
-  (make-scope (coerce thing 'list)))
+  (make-scope (coerce thing 'list) :intern? intern?))
 
 (defmethod make-scope ((thing string)
 		       &key
 		       intern?)
   (make-scope (split-sequence #\/ thing
-			      :remove-empty-subseqs t)))
+			      :remove-empty-subseqs t)
+	      :intern? intern?))
 
 (defun scope= (thing1 thing2)
   "Return non-nil if THING1 is the same scope as THING2."
@@ -140,8 +150,11 @@ components of THING1 and THING2."
 (defun intern-scope (thing)
   "Return the canonical `scope' instance designated by THING. May
 return THING, if it becomes the canonical instance."
-  (let ((scope (make-scope thing)))
-    (ensure-gethash (scope-components scope) *scopes* scope)))
+  (if (scope-interned? thing)
+      thing
+      (let ((scope (make-scope thing)))
+	(setf (scope-interned? scope) t)
+	(ensure-gethash (scope-components scope) *scopes* scope))))
 
 (defmethod relative-url ((scope scope))
   (make-instance 'puri:uri
