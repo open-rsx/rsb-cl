@@ -1,4 +1,4 @@
-;;; type-filter.lisp ---
+;;; type-filter.lisp --- A filter that discriminates event based on their type.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
