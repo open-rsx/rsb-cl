@@ -29,7 +29,9 @@
      internal-time-units-per-second))
 
 (defun parse-spread-name (name)
-  "DOC"
+  "Split NAME into a port and host components.
+Return two values the host component as string or nil if it not
+specified and the port component as string."
   (let ((@ (position #\@ name)))
     (if @
         (values (subseq name (1+ @)) (subseq name 0 @))
