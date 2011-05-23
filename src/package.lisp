@@ -129,6 +129,15 @@
 
    :make-informer)
 
+  ;; Configuration
+  (:export
+   :options-from-environment
+   :options-from-stream
+   :options-from-default-sources
+
+   :option-value
+   :section-options)
+
   ;; Macros
   (:export
    ;:with-channel
