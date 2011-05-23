@@ -43,7 +43,12 @@
    :pruning-assembly-pool
    :merge-fragment
 
-   :fragment-data)
+   :fragment-data
+
+   :*scope-group-cache*
+   :*scope-group-cache-max-size*
+   :scope->group
+   :scope->group/no-cache)
 
   (:documentation
    "This package contains a transport implementation based on the

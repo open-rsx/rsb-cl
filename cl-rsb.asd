@@ -188,6 +188,8 @@
 		 :pathname   "test/transport/spread"
 		 :depends-on ("test")
 		 :components ((:file       "package")
+			      (:file       "util"
+			       :depends-on ("package"))
 			      (:file       "fragmentation"
 			       :depends-on ("package")))))
   :in-order-to ((test-op (load-op :cl-rsb-test))))
