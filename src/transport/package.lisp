@@ -29,19 +29,25 @@
    :rsb
    :rsb.event-processing)
 
-  ;; Transport class family and port creation
+  ;; Connector protocol
+  (:export
+   :connector-direction
+
+   :connector-options) ;; works on connector classes, not instances
+
+  ;; Transport class family and connector creation
   (:export
    :no-such-transport
    :find-transport-class
    :transport-classes
 
-   :connector-options
    :make-connector)
 
-  ;; connector-class metaclass
+  ;; `connector-class' metaclass
   (:export
    :connector-class)
 
+  ;; `connector' class
   (:export
    :connector)
 

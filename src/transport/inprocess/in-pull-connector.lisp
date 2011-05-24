@@ -23,15 +23,16 @@
   (find-class 'in-pull-connector))
 
 (defclass in-pull-connector (connector)
-  ((queue :initarg  :queue
-	  :type     #+sbcl sb-concurrency:mailbox
-	            #-sbcl list
-	  :accessor connector-queue
-	  :initform #+sbcl (sb-concurrency:make-mailbox
-			    :name "event queue")
-	            #-sbcl nil
-	  :documentation
-	  ""))
+  ((direction :initform :in-pull)
+   (queue     :initarg  :queue
+	      :type     #+sbcl sb-concurrency:mailbox
+	      #-sbcl list
+	      :accessor connector-queue
+	      :initform #+sbcl (sb-concurrency:make-mailbox
+				:name "event queue")
+	      #-sbcl nil
+	      :documentation
+	      ""))
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))

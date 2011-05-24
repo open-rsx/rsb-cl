@@ -55,7 +55,14 @@ superclasses."
 ;;
 
 (defclass connector (uri-mixin)
-  ((rsb::uri :reader connector-uri)) ;; TODO base uri
+  ((rsb::uri  :reader   connector-uri) ;; TODO base uri
+   (direction :initarg  :direction
+	      :type     direction
+	      :allocation :class
+	      :reader   connector-direction
+	      :documentation
+	      "Stores the direction of instance of the connector
+class."))
   (:documentation
    "A connector implements access to the bus by means of a particular
 mechanism. One example is a connector that makes use of the Spread
@@ -98,4 +105,6 @@ group communication framework."))
 
 (defmethod print-object ((object connector) stream)
   (print-unreadable-object (object stream :identity t)
-    (format stream "~A" (connector-relative-url object "/")))) ;; TODO direction
+    (format stream "~A ~A"
+	    (connector-direction object)
+	    (connector-relative-url object "/"))))

@@ -25,7 +25,8 @@
 (defclass in-push-connector (connector
 			     broadcast-processor
 			     assembly-mixin)
-  ((terminate? :initarg  :terminate?
+  ((direction  :initform :in-push)
+   (terminate? :initarg  :terminate?
 	       :type     boolean
 	       :initform nil
 	       :documentation

@@ -23,7 +23,7 @@
   (find-class 'out-connector))
 
 (defclass out-connector (connector)
-  ()
+  ((direction :initform :out))
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))

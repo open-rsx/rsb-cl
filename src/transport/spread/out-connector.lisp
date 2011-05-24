@@ -23,7 +23,7 @@
   (find-class 'out-connector))
 
 (defclass out-connector (connector) ;; is an "event-sink"; there is no class or interface for this
-  ()
+  ((direction :initform :out))
   (:documentation
    "DOC"))
 

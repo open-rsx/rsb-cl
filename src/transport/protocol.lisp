@@ -23,6 +23,10 @@
 ;;; Connector protocol
 ;;
 
+(defgeneric connector-direction (connector)
+  (:documentation
+   "Return the communication direction of CONNECTOR."))
+
 (defgeneric connector-url (connector)
   (:documentation
    "Return a base URL that can be used to locate resources via
