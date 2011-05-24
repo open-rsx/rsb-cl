@@ -66,4 +66,5 @@
       (event-data event) data
       :test #'equalp)))
   (:documentation
-   "TODO(jmoringe): document"))
+   "This test suite class can be used as a superclass for test suites
+that test participant classes."))
