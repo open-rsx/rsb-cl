@@ -47,6 +47,7 @@
 		#+sbcl sb-concurrency
 		:bordeaux-threads ;; or eager-future
 
+		:closer-mop
 		:cl-hooks
 		:cl-dynamic-classes
 		:log5

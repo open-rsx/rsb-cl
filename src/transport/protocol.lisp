@@ -56,14 +56,8 @@ implementation infos."
 	      :initial-value :implemented)))
 
 
-;;; Transport implementations
+;;; Connector options protocol
 ;;
-
-(dynamic-classes:define-findable-class-family transport
-    "Transports are implemented by input and output connector
-classes. These are designated by names of the form :TRANSPORT-in
-and :TRANSPORT-out respectively.")
-
 
 (defgeneric connector-options (class)
   (:documentation
@@ -76,6 +70,15 @@ option."))
 (defmethod connector-options ((class class))
   "Default behavior is to claim to accept no options."
   nil)
+
+
+;;; Transport implementations
+;;
+
+(dynamic-classes:define-findable-class-family transport
+    "Transports are implemented by input and output connector
+classes. These are designated by names of the form :TRANSPORT-in
+and :TRANSPORT-out respectively.")
 
 ;; TODO add a type argument here? the connector instance would then
 ;; produce/consume events with payloads of the specified type (by

@@ -19,6 +19,41 @@
 
 (in-package :rsb.transport)
 
+
+;;; `connector-class' metaclass
+;;
+
+(defclass connector-class (standard-class)
+  ((options :initarg  :options
+	    :type     list
+	    :initform nil
+	    :documentation
+	    ""))
+  (:documentation
+   "This metaclass can be used as the class of connector classes in
+order to provide storage and retrieval (via methods on
+`connector-options') for connector options."))
+
+(defmethod connector-options ((class connector-class))
+  "Retrieve options from CLASS and its transitive superclasses.
+Option definitions in subclasses take precedence over definitions in
+superclasses."
+  (let* ((my-options (slot-value class 'options))
+	 (names      (map 'nil #'first my-options)))
+    (apply #'append
+	   my-options
+	   (remove-if (lambda (option) (member (first option) names))
+		      (map 'list #'connector-options
+			   (closer-mop:class-direct-superclasses class))))))
+
+(defmethod closer-mop:validate-superclass ((class      connector-class)
+					   (superclass standard-class))
+  t)
+
+
+;;; `connector' class
+;;
+
 (defclass connector (uri-mixin)
   ((rsb::uri :reader connector-uri)) ;; TODO base uri
   (:documentation

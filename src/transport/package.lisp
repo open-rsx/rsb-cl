@@ -38,6 +38,10 @@
    :connector-options
    :make-connector)
 
+  ;; connector-class metaclass
+  (:export
+   :connector-class)
+
   (:export
    :connector)
 
