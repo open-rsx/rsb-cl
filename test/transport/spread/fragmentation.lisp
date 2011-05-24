@@ -151,14 +151,15 @@ instance.")
       (ensure-same
        count 1
        :test      #'=
-       :report    "~@<After submitting a fragment, the count of the pool was ~D, not ~D.~@:>"
+       :report    "~@<After submitting a fragment, the count of the pool ~
+was ~D, not ~D.~@:>"
        :arguments (count 1)))
     (sleep 2)
     (let ((count (assembly-pool-count pool)))
       (ensure-same
        count 0
        :test #'=
-       :report    "~@<After submitting a fragment and waiting for it to
+       :report    "~@<After submitting a fragment and waiting for it to ~
 get pruned, the count of the pool was ~D, not ~D.~@:>"
        :arguments (count 0)))))
 
