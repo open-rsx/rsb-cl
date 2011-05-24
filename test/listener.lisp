@@ -64,3 +64,5 @@ function."))
 ;;	 (let ((*listener-stream* stream))
 ;;	   (receive sub :block? t)))
 ;;        :test #'regexp-matches))))
+
+(define-basic-participant-test-cases :listener)

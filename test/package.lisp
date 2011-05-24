@@ -68,3 +68,22 @@
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))
+
+(defmacro define-basic-participant-test-cases (kind)
+  "Define basic test cases for the participant subclass designated by
+KIND."
+  (let ((suite-name (symbolicate kind "-ROOT"))
+	(with-name  (symbolicate "WITH-" kind)))
+    `(progn
+       (addtest (,suite-name
+		 :documentation
+		 ,(format nil "Test `print-object' method on `~(~A~)' class."
+			  kind))
+	 print
+
+	 (,with-name (participant ,(format nil "/~(~A~)/print" kind)
+				  ,@(when (eq kind :informer) '(t)))
+	   (ensure
+	    (not (emptyp
+		  (with-output-to-string (stream)
+		    (format stream "~A" participant))))))))))

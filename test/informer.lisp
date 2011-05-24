@@ -1,4 +1,4 @@
-;;; informer.lisp --- Unit tests for informer.
+;;; informer.lisp --- Unit tests for informer class.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -22,7 +22,7 @@
 (deftestsuite informer-root (root)
   ()
   (:documentation
-   "Unit tests for the `informer' class and `publish' function."))
+   "Unit tests for the `informer' class and `make-informer' function."))
 
 (addtest (informer-root
           :documentation
@@ -39,7 +39,6 @@
 	  "Test sending data.")
   send
 
-  ;; Test blocking receive
   (with-informer (informer "/informer/send" t)
     (iter (repeat 100)
 	  (send informer "<foo/>")
@@ -57,3 +56,5 @@
 ;;	 (send pub "<bla/>")))
 ;;      "<bla/>"
 ;;      :test #'string=)))
+
+(define-basic-participant-test-cases :informer)
