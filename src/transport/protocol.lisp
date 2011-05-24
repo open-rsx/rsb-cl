@@ -64,6 +64,19 @@ implementation infos."
 classes. These are designated by names of the form :TRANSPORT-in
 and :TRANSPORT-out respectively.")
 
+
+(defgeneric connector-options (class)
+  (:documentation
+   "Return a description of the options accepted by the connector
+class CLASS. The returned description is a list of items of the
+form (NAME TYPE &optional DOCUMENTATION) where name is a keyword which
+names the option and TYPE is the type of acceptable values of the
+option."))
+
+(defmethod connector-options ((class class))
+  "Default behavior is to claim to accept no options."
+  nil)
+
 ;; TODO add a type argument here? the connector instance would then
 ;; produce/consume events with payloads of the specified type (by
 ;; internally managing the required converter)

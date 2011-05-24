@@ -35,6 +35,7 @@
    :find-transport-class
    :transport-classes
 
+   :connector-options
    :make-connector)
 
   (:export
