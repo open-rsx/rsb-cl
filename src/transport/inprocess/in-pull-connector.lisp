@@ -33,6 +33,7 @@
 	      #-sbcl nil
 	      :documentation
 	      ""))
+  (:metaclass connector-class)
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))

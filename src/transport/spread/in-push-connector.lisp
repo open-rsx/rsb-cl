@@ -31,6 +31,7 @@
 	       :initform nil
 	       :documentation
 	       ""))
+  (:metaclass connector-class)
   (:documentation
    "DOC"))
 ;; TODO store one/many converter(s) here and dispatch fully deserialized events?

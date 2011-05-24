@@ -24,9 +24,20 @@
 	       :reader   connector-connection
 	       :documentation
 	       ""))
+  (:metaclass connector-class)
   (:default-initargs
    :schema :spread
    :host   (load-time-value (hostname) t))
+  (:options
+   (:name string
+    "The name of the spread daemon. Mutually exclusive with HOST and ~
+PORT.")
+   (:host string
+    "The hostname of the spread daemon. Mutually exclusive with ~
+NAME.")
+   (:port (integer 0 65534)
+    "The port number of the spread daemon. Mutually exclusive with ~
+NAME."))
   (:documentation
    "This class serves as a superclass for spread in and out
 connectors."))

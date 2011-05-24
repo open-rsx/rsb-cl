@@ -24,6 +24,13 @@
 
 (defclass out-connector (connector) ;; is an "event-sink"; there is no class or interface for this
   ((direction :initform :out))
+  (:metaclass connector-class)
+  (:options
+   (:max-fragment-size positive-fixnum
+    "The maximum payload size that may be send in a single
+notification. The value of this options has to be chosen such that the
+combined sizes of payload and envelope data of notifications remain
+below the maximum message size allowed by spread."))
   (:documentation
    "DOC"))
 

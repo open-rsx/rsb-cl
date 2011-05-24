@@ -24,6 +24,7 @@
 
 (defclass out-connector (connector)
   ((direction :initform :out))
+  (:metaclass connector-class)
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))

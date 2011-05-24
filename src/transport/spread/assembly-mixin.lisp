@@ -24,6 +24,13 @@
 		  :type     assembly-pool
 		  :documentation
 		  ""))
+  (:metaclass connector-class)
+  (:options
+   (:age-limit positive-real
+    "The amount of time after which incomplete assemblies are
+pruned. Supplying this option only makes sense in conjunction with an
+unreliable communication mode since incomplete assemblies are never
+pruned in reliable communication modes."))
   (:documentation
    "TODO(jmoringe): document"))
 
