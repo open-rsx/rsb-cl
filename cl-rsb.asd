@@ -36,7 +36,7 @@
 (defsystem :cl-rsb
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     "0.2.0"
   :license     "GPL3; see COPYING file for details."
   :description "A Common Lisp implementation of RSB."
   :depends-on  (:alexandria
@@ -161,7 +161,7 @@
 (defsystem :cl-rsb-test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     "0.2.0"
   :license     "GPL3; see COPYING file for details."
   :description "Unit Tests for the cl-rsb system."
   :depends-on  (:iterate
@@ -212,7 +212,7 @@
 (defsystem-connection :cl-rsb-and-cl-spread
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     "0.2.0"
   :license     "GPL3; see COPYING file for details."
   :description "This system connections provides a RSB transport based
 on the spread group communication system."
@@ -260,7 +260,7 @@ cl-rsb-and-cl-protobuf unless system cl-protobuf can be loaded~@:>"))
 (defsystem-connection :cl-rsb-and-cl-protobuf
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     "0.2.0"
   :license     "GPL3; see COPYING file for details."
   :description "This system connections provides methods to serialize/deserialize
 RSB events to/from Google protocol buffers."
@@ -284,7 +284,7 @@ RSB events to/from Google protocol buffers."
 (defsystem-connection :cl-rsb-and-cxml-stp-and-xpath
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     "0.2.0"
   :license     "GPL3; see COPYING file for details."
   :description "This system connections provides methods to filter RSB
 events with XML data."
@@ -303,12 +303,12 @@ events with XML data."
 (defsystem-connection :cl-rsb-and-cxml-location
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     "0.2.0"
   :license     "GPL3; see COPYING file for details."
   :description "This system connections provides methods to serialize/deserialize
 RSB events to/from XML documents."
   :requires    (cl-rsb
 		cxml-location)
   :components  ((:module     "converter"
-			     :pathname   "src/converter"
-			     :components ((:file       "xml")))))
+		 :pathname   "src/converter"
+		 :components ((:file       "xml")))))
