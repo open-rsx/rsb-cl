@@ -20,6 +20,31 @@
 (in-package :rsb)
 
 
+;;; UUID utility functions
+;;
+
+(defun print-id (stream id colon? at?)
+  "Print the UUID ID to STREAM. If COLON? is non-nil, all components
+of ID are printed. Otherwise, just a block of 8 digits is printed.  "
+  (declare (ignore at?))
+  (if colon?
+      (format stream "~A" id)
+    (format stream "~8,'0X" (slot-value id 'uuid::time-low))))
+
+(defmacro print-unreadable-id-object ((object stream &key (type t))
+				      &body body)
+  "Print OBJECT to STREAM in a manner similar to
+`print-unreadable-object' but use the `id' slot of OBJECT as object
+identity."
+  (once-only (object stream)
+    (with-unique-names (id-var)
+      `(let ((,id-var (slot-value ,object 'id)))
+	 (print-unreadable-object (,object ,stream :type ,type)
+	   ,@body
+	   (write-char #\Space stream)
+	   (print-id ,stream ,id-var nil nil))))))
+
+
 ;;; UUID mixin
 ;;
 
@@ -40,16 +65,9 @@ instances."))
     (setf (slot-value instance 'id)
 	  (if (stringp id) (uuid:make-uuid-from-string id) id))))
 
-(defmacro print-unreadable-id-object ((object stream &key (type t))
-				      &body body)
-  "TODO(jmoringe): document"
-  (once-only (object stream)
-    (with-unique-names (id-var id-low-var)
-      `(let* ((,id-var     (slot-value ,object 'id))
-	      (,id-low-var (slot-value ,id-var 'uuid::time-low)))
-	 (print-unreadable-object (,object ,stream :type ,type)
-	   ,@body
-	   (format ,stream " ~8,'0X" ,id-low-var))))))
+
+;;; Scope mixin
+;;
 
 (defclass scope-mixin ()
   ((scope :initarg :scope

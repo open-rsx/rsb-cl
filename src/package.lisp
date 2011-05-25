@@ -147,6 +147,11 @@
    :with-enabled-listener :with-disabled-listener
    :with-informer)
 
+  ;; Utility functions and macros
+  (:export
+   :print-id
+   :print-unreadable-id-object)
+
   ;; TODO temp utils
   (:export
    :uuid-mixin
