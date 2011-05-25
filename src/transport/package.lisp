@@ -32,6 +32,8 @@
   ;; Connector protocol
   (:export
    :connector-direction
+   :connector-url
+   :connector-relative-url
 
    :connector-options) ;; works on connector classes, not instances
 
