@@ -26,7 +26,7 @@
    :split-sequence
    :iterate
    :bind
-   :hooks) ;; TODO use bind?
+   :hooks)
 
   ;; Types
   (:export
@@ -37,6 +37,7 @@
 
   ;; Conditions
   (:export
+   :missing-required-argument
 
    :missing-required-initarg
 
