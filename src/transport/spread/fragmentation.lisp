@@ -53,16 +53,16 @@ that have been split into multiple notifications."))
   (setf (slot-value instance 'fragments)
 	(make-array num-fragments :initial-element nil)))
 
-(defmethod assembly-age ((assembly assembly))
+(defun assembly-age (assembly)
   "Return the age of ASSEMBLY in (float) seconds."
   (- (internal-real-time-in-seconds) (assembly-birth-time assembly)))
 
-(defmethod assembly-complete? ((assembly assembly))
+(defun assembly-complete? (assembly)
   "Return non-nil if all expected fragments have been merged into
 ASSEMBLY."
   (notany #'null (assembly-fragments assembly)))
 
-(defmethod assembly-concatenated-data ((assembly assembly))
+(defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
 fragments of ASSEMBLY. ASSEMBLY has to be complete."
   (let* ((fragments (map 'list (compose #'rsb.protocol::attachment-binary
