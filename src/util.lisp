@@ -124,20 +124,6 @@ instances."))
   (setf (getf (slot-value object 'meta-data) key) new-value))
 
 
-;;;
-;;
-
-(defclass push-source-mixin ()
-  ((push-hook :initarg  :push-hook
-	      :type     list
-	      :initform nil
-	      :documentation
-	      ""))
-  (:documentation
-   "This class can be mixed into classes instances of which are data
-sources with \"push\" semantics."))
-
-
 ;;; Utility functions
 ;;
 
