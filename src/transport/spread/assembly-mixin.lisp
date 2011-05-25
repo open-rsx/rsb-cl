@@ -32,7 +32,9 @@ pruned. Supplying this option only makes sense in conjunction with an
 unreliable communication mode since incomplete assemblies are never
 pruned in reliable communication modes."))
   (:documentation
-   "TODO(jmoringe): document"))
+   "This mixin adds an assembly pool and a `notification->event'
+method which can be used to assemble incoming notifications (which may
+originate from fragmented events) into events."))
 
 (defmethod initialize-instance :after ((instance assembly-mixin)
                                        &key
@@ -45,7 +47,8 @@ pruned in reliable communication modes."))
 
 (defmethod notification->event ((notification t)
 				(connector    assembly-mixin))
-  "TODO(jmoringe): document"
+  "Try to converter NOTIFICATION into one or zero events. Accordingly,
+return either an `event' instance or nil."
   (bind (((:slots-r/o assembly-pool) connector))
     (notification->event notification assembly-pool))) ;; TODO decoding usually depends on the domain
                                                        ;; type requested by the listener
