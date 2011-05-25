@@ -38,12 +38,14 @@ originate from fragmented events) into events."))
 
 (defmethod initialize-instance :after ((instance assembly-mixin)
                                        &key
+				       assembly-pool
 				       age-limit)
-  (setf (slot-value instance 'assembly-pool)
-	(if age-limit
-	    (make-instance 'pruning-assembly-pool
-			   :age-limit age-limit)
-	    (make-instance 'assembly-pool))))
+  (unless assembly-pool
+    (setf (slot-value instance 'assembly-pool)
+	  (if age-limit
+	      (make-instance 'pruning-assembly-pool
+			     :age-limit age-limit)
+	      (make-instance 'assembly-pool)))))
 
 (defmethod notification->event ((notification t)
 				(connector    assembly-mixin))
