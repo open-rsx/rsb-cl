@@ -29,6 +29,10 @@
 	      :documentation
 	      "Stores the direction of instances of the connector
 class.")
+   (wire-type :type     (or symbol list)
+	      :documentation
+	      "Stores the wire-type of instance of the connector
+class.")
    (schemas   :initarg  :schemas
 	      :type     list
 	      :initform nil
@@ -43,14 +47,29 @@ class.")
   (:documentation
    "This metaclass can be used as the class of connector classes in
 order to provide storage and retrieval (via methods on
-`connector-direction', `connector-schemas' and `connector-options')
-for connector direction, schemas and options."))
+`connector-direction', `connector-wire-type', `connector-schemas' and
+`connector-options') for connector direction, wire-type, schemas and
+options."))
 
 (defmethod initialize-instance :after ((instance connector-class)
                                        &key
+				       wire-type
 				       direction)
+  (when wire-type
+    (setf (slot-value instance 'wire-type) (first wire-type)))
   (when direction
     (setf (slot-value instance 'direction) (first direction))))
+
+(defmethod connector-wire-type ((class class))
+  (values))
+
+(defmethod connector-wire-type ((class connector-class))
+  "Use wire-type stored in CLASS or retrieve from superclasses if
+necessary. "
+  (if (slot-boundp class 'wire-type)
+      (slot-value class 'wire-type)
+      (some #'connector-wire-type
+	    (closer-mop:class-direct-superclasses class))))
 
 (defmethod connector-schemas ((class connector-class))
   "Retrieve supported schemas from CLASS and its transitive

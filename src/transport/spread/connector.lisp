@@ -28,7 +28,8 @@
   (:default-initargs
    :schema :spread
    :host   (load-time-value (hostname) t))
-  (:schemas :spread)
+  (:wire-type octet-vector)
+  (:schemas   :spread)
   (:options
    (:name string
     :description

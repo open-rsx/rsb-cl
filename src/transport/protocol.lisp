@@ -42,6 +42,11 @@ CONNECTOR."))
    "Return the communication direction of CONNECTOR.
 Connector can be a connector class or a connector instance."))
 
+(defgeneric connector-wire-type (connector)
+  (:documentation
+   "Return the wire-type of CONNECTOR.
+Connector can be a connector class or a connector instance."))
+
 (defgeneric connector-schemas (class)
   (:documentation
    "Return a list of the (URI-)schemas supported by the connector
@@ -63,6 +68,11 @@ option."))
   "Default behavior is to retrieve the direction from the class of
 CONNECTOR."
   (connector-direction (class-of connector)))
+
+(defmethod connector-wire-type ((connector standard-object))
+  "Default behavior is to retrieve the wire-type from the class of
+CONNECTOR."
+  (connector-wire-type (class-of connector)))
 
 (defmethod connector-schemas ((class class))
   "Default behavior is to claim to support no schemas."

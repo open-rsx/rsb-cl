@@ -31,8 +31,10 @@
 
   ;; Connector protocol
   (:export
-   :connector-direction ;; works on connector classes and instances
-   :connector-url
+   :connector-direction ;; work on connector classes and instances
+   :connector-wire-type
+
+   :connector-url ; work on connector instances
    :connector-relative-url
 
    :connector-schemas ;; work on connector classes, not instances

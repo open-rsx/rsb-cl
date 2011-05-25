@@ -50,7 +50,9 @@ scopes.")
    :schema :inprocess
    :host   (load-time-value (hostname) t)
    :port   (load-time-value (sb-posix:getpid) t))
-  (:schemas :inprocess)
+  (:wire-type t) ;; The Lisp process is the medium, so t (any Lisp
+		 ;; object) should be a reasonable wire-type
+  (:schemas   :inprocess)
   (:documentation
    "DOC"))
 
