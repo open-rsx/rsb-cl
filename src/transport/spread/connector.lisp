@@ -1,4 +1,4 @@
-;;; connector.lisp ---
+;;; connector.lisp --- Superclass for spread connectors.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -31,13 +31,13 @@
   (:schemas :spread)
   (:options
    (:name string
-    "The name of the spread daemon. Mutually exclusive with HOST and ~
+    "The name of the spread daemon. Mutually exclusive with HOST and
 PORT.")
    (:host string
-    "The hostname of the spread daemon. Mutually exclusive with ~
+    "The hostname of the spread daemon. Mutually exclusive with
 NAME.")
    (:port (integer 0 65534)
-    "The port number of the spread daemon. Mutually exclusive with ~
+    "The port number of the spread daemon. Mutually exclusive with
 NAME."))
   (:documentation
    "This class serves as a superclass for spread in and out
