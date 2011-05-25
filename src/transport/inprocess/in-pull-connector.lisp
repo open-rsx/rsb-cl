@@ -19,6 +19,18 @@
 
 (in-package :rsb.transport.inprocess)
 
+
+;;; Interface for the in-direction, pull-based connector
+;;
+
+(defgeneric connector-queue-count (connector)
+  (:documentation
+   "Return the number of messages currently queued in CONNECTOR."))
+
+
+;;; `in-pull-connector' class
+;;
+
 (defmethod find-transport-class ((spec (eql :inprocess-in-pull)))
   (find-class 'in-pull-connector))
 
@@ -32,11 +44,16 @@
 				:name "event queue")
 	      #-sbcl nil
 	      :documentation
-	      ""))
+	      "Stores events as they arrive via the message bus."))
   (:metaclass connector-class)
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))
+
+(defmethod connector-queue-count ((connector in-pull-connector))
+  #+sbcl (sb-concurrency:mailbox-count
+	  (connector-queue connector))
+  #-sbcl (length (connector-queue connector)))
 
 (defmethod notify ((connector in-pull-connector)
 		   (scope     scope)
@@ -52,17 +69,24 @@ process."))
 
 (defmethod handle ((connector in-pull-connector)
 		   (event     event))
-  "TODO(jmoringe): document"
+  "Put EVENT into the queue maintained by CONNECTOR."
   (log1 :info "~S adding event ~S" connector event)
   #+sbcl (sb-concurrency:send-message (connector-queue connector) event)
   #-sbcl (appendf (connector-queue connector) event))
 
 (defmethod emit ((connector in-pull-connector) (block? (eql nil)))
-  "TODO(jmoringe): document"
+  "Extract and return one event from the queue maintained by
+CONNECTOR, if there are any. If there are no queued events, return
+nil."
   #+sbcl (sb-concurrency:receive-message-no-hang (connector-queue connector))
   #-sbcl (error "Not implemented"))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
-  "TODO(jmoringe): document"
+  "Extract and return one event from the queue maintained by
+CONNECTOR, if there are any. If there are no queued events, block."
   #+sbcl (sb-concurrency:receive-message (connector-queue connector))
   #-sbcl (error "Not implemented"))
+
+(defmethod print-object ((object in-pull-connector) stream)
+    (print-unreadable-object (object stream :type t :identity t)
+      (format stream "(~D)" (connector-queue-count object))))
