@@ -43,6 +43,7 @@
    :find-transport-class
    :transport-classes
 
+   :find-connector-class
    :make-connector)
 
   ;; `connector-class' metaclass
