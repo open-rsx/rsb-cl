@@ -19,8 +19,7 @@
 
 (in-package :rsb.transport.spread)
 
-;; TODO handlers
-(defclass connection (rsb.ep:broadcast-processor)
+(defclass connection ()
   ((connection :initarg  :connection
 	       :type     spread:connection
 	       :documentation
