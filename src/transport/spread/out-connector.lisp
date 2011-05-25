@@ -32,31 +32,7 @@ notification. The value of this options has to be chosen such that the
 combined sizes of payload and envelope data of notifications remain
 below the maximum message size allowed by spread."))
   (:documentation
-   "DOC"))
-
-;; (defmethod initialize-instance :after ((instance out-connector)
-;;				       &key)
-;;   (with-slots (connection) instance
-;;     (hooks:add-to-hook (hooks:object-hook connection 'spread:join-hook)
-;;		       (curry #'handle-join instance))
-;;     (hooks:add-to-hook (hooks:object-hook connection 'spread:leave-hook)
-;;		       (curry #'handle-leave instance))))
-;;
-;; (defmethod handle-join ((connector out-connector)
-;;			(group     string)
-;;			(members   list))
-;;   "DOC"
-;;   (when (length= 2 members)
-;;     (log1 :info "~A: first member in our group ~S" connector group))
-;;   )
-;;
-;; (defmethod handle-leave ((connector out-connector)
-;;			 (group     string)
-;;			 (members   list))
-;;   "DOC"
-;;   (when (length= 1 members)
-;;     (log1 :info "~A: no more members in our group ~S" connector group))
-;;   )
+   "A connector for sending data over spread."))
 
 (defmethod rsb.ep:handle ((connector out-connector) (event event))
   (bind ((group-names   (scope->groups (event-scope event)))
