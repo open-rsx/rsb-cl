@@ -42,11 +42,12 @@ receiving events."))
   (let (result)
     (tagbody
      skip
-       (restart-case ;; TODO the restart-case is expensive
+       (restart-case ;; TODO the restart-case is expensive; add restartable? parameter?
 	   (setf result (call-next-method))
 	 (skip ()
 	   :report (lambda (stream)
-		     (format stream "~@<Skip event.~@:>"))
+		     (format stream "~@<Skip the event and try to ~
+receive the next one.~@:>"))
 	   (go skip))))
     result))
 
@@ -57,12 +58,11 @@ receiving events."))
 (defmethod make-reader ((scope scope)
 			&key
 			(transports (transport-options)))
-  "TODO(jmoringe): document"
   (let* ((configurator (make-instance 'rsb.ep:in-route-configurator
 				      :scope scope))
 	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO
 				transports :in-pull))
-	 (reader     (make-instance 'reader
+	 (reader       (make-instance 'reader
 				      :scope        scope
 				      :configurator configurator)))
 
