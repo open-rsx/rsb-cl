@@ -52,7 +52,7 @@ connectors."))
 				      (values host port)
 				      (parse-spread-name name)))
 	 (name (or (format nil "~D@~A" port hostname)))
-	 ((:accessors-r/o (uri rsb.transport::connector-uri)) instance))
+	 ((:accessors-r/o (uri connector-url)) instance))
     (when hostname
       (setf (puri:uri-host uri) hostname))
     (setf (puri:uri-port uri) port)
