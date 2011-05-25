@@ -112,12 +112,8 @@ into one notification."
 (defun wire-data->event-data (data wire-schema)
   "DOC"
   (bind (((:values mechanism designator) (decode-wire-schema wire-schema)))
-	 ;(wire-type (rsb.protocol::attachment-type-id attachment))
-	 ;(binary    (rsb.protocol::attachment-binary attachment)))
     (cond
-      ((and (eq mechanism :fundamental)
-	    ;(string= wire-type   "application/octet-stream")
-	    )
+      ((eq mechanism :fundamental)
        (cond
 	 ((string= designator "string")
 	  (sb-ext:octets-to-string data)))) ;; TODO make a "fundamental" converter for this?
@@ -127,14 +123,15 @@ into one notification."
 	:protocol-buffer data (pb::proto-type-name->lisp-type-symbol
 				  designator)))
       (t
-       (error "Unsupported wire-type/-schema (~S,~S,~S)" mechanism designator wire-type)))))
+       (error "Unsupported wire-type/-schema (~S,~S)" mechanism designator)))))
 
 (defun event-data->wire-data (data)
   "DOC"
   (typecase data
-    (string (sb-ext:string-to-octets data))
-    (t      (rsb.converter:domain->wire
-	     :protocol-buffer data 'octet-vector))))
+    (octet-vector data)
+    (string       (sb-ext:string-to-octets data))
+    (t            (rsb.converter:domain->wire
+		   :protocol-buffer data 'octet-vector))))
 
 
 ;;; Utility functions
