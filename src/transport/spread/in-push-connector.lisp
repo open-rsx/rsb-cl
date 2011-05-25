@@ -19,6 +19,23 @@
 
 (in-package :rsb.transport.spread)
 
+
+;;; Protocol for in-direction, push-based connector
+;;
+
+(defgeneric receive-messages (connector)
+  (:documentation
+   "Receive messages and process them using `handle-message'."))
+
+(defgeneric handle-message (connector payload sender destination)
+  (:documentation
+   "Process the message from SENDER to DESTINATION consisting PAYLOAD
+that arrived through connector."))
+
+
+;;; `in-push-connector' class
+;;
+
 (defmethod find-transport-class ((spec (eql :spread-in-push)))
   (find-class 'in-push-connector))
 
@@ -42,7 +59,6 @@
 		  :name "spread receiver thread"))
 
 (defmethod receive-messages ((connector in-push-connector))
-  "TODO(jmoringe): document"
   (bind (((:accessors-r/o (connection connector-connection)) connector)
 	 ((:slots terminate?) connector))
     (iter (until terminate?)
