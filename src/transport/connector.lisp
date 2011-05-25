@@ -24,15 +24,40 @@
 ;;
 
 (defclass connector-class (standard-class)
-  ((options :initarg  :options
-	    :type     list
-	    :initform nil
-	    :documentation
-	    ""))
+  ((direction :type     direction
+	      :reader   connector-direction
+	      :documentation
+	      "Stores the direction of instances of the connector
+class.")
+   (schemas   :initarg  :schemas
+	      :type     list
+	      :initform nil
+	      :documentation
+	      "Stores a list of schemas provided by the connector
+class.")
+   (options   :initarg  :options
+	      :type     list
+	      :initform nil
+	      :documentation
+	      ""))
   (:documentation
    "This metaclass can be used as the class of connector classes in
 order to provide storage and retrieval (via methods on
-`connector-options') for connector options."))
+`connector-direction', `connector-schemas' and `connector-options')
+for connector direction, schemas and options."))
+
+(defmethod initialize-instance :after ((instance connector-class)
+                                       &key
+				       direction)
+  (when direction
+    (setf (slot-value instance 'direction) (first direction))))
+
+(defmethod connector-schemas ((class connector-class))
+  "Retrieve supported schemas from CLASS and its transitive
+superclasses."
+  (apply #'append (slot-value class 'schemas)
+	 (map 'list #'connector-schemas
+	      (closer-mop:class-direct-superclasses class))))
 
 (defmethod connector-options ((class connector-class))
   "Retrieve options from CLASS and its transitive superclasses.
@@ -55,14 +80,7 @@ superclasses."
 ;;
 
 (defclass connector (uri-mixin)
-  ((rsb::uri  :reader   connector-url)
-   (direction :initarg  :direction
-	      :type     direction
-	      :allocation :class
-	      :reader   connector-direction
-	      :documentation
-	      "Stores the direction of instance of the connector
-class."))
+  ((rsb::uri :reader   connector-url))
   (:documentation
    "A connector implements access to the bus by means of a particular
 mechanism. One example is a connector that makes use of the Spread

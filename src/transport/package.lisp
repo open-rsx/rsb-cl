@@ -31,11 +31,12 @@
 
   ;; Connector protocol
   (:export
-   :connector-direction
+   :connector-direction ;; works on connector classes and instances
    :connector-url
    :connector-relative-url
 
-   :connector-options) ;; works on connector classes, not instances
+   :connector-schemas ;; work on connector classes, not instances
+   :connector-options)
 
   ;; Transport class family and connector creation
   (:export

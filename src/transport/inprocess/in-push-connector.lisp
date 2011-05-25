@@ -24,8 +24,9 @@
 
 (defclass in-push-connector (connector
 			     broadcast-processor)
-  ((direction :initform :in-push))
+  ()
   (:metaclass connector-class)
+  (:direction :in-push)
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))

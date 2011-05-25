@@ -25,8 +25,9 @@
 (defclass in-pull-connector (connector
 			     broadcast-processor
 			     assembly-mixin)
-  ((direction :initform :in-pull))
+  ()
   (:metaclass connector-class)
+  (:direction :in-pull)
   (:documentation
    "DOC"))
 ;; TODO store one/many converter(s) here and dispatch fully deserialized events?

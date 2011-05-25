@@ -28,6 +28,7 @@
   (:default-initargs
    :schema :spread
    :host   (load-time-value (hostname) t))
+  (:schemas :spread)
   (:options
    (:name string
     "The name of the spread daemon. Mutually exclusive with HOST and ~

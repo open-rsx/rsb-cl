@@ -23,10 +23,6 @@
 ;;; Connector protocol
 ;;
 
-(defgeneric connector-direction (connector)
-  (:documentation
-   "Return the communication direction of CONNECTOR."))
-
 (defgeneric connector-url (connector)
   (:documentation
    "Return a base URL that can be used to locate resources via
@@ -38,8 +34,18 @@ CONNECTOR."))
  CONNECTOR."))
 
 
-;;; Connector options protocol
+;;; Connector introspection protocol
 ;;
+
+(defgeneric connector-direction (connector)
+  (:documentation
+   "Return the communication direction of CONNECTOR.
+Connector can be a connector class or a connector instance."))
+
+(defgeneric connector-schemas (class)
+  (:documentation
+   "Return a list of the (URI-)schemas supported by the connector
+class CLASS."))
 
 (defgeneric connector-options (class)
   (:documentation
@@ -48,6 +54,19 @@ class CLASS. The returned description is a list of items of the
 form (NAME TYPE &optional DOCUMENTATION) where name is a keyword which
 names the option and TYPE is the type of acceptable values of the
 option."))
+
+
+;;; Default behavior
+;;
+
+(defmethod connector-direction ((connector standard-object))
+  "Default behavior is to retrieve the direction from the class of
+CONNECTOR."
+  (connector-direction (class-of connector)))
+
+(defmethod connector-schemas ((class class))
+  "Default behavior is to claim to support no schemas."
+  nil)
 
 (defmethod connector-options ((class class))
   "Default behavior is to claim to accept no options."

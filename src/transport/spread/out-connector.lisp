@@ -23,8 +23,9 @@
   (find-class 'out-connector))
 
 (defclass out-connector (connector) ;; is an "event-sink"; there is no class or interface for this
-  ((direction :initform :out))
+  ()
   (:metaclass connector-class)
+  (:direction :out)
   (:options
    (:max-fragment-size positive-fixnum
     "The maximum payload size that may be send in a single

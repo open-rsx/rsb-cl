@@ -42,13 +42,13 @@ that arrived through connector."))
 (defclass in-push-connector (connector
 			     broadcast-processor
 			     assembly-mixin)
-  ((direction  :initform :in-push)
-   (terminate? :initarg  :terminate?
+  ((terminate? :initarg  :terminate?
 	       :type     boolean
 	       :initform nil
 	       :documentation
 	       ""))
   (:metaclass connector-class)
+  (:direction :in-push)
   (:documentation
    "DOC"))
 ;; TODO store one/many converter(s) here and dispatch fully deserialized events?

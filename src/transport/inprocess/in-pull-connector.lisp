@@ -35,17 +35,17 @@
   (find-class 'in-pull-connector))
 
 (defclass in-pull-connector (connector)
-  ((direction :initform :in-pull)
-   (queue     :initarg  :queue
-	      :type     #+sbcl sb-concurrency:mailbox
-	      #-sbcl list
-	      :accessor connector-queue
-	      :initform #+sbcl (sb-concurrency:make-mailbox
-				:name "event queue")
-	      #-sbcl nil
-	      :documentation
-	      "Stores events as they arrive via the message bus."))
+  ((queue :initarg  :queue
+	  :type     #+sbcl sb-concurrency:mailbox
+	  #-sbcl list
+	  :accessor connector-queue
+	  :initform #+sbcl (sb-concurrency:make-mailbox
+			    :name "event queue")
+	  #-sbcl nil
+	  :documentation
+	  "Stores events as they arrive via the message bus."))
   (:metaclass connector-class)
+  (:direction :in-pull)
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))

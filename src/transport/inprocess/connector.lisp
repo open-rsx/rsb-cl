@@ -45,10 +45,12 @@ scopes.")
 
 (defclass connector (rsb.transport:connector)
   ()
+  (:metaclass connector-class)
   (:default-initargs
    :schema :inprocess
    :host   (load-time-value (hostname) t)
    :port   (load-time-value (sb-posix:getpid) t))
+  (:schemas :inprocess)
   (:documentation
    "DOC"))
 
