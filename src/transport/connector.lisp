@@ -55,7 +55,7 @@ superclasses."
 ;;
 
 (defclass connector (uri-mixin)
-  ((rsb::uri  :reader   connector-uri) ;; TODO base uri
+  ((rsb::uri  :reader   connector-url)
    (direction :initarg  :direction
 	      :type     direction
 	      :allocation :class
@@ -82,7 +82,7 @@ group communication framework."))
 
 (defmethod connector-relative-url ((connector connector)
 				   (uri       puri:uri))
-  (puri:merge-uris uri (connector-uri connector)))
+  (puri:merge-uris uri (connector-url connector)))
 
 (defmethod connector-relative-url ((connector connector)
 				   (scope     rsb::scope)) ;; TODO can we remove this? scope has relative-url
