@@ -83,13 +83,13 @@
 			      (:file       "participant")
 			      (:file       "listener"
 			       :depends-on ("participant"))
-			      (:file       "receiver"
+			      (:file       "reader"
 			       :depends-on ("participant"))
 			      (:file       "informer"
 			       :depends-on ("participant"))
 
 			      (:file       "macros"
-			       :depends-on ("listener" "receiver"
+			       :depends-on ("listener" "reader"
 					    "informer"))))
 
 		(:module     "event-processing"

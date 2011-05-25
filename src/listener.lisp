@@ -74,7 +74,7 @@ a mechanism for dispatching matching events to these handlers."))
 ;;; `listener' creation
 ;;
 
-;; TODO make-informer and make-receiver are very similar
+;; TODO make-informer and make-reader are very similar
 (defmethod make-listener ((scope scope)
 			  &key
 			  (transports (transport-options)))

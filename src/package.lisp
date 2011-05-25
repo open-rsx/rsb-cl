@@ -114,13 +114,13 @@
 
    :make-listener)
 
-  ;; Receive protocol and `receiver' class
+  ;; Reader protocol and `reader' class
   (:export
    :receive
 
-   :receiver
+   :reader
 
-   :make-receiver)
+   :make-reader)
 
   ;; Send protocol and `informer' class
   (:export
@@ -143,7 +143,7 @@
   (:export
    ;:with-channel
    :with-listener
-   :with-receiver
+   :with-reader
    :with-enabled-listener :with-disabled-listener
    :with-informer)
 

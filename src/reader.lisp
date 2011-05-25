@@ -1,4 +1,4 @@
-;;; receiver.lisp --- Pull-based receiving participant class.
+;;; reader.lisp --- Pull-based receiving participant class.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -19,25 +19,25 @@
 
 (in-package :rsb)
 
-(defclass receiver (participant
-		    rsb.ep:client)
+(defclass reader (participant
+		  rsb.ep:client)
   ()
   (:documentation
    "Instances of this class provide a pull-based interface for
 receiving events."))
 
-(defmethod receive ((receiver receiver)
+(defmethod receive ((reader reader)
 		    &key
 		    (block? t))
   ;; TODO how to handle multiple connectors?
   ;; TODO who should be responsible for calling emit on the connector?
   (let ((connector (first
 		    (rsb.ep:configurator-connectors
-		     (rsb.ep:client-configurator receiver)))))
+		     (rsb.ep:client-configurator reader)))))
     (rsb.ep:emit connector block?)))
 
 ;; TODO maybe restart should be installed in transport layer
-(defmethod receive :around ((receiver receiver)
+(defmethod receive :around ((reader reader)
 			    &key &allow-other-keys)
   (let (result)
     (tagbody
@@ -51,29 +51,29 @@ receiving events."))
     result))
 
 
-;;; `receiver' creation
+;;; `reader' creation
 ;;
 
-(defmethod make-receiver ((scope scope)
-			  &key
-			  (transports (transport-options)))
+(defmethod make-reader ((scope scope)
+			&key
+			(transports (transport-options)))
   "TODO(jmoringe): document"
   (let* ((configurator (make-instance 'rsb.ep:in-route-configurator
 				      :scope scope))
 	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO
 				transports :in-pull))
-	 (receiver     (make-instance 'receiver
+	 (reader     (make-instance 'reader
 				      :scope        scope
 				      :configurator configurator)))
 
     (unless (length= 1 connectors)
-      (error "Receiver currently only works with a single connectors")) ;; TODO
+      (error "Reader currently only works with a single connectors")) ;; TODO
 
     (setf (rsb.ep:configurator-connectors configurator) connectors)
 
-    receiver))
+    reader))
 
-(define-participant-creation-uri-methods receiver (scope puri:uri))
+(define-participant-creation-uri-methods reader (scope puri:uri))
 
-(define-participant-creation-restart-method receiver (scope scope))
-(define-participant-creation-restart-method receiver (scope puri:uri))
+(define-participant-creation-restart-method reader (scope scope))
+(define-participant-creation-restart-method reader (scope puri:uri))

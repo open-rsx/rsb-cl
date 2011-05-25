@@ -34,16 +34,16 @@ ends normally or because of a control transfer."
        ;(destroy ,var)
        )))
 
-(defmacro with-receiver ((var scope-or-uri
-			  &rest args
-			  &key &allow-other-keys)
-			 &body body)
+(defmacro with-reader ((var scope-or-uri
+			&rest args
+			&key &allow-other-keys)
+		       &body body)
   "Execute BODY with VAR bound to an RSB listener for topic TOPIC on
 channel CHANNEL. The listener is destroyed when the execution of BODY
 ends normally or because of a control transfer."
   (check-type var symbol "a symbol")
 
-  `(let ((,var (make-receiver ,scope-or-uri ,@args)))
+  `(let ((,var (make-reader ,scope-or-uri ,@args)))
      (unwind-protect
 	 (progn ,@body)
        ;(destroy ,var)

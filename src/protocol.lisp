@@ -68,20 +68,20 @@ If successful return a `listener' instance. Otherwise an error of type
 ;; TODO unlisten, also use detach?
 
 
-;;; `receiver' protocol
+;;; Reader protocol
 ;;
 
-(defgeneric make-receiver (scope
-			   &key
-			   transports)
+(defgeneric make-reader (scope
+			 &key
+			 transports)
   (:documentation
    "Receive events on the channel designated by SCOPE.
-if successful, return a `receiver' instance. Otherwise an error of
-type `receiver-creation-failed' is signaled. The resulting `receiver'
-instance can be used to receive data in \"pull\" manner using the
-`receive' function."))
+if successful, return a `reader' instance. Otherwise an error of type
+`reader-creation-failed' is signaled. The resulting `reader' instance
+can be used to receive data in \"pull\" manner using the `receive'
+function."))
 
-(defgeneric receive (receiver
+(defgeneric receive (reader
 		     &key
 		     block?)
   (:documentation
