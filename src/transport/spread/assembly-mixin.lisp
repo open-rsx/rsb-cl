@@ -27,6 +27,8 @@
   (:metaclass connector-class)
   (:options
    (:age-limit positive-real
+    :default 10
+    :description
     "The amount of time after which incomplete assemblies are
 pruned. Supplying this option only makes sense in conjunction with an
 unreliable communication mode since incomplete assemblies are never

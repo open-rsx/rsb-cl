@@ -31,12 +31,16 @@
   (:schemas :spread)
   (:options
    (:name string
+    :description
     "The name of the spread daemon. Mutually exclusive with HOST and
 PORT.")
    (:host string
+    :description
     "The hostname of the spread daemon. Mutually exclusive with
 NAME.")
    (:port (integer 0 65534)
+    :default spread:*default-port*
+    :description
     "The port number of the spread daemon. Mutually exclusive with
 NAME."))
   (:documentation
