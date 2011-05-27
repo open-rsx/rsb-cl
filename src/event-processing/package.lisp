@@ -51,6 +51,13 @@
   (:export
    :notify)
 
+  ;; Processor class family
+  (:export
+   :make-processor-class
+   :ensure-processor-class
+   :clear-processor-classes
+   :processor-classes)
+
   ;;
   (:export
    :configurator
@@ -77,6 +84,7 @@
   (:documentation
    "This package contains protocol, classes and methods for routing
 and processing of events."))
+
 
 (in-package :rsb.event-processing)
 

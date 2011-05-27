@@ -81,3 +81,12 @@ mean to call some handlers, for example."))
    "Methods should return one of the symbols :not-implemented
 or :implemented to indicate whether the combination of SUBJECT and
 ACTION could be implemented by RECIPIENT."))
+
+
+;;; Processor classes
+;;
+
+(dynamic-classes:define-dynamic-class-family processor
+    "This class family consists of dynamically constructed processor
+classes. This facility can be used to construct appropriate processor
+classes based on configuration information supplied at runtime.")
