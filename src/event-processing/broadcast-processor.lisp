@@ -1,4 +1,4 @@
-;;; processor.lisp ---
+;;; broadcast-processor.lisp --- Broadcast events to multiple handlers.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -27,11 +27,15 @@
 	     :documentation
 	     ""))
   (:documentation
-   "DOC"))
+   "Instances of this class maintain a list of handlers and dispatch
+events to these handlers. Methods on `handle' can be use to filter or
+transform events. Methods on `dispatch' can be used to modify
+dispatching behavior."))
 
 (defmethod handle ((processor broadcast-processor)
 		   (event     event))
-  "DOC"
+  "Dispatch EVENT to handlers of PROCESSOR in a manner defined by
+methods on `dispatch'."
   (dispatch processor event))
 
 (defmethod dispatch ((processor broadcast-processor)

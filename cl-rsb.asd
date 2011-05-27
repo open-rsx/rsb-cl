@@ -100,9 +100,10 @@
 			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))
+			      (:file       "broadcast-processor"
+			       :depends-on ("package" "protocol"))
+
 			      (:file       "configurator"
-			       :depends-on ("package"))
-			      (:file       "processor"
 			       :depends-on ("package"))
 			      (:file       "in-route-configurator"
 			       :depends-on ("package" "util" "configurator"))
