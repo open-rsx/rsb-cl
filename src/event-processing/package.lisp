@@ -61,6 +61,7 @@
   ;;
   (:export
    :configurator
+   :configurator-direction
    :configurator-processor
    :configurator-connectors)
 

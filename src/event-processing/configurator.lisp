@@ -21,6 +21,12 @@
 
 (defclass configurator (scope-mixin)
   ((scope      :reader   configurator-scope)
+   (direction  :initarg  :direction
+	       :type     direction
+	       :reader   configurator-direction
+	       :documentation
+	       "The direction of the communication situation the
+configurator is responsible for.")
    (connectors :initarg  :connectors
 	       :type     list
 	       :accessor configurator-connectors
@@ -28,12 +34,25 @@
 	       :documentation
 	       "")
    (processor  :initarg  :processor
-	       :accessor configurator-processor
-	       :initform (make-instance 'broadcast-processor)
+	       :reader   configurator-processor
 	       :documentation
 	       ""))
   (:documentation
    "DOC"))
+
+(defmethod shared-initialize :after ((instance   configurator)
+                                     (slot-names t)
+                                     &key
+				     direction
+				     processor)
+  (unless processor
+    (setf (slot-value instance 'processor)
+	  (make-instance
+	   (ensure-processor-class
+	    (ecase direction
+	      (:in-push '(broadcast-processor))
+	      (:in-pull '(broadcast-processor))
+	      (:out     '(broadcast-processor))))))))
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)
 						   (configurator configurator))

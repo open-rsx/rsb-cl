@@ -79,7 +79,8 @@ a mechanism for dispatching matching events to these handlers."))
 			  &key
 			  (transports (transport-options)))
   (let* ((configurator (make-instance 'rsb.ep:in-route-configurator
-				      :scope scope))
+				      :scope     scope
+				      :direction :in-push))
 	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO package deps
 				transports :in-push))
 	 (listener     (make-instance 'listener

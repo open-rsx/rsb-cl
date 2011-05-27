@@ -21,6 +21,8 @@
 
 (defclass out-route-configurator (configurator)
   ()
+  (:default-initargs
+   :direction :out)
   (:documentation
    "DOC"))
 

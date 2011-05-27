@@ -59,7 +59,8 @@ receive the next one.~@:>"))
 			&key
 			(transports (transport-options)))
   (let* ((configurator (make-instance 'rsb.ep:in-route-configurator
-				      :scope scope))
+				      :scope     scope
+				      :direction :in-pull))
 	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO
 				transports :in-pull))
 	 (reader       (make-instance 'reader
