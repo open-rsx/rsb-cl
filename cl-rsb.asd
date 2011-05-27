@@ -102,9 +102,13 @@
 			       :depends-on ("package"))
 			      (:file       "broadcast-processor"
 			       :depends-on ("package" "protocol"))
+			      (:file       "pull-processor"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "configurator"
-			       :depends-on ("package"))
+			       :depends-on ("package"
+					    "broadcast-processor"
+					    "pull-processor"))
 			      (:file       "in-route-configurator"
 			       :depends-on ("package" "util" "configurator"))
 			      (:file       "out-route-configurator"

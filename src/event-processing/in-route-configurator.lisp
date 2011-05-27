@@ -65,7 +65,7 @@ listeners."
 	   (scope     configurator-scope)
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
-
+    ;; Notify new connector regarding scope and filters.
     (log1 :info "~S attaching connector ~S to ~S" configurator connector scope)
     (notify connector scope :attached)
 
@@ -73,9 +73,12 @@ listeners."
 	  (log1 :info "~S adding filter ~S to ~S" configurator filter connector)
 	  (notify connector filter :added))
 
+    ;; Notify processor regarding new connector and add to connectors
+    ;; handlers.
+    (notify processor connector action)
+
     (log1 :info "~S connecting ~S -> ~S" configurator connector processor)
-    (ignore-errors ;; FIXME pull-based connectors don't have handlers
-      (push processor (handlers connector)))))
+    (push processor (handlers connector))))
 
 (defmethod notify ((configurator in-route-configurator)
 		   (connector    t ;; rsb.transport::connector
@@ -85,12 +88,19 @@ listeners."
 	   (scope     configurator-scope)
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
-
+    ;; Remove processor from connectors handlers and notify regarding
+    ;; removed connector.
+    (log1 :info "~S disconnecting ~S -> ~S" configurator connector processor)
     (removef (handlers connector) processor)
 
+    (notify processor connector action)
+
+    ;; Notify remove connector regarding filters and scope.
     (iter (for filter in filters)
+	  (log1 :info "~S removing filter ~S to ~S" configurator filter connector)
 	  (notify connector filter :removed))
 
+    (log1 :info "~S detaching connector ~S to ~S" configurator connector scope)
     (notify connector scope :detached)))
 
 

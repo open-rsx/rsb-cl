@@ -52,7 +52,7 @@
 	      (log1 :info "~A: event [~S -> ~S] ~A." connector sender destination event))
 
 	    ;; Due to fragmentation of large events into multiple
-	    ;; notifications, we may not obtain an `event' instance
-	    ;; from the notification.
-	    (when (or event (not block?))
-	      (return event))))))
+	    ;; notifications or non-blocking receive mode, we may not
+	    ;; obtain an `event' instance from the notification.
+	    (when event
+	      (dispatch connector event))))))

@@ -51,7 +51,7 @@ configurator is responsible for.")
 	   (ensure-processor-class
 	    (ecase direction
 	      (:in-push '(broadcast-processor))
-	      (:in-pull '(broadcast-processor))
+	      (:in-pull '(pull-processor))
 	      (:out     '(broadcast-processor))))))))
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)

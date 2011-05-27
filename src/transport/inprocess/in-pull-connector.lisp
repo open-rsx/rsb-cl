@@ -34,7 +34,8 @@
 (defmethod find-transport-class ((spec (eql :inprocess-in-pull)))
   (find-class 'in-pull-connector))
 
-(defclass in-pull-connector (connector)
+(defclass in-pull-connector (connector
+			     rsb.ep:broadcast-processor)
   ((queue :initarg  :queue
 	  :type     #+sbcl sb-concurrency:mailbox
 	  #-sbcl list
@@ -78,14 +79,20 @@ process."))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, return
 nil."
-  #+sbcl (sb-concurrency:receive-message-no-hang (connector-queue connector))
-  #-sbcl (error "Not implemented"))
+  (let ((event #+sbcl (sb-concurrency:receive-message-no-hang
+		       (connector-queue connector))
+	       #-sbcl (error "Not implemented")))
+    (when event
+      (dispatch connector event)
+      t)))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, block."
-  #+sbcl (sb-concurrency:receive-message (connector-queue connector))
-  #-sbcl (error "Not implemented"))
+  (dispatch connector
+	    #+sbcl (sb-concurrency:receive-message (connector-queue connector))
+	    #-sbcl (error "Not implemented"))
+  t)
 
 (defmethod print-object ((object in-pull-connector) stream)
     (print-unreadable-object (object stream :type t :identity t)
