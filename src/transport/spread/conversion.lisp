@@ -77,7 +77,7 @@ been fragmented into multiple notifications."
 ;;; Event -> Notification
 ;;
 
-(defun event->notifications (event)
+(defun event->notifications (event max-fragment-size)
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
 into one notification."
@@ -88,10 +88,10 @@ into one notification."
 	 (id1    (format nil "~A" id))
 	 (scope1 (scope-string scope))
 	 (data1  (event-data->wire-data data)))
-    (if (> (length data1) 100000) ;; TODO
+    (if (> (length data1) max-fragment-size)
 	;; Split DATA1 into multiple fragment and make a notification
 	;; for each fragment.
-	(bind ((fragments     (fragment-data data1))
+	(bind ((fragments     (fragment-data data1 max-fragment-size))
 	       (num-fragments (length fragments)))
 	  (iter (for fragment in    fragments)
 		(for i        :from 0)

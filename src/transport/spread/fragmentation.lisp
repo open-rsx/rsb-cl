@@ -248,9 +248,7 @@ delete them."
 ;;; Fragmentation
 ;;
 
-(defun fragment-data (data
-		      &optional
-		      (chunk-size 100000)) ;; TODO parameter
+(defun fragment-data (data chunk-size)
   "Partition DATA into chunks of at most CHUNK-SIZE bytes. Return a
 list of the generated chunks."
   (check-type data octet-vector "An octet-vector")
