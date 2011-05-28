@@ -73,28 +73,9 @@
 			       :depends-on ("package" "scope"
 					    "protocol"))))
 
-		(:module      "src"
-		 :depends-on  ("src-early"
-			       "event-processing")
-		 :components ((:file       "configuration")
-			      (:file       "variables"
-			       :depends-on ("configuration"))
-
-			      (:file       "participant")
-			      (:file       "listener"
-			       :depends-on ("participant"))
-			      (:file       "reader"
-			       :depends-on ("participant"))
-			      (:file       "informer"
-			       :depends-on ("participant"))
-
-			      (:file       "macros"
-			       :depends-on ("listener" "reader"
-					    "informer"))))
-
 		(:module     "filter"
 		 :pathname   "src/filter"
-		 :depends-on ("src")
+		 :depends-on ("src-early")
 		 :components ((:file       "package")
 			      (:file       "protocol"
 			       :depends-on ("package"))
@@ -114,7 +95,7 @@
 
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"
-		 :depends-on ("src-early")
+		 :depends-on ("src-early" "filter") ;; for filtering-processor-mixin
 		 :components ((:file       "package")
 			      (:file       "util"
 			       :depends-on ("package"))
@@ -135,6 +116,25 @@
 			       :depends-on ("package" "configurator"))
 			      (:file       "client"
 			       :depends-on ("package" "configurator"))))
+
+		(:module      "src"
+		 :depends-on  ("src-early"
+			       "event-processing")
+		 :components ((:file       "configuration")
+			      (:file       "variables"
+			       :depends-on ("configuration"))
+
+			      (:file       "participant")
+			      (:file       "listener"
+			       :depends-on ("participant"))
+			      (:file       "reader"
+			       :depends-on ("participant"))
+			      (:file       "informer"
+			       :depends-on ("participant"))
+
+			      (:file       "macros"
+			       :depends-on ("listener" "reader"
+					    "informer"))))
 
 		(:module     "transport"
 		 :pathname   "src/transport"
