@@ -83,8 +83,7 @@ notification is required when data contained in event does not fit
 into one notification."
   (bind (((:accessors-r/o
 	   (scope event-scope) (id event-id)
-	   (type event-type) (data event-data)
-	   (meta-data event-meta-data)) event)
+	   (data event-data) (meta-data event-meta-data)) event)
 	 (id1    (format nil "~A" id))
 	 (scope1 (scope-string scope))
 	 (data1  (event-data->wire-data data)))
