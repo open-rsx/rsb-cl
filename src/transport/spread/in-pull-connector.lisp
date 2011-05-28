@@ -55,4 +55,6 @@
 	    ;; notifications or non-blocking receive mode, we may not
 	    ;; obtain an `event' instance from the notification.
 	    (when event
-	      (dispatch connector event))))))
+	      (dispatch connector event))
+	    (when (or event (not block?))
+	      (return event))))))
