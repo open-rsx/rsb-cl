@@ -1,4 +1,4 @@
-;;; protocol.lisp ---
+;;; protocol.lisp --- Protocol for event filtering.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -56,22 +56,5 @@
 		   &rest args
 		   &key)
   (bind (((class &rest child-specs) spec)
-	 (children (mapcar (curry  #'apply #'filter) child-specs)))
+	 (children (map 'list (curry  #'apply #'filter) child-specs)))
     (apply #'filter class :children children args)))
-
-;; TODO compilation protocol?
-
-;; TODO temp here filter mixin
-
-(defclass filter-mixin ()
-  ()
-  (:metaclass closer-mop:funcallable-standard-class)
-  (:documentation
-   "DOC"))
-
-(defmethod initialize-instance :after ((instance filter-mixin)
-				       &key)
-  (closer-mop:set-funcallable-instance-function
-   instance
-   #'(lambda (event)
-       (matches? instance event))))
