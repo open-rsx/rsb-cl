@@ -51,7 +51,7 @@ notifications on one channel of the bus."))
     (iter (for name  in names-and-values       :by #'cddr)
 	  (for value in (cdr names-and-values) :by #'cddr)
 	  (collect (make-keyword (string-upcase name)))
-	  (collect (parse-typed-value value)))))
+	  (collect value))))
 
 (defun uri->scope-and-options (uri &optional defaults)
   "Dissect the URI as follows:

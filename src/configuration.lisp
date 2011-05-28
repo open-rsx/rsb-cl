@@ -32,7 +32,7 @@
 	  (bind (((name value) (split-sequence #\= string :count 2))
 		 (name (name->option-name name)))
 	    (when name
-	      (cons name (parse-typed-value value))))))
+	      (cons name value)))))
     (effective-options
      (remove-if #'null (map 'list #'variable->option
 			    (sb-impl::posix-environ))))))
@@ -64,8 +64,7 @@
 	      (bind (((name value)
 		      (map 'list #'trim (split-sequence #\= content)))
 		     (name (string->option-name name)))
-		(collect (cons (append section name)
-			       (parse-typed-value value)))))
+		(collect (cons (append section name) value))))
 	     ;; Invalid
 	     (t
 	      (error "~@<Syntax error in line ~D, contents ~S.~@:>"
@@ -89,37 +88,6 @@
     (with-input-from-file (stream "~/.config/rsb.conf"
 				  :if-does-not-exist nil)
       (when stream (options-from-stream stream))))))
-
-
-;;; Typed values
-;;
-
-(defun parse-typed-value (value)
-  "DOC"
-  (bind ((typed? (and (not (emptyp value))
-		      (eq (aref value 0) #\<)
-		      (position #\> value :start 1)))
-	 (type   (when typed?
-		   (subseq value 1 typed?)))
-	 ((:flet parse-typed ())
-	  (let ((rest (subseq value (+ typed? 1))))
-	    (cond
-	      ;; Bool
-	      ((string= type "bool")
-	       (cond
-		 ((member rest '("1" "true") :test #'string=)
-		  t)
-		 ((member rest '("0" "false") :test #'string=)
-		  nil)
-		 (t
-		  (error "syntax error"))))
-	      ;; uint/int/double
-	      ((member type '("uint" "int" "double") :test #'string=)
-	       (nth-value 0 (read-from-string rest)))
-	      ;; Unknown type
-	      (t
-	       (error "unknown type"))))))
-    (if typed? (parse-typed) value)))
 
 
 ;;;
