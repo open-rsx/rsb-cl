@@ -74,8 +74,14 @@
   (:export
    :out-route-configurator)
 
+  ;; `broadcast-processor' class
   (:export
    :broadcast-processor)
+
+  ;; `filtering-processor-mixin' class
+  (:export
+   :filtering-processor-mixin
+   :processor-filters)
 
   ;; `client' class and protocol
   (:export

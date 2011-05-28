@@ -105,6 +105,8 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "pull-processor"
 			       :depends-on ("package" "protocol"))
+			      (:file       "filtering-processor-mixin"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "configurator"
 			       :depends-on ("package"

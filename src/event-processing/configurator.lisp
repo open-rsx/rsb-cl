@@ -50,8 +50,10 @@ configurator is responsible for.")
 	  (make-instance
 	   (ensure-processor-class
 	    (ecase direction
-	      (:in-push '(broadcast-processor))
-	      (:in-pull '(pull-processor))
+	      (:in-push '(filtering-processor-mixin
+			  broadcast-processor))
+	      (:in-pull '(filtering-processor-mixin
+			  pull-processor))
 	      (:out     '(broadcast-processor))))))))
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)
