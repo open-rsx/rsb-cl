@@ -108,6 +108,10 @@
    :participant-id
    :participant-scope)
 
+  ;; Protocol for receiving participants
+  (:export
+   :receiver-filters)
+
   ;; Listener
   (:export
    :listener

@@ -101,7 +101,7 @@ implementation infos."
       ;; successfully been implemented
       (reduce #'rsb.event-processing::merge-implementation-infos ;; TODO
 	      (map 'list #'(lambda (filter) (notify connector filter action))
-		   (rsb::listener-filters filter))
+		   (rsb:receiver-filters filter))
 	      :initial-value :implemented)))
 
 

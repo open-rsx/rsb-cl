@@ -31,13 +31,11 @@ participates in the filtering and dispatching of events."))
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
 
-(defmethod listener-filters ((listener listener))
-  "DOC"
+(defmethod receiver-filters ((listener listener))
   (rsb.ep:configurator-filters (rsb.ep:client-configurator listener)))
 
-(defmethod (setf listener-filters) ((new-value list)
+(defmethod (setf receiver-filters) ((new-value list)
 				    (listener  listener))
-  "DOC"
   (setf (rsb.ep:configurator-filters
 	 (rsb.ep:client-configurator listener))
 	new-value))

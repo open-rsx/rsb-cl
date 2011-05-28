@@ -54,7 +54,21 @@ OBJECT."))
 KEY."))
 
 
-;;; `listener' protocol
+;;; Common protocol for receiving participants
+;;
+
+(defgeneric receiver-filters (receiver)
+  (:documentation
+   "Return the list of filters associated to the receiving participant
+RECEIVER."))
+
+(defgeneric (setf receiver-filters) (new-value receiver)
+  (:documentation
+   "Set the list of filters associated to the receiving participant
+RECEIVER to NEW-VALUE."))
+
+
+;;; Listener protocol
 ;;
 
 (defgeneric make-listener (scope
