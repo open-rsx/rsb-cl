@@ -22,7 +22,7 @@
 (defmethod find-filter-class ((spec (eql :xpath)))
   (find-class 'xpath-filter))
 
-(defclass xpath-filter ()
+(defclass xpath-filter (filter-mixin)
   ((xpath          :initarg  :xpath
 		   :type     string
 		   :accessor filter-xpath
@@ -37,6 +37,7 @@ events.")
 		   :documentation
 		   "A compiled version of the XPath of the
 filter. Computed lazily."))
+  (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This filter discriminates based on XML content contained in
 events."))

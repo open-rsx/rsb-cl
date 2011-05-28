@@ -39,10 +39,9 @@
 
    :make-filter)
 
-  ;; `scope-filter' class
+  ;; `filter-mixin' class
   (:export
-   :scope-filter
-   :filter-scope)
+   :filter-mixin)
 
   (:export
    :composite-filter
@@ -55,6 +54,11 @@
   ;; `disjoin-filter' class
   (:export
    :disjoin-filter)
+
+  ;; `scope-filter' class
+  (:export
+   :scope-filter
+   :filter-scope)
 
   ;; DSL
   (:export

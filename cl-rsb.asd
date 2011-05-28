@@ -99,14 +99,18 @@
 			      (:file       "protocol"
 			       :depends-on ("package"))
 
-
-			      (:file       "composite-filter"
+			      (:file       "filter-mixin"
 			       :depends-on ("package" "protocol"))
+			      (:file       "composite-filter"
+			       :depends-on ("package" "protocol"
+					    "filter-mixin"))
 
 			      (:file       "scope-filter"
-			       :depends-on ("package" "protocol"))
+			       :depends-on ("package" "protocol"
+					    "filter-mixin"))
 			      (:file       "type-filter"
-			       :depends-on ("package" "protocol"))))
+			       :depends-on ("package" "protocol"
+					    "filter-mixin"))))
 
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"
