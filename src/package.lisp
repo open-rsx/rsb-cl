@@ -73,6 +73,10 @@
    :meta-data-plist
    :meta-data-alist)
 
+  ;; Component URL protocol
+  (:export
+   :relative-url)
+
   ;; Scope
   (:export
    :scope

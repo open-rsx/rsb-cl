@@ -54,6 +54,15 @@ OBJECT."))
 KEY."))
 
 
+;;; Component URL protocol
+;;
+
+(defgeneric relative-url (component)
+  (:documentation
+   "Return a relative URL that allows to locate COMPONENT when
+anchored at an absolute location like a transport URL."))
+
+
 ;;; Common protocol for receiving participants
 ;;
 
