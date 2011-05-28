@@ -19,6 +19,22 @@
 
 (in-package :rsb.event-processing)
 
+
+;;; Filtering processor protocol
+;;
+
+(defgeneric processor-filters (processor)
+  (:documentation
+   "Return the list of filters applied by PROCESSOR."))
+
+(defgeneric (setf processor-filters) (new-value processor)
+  (:documentation
+   "Set the list of filters applied by PROCESSOR to NEW-VALUE."))
+
+
+;;; Mixin class `filtering-processor-mixin'
+;;
+
 (defclass filtering-processor-mixin ()
   ((filter :initarg  :filter
 	   :type     rsb.filter:conjoin-filter
