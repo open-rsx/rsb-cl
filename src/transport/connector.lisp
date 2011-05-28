@@ -51,10 +51,11 @@ order to provide storage and retrieval (via methods on
 `connector-options') for connector direction, wire-type, schemas and
 options."))
 
-(defmethod initialize-instance :after ((instance connector-class)
-                                       &key
-				       wire-type
-				       direction)
+(defmethod shared-initialize :after ((instance   connector-class)
+				     (slot-names t)
+				     &key
+				     wire-type
+				     direction)
   (when wire-type
     (setf (slot-value instance 'wire-type) (first wire-type)))
   (when direction
