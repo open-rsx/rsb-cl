@@ -22,6 +22,9 @@
 
 ;;; Push source protocol
 ;;
+;; This protocol is provided by event sources that emit events without
+;; requiring an external trigger, for example a thread polling a
+;; network connection.
 
 (defgeneric handlers (source)
   (:documentation
@@ -34,10 +37,13 @@
 
 ;;; Pull source protocol
 ;;
+;; This protocol is provided by event sources that emit events only
+;; after being triggered externally. This external triggering is
+;; achieve by calling `emit' with such a source.
 
 (defgeneric emit (source block?)
   (:documentation
-   "Block until an event is available from SOURCE. Return it."))
+   "Block until an event is available from SOURCE."))
 
 
 ;;; Sink protocol
