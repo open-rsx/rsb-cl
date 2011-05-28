@@ -65,7 +65,7 @@
 			       :depends-on ("package"))
 
 			      (:file       "scope"
-			       :depends-on ("package"))
+			       :depends-on ("package" "protocol"))
 			      (:file       "event"
 			       :depends-on ("package" "util"))
 
