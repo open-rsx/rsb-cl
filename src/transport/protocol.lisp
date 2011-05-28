@@ -83,28 +83,6 @@ CONNECTOR."
   nil)
 
 
-;;; Default behavior
-;;
-
-(defmethod notify ((connector t) (filter t) (action t))
-  "The default behavior is to do nothing and state the fact."
-  :not-implemented)
-
-;; TODO is this the right place to implement this behavior?
-(defmethod notify ((connector t) (filter rsb::listener) (action t))
-  "The default behavior is to produce notifications for all filters
-contained in the subscription FILTER and merge the resulting
-implementation infos."
-  (or (when (eq (call-next-method) :implemented)
-	:implemented)
-      ;; The result is :not-implemented unless every single filter has
-      ;; successfully been implemented
-      (reduce #'rsb.event-processing::merge-implementation-infos ;; TODO
-	      (map 'list #'(lambda (filter) (notify connector filter action))
-		   (rsb:receiver-filters filter))
-	      :initial-value :implemented)))
-
-
 ;;; Transport implementations
 ;;
 

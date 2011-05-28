@@ -89,6 +89,14 @@ or :implemented to indicate whether the combination of SUBJECT and
 ACTION could be implemented by RECIPIENT."))
 
 
+;;; Default behavior
+;;
+
+(defmethod notify ((recipient t) (subject t) (action t))
+  "The default behavior is to do nothing and state the fact."
+  :not-implemented)
+
+
 ;;; Processor classes
 ;;
 
