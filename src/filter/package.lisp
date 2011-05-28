@@ -39,7 +39,7 @@
 
    :make-filter)
 
-  ;; scope-filter class
+  ;; `scope-filter' class
   (:export
    :scope-filter
    :filter-scope)
@@ -47,6 +47,14 @@
   (:export
    :composite-filter
    :filter-children)
+
+  ;; `conjoin-filter' class
+  (:export
+   :conjoin-filter)
+
+  ;; `disjoin-filter' class
+  (:export
+   :disjoin-filter)
 
   ;; DSL
   (:export

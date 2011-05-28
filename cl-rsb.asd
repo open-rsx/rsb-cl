@@ -92,6 +92,22 @@
 			       :depends-on ("listener" "reader"
 					    "informer"))))
 
+		(:module     "filter"
+		 :pathname   "src/filter"
+		 :depends-on ("src")
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
+
+
+			      (:file       "composite-filter"
+			       :depends-on ("package" "protocol"))
+
+			      (:file       "scope-filter"
+			       :depends-on ("package" "protocol"))
+			      (:file       "type-filter"
+			       :depends-on ("package" "protocol"))))
+
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"
 		 :depends-on ("src-early")
@@ -115,17 +131,6 @@
 			       :depends-on ("package" "configurator"))
 			      (:file       "client"
 			       :depends-on ("package" "configurator"))))
-
-		(:module     "filter"
-		 :pathname   "src/filter"
-		 :depends-on ("src")
-		 :components ((:file       "package")
-			      (:file       "protocol"
-			       :depends-on ("package"))
-			      (:file       "scope-filter"
-			       :depends-on ("package" "protocol"))
-			      (:file       "type-filter"
-			       :depends-on ("package" "protocol"))))
 
 		(:module     "transport"
 		 :pathname   "src/transport"
