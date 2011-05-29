@@ -64,13 +64,17 @@ listeners. An event is a composite structure consisting of
 	       &key
 	       (compare-ids? t)
 	       (data-test    #'equal))
-  "Return non-nil if the events LEFT and RIGHT are equal."
+  "Return non-nil if the events LEFT and RIGHT are equal.
+If COMPARE-IDS? is non-nil, return nil unless LEFT and RIGHT have
+identical ids.
+DATA-TEST has to be a function of two arguments or nil. In the latter
+case, the payloads of LEFT and RIGHT are not considered."
   (and (or (not compare-ids?)
-	   (equal (uuid:uuid-to-byte-array (event-id left))
-		  (uuid:uuid-to-byte-array (event-id right))))
+	   (uuid= (event-id left) (event-id right)))
        (scope= (event-scope left) (event-scope right))
        (type= (event-type left) (event-type right))
-       (funcall data-test (event-data left) (event-data right))))
+       (or (null data-test)
+	   (funcall data-test (event-data left) (event-data right)))))
 
 (defmethod print-object ((object event) stream)
   (bind (((:slots scope type data) object)
