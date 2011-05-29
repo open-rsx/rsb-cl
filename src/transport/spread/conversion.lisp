@@ -75,7 +75,7 @@ been fragmented into multiple notifications."
     ;; Sender and timestamps TODO should these really be optional?
     (when meta-data
       ;; Set origin, if present
-      (unless (zerop (rsb.protocol::meta-data-sender-id meta-data))
+      (unless (emptyp (rsb.protocol::meta-data-sender-id meta-data))
 	(setf (event-origin event)
 	      (uuid:byte-array-to-uuid
 	       (rsb.protocol::meta-data-sender-id meta-data))))
