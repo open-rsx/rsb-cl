@@ -60,9 +60,6 @@ been fragmented into multiple notifications."
 		 'rsb:event
 		 :id                (uuid:make-uuid-from-string id)
 		 :scope             (make-scope scope)
-		 :origin            (uuid:byte-array-to-uuid
-				     (rsb.protocol::meta-data-sender-id
-				      meta-data))
 		 :type              t ;(pb::proto-type-name->lisp-type-symbol
 					;wire-schema)
 		 :data              (wire-data->event-data
@@ -75,15 +72,25 @@ been fragmented into multiple notifications."
 	  (setf (meta-data event (rsb.protocol::meta-info-key meta-data))
 		(rsb.protocol::meta-info-value meta-data)))
 
-    ;; Timestamps
-    (setf (timestamp event :create)
-	  (unix-microseconds->timestamp
-	   (rsb.protocol::meta-data-create-time meta-data))
-	  (timestamp event :send)
-	  (unix-microseconds->timestamp
-	   (rsb.protocol::meta-data-send-time meta-data))
-	  (timestamp event :receive)
-	  (local-time:now))
+    ;; Sender and timestamps TODO should these really be optional?
+    (when meta-data
+      ;; Set origin, if present
+      (unless (zerop (rsb.protocol::meta-data-sender-id meta-data))
+	(setf (event-origin event)
+	      (uuid:byte-array-to-uuid
+	       (rsb.protocol::meta-data-sender-id meta-data))))
+      ;; Set :create timestamp, if present
+      (unless (zerop (rsb.protocol::meta-data-create-time meta-data))
+	(setf (timestamp event :create)
+	      (unix-microseconds->timestamp
+	       (rsb.protocol::meta-data-create-time meta-data))))
+      ;; Set :send timestamp, if present
+      (unless (zerop (rsb.protocol::meta-data-send-time meta-data))
+	(setf (timestamp event :send)
+	      (unix-microseconds->timestamp
+	       (rsb.protocol::meta-data-send-time meta-data))))
+      ;; Set :receive timestamp
+      (setf (timestamp event :receive) (local-time:now)))
 
     event))
 
@@ -114,6 +121,7 @@ into one notification."
 		    (make-notification id1 scope1 origin
 				       "string" fragment
 				       :meta-data      meta-data
+				       :timestamps     timestamps
 				       :data-part      i
 				       :num-data-parts num-fragments))))
 	;; DATA1 fits into a single notification.
