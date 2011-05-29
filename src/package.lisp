@@ -117,7 +117,9 @@
    :event-timestamps
 
    :make-event
-   :make-event/typed)
+   :make-event/typed
+
+   :event=)
 
   ;; Participant
   (:export
