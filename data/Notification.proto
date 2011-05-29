@@ -1,34 +1,44 @@
 package rsb.protocol;
 
 import "Attachment.proto";
+import "MetaData.proto";
 
 option java_outer_classname = "NotificationPB";
 
 message MetaInfo {
-    required string key = 1;
-    required string value = 2;
+    required string     key                     = 1;
+    required string     value                   = 2;
 }
 
 message Notification {
 
-    optional string version = 1 [default = "1.0"];    
-    // The id of the rsb event that is encoded in this notification
-    required string id = 2;    
-    // The scope under which the encoded event was sent
-    optional string scope = 6;
-    // The encoding format of the user data contained in the event
-    optional string wire_schema = 7;
-    // The contained user data
-    optional Attachment data = 9;
-    // Additional meta information for the notification
-    repeated MetaInfo meta_infos = 10;
-    // The number of notifications an event was split into because the message
-    // size would have been to big for monolithic sending. 1 indicates a
-    // monolithic (self-contained) notification.
-    optional uint32 num_data_parts = 11 [default = 1];
-    // The index of the current part of a split message. Counting starts with 0
-    optional uint32 data_part = 12 [default = 0];
-    // a method type that is associated with this notification
-    optional string method = 14 [default = ""];
-    
+    optional string     version                 = 1 [default = "1.0"];
+
+    // The id of the rsb event that is encoded in this notification.
+    required string     id                      = 2;
+
+    // The scope under which the encoded event was sent.
+    optional string     scope                   = 6;
+
+    // The encoding format of the user data contained in the event.
+    optional string     wire_schema             = 7;
+
+    // The contained user data.
+    optional Attachment data                    = 9;
+
+    // Additional meta information for the notification.
+    repeated MetaInfo   meta_infos              = 10;
+    optional MetaData   meta_data               = 15;
+
+    // The number of notifications an event was split into because the
+    // message size would have been to big for monolithic sending. 1
+    // indicates a monolithic (self-contained) notification.
+    optional uint32     num_data_parts          = 11 [default = 1];
+
+    // The index of the current part of a split message. Counting
+    // starts with 0.
+    optional uint32     data_part               = 12 [default = 0];
+
+    // A method type that is associated with this notification.
+    optional string     method                  = 14 [default = ""];
 }

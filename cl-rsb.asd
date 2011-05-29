@@ -286,6 +286,7 @@ RSB events to/from Google protocol buffers."
 		 :pathname   "data"
 		 :default-component-class asdf::protocol-buffer-descriptor
 		 :components ((:file       "Attachment")
+			      (:file       "MetaData")
 			      (:file       "Notification")))
 
 		(:module     "converter-protocol-buffer"
