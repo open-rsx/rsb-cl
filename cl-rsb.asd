@@ -53,7 +53,8 @@
 		:log5
 
 		:puri
-		:uuid)
+		:uuid
+		:local-time)
   :components  ((:module     "src-early"
 		 :pathname   "src"
 		 :components ((:file       "package")

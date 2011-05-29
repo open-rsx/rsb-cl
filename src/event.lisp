@@ -58,35 +58,60 @@ listeners. An event is a composite structure consisting of
 + the id of the participant that sent the event
 + a payload
 + a type describing the payload
++ various timestamps
 + optional metadata"))
 
-(defmethod initialize-instance :before ((instance event)
-					&key
-					(type nil type-supplied?)
-					(data nil data-supplied?)) ;; fail when these are missing?
+(defmethod shared-initialize :before ((instance   event)
+				      (slot-names t)
+				      &key
+				      (type nil type-supplied?)
+				      (data nil data-supplied?)) ;; fail when these are missing?
   (when (and type-supplied? data-supplied?
 	     (not (typep data type)))
     (error 'type-error
 	   :datum         data
 	   :expected-type type)))
 
+(defmethod shared-initialize :after ((instance   event)
+                                     (slot-names t)
+                                     &key
+				     (create-timestamp? t))
+  (when create-timestamp?
+   (setf (timestamp instance :create) (local-time:now))))
+
 (defun event= (left right
 	       &key
-	       (compare-ids?     t)
-	       (compare-origins? t)
-	       (data-test        #'equal))
+	       (compare-ids?       t)
+	       (compare-origins?   t)
+	       (compare-timestamps t)
+	       (data-test          #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
 If COMPARE-IDS? is non-nil, return nil unless LEFT and RIGHT have
 identical ids.
 If COMPARE-ORIGINS? is non-nil, return nil unless LEFT and RIGHT have
 identical origins.
+COMPARE-TIMESTAMPS can be nil, t or a list of timestamp keys to
+compare. If it is t, all RSB timestamps are
+compared (currently :create, :send, :receive and :deliver).
 DATA-TEST has to be a function of two arguments or nil. In the latter
 case, the payloads of LEFT and RIGHT are not considered."
   (and (or (not compare-ids?)
 	   (uuid= (event-id left) (event-id right)))
+       ;; Scope and origin
        (scope= (event-scope left) (event-scope right))
        (or (not compare-origins?)
 	   (uuid= (event-origin left) (event-origin right)))
+       ;; Timestamps
+       (or (null compare-timestamps)
+	   (iter (for key in (if (eq compare-timestamps t)
+				 '(:create :send :receive :deliver)
+				 compare-timestamps))
+		 (let ((value-left  (timestamp left key))
+		       (value-right (timestamp right key)))
+		  (always (or (and (null value-left) (null value-right))
+			      (local-time:timestamp=
+			       value-left value-right))))))
+       ;; Data and type
        (type= (event-type left) (event-type right))
        (or (null data-test)
 	   (funcall data-test (event-data left) (event-data right)))))

@@ -56,24 +56,34 @@ been fragmented into multiple notifications."
       (error "Notification ~S does not have an id." ;; TODO condition; maybe communication-error or protocol-error?
 	     notification))
 
-    (setf event (make-instance 'rsb:event
-			       :id     (uuid:make-uuid-from-string id)
-			       :scope  (make-scope scope)
-			       :origin (uuid:byte-array-to-uuid
-					(rsb.protocol::meta-data-sender-id
-					 meta-data))
-			       :type   t ;(pb::proto-type-name->lisp-type-symbol
+    (setf event (make-instance
+		 'rsb:event
+		 :id                (uuid:make-uuid-from-string id)
+		 :scope             (make-scope scope)
+		 :origin            (uuid:byte-array-to-uuid
+				     (rsb.protocol::meta-data-sender-id
+				      meta-data))
+		 :type              t ;(pb::proto-type-name->lisp-type-symbol
 					;wire-schema)
-			       :data   (wire-data->event-data
-					(or data (rsb.protocol::attachment-binary attachment))
-					wire-schema)))
+		 :data              (wire-data->event-data
+				     (or data (rsb.protocol::attachment-binary attachment))
+				     wire-schema)
+		 :create-timestamp? nil))
 
     ;; Meta-data
     (iter (for meta-data in-vector meta-info)
-	  (setf (meta-data event ;(read-from-string
-				  (rsb.protocol::meta-info-key meta-data));)
-
+	  (setf (meta-data event (rsb.protocol::meta-info-key meta-data))
 		(rsb.protocol::meta-info-value meta-data)))
+
+    ;; Timestamps
+    (setf (timestamp event :create)
+	  (unix-microseconds->timestamp
+	   (rsb.protocol::meta-data-create-time meta-data))
+	  (timestamp event :send)
+	  (unix-microseconds->timestamp
+	   (rsb.protocol::meta-data-send-time meta-data))
+	  (timestamp event :receive)
+	  (local-time:now))
 
     event))
 
@@ -87,8 +97,9 @@ notification is required when data contained in event does not fit
 into one notification."
   (bind (((:accessors-r/o
 	   (id event-id) (scope event-scope) (origin event-origin)
-	   (data event-data)
-	   (meta-data event-meta-data)) event)
+	   (data       event-data)
+	   (meta-data  event-meta-data)
+	   (timestamps event-timestamps)) event)
 	 (id1    (format nil "~A" id))
 	 (scope1 (scope-string scope))
 	 (data1  (event-data->wire-data data)))
@@ -109,7 +120,8 @@ into one notification."
 	(list
 	 (make-notification id1 scope1 origin
 			    "string" data1
-			    :meta-data meta-data)))))
+			    :meta-data meta-data
+			    :timestamps timestamps)))))
 
 
 ;;; Data Conversion
@@ -146,25 +158,33 @@ into one notification."
 (defun make-notification (id scope origin wire-schema data
 			  &key
 			  meta-data
+			  timestamps
 			  (num-data-parts 1)
 			  (data-part      0))
   "Make a `rsb.protocol:notification' instance with ID, SCOPE,
 WIRE-SCHEMA, DATA and optionally META-DATA. When NUM-DATA-PARTS and
 DATA-PART are not supplied, values that indicate a non-fragmented
 notification are chosen."
-  (bind ((attachment   (make-instance 'rsb.protocol::attachment
-				      :length (length data)
-				      :binary data))
-	 (meta-data1   (make-instance 'rsb.protocol::meta-data
-				      :sender-id (uuid:uuid-to-byte-array origin)))
-	 (notification (make-instance 'rsb.protocol::notification
-				      :id             id
-				      :scope          scope
-				      :wire-schema    wire-schema
-				      :num-data-parts num-data-parts
-				      :data-part      data-part
-				      :data           attachment
-				      :meta-data      meta-data1)))
+  (bind ((attachment   (make-instance
+			'rsb.protocol::attachment
+			:length (length data)
+			:binary data))
+	 (meta-data1   (make-instance
+			'rsb.protocol::meta-data
+			:sender-id   (uuid:uuid-to-byte-array origin)
+			:create-time (timestamp->unix-microseconds
+				      (getf timestamps :create))
+			:send-time   (timestamp->unix-microseconds
+				      (local-time:now))))
+	 (notification (make-instance
+			'rsb.protocol::notification
+			:id             id
+			:scope          scope
+			:wire-schema    wire-schema
+			:num-data-parts num-data-parts
+			:data-part      data-part
+			:data           attachment
+			:meta-data      meta-data1)))
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)
@@ -174,8 +194,38 @@ notification are chosen."
 			  :value (prin1-to-string value))
 	   (rsb.protocol::notification-meta-infos notification)))
 
+    ;; Add TIMESTAMPS.
+    (iter (for (key value) on timestamps :by #'cddr)
+	  (unless (eq key :create) ;; the event should not have :send,
+				   ;; :receive or :deliver at this
+				   ;; point
+	    (let ((name (sb-ext:string-to-octets
+			 (string key)
+			 :external-format :ascii))
+		  (flat (timestamp->unix-microseconds value)))
+	      (vector-push-extend
+	       (make-instance 'rsb.protocol::user-time
+			      :key       name
+			      :timestamp flat)
+	       (rsb.protocol::meta-data-user-times meta-data1)))))
+
     ;; Return the complete notification instance.
     notification))
+
+(defun timestamp->unix-microseconds (timestamp)
+  "Convert the `local-time:timestamp' instance TIMESTAMP into an
+integer which counts the number of microseconds since UNIX epoch."
+  (nth-value
+   0 (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
+	(* 1       (local-time:timestamp-microsecond timestamp)))))
+
+(defun unix-microseconds->timestamp (unix-microseconds)
+  "Convert UNIX-MICROSECONDS to an instance of
+`local-time:timestamp'."
+  (bind (((:values unix-seconds microseconds)
+	  (floor unix-microseconds 1000000)))
+   (local-time:unix-to-timestamp
+    unix-seconds :nsec (* 1000 microseconds))))
 
 ;; TODO would not belong in spread transport, if we really did this
 (defun decode-wire-schema (wire-schema)
