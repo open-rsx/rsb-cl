@@ -48,6 +48,7 @@ been fragmented into multiple notifications."
 	   (scope       rsb.protocol::notification-scope)
 	   (wire-schema rsb.protocol::notification-wire-schema)
 	   (attachment  rsb.protocol::notification-data)
+	   (meta-data   rsb.protocol::notification-meta-data)
 	   (meta-info   rsb.protocol::notification-meta-infos)) notification)
 	 (event))
 
@@ -56,13 +57,16 @@ been fragmented into multiple notifications."
 	     notification))
 
     (setf event (make-instance 'rsb:event
-			       :id    (uuid:make-uuid-from-string id)
-			       :scope (make-scope scope)
-			       :type  t ;(pb::proto-type-name->lisp-type-symbol
+			       :id     (uuid:make-uuid-from-string id)
+			       :scope  (make-scope scope)
+			       :origin (uuid:byte-array-to-uuid
+					(rsb.protocol::meta-data-sender-id
+					 meta-data))
+			       :type   t ;(pb::proto-type-name->lisp-type-symbol
 					;wire-schema)
-			       :data  (wire-data->event-data
-				       (or data (rsb.protocol::attachment-binary attachment))
-				       wire-schema)))
+			       :data   (wire-data->event-data
+					(or data (rsb.protocol::attachment-binary attachment))
+					wire-schema)))
 
     ;; Meta-data
     (iter (for meta-data in-vector meta-info)
@@ -82,8 +86,9 @@ been fragmented into multiple notifications."
 notification is required when data contained in event does not fit
 into one notification."
   (bind (((:accessors-r/o
-	   (scope event-scope) (id event-id)
-	   (data event-data) (meta-data event-meta-data)) event)
+	   (id event-id) (scope event-scope) (origin event-origin)
+	   (data event-data)
+	   (meta-data event-meta-data)) event)
 	 (id1    (format nil "~A" id))
 	 (scope1 (scope-string scope))
 	 (data1  (event-data->wire-data data)))
@@ -95,13 +100,15 @@ into one notification."
 	  (iter (for fragment in    fragments)
 		(for i        :from 0)
 		(collect
-		    (make-notification id1 scope1 "string" fragment
+		    (make-notification id1 scope1 origin
+				       "string" fragment
 				       :meta-data      meta-data
 				       :data-part      i
 				       :num-data-parts num-fragments))))
 	;; DATA1 fits into a single notification.
 	(list
-	 (make-notification id1 scope1 "string" data1
+	 (make-notification id1 scope1 origin
+			    "string" data1
 			    :meta-data meta-data)))))
 
 
@@ -136,7 +143,7 @@ into one notification."
 ;;; Utility functions
 ;;
 
-(defun make-notification (id scope wire-schema data
+(defun make-notification (id scope origin wire-schema data
 			  &key
 			  meta-data
 			  (num-data-parts 1)
@@ -148,13 +155,16 @@ notification are chosen."
   (bind ((attachment   (make-instance 'rsb.protocol::attachment
 				      :length (length data)
 				      :binary data))
+	 (meta-data1   (make-instance 'rsb.protocol::meta-data
+				      :sender-id (uuid:uuid-to-byte-array origin)))
 	 (notification (make-instance 'rsb.protocol::notification
 				      :id             id
 				      :scope          scope
 				      :wire-schema    wire-schema
 				      :num-data-parts num-data-parts
 				      :data-part      data-part
-				      :data           attachment)))
+				      :data           attachment
+				      :meta-data      meta-data1)))
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)

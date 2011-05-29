@@ -111,6 +111,7 @@
    :event
    :event-id
    :event-scope
+   :event-origin
    :event-type
    :event-data
    :event-meta-data

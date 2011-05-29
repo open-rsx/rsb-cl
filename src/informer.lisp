@@ -42,7 +42,12 @@ associated SCOPE and type and known about its subscribers."))
 	     :expected-type type))))
 
 (defmethod send ((informer informer) (event event))
-  (rsb.ep:handle informer event))
+  ;; Set EVENT's origin to our id.
+  (setf (event-origin event) (participant-id informer))
+  ;; Send EVENT.
+  (rsb.ep:handle informer event)
+  ;; Return event to the client in case we created it on the fly.
+  event)
 
 (defmethod send ((informer informer) (data t))
   (send informer (make-event/typed (participant-scope informer)

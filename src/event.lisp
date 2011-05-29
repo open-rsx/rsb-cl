@@ -28,6 +28,12 @@
 		 plist-timestamp-mixin)
   ((id        :accessor event-id)
    (scope     :accessor event-scope)
+   (origin    :initarg  :origin
+	      :type     uuid:uuid
+	      :accessor event-origin
+	      :documentation
+	      "Stores the id of the participant by which the event was
+published onto the bus.")
    (type      :initarg  :type
 	      :type     (or symbol list)
 	      :accessor event-type
@@ -49,6 +55,7 @@ probably is forcing a more general type.")
 listeners. An event is a composite structure consisting of
 + an id
 + a scope
++ the id of the participant that sent the event
 + a payload
 + a type describing the payload
 + optional metadata"))
@@ -65,16 +72,21 @@ listeners. An event is a composite structure consisting of
 
 (defun event= (left right
 	       &key
-	       (compare-ids? t)
-	       (data-test    #'equal))
+	       (compare-ids?     t)
+	       (compare-origins? t)
+	       (data-test        #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
 If COMPARE-IDS? is non-nil, return nil unless LEFT and RIGHT have
 identical ids.
+If COMPARE-ORIGINS? is non-nil, return nil unless LEFT and RIGHT have
+identical origins.
 DATA-TEST has to be a function of two arguments or nil. In the latter
 case, the payloads of LEFT and RIGHT are not considered."
   (and (or (not compare-ids?)
 	   (uuid= (event-id left) (event-id right)))
        (scope= (event-scope left) (event-scope right))
+       (or (not compare-origins?)
+	   (uuid= (event-origin left) (event-origin right)))
        (type= (event-type left) (event-type right))
        (or (null data-test)
 	   (funcall data-test (event-data left) (event-data right)))))
