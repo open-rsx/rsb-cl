@@ -27,7 +27,7 @@
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
-  (if (zerop (rsb.protocol::notification-num-data-parts notification))
+  (if (<= (rsb.protocol::notification-num-data-parts notification) 1)
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
       (one-notification->event notification)
