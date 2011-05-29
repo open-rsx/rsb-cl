@@ -107,39 +107,95 @@ instances."))
 ;;; Plist meta data mixin
 ;;
 
-(defclass plist-meta-data-mixin ()
-  ((meta-data :initarg  :meta-data
-	      :type     list
-	      :initform nil
-	      :documentation
-	      ""))
-  (:documentation
-   "DOC"))
+(defmacro define-plist-data-mixin (name
+				   &key
+				   (slot-name name))
+  "Define a class `plist-NAME-mixin' which manages a plist in a
+slot. Define the following accessors along with the class:
++ `NAME-count' :: Return number of items.
++ `NAME-keys' :: Return item keys.
++ `NAME-values' :: Return item values.
++ `NAME-plist' :: Return items as plist.
++ `NAME-alist' :: Return items as alist."
+  (bind ((class-name (symbolicate "PLIST-" name "-MIXIN"))
+	 (initarg    (make-keyword slot-name))
+	 ((count-name keys-name values-name plist-name alist-name)
+	  (map 'list (curry #'symbolicate name)
+	       '("-COUNT" "-KEYS" "-VALUES" "-PLIST" "-ALIST"))))
+    `(progn
+       (defclass ,class-name ()
+	 ((,slot-name :initarg  ,initarg
+		      :type     list
+		      :initform nil
+		      :documentation
 
-(defmethod meta-data-count ((object plist-meta-data-mixin))
-  (ash (length (slot-value object 'meta-data)) -1))
+		      ,(format nil "Stores the ~(~A~) items associated ~
+to the instance."
+			       name)))
+	 (:documentation
+	  "This mixin adds storage for a plist of items and associated
+accessors. See `define-plist-data-mixin' for a description."))
 
-(defmethod meta-data-keys ((object plist-meta-data-mixin))
-  (iter (for (key) on (slot-value object 'meta-data)
-	     :by #'cddr)
-	(collect key)))
+       (defgeneric ,count-name (object)
+	 (:method ((object ,class-name))
+	   (ash (length (slot-value object ',slot-name)) -1))
+	 (:documentation
+	  ,(format nil "Return the number of ~(~A~) items stored in OBJECT."
+		   name)))
 
-(defmethod meta-data-values ((object plist-meta-data-mixin))
-  (iter (for (key value) on (slot-value object 'meta-data)
-	     :by #'cddr)
-	(collect value)))
+       (defgeneric ,keys-name (object)
+	 (:method ((object ,class-name))
+	   (iter (for (key) on (slot-value object ',slot-name)
+		      :by #'cddr)
+		 (collect key)))
+	 (:documentation
 
-(defmethod meta-data-plist ((object plist-meta-data-mixin))
-  (slot-value object 'meta-data))
+	  ,(format nil "Return a list of the keys of ~(~A~) items ~
+stored in OBJECT."
+		   name)))
 
-(defmethod meta-data-alist ((object plist-meta-data-mixin))
-  (plist-alist (slot-value object 'meta-data)))
+       (defgeneric ,values-name (object)
+	 (:method ((object ,class-name))
+	   (iter (for (key value) on (slot-value object ',slot-name)
+		      :by #'cddr)
+		 (collect value)))
+	 (:documentation
+	  ,(format nil "Return a list of the values of ~(~A~) items ~
+stored in OBJECT."
+		   name)))
 
-(defmethod meta-data ((object plist-meta-data-mixin) (key t))
-  (getf (slot-value object 'meta-data) key))
+       (defgeneric ,plist-name (object)
+	 (:method ((object ,class-name))
+	   (slot-value object ',slot-name))
+	 (:documentation
+	  ,(format nil "Return a plist of the ~(~A~) items stored in ~
+OBJECT."
+		   name)))
 
-(defmethod (setf meta-data) ((new-value t) (object plist-meta-data-mixin) (key t))
-  (setf (getf (slot-value object 'meta-data) key) new-value))
+       (defgeneric ,alist-name (object)
+	 (:method ((object ,class-name))
+	   (plist-alist (slot-value object ',slot-name)))
+	 (:documentation
+	  ,(format nil "Return an alist of the ~(~A~) items stored ~
+in OBJECT."
+		   name)))
+
+       (defgeneric ,name (object key)
+	 (:method ((object ,class-name) (key t))
+	   (getf (slot-value object ',slot-name) key))
+	 (:documentation
+	  ,(format nil "Return the ~(~A~) item of OBJECT identified ~
+by KEY."
+		   name)))
+
+       (defgeneric (setf ,name) (new-value object key)
+	 (:method ((new-value t) (object ,class-name) (key t))
+	   (setf (getf (slot-value object ',slot-name) key) new-value))
+	 (:documentation
+
+	  ,(format nil "Associate NEW-VALUE to OBJECT as the ~(~A~)
+item identified by KEY."
+		   name))))))
 
 
 ;;; Utility functions

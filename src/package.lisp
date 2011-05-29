@@ -67,11 +67,23 @@
   (:export
    :meta-data
 
+   :meta-data-count
    :meta-data-keys
    :meta-data-values
 
    :meta-data-plist
    :meta-data-alist)
+
+  ;; Timestamp protocol
+  (:export
+   :timestamp
+
+   :timestamp-count
+   :timestamp-keys
+   :timestamp-values
+
+   :timestamp-plist
+   :timestamp-alist)
 
   ;; Component URL protocol
   (:export
@@ -102,6 +114,7 @@
    :event-type
    :event-data
    :event-meta-data
+   :event-timestamps
 
    :make-event
    :make-event/typed)

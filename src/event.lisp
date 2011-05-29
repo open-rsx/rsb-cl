@@ -19,9 +19,13 @@
 
 (in-package :rsb)
 
+(define-plist-data-mixin meta-data)
+(define-plist-data-mixin timestamp)
+
 (defclass event (uuid-mixin
 		 scope-mixin
-		 plist-meta-data-mixin)
+		 plist-meta-data-mixin
+		 plist-timestamp-mixin)
   ((id        :accessor event-id)
    (scope     :accessor event-scope)
    (type      :initarg  :type
@@ -38,9 +42,8 @@ probably is forcing a more general type.")
 	      :accessor event-data
 	      :documentation
 	      "")
-   (meta-data :accessor event-meta-data
-	      :documentation
-	      ""))
+   (meta-data :accessor event-meta-data)
+   (timestamp :accessor event-timestamps))
   (:documentation
    "Basic unit of information that is exchanged between informers and
 listeners. An event is a composite structure consisting of
