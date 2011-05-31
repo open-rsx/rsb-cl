@@ -168,6 +168,11 @@
    :option-value
    :section-options)
 
+  ;; URI-related function
+  (:export
+   :uri-options
+   :uri->scope-and-options)
+
   ;; Macros
   (:export
    ;:with-channel

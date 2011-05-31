@@ -23,6 +23,7 @@
   (:use
    :cl
    :alexandria
+   :bind
    :iterate
 
    :lift
@@ -53,7 +54,7 @@
   (:function
    (check-participant (participant scope)
      (ensure-same
-      (participant-scope participant ) (make-scope scope)
+      (participant-scope participant) (make-scope scope)
       :test #'scope=)
      (ensure
       (typep (participant-id participant) 'uuid:uuid))))

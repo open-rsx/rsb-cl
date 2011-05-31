@@ -197,6 +197,8 @@
 
 			      (:file       "event"
 			       :depends-on ("package"))
+			      (:file       "uris"
+			       :depends-on ("package"))
 			      (:file       "listener"
 			       :depends-on ("package"))
 			      (:file       "informer"
