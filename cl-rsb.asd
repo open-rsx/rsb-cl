@@ -69,6 +69,8 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "event"
 			       :depends-on ("package" "util"))
+			      (:file       "uris"
+			       :depends-on ("package" "scope"))
 
 			      (:file       "util"
 			       :depends-on ("package" "scope"

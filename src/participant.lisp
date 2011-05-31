@@ -43,48 +43,6 @@ notifications on one channel of the bus."))
 ;;; Participant creation
 ;;
 
-;; TODO where should these go?
-
-(defun uri-options (uri)
-  "Translate the query part of URI into a plist of options."
-  (let ((names-and-values (split-sequence #\= (puri:uri-query uri))))
-    (iter (for name  in names-and-values       :by #'cddr)
-	  (for value in (cdr names-and-values) :by #'cddr)
-	  (collect (make-keyword (string-upcase name)))
-	  (collect value))))
-
-(defun uri->scope-and-options (uri &optional defaults)
-  "Dissect the URI as follows:
-+ scheme   -> transport name
-+ host     -> transport option :HOST
-+ port     -> transport option :PORT
-+ path     -> scope
-+ fragment -> not processed
-+ query    -> \"freestyle\" transport options
-Return two values: scope and transport options."
-  (bind (((:accessors-r/o
-	   (transport   puri:uri-scheme)
-	   (host        puri:uri-host)
-	   (port        puri:uri-port)
-	   (path        puri:uri-path)
-	   (fragment    puri:uri-fragment)
-	   (uri-options uri-options)) uri)
-	 (options (copy-list
-		   (rest (find transport defaults :key #'first)))))
-    (when (eq transport :rsb)
-      (error "~@<~S schema is not supported yet.~@:>"
-	     transport))
-    (when host
-      (setf (getf options :host) host))
-    (when port
-      (setf (getf options :port) port))
-    (when fragment
-      (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
-	    fragment uri))
-    (values (make-scope path)
-	    (list (cons transport (append uri-options options))))))
-
-
 (defun make-participant (class scope direction transports &rest args)
   "Make and return a participant instance of CLASS "
   (let* ((configurator (make-instance
