@@ -36,7 +36,7 @@ returned."))
 
 (defclass assembly ()
   ((id         :initarg  :id
-	       :type     string
+	       :type     octet-vector
 	       :reader   assembly-id
 	       :documentation
 	       "The id of notifications that are assembled in this
@@ -76,8 +76,7 @@ ASSEMBLY."
 (defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
 fragments of ASSEMBLY. ASSEMBLY has to be complete."
-  (let* ((fragments (map 'list (compose #'rsb.protocol::attachment-binary
-					#'rsb.protocol::notification-data)
+  (let* ((fragments (map 'list #'rsb.protocol::notification-data
 			 (assembly-fragments assembly)))
 	 (size      (reduce #'+ fragments :key #'length))
 	 (result    (make-array size :element-type '(unsigned-byte 8))))
@@ -87,8 +86,8 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 	  (setf (subseq result start end) fragment))
     result))
 
-(defmethod add-fragment! ((assembly assembly)
-			  (fragment rsb.protocol::notification))
+(defmethod add-fragment! ((assembly  assembly)
+			  (fragment  rsb.protocol::notification))
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
 	 ((:accessors-r/o
 	   (id rsb.protocol::notification-data-part)) fragment))
@@ -145,7 +144,7 @@ built from the complete assembly. Otherwise, return nil."))
 
 (defclass assembly-pool ()
   ((assemblies :type     hash-table
-	       :initform (make-hash-table :test #'equal)
+	       :initform (make-hash-table :test #'equalp)
 	       :documentation
 	       "This hash-table maps event ids to `assembly'
 instances."))
@@ -158,7 +157,7 @@ necessary when fragments are submitted by calls to
   (hash-table-count (slot-value pool 'assemblies)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
-			    (id   string)
+			    (id   simple-array)
 			    (size integer))
   (bind (((:slots-r/o assemblies) pool))
     (or (gethash id assemblies)

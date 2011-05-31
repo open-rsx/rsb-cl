@@ -303,9 +303,7 @@ RSB events to/from Google protocol buffers."
   :components  ((:module     "protocol"
 		 :pathname   "data"
 		 :default-component-class asdf::protocol-buffer-descriptor
-		 :components ((:file       "Attachment")
-			      (:file       "MetaData")
-			      (:file       "Notification")))
+		 :components ((:file       "Protocol")))
 
 		(:module     "converter-protocol-buffer"
 		 :pathname   "src/converter"

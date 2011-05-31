@@ -33,11 +33,10 @@
   (:function
    (make-notification (uuid length id data)
      (make-instance 'rsb.protocol::notification
-		    :id             (princ-to-string uuid)
+		    :id             (uuid:uuid-to-byte-array uuid)
 		    :num-data-parts length
 		    :data-part      id
-		    :data           (make-instance 'rsb.protocol::attachment
-						   :binary data))))
+		    :data           data)))
   (:documentation
    "Unit tests for the fragmentation and assembly of
 data/notifications."))

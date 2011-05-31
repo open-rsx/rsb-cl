@@ -47,9 +47,8 @@ been fragmented into multiple notifications."
 	   (id          rsb.protocol::notification-id)
 	   (scope       rsb.protocol::notification-scope)
 	   (wire-schema rsb.protocol::notification-wire-schema)
-	   (attachment  rsb.protocol::notification-data)
-	   (meta-data   rsb.protocol::notification-meta-data)
-	   (meta-info   rsb.protocol::notification-meta-infos)) notification)
+	   (payload     rsb.protocol::notification-data)
+	   (meta-data   rsb.protocol::notification-meta-data)) notification)
 	 (event))
 
     (when (emptyp id)
@@ -58,22 +57,22 @@ been fragmented into multiple notifications."
 
     (setf event (make-instance
 		 'rsb:event
-		 :id                (uuid:make-uuid-from-string id)
-		 :scope             (make-scope scope)
+		 :id                (uuid:byte-array-to-uuid id)
+		 :scope             (make-scope (sb-ext:octets-to-string
+						 scope :external-format :ascii))
 		 :type              t ;(pb::proto-type-name->lisp-type-symbol
 					;wire-schema)
 		 :data              (wire-data->event-data
-				     (or data (rsb.protocol::attachment-binary attachment))
-				     wire-schema)
+				     (or data payload) wire-schema)
 		 :create-timestamp? nil))
-
-    ;; Meta-data
-    (iter (for meta-data in-vector meta-info)
-	  (setf (meta-data event (rsb.protocol::meta-info-key meta-data))
-		(rsb.protocol::meta-info-value meta-data)))
 
     ;; Sender and timestamps TODO should these really be optional?
     (when meta-data
+      ;; "User infos"
+      (iter (for meta-data in-vector (rsb.protocol::meta-data-user-infos meta-data))
+	    (setf (meta-data event (rsb.protocol::user-info-key meta-data))
+		  (rsb.protocol::user-info-value meta-data)))
+
       ;; Set origin, if present
       (unless (emptyp (rsb.protocol::meta-data-sender-id meta-data))
 	(setf (event-origin event)
@@ -114,9 +113,7 @@ into one notification."
 	   (data       event-data)
 	   (meta-data  event-meta-data)
 	   (timestamps event-timestamps)) event)
-	 (id1    (format nil "~A" id))
-	 (scope1 (scope-string scope))
-	 (data1  (event-data->wire-data data)))
+	 (data1 (event-data->wire-data data)))
     (if (> (length data1) max-fragment-size)
 	;; Split DATA1 into multiple fragment and make a notification
 	;; for each fragment.
@@ -125,7 +122,7 @@ into one notification."
 	  (iter (for fragment in    fragments)
 		(for i        :from 0)
 		(collect
-		    (make-notification id1 scope1 origin
+		    (make-notification id scope origin
 				       "string" fragment
 				       :meta-data      meta-data
 				       :timestamps     timestamps
@@ -133,7 +130,7 @@ into one notification."
 				       :num-data-parts num-fragments))))
 	;; DATA1 fits into a single notification.
 	(list
-	 (make-notification id1 scope1 origin
+	 (make-notification id scope origin
 			    "string" data1
 			    :meta-data meta-data
 			    :timestamps timestamps)))))
@@ -180,11 +177,7 @@ into one notification."
 WIRE-SCHEMA, DATA and optionally META-DATA. When NUM-DATA-PARTS and
 DATA-PART are not supplied, values that indicate a non-fragmented
 notification are chosen."
-  (bind ((attachment   (make-instance
-			'rsb.protocol::attachment
-			:length (length data)
-			:binary data))
-	 (meta-data1   (make-instance
+  (bind ((meta-data1   (make-instance
 			'rsb.protocol::meta-data
 			:sender-id   (uuid:uuid-to-byte-array origin)
 			:create-time (timestamp->unix-microseconds
@@ -193,21 +186,25 @@ notification are chosen."
 				      (local-time:now))))
 	 (notification (make-instance
 			'rsb.protocol::notification
-			:id             id
-			:scope          scope
-			:wire-schema    wire-schema
+			:id             (uuid:uuid-to-byte-array id)
+			:scope          (sb-ext:string-to-octets
+					 (scope-string scope)
+					 :external-format :ascii)
+			:wire-schema    (sb-ext:string-to-octets
+					 wire-schema
+					 :external-format :ascii)
 			:num-data-parts num-data-parts
 			:data-part      data-part
-			:data           attachment
+			:data           data
 			:meta-data      meta-data1)))
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)
 	  (vector-push-extend
-	   (make-instance 'rsb.protocol::meta-info
+	   (make-instance 'rsb.protocol::user-info
 			  :key   (string key)
 			  :value (prin1-to-string value))
-	   (rsb.protocol::notification-meta-infos notification)))
+	   (rsb.protocol::meta-data-user-infos meta-data1)))
 
     ;; Add TIMESTAMPS.
     (iter (for (key value) on timestamps :by #'cddr)
