@@ -1,4 +1,4 @@
-;;; types.lisp ---
+;;; types.lisp --- Types used in the cl-rsb system.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -26,19 +26,15 @@
 ;;; Scope-related types
 ;;
 
-(deftype scope-anchor ()
-  '(member :relative :absolute))
-
 (deftype scope-component ()
   '(and string (satisfies scope-component?)))
 
 (deftype scope-components ()
-;;'(cons scope-anchor
-         '(or null
-	     (cons scope-component t)))
+  '(or null
+       (cons scope-component t)))
 
 (defun scope-component? (string)
-  "DOC"
+  "Non-nil when STRING is a valid scope component."
   (bind (((:flet valid-char? (char))
 	  (or (<= (char-code #\a) (char-code char) (char-code #\z))
 	      (<= (char-code #\A) (char-code char) (char-code #\Z))
@@ -47,18 +43,11 @@
 	 (every #'valid-char? string))))
 
 
-;;;
+;;; Transport-related types
 ;;
-
 
 (deftype implementation-feedback ()
   '(member :implemented :not-implemented))
 
 (deftype direction ()
   '(member :in-push :in-pull :out))
-
-(deftype wire-schema-designator ()
-  "One of the forms:
-\(MECHANISM . MECHANISM-SPECIFIC-DESIGNATOR)"
-  `(or (cons keyword symbol)
-       ))
