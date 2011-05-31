@@ -28,7 +28,6 @@
 notifications on one channel of the bus."))
 
 (defmethod relative-url ((participant participant))
-  "DOC"
   (puri:merge-uris
    (make-instance 'puri:uri
 		  :fragment (prin1-to-string
@@ -62,7 +61,6 @@ notifications on one channel of the bus."))
 
     (values participant configurator connectors)))
 
-;; TODO make a function uri->configuration?
 (defmacro define-participant-creation-uri-methods (kind &rest args)
   (let* ((make-name      (symbolicate "MAKE-" kind))
 	 (arg-names      (map 'list (compose #'first #'ensure-list)
@@ -80,7 +78,7 @@ notifications on one channel of the bus."))
 			      (transports (transport-options)))
 	 (bind (((:values scope options)
 		 (uri->scope-and-options ,designator-arg transports)))
-	   (,make-name scope ,@(rest arg-names) :transports options )))
+	   (,make-name scope ,@(rest arg-names) :transports options)))
 
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
 			      &key
@@ -92,12 +90,15 @@ notifications on one channel of the bus."))
 			 :transports transports))))))
 
 (defmacro define-participant-creation-restart-method (kind &rest args)
-  "TODO(jmoringe): document"
+  "Emit an :around method on `make-KIND' that establishes restarts.
+KIND will usually be one of :informer, :listener and :reader. ARGS is
+a method lambda-list. The first argument is assumed to be designator
+that is the URI or scope."
   (let* ((make-name       (symbolicate "MAKE-" kind))
 	 (arg-names       (map 'list (compose #'first #'ensure-list)
 			       args))
 	 (designator-arg  (first arg-names))
-	 (designator-kind (symbolicate (second (first args))))
+	 (designator-kind (make-keyword (second (first args))))
 	 (restart-name    (symbolicate "USE-" designator-kind)))
     (with-unique-names (args-var)
       `(defmethod ,make-name :around (,@args
@@ -112,14 +113,17 @@ notifications on one channel of the bus."))
 		(retry ()
 		  :report (lambda (stream)
 			    (format stream ,(format nil "~~@<Retry creating the ~(~A~) for ~(~A~) ~~S~~@:>"
-						    designator-kind kind)
+						    kind designator-kind)
 				    ,designator-arg))
 		  (go retry))
 		(,restart-name (new-value)
 		  :interactive (lambda ()
-				 (format *query-io* ,(format nil "Specify ~A: " designator-kind))
+				 (format *query-io* ,(format nil "Specify ~(~A~) (not evaluated): "
+							     designator-kind))
 				 (force-output *query-io*)
-				 (list (read-line *query-io*)))
+				 (list ,(ecase designator-kind
+				          (:uri   `(puri:parse-uri (read-line *query-io*)))
+					  (:scope `(make-scope (read-line *query-io*))))))
 		  :report ,(format nil "Retry creating the ~(~A~) with a different ~(~A~)."
 				   kind designator-kind)
 		  (setf ,designator-arg new-value)
