@@ -19,6 +19,37 @@
 
 (in-package :rsb.transport.spread)
 
+
+;;; Spread connection protocol
+;;
+
+(defgeneric ref-group (connection group)
+  (:documentation
+   "Increase the reference count of GROUP, causing CONNECTION to join
+GROUP in case of a 0 -> 1 transition."))
+
+(defgeneric unref-group (connection group)
+  (:documentation
+   "Decrease the reference count of GROUP, causing CONNECTION to leave
+GROUP in case of a 1 -> 0 transition."))
+
+(defgeneric send-message (connection destination payload)
+  (:documentation
+   "Send the PAYLOAD to DESTINATION via CONNECTION in a Spread
+message."))
+
+(defgeneric receive-message (connection
+			     &key
+			     block?)
+  (:documentation
+   "Receive a Spread message via CONNECTION. If BLOCK? is non-nil,
+block until a message is available. Otherwise return nil if no message
+is available."))
+
+
+;;; `connection' class
+;;
+
 (defclass connection ()
   ((connection :initarg  :connection
 	       :type     spread:connection
@@ -57,18 +88,15 @@ instance.")
 (defmethod receive-message ((connection connection)
 			    &key
 			    (block? t))
-  "DOC"
   (spread:receive (slot-value connection 'connection) :block? block?))
 
-(defmethod send-message ((connection   connection)
-			   (destination list)
-			   (payload     simple-array))
-  "DOC"
+(defmethod send-message ((connection  connection)
+			 (destination list)
+			 (payload     simple-array))
   (check-type payload spread:octet-vector "an octet-vector") ;; TODO rsb:octet-vector?
 
-  (log1 :info "~A: message [me -> ~S] ~S." connection destination (subseq payload 0 (min 256 (length payload))))
-
-  (spread:send (slot-value connection 'connection) destination payload))
+  (spread:send-bytes
+   (slot-value connection 'connection) destination payload))
 
 (defmethod print-object ((object connection) stream)
   (with-slots (connection groups) object
