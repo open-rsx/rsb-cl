@@ -89,12 +89,19 @@ classes."))
 ;;; Participant-related errors
 ;;
 
-(define-condition participation-failed (condition)
-  ((scope :initarg  :scope
-	  :type     scope
-	  :reader   participation-failed-scope
-	  :documentation
-	  ""))
+(define-condition participation-failed (rsb-error)
+  ((scope      :initarg  :scope
+	       :type     scope
+	       :reader   participation-failed-scope
+	       :documentation
+	       "The scope of the channel in which the participant
+would have participated.")
+   (transports :initarg  :transports
+	       :type     list
+	       :reader   participation-failed-transports
+	       :documentation
+	       "A list of transports the participant would have used
+to connect to the bus."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
@@ -104,14 +111,24 @@ designated by ~A.~@:>"
    "This error is signaled when the creation of a participant (which
 implies participation in a channel) fails."))
 
-;; TODO listener-creation-failed
+(define-condition listener-creation-failed (participation-failed)
+  ()
+  (:documentation
+   "This error is signaled when an attempt to create a listener
+fails."))
 
-(define-condition informer-creation-failed (rsb-error)
+(define-condition reader-creation-failed (participation-failed)
+  ()
+  (:documentation
+   "This error is signaled when an attempt to create a reader
+fails."))
+
+(define-condition informer-creation-failed (participation-failed)
   ((type :initarg  :type
 	 :type     (or list symbol)
 	 :reader   informer-creation-failed-type
 	 :documentation
-	 ""))
+	 "The type of the informer for which the creation failed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to create RSB informer in the channel ~

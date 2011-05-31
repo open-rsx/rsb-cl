@@ -45,11 +45,16 @@
 
    :communication-error
 
-   :informer-creation-failed
-   :informer-creation-failed-type
-
    :participation-failed
-   :participation-failed-scope)
+   :participation-failed-scope
+   :participation-failed-transports
+
+   :listener-creation-failed
+
+   :reader-creation-failed
+
+   :informer-creation-failed
+   :informer-creation-failed-type)
 
   ;; Restarts
   (:export
