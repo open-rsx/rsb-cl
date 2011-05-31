@@ -73,4 +73,5 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\"))
       (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
 	    fragment uri))
     (values (make-scope path)
-	    (list (cons transport (append uri-options options))))))
+	    (when transport 
+	      (list (cons transport (append uri-options options)))))))
