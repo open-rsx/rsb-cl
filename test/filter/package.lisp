@@ -71,6 +71,21 @@ match~;matched~] the event ~S, but should~:[ not~;~].~@:>"
 
        (addtest (,suite-name
 		 :documentation
+		 ,(format nil "Test calling instances of the `~(~A~)' as functions."
+			  class))
+	 funcallability
+
+	 (ensure-cases (event expected)
+	     (map 'list #'list events ',matches)
+	   (let ((result (funcall simple-filter event)))
+	     (ensure-same result expected
+			  :report "~@<When called as a function, the ~
+filter ~S ~:[did not match~;matched~] the event ~S, but should~:[ ~
+not~;~].~@:>"
+			  :arguments (simple-filter result event expected)))))
+
+       (addtest (,suite-name
+		 :documentation
 		 ,(format nil "Test method on `print-object' for the `~(~A~)' filter class."
 			  class))
 	 print
