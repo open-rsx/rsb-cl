@@ -1,9 +1,0 @@
-package rsb.protocol;
-
-option java_outer_classname = "AttachmentPB";
-
-message Attachment {
-    optional string type_id = 1 [default = "application/octet-stream"];
-    required int32 length = 2;
-    optional bytes binary = 3;
-}
