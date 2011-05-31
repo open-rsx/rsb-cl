@@ -90,7 +90,14 @@ been fragmented into multiple notifications."
 	      (unix-microseconds->timestamp
 	       (rsb.protocol::meta-data-send-time meta-data))))
       ;; Set :receive timestamp
-      (setf (timestamp event :receive) (local-time:now)))
+      (setf (timestamp event :receive) (local-time:now))
+
+      (iter (for user-time in-vector (rsb.protocol::meta-data-user-times meta-data))
+	    (setf (timestamp event (make-keyword (sb-ext:octets-to-string
+						  (rsb.protocol::user-time-key user-time)
+						  :external-format :ascii)))
+		  (unix-microseconds->timestamp
+		   (rsb.protocol::user-time-timestamp user-time)))))
 
     event))
 
@@ -198,7 +205,7 @@ notification are chosen."
     (iter (for (key value) on meta-data :by #'cddr)
 	  (vector-push-extend
 	   (make-instance 'rsb.protocol::meta-info
-			  :key   (prin1-to-string key)
+			  :key   (string key)
 			  :value (prin1-to-string value))
 	   (rsb.protocol::notification-meta-infos notification)))
 
