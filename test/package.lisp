@@ -29,8 +29,15 @@
    :lift
 
    :rsb)
+
+  ;; Root test suite
   (:export
    :root)
+
+  ;; Test utilities
+  (:export
+   :check-print)
+
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
 
@@ -44,6 +51,13 @@
      (setf *default-configuration*
 	   `(((:transport :spread :host) . "localhost")
 	     ((:transport :spread :port) . ,spread-port)))))
+  (:function
+   (check-print (thing)
+     (ensure
+      (funcall
+       (conjoin #'stringp (complement #'emptyp))
+       (with-output-to-string (stream)
+	 (print-object thing stream))))))
   (:documentation
    "Root unit test suite of the cl-rsb system."))
 
