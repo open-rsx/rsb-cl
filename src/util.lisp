@@ -70,8 +70,7 @@ instances."))
 ;;
 
 (defclass scope-mixin ()
-  ((scope :initarg :scope
-	  :type     scope
+  ((scope :type     scope
 	  :documentation
 	  ""))
   (:default-initargs
@@ -88,7 +87,6 @@ instances."))
 
 ;;; URI mixin
 ;;
-
 
 (defclass uri-mixin ()
   ((uri :type     puri:uri
