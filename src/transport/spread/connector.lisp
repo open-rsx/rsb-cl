@@ -33,17 +33,18 @@
   (:options
    (:name string
     :description
-    "The name of the spread daemon. Mutually exclusive with HOST and
-PORT.")
+    "The name of the spread daemon. Has to be either of the form PORT@HOSTNAME or just PORT. Mutually exclusive with HOST and PORT.")
    (:host string
     :description
-    "The hostname of the spread daemon. Mutually exclusive with
-NAME.")
+    "The hostname of the spread daemon. Mutually exclusive with NAME.")
    (:port (integer 0 65534)
     :default spread:*default-port*
     :description
-    "The port number of the spread daemon. Mutually exclusive with
-NAME."))
+    "The port number of the spread daemon. Mutually exclusive with NAME.")
+   (:tcpnodelay boolean
+    :default t
+    :description
+    "Should the TCP_NODELAY option be set on the socket used for Spread communication? Note: currently ignored by Lisp implementation."))
   (:documentation
    "This class serves as a superclass for spread in and out
 connectors."))
