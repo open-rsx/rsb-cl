@@ -29,12 +29,9 @@ receiving events."))
 (defmethod receive ((reader reader)
 		    &key
 		    (block? t))
-  ;; TODO how to handle multiple connectors?
-  ;; TODO who should be responsible for calling emit on the connector?
-  (let ((connector (first
-		    (rsb.ep:configurator-connectors
-		     (rsb.ep:client-configurator reader)))))
-    (rsb.ep:emit connector block?)))
+  (let ((processor (rsb.ep:configurator-processor
+		    (rsb.ep:client-configurator reader))))
+    (rsb.ep:emit processor block?)))
 
 ;; TODO maybe restart should be installed in transport layer
 (defmethod receive :around ((reader reader)
