@@ -20,6 +20,17 @@
 (in-package :rsb.transport.spread)
 
 
+;;; Assembly protocol
+;;
+
+(defgeneric add-fragment! (assembly fragment)
+  (:documentation
+   "Integrate the notification FRAGMENT into the partial assembly
+ASSEMBLY. Warning conditions are signaled if FRAGMENT cannot be
+integrated for some reason. The (possibly) modified ASSEMBLY is
+returned."))
+
+
 ;;; `assembly' class
 ;;
 
@@ -78,10 +89,6 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 
 (defmethod add-fragment! ((assembly assembly)
 			  (fragment rsb.protocol::notification))
-  "Integrate the notification FRAGMENT into the partial assembly
-ASSEMBLY. Warning conditions are signaled if FRAGMENT cannot be
-integrated for some reason. The (possibly) modified ASSEMBLY is
-returned."
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
 	 ((:accessors-r/o
 	   (id rsb.protocol::notification-data-part)) fragment))
