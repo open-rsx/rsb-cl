@@ -40,7 +40,7 @@ notifications on one channel of the bus."))
     (format stream "~A" (scope-string (participant-scope object)))))
 
 
-;;;
+;;; Participant creation
 ;;
 
 ;; TODO where should these go?
@@ -83,6 +83,26 @@ Return two values: scope and transport options."
 	    fragment uri))
     (values (make-scope path)
 	    (list (cons transport (append uri-options options))))))
+
+
+(defun make-participant (class scope direction transports &rest args)
+  "Make and return a participant instance of CLASS "
+  (let* ((configurator (make-instance
+			(ecase direction
+			  ((:in-push :in-pull) 'rsb.ep:in-route-configurator)
+			  (:out                'rsb.ep:out-route-configurator))
+			:scope     scope
+			:direction direction))
+	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO figure out package deps
+				transports direction))
+	 (participant  (apply #'make-instance class
+			      :scope        scope
+			      :configurator configurator
+			      args)))
+
+    (setf (rsb.ep:configurator-connectors configurator) connectors)
+
+    (values participant configurator connectors)))
 
 ;; TODO make a function uri->configuration?
 (defmacro define-participant-creation-uri-methods (kind &rest args)

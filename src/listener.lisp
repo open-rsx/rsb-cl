@@ -72,22 +72,10 @@ a mechanism for dispatching matching events to these handlers."))
 ;;; `listener' creation
 ;;
 
-;; TODO make-informer and make-reader are very similar
 (defmethod make-listener ((scope scope)
 			  &key
 			  (transports (transport-options)))
-  (let* ((configurator (make-instance 'rsb.ep:in-route-configurator
-				      :scope     scope
-				      :direction :in-push))
-	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO package deps
-				transports :in-push))
-	 (listener     (make-instance 'listener
-				      :scope        scope
-				      :configurator configurator)))
-
-    (setf (rsb.ep:configurator-connectors configurator) connectors)
-
-    listener))
+  (make-participant 'listener scope :in-push  transports))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))
 

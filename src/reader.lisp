@@ -58,21 +58,7 @@ receive the next one.~@:>"))
 (defmethod make-reader ((scope scope)
 			&key
 			(transports (transport-options)))
-  (let* ((configurator (make-instance 'rsb.ep:in-route-configurator
-				      :scope     scope
-				      :direction :in-pull))
-	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO
-				transports :in-pull))
-	 (reader       (make-instance 'reader
-				      :scope        scope
-				      :configurator configurator)))
-
-    (unless (length= 1 connectors)
-      (error "Reader currently only works with a single connectors")) ;; TODO
-
-    (setf (rsb.ep:configurator-connectors configurator) connectors)
-
-    reader))
+  (make-participant 'reader scope :in-pull transports))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))
 

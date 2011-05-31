@@ -69,18 +69,9 @@ associated SCOPE and type and known about its subscribers."))
 			  (type  t)
 			  &key
 			  (transports (transport-options)))
-  (let* ((configurator (make-instance 'rsb.ep:out-route-configurator
-				      :scope scope))
-	 (connectors   (iter (for (name . args) in transports)
-			     (collect
-				 (apply (fdefinition (find-symbol "MAKE-CONNECTOR" :rsb.transport))
-					name :out args))))
-	 (informer     (make-instance 'informer
-				      :scope        scope
-				      :type         type
-				      :configurator configurator)))
-
-    (setf (rsb.ep:configurator-connectors configurator) connectors)
+  (bind (((:values informer configurator)
+	  (make-participant 'informer scope :out transports
+			    :type type)))
     ;; TODO not sure who should set this up
     (push (rsb.ep:configurator-processor configurator) (rsb.ep:handlers informer))
     informer))
