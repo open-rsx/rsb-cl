@@ -96,13 +96,15 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
     (cond
       ;; Bounds check for fragment id.
       ((not (<= 0 id (1- (length fragments))))
-       (warn "~@<Received illegal fragment ~D of ~S~@:>"
-	     id assembly))
+       (warn 'invalid-fragment-id
+	     :assembly assembly
+	     :fragment fragment))
 
       ;; Check for duplicates.
       ((aref fragments id)
-       (warn "~@<Received fragment ~D of ~S more than once~@:>"
-	     id assembly)) ;; TODO proper condition
+       (warn 'duplicate-fragment
+	     :assembly assembly
+	     :fragment fragment))
 
       ;; Store the fragment.
       (t

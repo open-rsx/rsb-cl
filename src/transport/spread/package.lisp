@@ -30,9 +30,20 @@
    :bind
 
    :rsb
-   ;:rsb.filter
    :rsb.event-processing
    :rsb.transport)
+
+  ;; Conditions
+  (:export
+   :assembly-problem
+   :assembly-problem-assembly
+
+   :fragment-problem
+   :assembly-problem-fragment
+
+   :invalid-fragment-id
+
+   :duplicate-fragment)
 
   ;; Exported for unit tests
   (:export

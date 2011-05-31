@@ -126,6 +126,22 @@ instance.")
 
 (addtest (fragmentation-root
           :documentation
+	  "Ensure that warnings are signaled when invalid fragments
+  are added to an assembly.")
+  warnings
+
+  (let ((uuid (uuid:make-v1-uuid))
+	(pool (make-instance 'assembly-pool)))
+    (merge-fragment pool (make-notification uuid 3 0 (octetify "foo")))
+
+    (ensure-condition 'invalid-fragment-id
+      (merge-fragment pool (make-notification uuid 3 5 (octetify "foo"))))
+
+    (ensure-condition 'duplicate-fragment
+      (merge-fragment pool (make-notification uuid 3 0 (octetify "foo"))))))
+
+(addtest (fragmentation-root
+          :documentation
 	  "Test `print-object' method on `assembly-pool'.")
   print-smoke
 

@@ -242,10 +242,12 @@ on the spread group communication system."
   :components  ((:module     "spread"
 		 :pathname   "src/transport/spread"
 		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
 			      (:file       "util"
 			       :depends-on ("package"))
 			      (:file       "fragmentation"
-			       :depends-on ("package" "util"))
+			       :depends-on ("package" "conditions" "util"))
 			      (:file       "conversion"
 			       :depends-on ("package" "fragmentation"))
 
