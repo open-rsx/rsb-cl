@@ -26,14 +26,14 @@
 			scope-mixin)
   ((rsb::scope :accessor filter-scope
 	       :documentation
-	       "The URI of matching events."))
+	       "A superscope of the scopes of matching events."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
-   "Instances of this filter class discriminate based on the URI of
-RSB events."))
+   "Instances of this filter class discriminate based on the scopes of
+events."))
 
 (defmethod matches? ((filter scope-filter) (event event))
-  "EVENT is matched by comparing its URI to the URI of FILTER."
+  "EVENT is matched by comparing its scope to the scope of FILTER."
   (sub-scope? (event-scope event) (filter-scope filter)))
 
 (defmethod print-object ((object scope-filter) stream)
