@@ -204,7 +204,6 @@
 			      (:file       "informer"
 			       :depends-on ("package"))))
 
-
 		(:module     "filter"
 		 :pathname   "test/filter"
 		 :depends-on ("test")
@@ -212,6 +211,8 @@
 			      (:file       "disjoin-filter"
 			       :depends-on ("package"))
 			      (:file       "conjoin-filter"
+			       :depends-on ("package"))
+			      (:file       "scope-filter"
 			       :depends-on ("package"))))
 
 		(:module     "transport"
