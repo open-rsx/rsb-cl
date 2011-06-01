@@ -63,15 +63,17 @@ been fragmented into multiple notifications."
 		 :type              t ;(pb::proto-type-name->lisp-type-symbol
 					;wire-schema)
 		 :data              (wire-data->event-data
-				     (or data payload) wire-schema)
+				     (or data payload)
+				     (sb-ext:octets-to-string
+				      wire-schema :external-format :ascii))
 		 :create-timestamp? nil))
 
     ;; Sender and timestamps TODO should these really be optional?
     (when meta-data
       ;; "User infos"
-      (iter (for meta-data in-vector (rsb.protocol::meta-data-user-infos meta-data))
-	    (setf (meta-data event (rsb.protocol::user-info-key meta-data))
-		  (rsb.protocol::user-info-value meta-data)))
+      (iter (for user-info in-vector (rsb.protocol::meta-data-user-infos meta-data))
+	    (setf (meta-data event (rsb.protocol::user-info-key user-info))
+		  (rsb.protocol::user-info-value user-info)))
 
       ;; Set origin, if present
       (unless (emptyp (rsb.protocol::meta-data-sender-id meta-data))
