@@ -20,7 +20,7 @@
 (in-package :cl-user)
 
 (defpackage :rsb.converter
-  (:nicknames :rsbc)
+  (:nicknames :rsb.conv)
   (:use
    :cl
    :rsb)
