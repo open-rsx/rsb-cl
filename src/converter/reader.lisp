@@ -1,4 +1,4 @@
-;;; reader.lisp ---
+;;; reader.lisp --- A converter that uses the Lisp reader/printer.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -19,30 +19,29 @@
 
 (in-package :rsb.converter)
 
-(defmethod wire->domain ((wire-schema (eql :reader))
-			 (encoded     string)  ;; TODO octet-vector?
-			 (domain-type class)) ;; TODO could also be symbol and standard-object
+(defmethod wire->domain ((converter   (eql :reader))
+			 (wire-data   string)
+			 (wire-schema symbol))
   (with-standard-io-syntax
-    (read-from-string encoded)))
+    (read-from-string wire-data)))
 
-(defmethod wire->domain :around ((wire-schema (eql :reader))
-				 (encoded     string)
-				 (domain-type class))
-  (let ((expected-type (class-name domain-type))
+(defmethod wire->domain :around ((converter   (eql :reader))
+				 (wire-data   string)
+				 (wire-schema symbol))
+  (let ((expected-type wire-schema)
 	(result        (call-next-method)))
     (unless (typep result expected-type)
       (error 'wire->domain-conversion-error
-	     :wire-format wire-schema
-	     :encoded     encoded
-	     :domain-type domain-type
-	     :format-control "~@<The value is not ..."))
+	     :encoded     wire-data
+	     :wire-schema wire-schema
+	     :domain-type expected-type
+	     :format-control "~@<The value is not ~A is not of the expected type ~A.~@:>"
+	     :format-arguments `(,result ,expected-type)))
     result)) ;; TODO also type-error?
 
-(defmethod domain->wire ((wire-schema   (eql :reader))
-			 (domain-object t)
-			 (wire-type     (eql 'string))) ;; TODO octet-vector?
-  (with-standard-io-syntax
-    (prin1-to-string domain-object)))
-
-;; roundtrip test
-;; (wire->domain :reader (domain->wire :reader :boo 'string) (find-class 'symbol))
+(defmethod domain->wire ((converter     (eql :reader))
+			 (domain-object t))
+  (values
+   (with-standard-io-syntax
+     (prin1-to-string domain-object))
+   (type-of domain-object)))

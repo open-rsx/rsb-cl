@@ -1,4 +1,4 @@
-;;; protocol-buffers.lisp --- Converter for protocol buffer wire format.
+;;; protocol-buffers.lisp --- Converter for protocol buffer wire schemas.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -19,30 +19,17 @@
 
 (in-package :rsb.converter)
 
-(defmethod wire->domain ((wire-schema (eql :protocol-buffer))
-			 (encoded     simple-array)
-			 (domain-type symbol))
-  (check-type encoded octet-vector)
+(defmethod wire->domain ((converter   (eql :protocol-buffer))
+			 (wire-data   simple-array)
+			 (wire-schema symbol))
+  (check-type wire-data octet-vector)
 
-  (nth-value 0 (pb:unpack encoded domain-type)))
+  (let ((type (pb::proto-type-name->lisp-type-symbol
+	       (string wire-schema))))
+    (nth-value 0 (pb:unpack wire-data type))))
 
-(defmethod domain->wire ((wire-schema   (eql :protocol-buffer))
-			 (domain-object standard-object)
-			 (wire-type     (eql 'octet-vector)))
-  (pb::pack1 domain-object))
-
-
-;;;
-;;
-
-;; (defmethod wire->domain ((wire-schema (eql :protocol-buffer))
-;;			 (encoded     string)
-;;			 (domain-type class)) ;; TODO could also be symbol and standard-object
-;;   (let ((bytes (base64:base64-string-to-usb8-array encoded)))
-;;     (wire->domain wire-format bytes domain-type)))
-;;
-;; (defmethod domain->wire ((wire-schema   (eql :protocol-buffer))
-;;			 (domain-object standard-object)
-;;			 (wire-type     (eql 'base64-string)))
-;;   (base64:usb8-array-to-base64-string
-;;    (domain->wire :protocol-buffer domain-object 'octet-vector)))
+(defmethod domain->wire ((converter     (eql :protocol-buffer))
+			 (domain-object standard-object))
+  (values
+   (pb::pack1 domain-object)
+   (type-of domain-object)))

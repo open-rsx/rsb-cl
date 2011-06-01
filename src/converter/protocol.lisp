@@ -23,33 +23,68 @@
 ;;; Converter protocol
 ;;
 
-(defgeneric wire->domain (wire-schema wire-data domain-type)
+(defgeneric wire->domain (converter wire-data wire-schema)
   (:documentation
-   "Decode WIRE-DATA into a Lisp object of type DOMAIN-TYPE (or at
-least designated by DOMAIN-TYPE) using the interpretation described by
-WIRE-SCHEMA."))
+   "Decode WIRE-DATA into a Lisp object using an interpretation
+according to WIRE-SCHEMA and CONVERTER. Return the decoded Lisp
+object.
 
-;; TODO wire-schema may not be needed here
-(defgeneric domain->wire (wire-schema domain-object wire-type)
+Example:
+RSB.CONVERTER> (wire->domain :fundamental-string #(102 111 111) :string)
+=> \"foo\""))
+
+(defgeneric domain->wire (converter domain-object)
   (:documentation
    "Encode the Lisp object DOMAIN-OBJECT into the wire representation
-described by the pair (WIRE-TYPE WIRE-SCHEMA) and return the
-constructed wire representation object. The type of the returned
-object depends on WIRE-TYPE."))
+associated to CONVERTER. Return two values: the constructed wire
+representation and the wire-schema.
+
+Example:
+RSB.CONVERTER> (domain->wire :fundamental-string \"foo\")
+=> #(102 111 111) :string"))
 
 
-;;; Default behavior
+;;; Converter info protocol
 ;;
 
-;; (defmethod no-applicable-method ((function (fdefinition 'wire->domain))
-;;				 &rest args)
-;;   "DOC"
-;;   )
+(defgeneric wire->domain? (converter wire-data wire-schema)
+  (:documentation
+   "Return non-nil if CONVERTER can be used to convert WIRE-DATA into
+a Lisp object using the interpretation designated by WIRE-SCHEMA. If
+such a conversion is possible, return two values: CONVERTER and the
+type of the Lisp object that the conversion would produce.
 
-;; (defmethod wire->domain ((wire-schema t)
-;;			 (encoded     t)
-;;			 (domain-type symbol))
-;;   (wire->domain wire-schema encoded (find-class domain-type)))
+Example:
+RSB.CONVERTER> (wire->domain? :fundamental-string #(102 111 111) :string)
+=> :fundamental-string 'string"))
+
+(defgeneric domain->wire? (converter domain-object)
+  (:documentation
+   "Return non-nil if CONVERTER can be used to convert DOMAIN-OBJECT
+to its wire-type. If such a conversion is possible, return three
+values: CONVERTER, the wire-type and the wire-schema the conversion
+would produce.
+
+Example:
+RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
+=> :fundamental-string 'rsb:octet-vector :string"))
+
+
+;;; Default behavior for the converter info protocol.
+;;
+
+(defmethod no-applicable-method ((function (eql (fdefinition 'wire->domain?)))
+				 &rest args)
+  "If there is no method on `wire->domain?' for a given combination of
+converter, wire-data and wire-schema, the converter is cannot handle
+the data."
+  nil)
+
+(defmethod no-applicable-method ((function (eql (fdefinition 'domain->wire?)))
+				 &rest args)
+  "If there is no method on `domain->wire?' for a given pair of
+converter and data, the converter cannot handle the data."
+  nil)
 
 
 ;;; Converter implementations

@@ -23,65 +23,49 @@
 ;;; Wire -> domain conversions
 ;;
 
-(defmethod wire->domain ((wire-schema (eql :xml))
-			 (encoded     stp:document)
-			 (domain-type (eql 'stp:document)))
-  "No conversion is required if ENCODED already is a `stp:document'."
-  encoded)
+(defmethod wire->domain ((converter   (eql :xml-dom))
+			 (wire-data   stp:document)
+			 (wire-schema t))
+  (let ((root (stp:document-element wire-data)))
+    (cxml-location:xml-> root wire-schema)))
 
-;; TODO domain could also be an instance; cxml-location allows this
-(defmethod wire->domain ((wire-schema (eql :xml))
-			 (encoded     string)
-			 (domain-type symbol))
-  (let* ((document (cxml:parse encoded (stp:make-builder)))
-	 (root     (stp:document-element document)))
-    (cxml-location:xml-> root domain-type)))
+(defmethod wire->domain ((converter   (eql :xml-string))
+			 (wire-data   string)
+			 (wire-schema t))
+  (cxml:parse wire-data (stp:make-builder)))
 
-(defmethod wire->domain ((wire-schema (eql :xml))
-			 (encoded     simple-array)
-			 (domain-type symbol))
-  (check-type encoded octet-vector "an octet-vector")
+(defmethod wire->domain ((converter   (eql :xml-bytes))
+			 (wire-data   simple-array)
+			 (wire-schema t))
+  (check-type wire-data octet-vector "an octet-vector")
 
-  (let* ((document (cxml:parse-octets encoded (stp:make-builder)))
-	 (root     (stp:document-element document)))
-    (cxml-location:xml-> root domain-type)))
+  (cxml:parse-octets wire-data (stp:make-builder)))
 
 
 ;;; Domain -> wire conversions
 ;;
 
-(defmethod domain->wire ((wire-schema   (eql :xml))
-			 (domain-object stp:document)
-			 (wire-type     (eql 'stp:document)))
-  "No conversion is required if DOMAIN-OBJECT already is a
-`stp:document'"
-  domain-object)
-
-(defmethod domain->wire ((wire-schema   (eql :xml))
-			 (domain-object t)
-			 (wire-type     (eql 'stp:document)))
+(defmethod domain->wire ((converter     (eql :xml-dom))
+			 (domain-object t))
   (let* ((root     (stp:make-element "object")) ;; TODO this is somehow arbitrary
 	 (document (stp:make-document root)))
-    (cxml-location:->xml domain-object root :any) ;(type-of domain-object))
-    document))
+    (cxml-location:->xml domain-object root :any)
+    (values document domain-object)))
 
-(defmethod domain->wire ((wire-schema   (eql :xml))
-			 (domain-object t)
-			 (wire-type     (eql 'string)))
-  (stp:serialize
-   (domain->wire wire-schema domain-object 'stp:document)
-   (cxml:make-string-sink)))
+(defmethod domain->wire ((converter     (eql :xml-string))
+			 (domain-object stp:document))
+  (values
+   (stp:serialize domain-object (cxml:make-string-sink))
+   :TODO))
+
+(defmethod domain->wire ((converter     (eql :xml-bytes))
+			 (domain-object t))
+  (values
+   (stp:serialize domain-object (cxml:make-octet-vector-sink))
+   :TODO))
 
 ;; TODO control ?xml declaration
 ;; (cxml:make-string-sink :omit-xml-declaration-p t)
 ;; TODO control indent
 ;; For indent
 ;; (apply #'cxml:make-string-sink (when indent? '(:indentation 2)))
-
-(defmethod domain->wire ((wire-schema   (eql :xml))
-			 (domain-object t)
-			 (wire-type     (eql 'octet-vector)))
-  (stp:serialize
-   (domain->wire wire-schema domain-object 'stp:document)
-   (cxml:make-octet-vector-sink)))
-

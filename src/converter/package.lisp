@@ -23,6 +23,10 @@
   (:nicknames :rsb.conv)
   (:use
    :cl
+   :alexandria
+   :bind
+   :iterate
+
    :rsb)
 
   ;; Conditions
@@ -40,6 +44,9 @@
 
   ;; Converter protocol
   (:export
+   :domain->wire?
+   :wire->domain?
+
    :domain->wire
    :wire->domain)
 

@@ -151,9 +151,7 @@ into one notification."
 	  (sb-ext:octets-to-string data)))) ;; TODO make a "fundamental" converter for this?
 
       ((eq mechanism :protocol-buffer)
-       (rsb.converter:wire->domain
-	:protocol-buffer data (pb::proto-type-name->lisp-type-symbol
-				  designator)))
+       (rsb.converter:wire->domain :protocol-buffer data designator))
       (t
        (error "Unsupported wire-type/-schema (~S,~S)" mechanism designator)))))
 
@@ -162,8 +160,7 @@ into one notification."
   (typecase data
     (octet-vector data)
     (string       (sb-ext:string-to-octets data))
-    (t            (rsb.converter:domain->wire
-		   :protocol-buffer data 'octet-vector))))
+    (t            (rsb.converter:domain->wire :protocol-buffer data))))
 
 
 ;;; Utility functions
