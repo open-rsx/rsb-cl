@@ -49,8 +49,10 @@
    (let ((spread-port (asdf:component-property
 		       (asdf:find-system :cl-rsb-test) :spread-port)))
      (setf *default-configuration*
-	   `(((:transport :spread :host) . "localhost")
-	     ((:transport :spread :port) . ,spread-port)))))
+	   (append
+	    `(((:transport :spread :host) . "localhost")
+	      ((:transport :spread :port) . ,spread-port))
+	    (options-from-default-sources)))))
   (:function
    (check-print (thing)
      (ensure
