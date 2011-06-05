@@ -22,7 +22,8 @@
 (defmethod find-transport-class ((spec (eql :spread-out)))
   (find-class 'out-connector))
 
-(defclass out-connector (connector) ;; is an "event-sink"; there is no class or interface for this
+(defclass out-connector (connector
+			 conversion-mixin)
   ((max-fragment-size :initarg  :max-fragment-size
 		      :type     positive-fixnum
 		      :reader   connector-max-fragment-size
@@ -43,11 +44,11 @@ below the maximum message size allowed by spread."))
   (:documentation
    "A connector for sending data over spread."))
 
-(defmethod rsb.ep:handle ((connector out-connector) (event event))
+(defmethod handle ((connector out-connector) (event event))
   (bind ((max-fragment-size (connector-max-fragment-size connector))
 	 (group-names       (scope->groups (event-scope event)))
 	 (notifications     (event->notifications
-			     :fundamental-string event max-fragment-size))) ;; TODO only if group is populated?
+			     connector event max-fragment-size))) ;; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (iter (for notification in notifications)
