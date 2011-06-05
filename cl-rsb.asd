@@ -150,9 +150,13 @@
 			      (:file       "protocol"
 			       :depends-on ("package"))
 
+			      (:file       "sequence"
+			       :depends-on ("package" "conditions"
+					    "protocol"))
 			      (:file       "fundamental"
 			       :depends-on ("package" "conditions"
 					    "protocol"))
+
 			      (:file       "reader"
 			       :depends-on ("package" "conditions"
 					    "protocol"))))
