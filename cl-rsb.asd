@@ -159,12 +159,15 @@
 
 		(:module     "transport"
 		 :pathname   "src/transport"
-		 :depends-on ("src")
+		 :depends-on ("src" "converter") ;; for conversion-mixin
 		 :components ((:file       "package")
 			      (:file       "protocol"
 			       :depends-on ("package"))
 			      (:file       "connector"
-			       :depends-on ("package" "protocol"))))
+			       :depends-on ("package" "protocol"))
+
+			      (:file       "conversion-mixin"
+			       :depends-on ("package"))))
 
 
 		(:module     "transport-inprocess"

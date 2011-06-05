@@ -24,10 +24,12 @@
   (:use
    :cl
    :alexandria
+   :bind
    :iterate
 
    :rsb
-   :rsb.event-processing)
+   :rsb.event-processing
+   :rsb.converter)
 
   ;; Connector protocol
   (:export
@@ -56,6 +58,11 @@
   ;; `connector' class
   (:export
    :connector)
+
+  ;; `conversion-mixin' class
+  (:export
+   :conversion-mixin
+   :connector-converter)
 
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp

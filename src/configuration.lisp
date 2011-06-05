@@ -87,7 +87,9 @@
       (when stream (options-from-stream stream)))
     (with-input-from-file (stream "~/.config/rsb.conf"
 				  :if-does-not-exist nil)
-      (when stream (options-from-stream stream))))))
+      (when stream (options-from-stream stream)))
+    '(((:transport :spread :converter)
+       . (:fundamental-string :fundamental-bytes))))))
 
 
 ;;;

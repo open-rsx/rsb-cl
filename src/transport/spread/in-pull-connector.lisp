@@ -24,13 +24,13 @@
 
 (defclass in-pull-connector (connector
 			     broadcast-processor
-			     assembly-mixin)
+			     assembly-mixin
+			     conversion-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
    "DOC"))
-;; TODO store one/many converter(s) here and dispatch fully deserialized events?
 
 ;; TODO allow connector to continue after failed decoding or dispatching
 ;; for example, there could be an :around method on handle-message with the appropriate restarts
@@ -47,12 +47,8 @@
 		 (event        (when notification
 				 (notification->event
 				  (connector-assembly-pool connector)
-				  :fundamental-string
+				  (connector-converter connector)
 				  notification))))
-
-	    ;; TODO temp
-	    (when event
-	      (log1 :info "~A: event [~S -> ~S] ~A." connector sender destination event))
 
 	    ;; Due to fragmentation of large events into multiple
 	    ;; notifications or non-blocking receive mode, we may not

@@ -41,7 +41,8 @@ that arrived through connector."))
 
 (defclass in-push-connector (connector
 			     broadcast-processor
-			     assembly-mixin)
+			     assembly-mixin
+			     conversion-mixin)
   ((terminate? :initarg  :terminate?
 	       :type     boolean
 	       :initform nil
@@ -51,7 +52,6 @@ that arrived through connector."))
   (:direction :in-push)
   (:documentation
    "DOC"))
-;; TODO store one/many converter(s) here and dispatch fully deserialized events?
 
 (defmethod initialize-instance :after ((instance in-push-connector)
                                        &key)
@@ -71,16 +71,15 @@ that arrived through connector."))
 			   (payload     simple-array)
 			   (sender      string)
 			   (destination list))
+  "Try to converter NOTIFICATION into one or zero events. Accordingly,
+return either an `event' instance or nil."
   (let* ((notification (pb:unpack payload 'rsb.protocol::notification))
 	 (event        (notification->event
 			(connector-assembly-pool connector)
-			:fundamental-string
+			(connector-converter connector)
 			notification)))
-
     ;; Due to fragmentation of large events into multiple
     ;; notifications, we may not obtain an `event' instance from the
     ;; notification.
     (when event
-      (log1 :info "~A: event [~S -> ~S] ~A." connector sender destination event)
-
       (handle connector event))))
