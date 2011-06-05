@@ -228,6 +228,13 @@
 			      (:file       "scope-filter"
 			       :depends-on ("package"))))
 
+		(:module     "converter"
+		 :pathname   "test/converter"
+		 :depends-on ("test")
+		 :components ((:file       "package")
+			      (:file       "fundamental"
+			       :depends-on ("package"))))
+
 		(:module     "transport"
 		 :pathname   "test/transport"
 		 :depends-on ("test")
