@@ -78,12 +78,14 @@ RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
   "If there is no method on `wire->domain?' for a given combination of
 converter, wire-data and wire-schema, the converter is cannot handle
 the data."
+  (declare (ignore args))
   nil)
 
 (defmethod no-applicable-method ((function (eql (fdefinition 'domain->wire?)))
 				 &rest args)
   "If there is no method on `domain->wire?' for a given pair of
 converter and data, the converter cannot handle the data."
+  (declare (ignore args))
   nil)
 
 
