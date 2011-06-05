@@ -45,7 +45,10 @@
 		 (notification (when payload
 				 (pb:unpack payload 'rsb.protocol::notification)))
 		 (event        (when notification
-				 (notification->event notification connector))))
+				 (notification->event
+				  (connector-assembly-pool connector)
+				  :fundamental-string
+				  notification))))
 
 	    ;; TODO temp
 	    (when event

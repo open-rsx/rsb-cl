@@ -22,6 +22,7 @@
 (defclass assembly-mixin ()
   ((assembly-pool :initarg  :assembly-pool
 		  :type     assembly-pool
+		  :reader   connector-assembly-pool
 		  :documentation
 		  ""))
   (:metaclass connector-class)
@@ -48,11 +49,3 @@ originate from fragmented events) into events."))
 	      (make-instance 'pruning-assembly-pool
 			     :age-limit age-limit)
 	      (make-instance 'assembly-pool)))))
-
-(defmethod notification->event ((notification t)
-				(connector    assembly-mixin))
-  "Try to converter NOTIFICATION into one or zero events. Accordingly,
-return either an `event' instance or nil."
-  (bind (((:slots-r/o assembly-pool) connector))
-    (notification->event notification assembly-pool))) ;; TODO decoding usually depends on the domain
-                                                       ;; type requested by the listener

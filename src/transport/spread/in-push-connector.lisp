@@ -72,8 +72,11 @@ that arrived through connector."))
 			   (sender      string)
 			   (destination list))
   (let* ((notification (pb:unpack payload 'rsb.protocol::notification))
-	 (event        (notification->event notification connector))) ;; TODO decoding usually depends on the domain
-                                                                      ;; type requested by the listener
+	 (event        (notification->event
+			(connector-assembly-pool connector)
+			:fundamental-string
+			notification)))
+
     ;; Due to fragmentation of large events into multiple
     ;; notifications, we may not obtain an `event' instance from the
     ;; notification.

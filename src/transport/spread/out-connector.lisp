@@ -47,7 +47,7 @@ below the maximum message size allowed by spread."))
   (bind ((max-fragment-size (connector-max-fragment-size connector))
 	 (group-names       (scope->groups (event-scope event)))
 	 (notifications     (event->notifications
-			     event max-fragment-size))) ;; TODO only if group is populated?
+			     :fundamental-string event max-fragment-size))) ;; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (iter (for notification in notifications)

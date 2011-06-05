@@ -141,6 +141,22 @@
 			       :depends-on ("listener" "reader"
 					    "informer"))))
 
+		(:module     "converter"
+		 :pathname   "src/converter"
+		 :depends-on ("src")
+		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package"))
+
+			      (:file       "fundamental"
+			       :depends-on ("package" "conditions"
+					    "protocol"))
+			      (:file       "reader"
+			       :depends-on ("package" "conditions"
+					    "protocol"))))
+
 		(:module     "transport"
 		 :pathname   "src/transport"
 		 :depends-on ("src")
@@ -164,17 +180,7 @@
 			      (:file       "out-connector"
 			       :depends-on ("package" "connector"))))
 
-		(:module     "converter"
-		 :pathname   "src/converter"
-		 :depends-on ("src")
-		 :components ((:file       "package")
-			      (:file       "conditions"
-			       :depends-on ("package"))
-			      (:file       "protocol"
-			       :depends-on ("package"))
-			      (:file       "reader"
-			       :depends-on ("package" "conditions"
-					    "protocol")))))
+		)
   :in-order-to ((test-op (test-op :cl-rsb-test))))
 
 (defsystem :cl-rsb-test

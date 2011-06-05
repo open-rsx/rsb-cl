@@ -23,14 +23,16 @@
 ;;; Notification -> Event
 ;;
 
-(defmethod notification->event ((notification t) (pool assembly-pool))
+(defun notification->event (pool converter notification)
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
   (if (<= (rsb.protocol::notification-num-data-parts notification) 1)
+
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
-      (one-notification->event notification)
+      (one-notification->event converter notification)
+
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
       ;; notification. `merge-fragment' returns nil until all
@@ -38,10 +40,11 @@ been fragmented into multiple notifications."
       (let ((assembly (merge-fragment pool notification)))
 	(when assembly
 	  (one-notification->event
+	   converter
 	   (aref (assembly-fragments assembly) 0)
 	   (assembly-concatenated-data assembly))))))
 
-(defun one-notification->event (notification &optional data)
+(defun one-notification->event (converter notification &optional data)
   "DOC"
   (bind (((:accessors-r/o
 	   (id          rsb.protocol::notification-id)
@@ -60,12 +63,12 @@ been fragmented into multiple notifications."
 		 :id                (uuid:byte-array-to-uuid id)
 		 :scope             (make-scope (sb-ext:octets-to-string
 						 scope :external-format :ascii))
-		 :type              t ;(pb::proto-type-name->lisp-type-symbol
-					;wire-schema)
-		 :data              (wire-data->event-data
-				     (or data payload)
-				     (sb-ext:octets-to-string
-				      wire-schema :external-format :ascii))
+		 :type              t
+		 :data              (rsb.converter:wire->domain
+				     converter (or data payload)
+				     (make-keyword
+				      (sb-ext:octets-to-string
+				       wire-schema :external-format :ascii))) ;; TODO
 		 :create-timestamp? nil))
 
     ;; Sender and timestamps TODO should these really be optional?
@@ -106,7 +109,7 @@ been fragmented into multiple notifications."
 ;;; Event -> Notification
 ;;
 
-(defun event->notifications (event max-fragment-size)
+(defun event->notifications (converter event max-fragment-size)
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
 into one notification."
@@ -115,52 +118,29 @@ into one notification."
 	   (data       event-data)
 	   (meta-data  event-meta-data)
 	   (timestamps event-timestamps)) event)
-	 (data1 (event-data->wire-data data)))
-    (if (> (length data1) max-fragment-size)
+	 ((:values wire-data wire-schema)
+	  (rsb.converter:domain->wire converter data)))
+    (if (> (length wire-data) max-fragment-size)
+
 	;; Split DATA1 into multiple fragment and make a notification
 	;; for each fragment.
-	(bind ((fragments     (fragment-data data1 max-fragment-size))
+	(bind ((fragments     (fragment-data wire-data max-fragment-size))
 	       (num-fragments (length fragments)))
 	  (iter (for fragment in    fragments)
 		(for i        :from 0)
 		(collect
 		    (make-notification id scope origin
-				       "string" fragment
+				       wire-schema fragment
 				       :meta-data      meta-data
 				       :timestamps     timestamps
 				       :data-part      i
 				       :num-data-parts num-fragments))))
+
 	;; DATA1 fits into a single notification.
-	(list
-	 (make-notification id scope origin
-			    "string" data1
-			    :meta-data meta-data
-			    :timestamps timestamps)))))
-
-
-;;; Data Conversion
-;;
-
-(defun wire-data->event-data (data wire-schema)
-  "DOC"
-  (bind (((:values mechanism designator) (decode-wire-schema wire-schema)))
-    (cond
-      ((eq mechanism :fundamental)
-       (cond
-	 ((string= designator "string")
-	  (sb-ext:octets-to-string data)))) ;; TODO make a "fundamental" converter for this?
-
-      ((eq mechanism :protocol-buffer)
-       (rsb.converter:wire->domain :protocol-buffer data designator))
-      (t
-       (error "Unsupported wire-type/-schema (~S,~S)" mechanism designator)))))
-
-(defun event-data->wire-data (data)
-  "DOC"
-  (typecase data
-    (octet-vector data)
-    (string       (sb-ext:string-to-octets data))
-    (t            (rsb.converter:domain->wire :protocol-buffer data))))
+	(list (make-notification id scope origin
+				 wire-schema wire-data
+				 :meta-data  meta-data
+				 :timestamps timestamps)))))
 
 
 ;;; Utility functions
@@ -190,7 +170,7 @@ notification are chosen."
 					 (scope-string scope)
 					 :external-format :ascii)
 			:wire-schema    (sb-ext:string-to-octets
-					 wire-schema
+					 (string wire-schema)
 					 :external-format :ascii)
 			:num-data-parts num-data-parts
 			:data-part      data-part
@@ -237,20 +217,3 @@ integer which counts the number of microseconds since UNIX epoch."
 	  (floor unix-microseconds 1000000)))
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))
-
-;; TODO would not belong in spread transport, if we really did this
-(defun decode-wire-schema (wire-schema)
-  "DOC"
-  (let ((colon (position #\: wire-schema)))
-    (if colon
-	(values
-	 (make-keyword (string-upcase (subseq wire-schema 0 colon))) ;; TODO make a function?
-	 (subseq wire-schema (1+ colon)))
-	(values
-	 :fundamental
-	 wire-schema))))
-
-;; A funny piece of meta-data
-;; :key   "descriptor"
-;; :value (base64:usb8-array-to-base64-string
-;;	(pb::pack1 (pb::descriptor data))))
