@@ -40,7 +40,7 @@
 	  ;; convert into an event and return the event in case of
 	  ;; success. In blocking mode, wait for the next
 	  ;; notification.
-	  (bind (((:values payload sender destination)
+	  (bind (((:values payload _ _)
 		  (receive-message connection :block? block?))
 		 (notification (when payload
 				 (pb:unpack payload 'rsb.protocol::notification)))
