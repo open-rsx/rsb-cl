@@ -67,8 +67,9 @@ been fragmented into multiple notifications."
 		 :data              (rsb.converter:wire->domain
 				     converter (or data payload)
 				     (make-keyword
-				      (sb-ext:octets-to-string
-				       wire-schema :external-format :ascii))) ;; TODO
+				      (string-upcase
+				       (sb-ext:octets-to-string
+					wire-schema :external-format :ascii)))) ;; TODO
 		 :create-timestamp? nil))
 
     ;; Sender and timestamps TODO should these really be optional?
@@ -170,7 +171,7 @@ notification are chosen."
 					 (scope-string scope)
 					 :external-format :ascii)
 			:wire-schema    (sb-ext:string-to-octets
-					 (string wire-schema)
+					 (string-downcase (string wire-schema))
 					 :external-format :ascii)
 			:num-data-parts num-data-parts
 			:data-part      data-part
