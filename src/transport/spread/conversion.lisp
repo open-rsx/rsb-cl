@@ -1,4 +1,4 @@
-;;; conversion.lisp ---
+;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -45,7 +45,10 @@ been fragmented into multiple notifications."
 	   (assembly-concatenated-data assembly))))))
 
 (defun one-notification->event (converter notification &optional data)
-  "DOC"
+  "Convert NOTIFICATION to an `event' instance using CONVERTER for the
+payload. Return the decoded event. The optional parameter DATA can be
+used to supply encoded data that should be used instead of the data
+contained in NOTIFICATION."
   (bind (((:accessors-r/o
 	   (id          rsb.protocol::notification-id)
 	   (scope       rsb.protocol::notification-scope)
@@ -53,10 +56,6 @@ been fragmented into multiple notifications."
 	   (payload     rsb.protocol::notification-data)
 	   (meta-data   rsb.protocol::notification-meta-data)) notification)
 	 (event))
-
-    (when (emptyp id)
-      (error "Notification ~S does not have an id." ;; TODO condition; maybe communication-error or protocol-error?
-	     notification))
 
     (setf event (make-instance
 		 'rsb:event
