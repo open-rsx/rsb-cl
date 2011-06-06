@@ -29,8 +29,9 @@
   ((id        :accessor event-id)
    (scope     :accessor event-scope)
    (origin    :initarg  :origin
-	      :type     uuid:uuid
+	      :type     (or null uuid:uuid)
 	      :accessor event-origin
+	      :initform nil
 	      :documentation
 	      "Stores the id of the participant by which the event was
 published onto the bus.")
