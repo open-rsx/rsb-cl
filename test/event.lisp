@@ -48,11 +48,36 @@
 
 (addtest (event-root
           :documentation
+	  "Test comparing events for equality using `event='.")
+  comparison
+
+  (ensure-cases (scope1 data1 scope2 data2 =1? =2? =3? =4?)
+      '(("/"    "bar" "/" "bar" t   nil t   nil)
+	("/foo" "bar" "/" "bar" nil nil nil nil)
+	("/"    "baz" "/" "bar" nil nil nil nil))
+
+    (let ((left  (make-event scope1 data1))
+	  (right (progn
+		   (sleep .01)
+		   (make-event scope2 data2))))
+      (iter (for (ids? origins? timestamps? expected)
+		 in `((nil nil nil ,=1?)
+		      (t   nil nil ,=2?)
+		      (nil t   nil ,=3?)
+		      (nil nil t   ,=4?)))
+       (ensure-same
+	(event= left right
+		:compare-ids?       ids?
+		:compare-origins?   origins?
+		:compare-timestamps timestamps?
+		:data-test          #'equal)
+	expected)))))
+
+(addtest (event-root
+          :documentation
 	  "Test `print-object' method on `event' class.")
   print
 
-  (let ((event (make-event "/foo/bar" "baz")))
-    (ensure
-     (not (emptyp
-	   (with-output-to-string (stream)
-	     (format stream "~A" event)))))))
+  (check-print (make-event "/foo/bar" "baz"))
+  (check-print (make-event "/foo/bar" (make-string 1000
+						   :initial-element #\a))))

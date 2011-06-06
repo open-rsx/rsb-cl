@@ -101,7 +101,11 @@ case, the payloads of LEFT and RIGHT are not considered."
        ;; Scope and origin
        (scope= (event-scope left) (event-scope right))
        (or (not compare-origins?)
-	   (uuid= (event-origin left) (event-origin right)))
+	   (let ((left-origin  (event-origin left))
+		 (right-origin (event-origin right)))
+	     (or (and (not left-origin) (not right-origin))
+		 (and left-origin right-origin
+		      (uuid= left-origin right-origin)))))
        ;; Timestamps
        (or (null compare-timestamps)
 	   (iter (for key in (if (eq compare-timestamps t)
