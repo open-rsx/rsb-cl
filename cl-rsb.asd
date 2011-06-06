@@ -29,6 +29,19 @@
 (when (find-system :asdf-system-connections)
   (load-system :asdf-system-connections))
 
+(when (find-symbol "DOC-OP" :asdf)
+  (pushnew :asdf-doc-op *features*))
+
+#-asdf-doc-op
+(progn
+  (defclass doc-op (operation)
+    ()
+    (:documentation
+     "Poor man's doc-op until ASDF gets one."))
+
+  (defmethod perform ((op doc-op) (component t))
+    nil))
+
 
 ;;; System definitions
 ;;
@@ -185,10 +198,26 @@
 			      (:file       "in-pull-connector"
 			       :depends-on ("package" "connector"))
 			      (:file       "out-connector"
-			       :depends-on ("package" "connector"))))
-
-		)
+			       :depends-on ("package" "connector")))))
+  :in-order-to ((doc-op  (doc-op  :cl-rsb-doc)))
   :in-order-to ((test-op (test-op :cl-rsb-test))))
+
+(defsystem :cl-rsb-doc
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     "0.1.0"
+  :license     "GPL3; see COPYING file for details."
+  :description "Documentation generation for the cl-rsb system."
+  :depends-on  (:cxml-stp
+		:cl-protobuf
+		:cl-spread
+		:cl-rsb)
+  :components  ((:module     "doc"
+		 :components ((:file       "package"))))
+  :in-order-to ((doc-op (load-op :cl-rsb-doc))))
+
+(defmethod perform ((op doc-op) (system (eql (find-system :cl-rsb-doc))))
+  (eval (read-from-string "(RSB.DOC:DOCUMENT-SYSTEM)")))
 
 (defsystem :cl-rsb-test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
@@ -196,8 +225,7 @@
   :version     "0.3.0"
   :license     "GPL3; see COPYING file for details."
   :description "Unit Tests for the cl-rsb system."
-  :depends-on  (:iterate
-		:lift
+  :depends-on  (:lift
 		:cxml-stp
 		:cl-protobuf
 		:cl-spread
