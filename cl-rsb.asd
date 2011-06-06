@@ -287,6 +287,23 @@
             (LIFT:RUN-TESTS :CONFIG :GENERIC))")))
 
 
+;;; System connection with clon
+;;
+
+(defsystem-connection :cl-rsb-and-com.dvlsoft.clon
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     "0.1.0"
+  :license     "GPL3; see COPYING file for details."
+  :description "Generate clon option descriptions based on
+introspection of RSB configuration options."
+  :requires    (cl-rsb
+		com.dvlsoft.clon)
+  :depends-on  ()
+  :components  ((:file       "clon"
+		 :pathname   "src/clon")))
+
+
 ;;; System connection with cl-spread
 ;;
 
