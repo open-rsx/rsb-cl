@@ -51,27 +51,36 @@
 	  "Test comparing events for equality using `event='.")
   comparison
 
-  (ensure-cases (scope1 data1 scope2 data2 =1? =2? =3? =4?)
-      '(("/"    "bar" "/" "bar" t   nil t   nil)
-	("/foo" "bar" "/" "bar" nil nil nil nil)
-	("/"    "baz" "/" "bar" nil nil nil nil))
+  (ensure-cases (scope1 data1 origin1?
+		 scope2 data2 origin2?
+		 =1? =2? =3? =4?)
+      '(("/"    "bar" nil "/" "bar" nil t   nil t   nil)
+	("/"    "bar" t   "/" "bar" nil t   nil nil nil)
+	("/"    "bar" t   "/" "bar" t   t   nil t   nil)
+	("/foo" "bar" nil "/" "bar" nil nil nil nil nil)
+	("/"    "baz" nil "/" "bar" nil nil nil nil nil))
 
-    (let ((left  (make-event scope1 data1))
-	  (right (progn
-		   (sleep .01)
-		   (make-event scope2 data2))))
+    (let* ((origin (uuid:make-v1-uuid))
+	   (left   (make-event scope1 data1))
+	   (right  (progn
+		     (sleep .01)
+		     (make-event scope2 data2))))
+      (when origin1?
+	(setf (event-origin left) origin))
+      (when origin2?
+	(setf (event-origin right) origin))
       (iter (for (ids? origins? timestamps? expected)
 		 in `((nil nil nil ,=1?)
 		      (t   nil nil ,=2?)
 		      (nil t   nil ,=3?)
 		      (nil nil t   ,=4?)))
-       (ensure-same
-	(event= left right
-		:compare-ids?       ids?
-		:compare-origins?   origins?
-		:compare-timestamps timestamps?
-		:data-test          #'equal)
-	expected)))))
+	    (ensure-same
+	     (event= left right
+		     :compare-ids?       ids?
+		     :compare-origins?   origins?
+		     :compare-timestamps timestamps?
+		     :data-test          #'equal)
+	     expected)))))
 
 (addtest (event-root
           :documentation
