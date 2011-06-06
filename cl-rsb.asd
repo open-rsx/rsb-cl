@@ -199,8 +199,8 @@
 			       :depends-on ("package" "connector"))
 			      (:file       "out-connector"
 			       :depends-on ("package" "connector")))))
-  :in-order-to ((doc-op  (doc-op  :cl-rsb-doc)))
-  :in-order-to ((test-op (test-op :cl-rsb-test))))
+  :in-order-to ((doc-op  (doc-op  :cl-rsb-doc))
+		(test-op (test-op :cl-rsb-test))))
 
 (defsystem :cl-rsb-doc
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
