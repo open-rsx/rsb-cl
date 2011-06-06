@@ -26,6 +26,33 @@
 
 (addtest (scope-root
           :documentation
+	  "Test constructing `scope' instances.")
+  construction
+
+  (ensure-same
+   (scope-components (make-scope (make-scope "/foo")))
+   '("foo")
+   :test #'equalp)
+  (ensure-same
+   (scope-components (make-scope '("bar" "foo")))
+   '("bar" "foo")
+   :test #'equalp)
+  (ensure-same
+   (scope-components (make-scope (make-scope #("baz" "bar"))))
+   '("baz" "bar")
+   :test #'equalp)
+
+  (ensure-condition 'type-error
+    (make-scope "/!@#/+1"))
+  (ensure-condition 'type-error
+    (make-scope #("!@#" "foo")))
+  (ensure-condition 'type-error
+    (make-scope #("/")))
+  (ensure-condition 'type-error
+    (make-scope '(""))))
+
+(addtest (scope-root
+          :documentation
 	  "Test constructing `scope' instances from strings.")
   from-string
 
