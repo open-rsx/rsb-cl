@@ -22,15 +22,13 @@
 (defmethod find-transport-class ((spec (eql :spread-in-pull)))
   (find-class 'in-pull-connector))
 
-(defclass in-pull-connector (connector
-			     broadcast-processor
-			     assembly-mixin
-			     conversion-mixin)
+(defclass in-pull-connector (in-connector)
   ()
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
-   "DOC"))
+   "This class implements pull-style event receiving for the Spread
+transport."))
 
 ;; TODO allow connector to continue after failed decoding or dispatching
 ;; for example, there could be an :around method on handle-message with the appropriate restarts

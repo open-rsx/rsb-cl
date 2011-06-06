@@ -294,10 +294,12 @@ on the spread group communication system."
 			      (:file       "connector"
 			       :depends-on ("package" "util"
 					    "connection" "conversion"))
+			      (:file       "in-connector"
+			       :depends-on ("package" "connector"))
 			      (:file       "in-push-connector"
-			       :depends-on ("package" "connector"))
+			       :depends-on ("package" "in-connector"))
 			      (:file       "in-pull-connector"
-			       :depends-on ("package" "connector"))
+			       :depends-on ("package" "in-connector"))
 			      (:file       "out-connector"
 			       :depends-on ("package" "connector"))))))
 

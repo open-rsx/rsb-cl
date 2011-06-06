@@ -39,10 +39,7 @@ that arrived through connector."))
 (defmethod find-transport-class ((spec (eql :spread-in-push)))
   (find-class 'in-push-connector))
 
-(defclass in-push-connector (connector
-			     broadcast-processor
-			     assembly-mixin
-			     conversion-mixin)
+(defclass in-push-connector (in-connector)
   ((terminate? :initarg  :terminate?
 	       :type     boolean
 	       :initform nil
@@ -51,7 +48,8 @@ that arrived through connector."))
   (:metaclass connector-class)
   (:direction :in-push)
   (:documentation
-   "DOC"))
+   "This connector class implements push-style event receiving for the
+Spread transport."))
 
 (defmethod initialize-instance :after ((instance in-push-connector)
                                        &key)
