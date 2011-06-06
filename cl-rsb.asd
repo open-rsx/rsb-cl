@@ -208,6 +208,8 @@
   :components  ((:module     "test"
 		 :components ((:file       "package")
 
+			      (:file       "scope"
+			       :depends-on ("package"))
 			      (:file       "event"
 			       :depends-on ("package"))
 			      (:file       "uris"
