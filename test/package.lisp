@@ -36,7 +36,8 @@
 
   ;; Test utilities
   (:export
-   :check-print)
+   :check-print
+   :check-event)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
@@ -60,6 +61,14 @@
        (conjoin #'stringp (complement #'emptyp))
        (with-output-to-string (stream)
 	 (print-object thing stream))))))
+  (:function
+   (check-event (event scope data)
+     (ensure-same
+      (event-scope event) (make-scope scope)
+      :test #'scope=)
+     (ensure-same
+      (event-data event) data
+      :test #'equalp)))
   (:documentation
    "Root unit test suite of the cl-rsb system."))
 
@@ -74,14 +83,6 @@
       :test #'scope=)
      (ensure
       (typep (participant-id participant) 'uuid:uuid))))
-  (:function
-   (check-event (event scope data)
-     (ensure-same
-      (event-scope event) (make-scope scope)
-      :test #'scope=)
-     (ensure-same
-      (event-data event) data
-      :test #'equalp)))
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))

@@ -25,6 +25,28 @@
    "Unit tests for the `event' class."))
 
 (addtest (event-root
+	  :documentation
+	  "Test construction of `event' instances.")
+  construction
+
+  ;; Cannot have an `event' without scope
+  (ensure-condition 'missing-required-initarg
+    (make-instance 'event))
+
+  (let ((event (make-instance 'event
+			      :scope (make-scope "/")
+			      :data  "foo")))
+    (check-event event "/" "foo")
+    (ensure (typep (timestamp event :create) 'local-time:timestamp)))
+
+  (let ((event (make-instance 'event
+			      :scope             (make-scope "/baz")
+			      :data              "bar"
+			      :create-timestamp? nil)))
+    (check-event event "/baz/" "bar")
+    (ensure-null (timestamp event :create))))
+
+(addtest (event-root
           :documentation
 	  "Test `print-object' method on `event' class.")
   print
