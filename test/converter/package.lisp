@@ -44,7 +44,7 @@
   (:documentation
    "Root unit test suite for the converter module."))
 
-(defmacro define-basic-converter-test-cases (converter cases)
+(defmacro define-basic-converter-test-cases ((converter) cases)
   "Emit basic test cases for CONVERTER."
   (let ((suite-name (symbolicate converter "-ROOT")))
     `(progn

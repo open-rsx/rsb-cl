@@ -25,6 +25,19 @@
    "Root unit test suite for fundamental converters."))
 
 
+;;; Converter fundamental-null
+;;
+
+(deftestsuite fundamental-null-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-null' converter."))
+
+(define-basic-converter-test-cases (:fundamental-null)
+    `((nil                     t nil)
+      (,(octetify #(65 65 65)) t ,(octetify #(65 65 65)))))
+
+
 ;;; Converter fundamental-string
 ;;
 
@@ -33,6 +46,19 @@
   (:documentation
    "Unit tests for the `fundamental-string' converter."))
 
-(define-basic-converter-test-cases :fundamental-string
+(define-basic-converter-test-cases (:fundamental-string)
     `((,(octetify #())         :string "")
       (,(octetify #(65 65 65)) :string "AAA")))
+
+
+;;; Converter fundamental-bytes
+;;
+
+(deftestsuite fundamental-bytes-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-bytes' converter."))
+
+(define-basic-converter-test-cases (:fundamental-bytes)
+    `((,(octetify #())         :bytes ,(octetify #()))
+      (,(octetify #(65 65 65)) :bytes ,(octetify #(65 65 65)))))
