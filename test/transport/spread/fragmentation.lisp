@@ -51,7 +51,7 @@ instance.")
       `((,(uuid:make-v1-uuid)
 	 5
 	 ("foo" "bar" "baz" "a" "b")
-	 (0 1 2 3 4)
+	 (0     1     2     3   4)
 	 "foobarbazab")
 	(,(uuid:make-v1-uuid)
 	 2
@@ -126,7 +126,7 @@ instance.")
 (addtest (fragmentation-root
           :documentation
 	  "Ensure that warnings are signaled when invalid fragments
-  are added to an assembly.")
+are added to an assembly.")
   warnings
 
   (let ((uuid (uuid:make-v1-uuid))
