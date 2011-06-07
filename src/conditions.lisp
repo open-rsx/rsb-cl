@@ -20,6 +20,42 @@
 (in-package :rsb)
 
 
+;;; Generic condition utilities
+;;
+
+(define-condition chainable-condition (condition)
+  ((cause :initarg  :cause
+	  :type     (or null condition)
+	  :reader   chainable-condition-cause
+	  :initform nil
+	  :documentation
+	  "The condition which originally caused the condition to be
+signaled."))
+  (:documentation
+   "Instances of this class can contain another condition instance
+which originally caused the condition to be signaled. This structure
+can continue recursively thus forming a chain of causing
+conditions."))
+
+(defun maybe-print-cause (condition stream)
+  "Print the condition that caused CONDITION to be signaled onto
+STREAM."
+  (when (chainable-condition-cause condition)
+    (format stream "~&Caused by:~&~A"
+	    (chainable-condition-cause condition))))
+
+(defun maybe-print-explanation (condition stream)
+  "Format the message contained in the `simple-condition' CONDITION on
+STREAM."
+  (if (simple-condition-format-control condition)
+      (progn
+	(format stream ":~&")
+	(apply #'format stream
+	       (simple-condition-format-control   condition)
+	       (simple-condition-format-arguments condition)))
+      (write-char #\. stream)))
+
+
 ;;; Program error conditions
 ;;
 

@@ -37,6 +37,12 @@
 
   ;; Conditions
   (:export
+   :chainable-condition
+   :chainable-condition-cause
+   :maybe-print-cause
+
+   :maybe-print-explanation
+
    :missing-required-argument
 
    :missing-required-initarg
