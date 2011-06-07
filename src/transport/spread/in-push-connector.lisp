@@ -71,13 +71,9 @@ Spread transport."))
 			   (destination list))
   "Try to converter NOTIFICATION into one or zero events. Accordingly,
 return either an `event' instance or nil."
-  (let* ((notification (pb:unpack payload 'rsb.protocol::notification))
-	 (event        (notification->event
-			(connector-assembly-pool connector)
-			(connector-converter connector)
-			notification)))
+  (let ((event (message->event payload connector)))
     ;; Due to fragmentation of large events into multiple
-    ;; notifications, we may not obtain an `event' instance from the
-    ;; notification.
+    ;; notifications and error handling policies, we may not obtain an
+    ;; `event' instance from the notification.
     (when event
       (handle connector event))))

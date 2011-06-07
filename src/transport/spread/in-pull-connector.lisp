@@ -40,17 +40,13 @@ transport."))
 	  ;; notification.
 	  (bind (((:values payload _ _)
 		  (receive-message connection :block? block?))
-		 (notification (when payload
-				 (pb:unpack payload 'rsb.protocol::notification)))
-		 (event        (when notification
-				 (notification->event
-				  (connector-assembly-pool connector)
-				  (connector-converter connector)
-				  notification))))
+		 (event (when payload
+			  (message->event payload connector))))
 
 	    ;; Due to fragmentation of large events into multiple
-	    ;; notifications or non-blocking receive mode, we may not
-	    ;; obtain an `event' instance from the notification.
+	    ;; notifications, non-blocking receive mode and error
+	    ;; handling policies, we may not obtain an `event'
+	    ;; instance from the notification.
 	    (when event
 	      (dispatch connector event))
 	    (when (or event (not block?))

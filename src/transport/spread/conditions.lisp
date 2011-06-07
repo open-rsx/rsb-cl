@@ -19,6 +19,50 @@
 
 (in-package :rsb.transport.spread)
 
+
+;;; Generic encoding and decoding errors
+;;
+
+(define-condition decoding-error (rsb-error
+				  simple-condition
+				  chainable-condition)
+  ((encoded :initarg  :encoded
+	    :type     octet-vector
+	    :reader   decoding-error-encoded
+	    :documentation
+	    "The encoded data, for which the decoding failed."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The encoded data ~S could not be decoded~@:>"
+	     (decoding-error-encoded condition))
+     (maybe-print-explanation condition stream)
+     (maybe-print-cause condition stream)))
+  (:documentation
+   "This error is signaled when decoding one or more notifications
+into an `event' instance fails."))
+
+(define-condition encoding-error (rsb-error
+				  simple-condition
+				  chainable-condition)
+  ((event :initarg  :event
+	  :reader   encoding-error-event
+	  :documentation
+	  "The event for which the encoding failed."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The event ~A could not be encoded into an octet-vector~@:>"
+	     (encoding-error-event condition))
+     (maybe-print-explanation condition stream)
+     (maybe-print-cause condition stream)))
+  (:documentation
+   "This error is signaled when encoding an `event' instance into one
+or more notifications fails."))
+
+
+;;; Fragmentation-related conditions
+;;
+
+
 (define-condition assembly-problem (condition)
   ((assembly :initarg  :assembly
 	     :reader   assembly-problem-assembly

@@ -20,6 +20,16 @@
 (in-package :rsb.transport.spread)
 
 
+;;; In-direction connector protocol
+;;
+
+(defgeneric message->event (data connector)
+  (:documentation
+   "Try to convert DATA into one or zero events. Accordingly,
+return either an `event' instance or nil. Signal a `decoding-error' if
+something goes wrong."))
+
+
 ;;; `in-connector' class
 ;;
 
@@ -48,3 +58,43 @@ connector classes for Spread."))
 	 (group-name (scope->group scope)))
     (unref-group connection group-name))
   :implemented)
+
+(defmethod message->event ((data      simple-array)
+			   (connector in-connector))
+  (bind (((:accessors-r/o (pool      connector-assembly-pool)
+			  (converter connector-converter)) connector)
+	 notification)
+
+    ;; Try to unpack DATA into a `notification' instance. Signal
+    ;; `decoding-error' if that fails.
+    (handler-case
+	(setf notification (pb:unpack data 'rsb.protocol::notification))
+      (error (condition)
+	(error 'decoding-error
+	       :encoded          data
+	       :format-control   "~@<The data could not be unpacked as a ~
+protocol buffer of kind ~S.~:@>"
+	       :format-arguments '(rsb.protocol::notification)
+	       :cause            condition)))
+
+    ;; If DATA could be unpacked into a `notification' instance, try
+    ;; to convert it, and especially its payload, into an `event'
+    ;; instance and an event payload. There are three possible
+    ;; outcomes:
+    ;; 1. The notification (maybe in conjunction with previously
+    ;;    received notifications) forms a complete event
+    ;;    a) The payload conversion succeeds
+    ;;       In this case, an `event' instance is returned
+    ;;    b) The payload conversion fails
+    ;;       In this case, an error is signaled
+    ;; 2. The notification does not form a complete event
+    ;;    In this case, nil is returned.
+    (handler-case
+	(notification->event pool converter notification)
+      (error (condition)
+	(error 'decoding-error
+	       :encoded          data
+	       :format-control   "~@<After unpacking, the notification ~
+~S could not be converter into an event.~:@>"
+	       :format-arguments `(,notification)
+	       :cause            condition)))))

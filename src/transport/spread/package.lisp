@@ -35,6 +35,13 @@
 
   ;; Conditions
   (:export
+
+   :decoding-error
+   :decoding-error-encoded
+
+   :encoding-error
+   :encoding-error-event
+
    :assembly-problem
    :assembly-problem-assembly
 
