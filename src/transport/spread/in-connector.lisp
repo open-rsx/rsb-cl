@@ -35,8 +35,7 @@ something goes wrong."))
 
 (defclass in-connector (connector
 			broadcast-processor
-			assembly-mixin
-			conversion-mixin)
+			assembly-mixin)
   ()
   (:metaclass connector-class)
   (:documentation

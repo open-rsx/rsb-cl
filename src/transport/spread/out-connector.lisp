@@ -22,8 +22,7 @@
 (defmethod find-transport-class ((spec (eql :spread-out)))
   (find-class 'out-connector))
 
-(defclass out-connector (connector
-			 conversion-mixin)
+(defclass out-connector (connector)
   ((max-fragment-size :initarg  :max-fragment-size
 		      :type     positive-fixnum
 		      :reader   connector-max-fragment-size

@@ -19,7 +19,8 @@
 
 (in-package :rsb.transport.spread)
 
-(defclass connector (rsb.transport:connector)
+(defclass connector (rsb.transport:connector
+		     conversion-mixin)
   ((connection :type     connection
 	       :reader   connector-connection
 	       :documentation
