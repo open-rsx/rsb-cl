@@ -75,7 +75,9 @@ contained in NOTIFICATION."
     (when meta-data
       ;; "User infos"
       (iter (for user-info in-vector (rsb.protocol::meta-data-user-infos meta-data))
-	    (setf (meta-data event (rsb.protocol::user-info-key user-info))
+	    (setf (meta-data event (make-keyword
+				    (string-upcase
+				     (rsb.protocol::user-info-key user-info))))
 		  (rsb.protocol::user-info-value user-info)))
 
       ;; Set origin, if present
@@ -97,9 +99,11 @@ contained in NOTIFICATION."
       (setf (timestamp event :receive) (local-time:now))
 
       (iter (for user-time in-vector (rsb.protocol::meta-data-user-times meta-data))
-	    (setf (timestamp event (make-keyword (sb-ext:octets-to-string
-						  (rsb.protocol::user-time-key user-time)
-						  :external-format :ascii)))
+	    (setf (timestamp event (make-keyword
+				    (string-upcase
+				     (sb-ext:octets-to-string
+				      (rsb.protocol::user-time-key user-time)
+				      :external-format :ascii))))
 		  (unix-microseconds->timestamp
 		   (rsb.protocol::user-time-timestamp user-time)))))
 
@@ -181,7 +185,7 @@ notification are chosen."
     (iter (for (key value) on meta-data :by #'cddr)
 	  (vector-push-extend
 	   (make-instance 'rsb.protocol::user-info
-			  :key   (string key)
+			  :key   (string-downcase (string key))
 			  :value (prin1-to-string value))
 	   (rsb.protocol::meta-data-user-infos meta-data1)))
 
@@ -191,7 +195,7 @@ notification are chosen."
 				   ;; :receive or :deliver at this
 				   ;; point
 	    (let ((name (sb-ext:string-to-octets
-			 (string key)
+			 (string-downcase (string key))
 			 :external-format :ascii))
 		  (flat (timestamp->unix-microseconds value)))
 	      (vector-push-extend
