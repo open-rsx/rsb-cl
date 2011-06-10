@@ -189,10 +189,11 @@
 
   ;; Macros
   (:export
-   ;:with-channel
-   :with-listener
    :with-reader
-   :with-enabled-listener :with-disabled-listener
+
+   :with-listener
+   :with-handler
+
    :with-informer)
 
   ;; Utility functions and macros

@@ -49,25 +49,21 @@ ends normally or because of a control transfer."
        ;(destroy ,var)
        )))
 
-(defmacro with-enabled-listener (listener &body body)
+(defmacro with-handler (listener
+			((event-var) &body handler-body)
+			&body body)
   "Execute BODY with LISTENER enabled."
-  (once-only (listener)
-    `(let ((previous-state (listener-enabled? ,listener)))
-       (unwind-protect
-	    (progn
-	      (setf (listener-enabled? ,listener) t)
-	      ,@body)
-	 (setf (listener-enabled? ,listener) previous-state)))))
+  (check-type event-var symbol "a symbol")
 
-(defmacro with-disabled-listener (listener &body body)
-  "Execute BODY with LISTENER disabled."
   (once-only (listener)
-    `(let ((previous-state (listener-enabled? ,listener)))
-       (unwind-protect
-	    (progn
-	      (setf (listener-enabled? ,listener) nil)
-	      ,@body)
-	 (setf (listener-enabled? ,listener) previous-state)))))
+    (with-unique-names (handler-var)
+     `(let ((,handler-var (function (lambda (,event-var)
+			    ,@handler-body))))
+	(unwind-protect
+	     (progn
+	       (push ,handler-var (rsb.ep:handlers ,listener))
+	       ,@body)
+	  (removef (rsb.ep:handlers ,listener) ,handler-var))))))
 
 (defmacro with-informer ((var scope type
 			  &rest args
