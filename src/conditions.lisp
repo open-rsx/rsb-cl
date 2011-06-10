@@ -175,15 +175,55 @@ designated by ~A and type ~S.~@:>"
    "This error is signaled when an attempt to create an informer
 fails."))
 
+
+;;; Event sending conditions
+;;
+
+(define-condition invalid-event (rsb-error)
+  ((event    :initarg  :event
+	     :reader   invalid-event-event
+	     :documentation
+	     "The invalid event."))
+  (:default-initargs
+   :event (missing-required-initarg 'invalid-event :event))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The event ~S was used in a context for which ~
+it is not valid.~:@>"
+	     (invalid-event-event    condition)
+	     ;; (invalid-event-informer condition)
+	     )))
+  (:documentation
+   "Instances of this error condition and its subclasses are signaled
+when an attempt is made to use an event in a context for which it is
+not valid."))
+
 (define-condition invalid-event-type (type-error
-				      rsb-error)
+				      invalid-event)
   ()
   (:report
    (lambda (condition stream)
-     (format stream "~@<The type of event ~S (~S) is not ~S.~@:>"
-	     (type-error-datum condition)
+     (format stream "~@<The type ~S of event ~S is not ~S.~@:>"
 	     (event-type (type-error-datum condition))
+	     (type-error-datum condition)
 	     (type-error-expected-type condition))))
   (:documentation
-   "This error is signaled when an event is used in a place where its
-type is unsuitable."))
+   "This error is signaled when an event is used in a context in which
+its type is unsuitable."))
+
+(define-condition invalid-event-scope (invalid-event)
+  ((expected-scope :initarg    :expected-scope
+		   :type       scope
+		   :reader     invalid-event-expected-scope
+		   :documentation
+		   "The scope the invalid event was expected to have."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The scope ~A of the event ~S is not identical ~
+to the expected scope ~A.~:@>"
+	     (event-scope (invalid-event-event condition))
+	     (invalid-event-event condition)
+	     (invalid-event-expected-scope condition))))
+  (:documentation
+   "This error is signaled when an event is used in a context in which
+its scope is not valid."))

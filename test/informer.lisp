@@ -24,6 +24,8 @@
   (:documentation
    "Unit tests for the `informer' class and `make-informer' function."))
 
+(define-basic-participant-test-cases :informer)
+
 (addtest (informer-root
           :documentation
 	  "Test creating a informer.")
@@ -44,6 +46,27 @@
 	  (send informer "<foo/>")
 	  (send informer "<bar/>"))))
 
+(addtest (informer-root
+          :documentation
+	  "Test the type check employed by the `send' method.")
+  check-type
+
+  (with-informer (informer "/informer/check-type" 'string)
+    (ensure-condition 'type-error
+      (send informer 5))
+    (ensure-condition 'invalid-event-type
+      (send informer (make-event/typed
+		      "/informer/check-type" 5 'integer)))))
+
+(addtest (informer-root
+          :documentation
+	  "Test the scope check employed by the `send' method.")
+  check-scope
+
+  (with-informer (informer "/informer/check-scope" 'string)
+    (ensure-condition 'invalid-event-type
+      (send informer (make-event "/informer/wrong-scope" "foo")))))
+
 ;; (addtest (informer-root
 ;;           :documentation
 ;;	  "Test binding *informer-stream*.")
@@ -56,5 +79,3 @@
 ;;	 (send pub "<bla/>")))
 ;;      "<bla/>"
 ;;      :test #'string=)))
-
-(define-basic-participant-test-cases :informer)

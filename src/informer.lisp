@@ -24,7 +24,7 @@
 		    rsb.ep:broadcast-processor)
   ((type :initarg  :type
 	 :type     (or symbol list)
-	 :accessor informer-type ;; TODO really writable?
+	 :reader   informer-type
 	 :initform t
 	 :documentation
 	 ""))
@@ -35,11 +35,21 @@ broadcast RSB events for subscribers to receive. Each publisher has an
 associated SCOPE and type and known about its subscribers."))
 
 (defmethod send :before ((informer informer) (data event))
-  (let ((type (informer-type informer)))
+  (bind (((:accessors-r/o (scope participant-scope)
+			  (type  informer-type)) informer))
+    ;; Ensure that the type of DATA is a subtype of INFORMER's type
     (unless (subtypep (event-type data) type)
       (error 'invalid-event-type
+	     :event         data
 	     :datum         data
-	     :expected-type type))))
+	     :expected-type type))
+
+    ;; Ensure that the destination scope of DATA is identical to
+    ;; INFORMER's scope.
+    (unless (scope= (event-scope data) (participant-scope informer))
+      (error 'invalid-event-scope
+	     :event          data
+	     :expected-scope scope))))
 
 (defmethod send ((informer informer) (event event))
   ;; Set EVENT's origin to our id.

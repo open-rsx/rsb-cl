@@ -60,7 +60,15 @@
    :reader-creation-failed
 
    :informer-creation-failed
-   :informer-creation-failed-type)
+   :informer-creation-failed-type
+
+   :invalid-event
+   :invalid-event-event
+
+   :invalid-event-type
+
+   :invalid-event-scope
+   :invalid-event-expected-scope)
 
   ;; Restarts
   (:export
