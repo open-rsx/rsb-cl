@@ -82,6 +82,10 @@
    :*subscriber-stream*
    :*publisher-stream*)
 
+  ;; Hooks
+  (:export
+   :error-hook)
+
   ;; Meta data protocol
   (:export
    :meta-data

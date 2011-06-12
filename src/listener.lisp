@@ -21,12 +21,17 @@
 
 (defclass listener (participant
 		    rsb.ep:client)
-  ((enabled? :type     boolean
-	     :accessor listener-enabled?
-	     :initform t
-	     :documentation
-	     "This Boolean value controls whether the listener
-participates in the filtering and dispatching of events."))
+  ((enabled?   :type     boolean
+	       :accessor listener-enabled?
+	       :initform t
+	       :documentation
+	       "This Boolean value controls whether the listener
+participates in the filtering and dispatching of events.")
+   (error-hook :initarg  :error-hook
+	       :type     list
+	       :initform nil
+	       :documentation
+	       ""))
   (:documentation
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
