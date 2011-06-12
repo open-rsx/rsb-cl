@@ -89,7 +89,7 @@
 				  :if-does-not-exist nil)
       (when stream (options-from-stream stream)))
     '(((:transport :spread :converter)
-       . (:fundamental-string :fundamental-bytes))))))
+       . (:fundamental-utf-8-string :fundamental-bytes))))))
 
 
 ;;;
