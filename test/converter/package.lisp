@@ -57,9 +57,10 @@
 
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
-	   (let ((result (wire->domain? ,converter wire-data wire-schema)))
-	     (ensure-same result ,converter
-			  :ignore-multiple-values? t))))
+	   (unless (eq wire-data :error)
+	     (let ((result (wire->domain? ,converter wire-data wire-schema)))
+	       (ensure-same result ,converter
+			    :ignore-multiple-values? t)))))
 
        (addtest (,suite-name
 		 :documentation
@@ -69,8 +70,45 @@
 
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
-	   (let ((result (domain->wire? ,converter domain-object)))
-	     (ensure-same result (values ,converter wire-schema)))))
+	   (unless (eq domain-object :error)
+	     (let ((result (domain->wire? ,converter domain-object)))
+	       (ensure-same result (values ,converter wire-schema))))))
+
+       (addtest (,suite-name
+		 :documentation
+		 ,(format nil "Test methods on `wire->domain' for the `~(~A~)' converter."
+			  converter))
+	 wire->domain-smoke
+
+	 (ensure-cases (wire-data wire-schema domain-object)
+	     ,cases
+	   (cond
+	     ((eq wire-data :error))
+	     ((eq domain-object :error)
+	      (ensure-condition 'error
+		(wire->domain ,converter wire-data wire-schema)))
+	     (t
+	      (let ((result (wire->domain ,converter wire-data wire-schema)))
+		(ensure-same result domain-object
+			     :test #'equalp))))))
+
+       (addtest (,suite-name
+		 :documentation
+		 ,(format nil "Test methods on `domain->wire' for the `~(~A~)' converter."
+			  converter))
+	 domain->wire-smoke
+
+	 (ensure-cases (wire-data wire-schema domain-object)
+	     ,cases
+	   (cond
+	     ((eq domain-object :error))
+	     ((eq wire-data :error)
+	      (ensure-condition 'error
+		(domain->wire ,converter domain-object)))
+	     (t
+	      (let ((result (domain->wire ,converter domain-object)))
+		(ensure-same result (values wire-data wire-schema)
+			     :test #'equalp))))))
 
        (addtest (,suite-name
 		 :documentation
@@ -80,8 +118,9 @@
 
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
-	   (bind (((:values encoded encoded-wire-schema)
-		   (domain->wire ,converter domain-object))
-		  (decoded (wire->domain ,converter encoded encoded-wire-schema)))
-	     (ensure-same domain-object decoded
-			  :test #'equal)))))))
+	   (unless (or (eq wire-data :error) (eq domain-object :error))
+	     (bind (((:values encoded encoded-wire-schema)
+		     (domain->wire ,converter domain-object))
+		    (decoded (wire->domain ,converter encoded encoded-wire-schema)))
+	       (ensure-same domain-object decoded
+			    :test #'equal))))))))
