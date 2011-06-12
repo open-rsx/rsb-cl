@@ -21,17 +21,12 @@
 
 (defclass listener (participant
 		    rsb.ep:client)
-  ((enabled?   :type     boolean
-	       :accessor listener-enabled?
-	       :initform t
-	       :documentation
-	       "This Boolean value controls whether the listener
-participates in the filtering and dispatching of events.")
-   (error-hook :initarg  :error-hook
+  ((error-hook :initarg  :error-hook
 	       :type     list
 	       :initform nil
 	       :documentation
-	       ""))
+	       "Stores a list of functions to call in case of
+errors."))
   (:documentation
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
@@ -46,32 +41,18 @@ a mechanism for dispatching matching events to these handlers."))
 	new-value))
 
 (defmethod rsb.ep:handlers ((listener listener))
-  "DOC"
   ;(rsb.ep:handlers (rsb.ep:client-configurator listener))
   nil)
 
 (defmethod (setf rsb.ep:handlers) ((new-value list) (listener listener))
-  "DOC"
   (rsb.ep:notify (rsb.ep:client-configurator listener) (first new-value) :handler-added))
   ;(setf (rsb.ep:handlers (rsb.ep:client-configurator listener))
 ;	new-value))
 
-(defmethod (setf listener-enabled?) :around ((new-value    t)
-					     (listener listener))
-  "DOC"
-  (let ((old-value (listener-enabled? listener)))
-    (prog1
-	(call-next-method)
-      (unless (eq old-value new-value)
-	(rsb.ep:notify (rsb.ep:client-configurator listener)
-		       listener
-		       (if new-value :enabled :disabled))))))
-
 (defmethod print-object ((object listener) stream)
   (print-unreadable-id-object (object stream :type t)
-    (format stream "~A |(~D)~:[ [disabled]~;~]"
-	    (scope-string (participant-scope object))
-	    0 (listener-enabled? object))))
+    (format stream "~A |(~D)"
+	    (scope-string (participant-scope object)) 0)))
 
 
 ;;; `listener' creation
