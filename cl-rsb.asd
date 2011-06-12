@@ -59,7 +59,7 @@
 
 		#+sbcl sb-concurrency
 		:bordeaux-threads ;; or eager-future
-
+		:trivial-garbage
 		:closer-mop
 		:cl-hooks
 		:cl-dynamic-classes
@@ -299,7 +299,6 @@
 introspection of RSB configuration options."
   :requires    (cl-rsb
 		com.dvlsoft.clon)
-  :depends-on  ()
   :components  ((:file       "clon"
 		 :pathname   "src/clon")))
 
@@ -319,8 +318,7 @@ on the spread group communication system."
 		cl-spread
 		cl-protobuf
 		cl-rsb-and-cl-protobuf)
-  :depends-on  (:trivial-garbage
-		:ironclad)
+  :depends-on  (:ironclad)
   :components  ((:module     "spread"
 		 :pathname   "src/transport/spread"
 		 :components ((:file       "package")
