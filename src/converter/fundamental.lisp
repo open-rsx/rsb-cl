@@ -80,7 +80,8 @@
 
 (defmethod domain->wire? ((converter     (eql :fundamental-bytes))
 			  (domain-object simple-array))
-  (values converter 'octet-vector :bytes))
+  (when (typep domain-object '(vector (unsigned-byte 8)))
+    (values converter 'octet-vector :bytes)))
 
 (defmethod wire->domain ((converter   (eql :fundamental-bytes))
 			 (wire-data   simple-array)
@@ -91,6 +92,6 @@
 
 (defmethod domain->wire ((converter     (eql :fundamental-bytes))
 			 (domain-object simple-array))
-  (check-type domain-object octet-vector)
+  (check-type domain-object (vector (unsigned-byte 8)))
 
-  (values domain-object :bytes))
+  (values (coerce domain-object 'octet-vector) :bytes))
