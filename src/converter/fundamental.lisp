@@ -42,31 +42,58 @@
   (values domain-object t))
 
 
-;;; String converter
+;;; ASCII string converter
 ;;
 
-(defmethod wire->domain? ((converter   (eql :fundamental-string))
+(defmethod wire->domain? ((converter   (eql :fundamental-ascii-string))
 			  (wire-data   simple-array)
-			  (wire-schema (eql :string)))
+			  (wire-schema (eql :ascii-string)))
   (when (typep wire-data '(vector (unsigned-byte 8)))
     (values converter 'string)))
 
-(defmethod domain->wire? ((converter     (eql :fundamental-string))
+(defmethod domain->wire? ((converter     (eql :fundamental-ascii-string))
 			  (domain-object string))
-  (values converter 'octet-vector :string))
+  (values converter 'octet-vector :ascii-string))
 
-(defmethod wire->domain ((converter   (eql :fundamental-string))
+(defmethod wire->domain ((converter   (eql :fundamental-ascii-string))
 			 (wire-data   simple-array)
-			 (wire-schema (eql :string)))
+			 (wire-schema (eql :ascii-string)))
+  (check-type wire-data (vector (unsigned-byte 8)))
+
+  (sb-ext:octets-to-string wire-data :external-format :ascii))
+
+(defmethod domain->wire ((converter     (eql :fundamental-ascii-string))
+			 (domain-object string))
+  (values
+   (sb-ext:string-to-octets domain-object :external-format :ascii)
+   :ascii-string))
+
+
+;;; UTF-8 string converter
+;;
+
+(defmethod wire->domain? ((converter   (eql :fundamental-utf-8-string))
+			  (wire-data   simple-array)
+			  (wire-schema (eql :utf-8-string)))
+  (when (typep wire-data '(vector (unsigned-byte 8)))
+    (values converter 'string)))
+
+(defmethod domain->wire? ((converter     (eql :fundamental-utf-8-string))
+			  (domain-object string))
+  (values converter 'octet-vector :utf-8-string))
+
+(defmethod wire->domain ((converter   (eql :fundamental-utf-8-string))
+			 (wire-data   simple-array)
+			 (wire-schema (eql :utf-8-string)))
   (check-type wire-data (vector (unsigned-byte 8)))
 
   (sb-ext:octets-to-string wire-data :external-format :utf-8))
 
-(defmethod domain->wire ((converter     (eql :fundamental-string))
+(defmethod domain->wire ((converter     (eql :fundamental-utf-8-string))
 			 (domain-object string))
   (values
    (sb-ext:string-to-octets domain-object :external-format :utf-8)
-   :string))
+   :utf-8-string))
 
 
 ;;; Bytes converter

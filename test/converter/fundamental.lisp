@@ -35,20 +35,39 @@
 
 (define-basic-converter-test-cases (:fundamental-null)
     `((nil                     t nil)
+      (:foo                    t :foo)
+      ("bar"                   t "bar")
       (,(octetify #(65 65 65)) t ,(octetify #(65 65 65)))))
 
 
-;;; Converter fundamental-string
+;;; Converter fundamental-ascii-string
 ;;
 
-(deftestsuite fundamental-string-root (fundamental-root)
+(deftestsuite fundamental-ascii-string-root (fundamental-root)
   ()
   (:documentation
-   "Unit tests for the `fundamental-string' converter."))
+   "Unit tests for the `fundamental-ascii-string' converter."))
 
-(define-basic-converter-test-cases (:fundamental-string)
-    `((,(octetify #())         :string "")
-      (,(octetify #(65 65 65)) :string "AAA")))
+(define-basic-converter-test-cases (:fundamental-ascii-string)
+    `((,(octetify #())         :ascii-string "")
+      (,(octetify #(65 65 65)) :ascii-string "AAA")
+      (:error                  :ascii-string "Aλ")
+      (,(octetify #(65 129))   :ascii-string :error)))
+
+
+;;; Converter fundamental-utf-8--string
+;;
+
+(deftestsuite fundamental-utf-8-string-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-utf-8-string' converter."))
+
+(define-basic-converter-test-cases (:fundamental-utf-8-string)
+    `((,(octetify #())           :utf-8-string "")
+      (,(octetify #(65 65 65))   :utf-8-string "AAA")
+      (,(octetify #(65 206 187)) :utf-8-string "Aλ")
+      (,(octetify #(255))        :utf-8-string :error)))
 
 
 ;;; Converter fundamental-bytes
@@ -62,3 +81,7 @@
 (define-basic-converter-test-cases (:fundamental-bytes)
     `((,(octetify #())         :bytes ,(octetify #()))
       (,(octetify #(65 65 65)) :bytes ,(octetify #(65 65 65)))))
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
