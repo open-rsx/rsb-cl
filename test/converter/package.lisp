@@ -31,6 +31,9 @@
 
    :rsb.test)
 
+  (:export
+   :define-basic-converter-test-cases)
+
   (:documentation
    "This package contains unit tests for the converter module."))
 
