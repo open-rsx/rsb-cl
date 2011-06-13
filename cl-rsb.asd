@@ -209,8 +209,9 @@
 			       :depends-on ("package" "protocol"))
 
 			      (:file       "conversion-mixin"
+			       :depends-on ("package"))
+			      (:file       "message-receiver-mixin"
 			       :depends-on ("package"))))
-
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"

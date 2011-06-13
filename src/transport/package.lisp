@@ -64,11 +64,18 @@
    :conversion-mixin
    :connector-converter)
 
+  ;; Message receiver protocol and `message-receiver-mixin' class
+  (:export
+   :receive-message
+   :message->event
+
+   :message-receiver-mixin)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation. The central concept of the transport layer is a
 \"port\". Port instances handle incoming and outgoing events (see
-`handle'). The function `make-port' can be used to create port
+`handle'). The function `make-connector' can be used to create port
 instances for different kinds of transports. The efficiency of data
 handling can be increased by notifying ports of restrictions that can
 be applied to the otherwise broadcast-style event delivery."))
