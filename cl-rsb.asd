@@ -20,7 +20,11 @@
 (cl:defpackage :cl-rsb-system
   (:use
    :cl
-   :asdf))
+   :asdf)
+
+  (:export
+   :version
+   :version/string))
 
 (cl:in-package :cl-rsb-system)
 
@@ -43,13 +47,34 @@
     nil))
 
 
+;;; Version stuff
+;;
+
+(defconstant +version-major+ 0
+  "Major version number.")
+
+(defconstant +version-minor+ 3
+  "Major version number.")
+
+(defconstant +version-revision+ 0
+  "Major version number.")
+
+(defun version ()
+  "Return a version of the form (MAJOR MINOR REVISION) "
+  (list +version-major+ +version-minor+ +version-revision+))
+
+(defun version/string ()
+  "Return a version string of the form \"MAJOR.MINOR.REVISION\"."
+  (format nil "~{~A.~A.~A~}" (version)))
+
+
 ;;; System definitions
 ;;
 
 (defsystem :cl-rsb
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.3.0"
+  :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "A Common Lisp implementation of RSB."
   :depends-on  (:alexandria
