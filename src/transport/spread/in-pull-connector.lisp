@@ -30,8 +30,6 @@
    "This class implements pull-style event receiving for the Spread
 transport."))
 
-;; TODO allow connector to continue after failed decoding or dispatching
-;; for example, there could be an :around method on handle-message with the appropriate restarts
 (defmethod emit ((connector in-pull-connector) (block? t))
   (bind (((:accessors-r/o (connection connector-connection)) connector))
     (iter ;; Maybe block until a notification is received. Try to
@@ -39,9 +37,9 @@ transport."))
 	  ;; success. In blocking mode, wait for the next
 	  ;; notification.
 	  (bind (((:values payload _ _)
-		  (receive-message connection :block? block?))
+		  (receive-message connection block?))
 		 (event (when payload
-			  (message->event payload connector))))
+			  (message->event connector payload :undetermined))))
 
 	    ;; Due to fragmentation of large events into multiple
 	    ;; notifications, non-blocking receive mode and error

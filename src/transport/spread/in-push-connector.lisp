@@ -61,17 +61,15 @@ Spread transport."))
 	 ((:slots terminate?) connector))
     (iter (until terminate?)
 	  (multiple-value-call #'handle-message
-	    (values connector) (receive-message connection)))))
+	    (values connector) (receive-message connection t)))))
 
-;; TODO allow connector to continue after failed decoding or dispatching
-;; for example, there could be an :around method on handle-message with the appropriate restarts
 (defmethod handle-message ((connector   in-push-connector)
 			   (payload     simple-array)
 			   (sender      string)
 			   (destination list))
   "Try to converter NOTIFICATION into one or zero events. Accordingly,
 return either an `event' instance or nil."
-  (let ((event (message->event payload connector)))
+  (let ((event (message->event connector payload :undetermined)))
     ;; Due to fragmentation of large events into multiple
     ;; notifications and error handling policies, we may not obtain an
     ;; `event' instance from the notification.

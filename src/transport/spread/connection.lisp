@@ -38,14 +38,6 @@ GROUP in case of a 1 -> 0 transition."))
    "Send the PAYLOAD to DESTINATION via CONNECTION in a Spread
 message."))
 
-(defgeneric receive-message (connection
-			     &key
-			     block?)
-  (:documentation
-   "Receive a Spread message via CONNECTION. If BLOCK? is non-nil,
-block until a message is available. Otherwise return nil if no message
-is available."))
-
 
 ;;; `connection' class
 ;;
@@ -89,9 +81,7 @@ groups in which they are members."))
     (remhash group (slot-value connection 'groups))
     (spread:leave (slot-value connection 'connection) group)))
 
-(defmethod receive-message ((connection connection)
-			    &key
-			    (block? t))
+(defmethod receive-message ((connection connection) (block? t))
   (spread:receive (slot-value connection 'connection) :block? block?))
 
 (defmethod send-message ((connection  connection)

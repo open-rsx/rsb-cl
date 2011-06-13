@@ -20,16 +20,6 @@
 (in-package :rsb.transport.spread)
 
 
-;;; In-direction connector protocol
-;;
-
-(defgeneric message->event (data connector)
-  (:documentation
-   "Try to convert DATA into one or zero events. Accordingly,
-return either an `event' instance or nil. Signal a `decoding-error' if
-something goes wrong."))
-
-
 ;;; `in-connector' class
 ;;
 
@@ -58,26 +48,27 @@ connector classes for Spread."))
     (unref-group connection group-name))
   :implemented)
 
-(defmethod message->event ((data      simple-array)
-			   (connector in-connector))
+(defmethod message->event ((connector   in-connector)
+			   (message     simple-array)
+			   (wire-schema t))
   (bind (((:accessors-r/o (pool      connector-assembly-pool)
 			  (converter connector-converter)) connector)
 	 notification)
 
-    ;; Try to unpack DATA into a `notification' instance. Signal
+    ;; Try to unpack MESSAGE into a `notification' instance. Signal
     ;; `decoding-error' if that fails.
     (handler-case
-	(setf notification (pb:unpack data 'rsb.protocol::notification))
+	(setf notification (pb:unpack message 'rsb.protocol::notification))
       (error (condition)
 	(error 'decoding-error
-	       :encoded          data
+	       :encoded          message
 	       :format-control   "~@<The data could not be unpacked as a ~
 protocol buffer of kind ~S.~:@>"
 	       :format-arguments '(rsb.protocol::notification)
 	       :cause            condition)))
 
-    ;; If DATA could be unpacked into a `notification' instance, try
-    ;; to convert it, and especially its payload, into an `event'
+    ;; If message could be unpacked into a `notification' instance,
+    ;; try to convert it, and especially its payload, into an `event'
     ;; instance and an event payload. There are three possible
     ;; outcomes:
     ;; 1. The notification (maybe in conjunction with previously
@@ -92,7 +83,7 @@ protocol buffer of kind ~S.~:@>"
 	(notification->event pool converter notification)
       (error (condition)
 	(error 'decoding-error
-	       :encoded          data
+	       :encoded          message
 	       :format-control   "~@<After unpacking, the notification ~
 ~S could not be converter into an event.~:@>"
 	       :format-arguments `(,notification)
