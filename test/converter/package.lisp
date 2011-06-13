@@ -32,6 +32,9 @@
    :rsb.test)
 
   (:export
+   :converter-root
+   :octetify
+
    :define-basic-converter-test-cases)
 
   (:documentation
