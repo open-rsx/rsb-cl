@@ -184,7 +184,11 @@
    :options-from-default-sources
 
    :option-value
-   :section-options)
+   :section-options
+
+   :make-options
+   :make-options-for-connector-classes
+   :make-options-for-connector-class)
 
   ;; URI-related function
   (:export
