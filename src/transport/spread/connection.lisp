@@ -1,4 +1,4 @@
-;;; connection.lisp ---
+;;; connection.lisp --- Spread connections with membership management.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -60,9 +60,13 @@ instance.")
 	       :type     hash-table
 	       :initform (make-hash-table :test #'equal)
 	       :documentation
-	       ""))
+	       "A mapping of group names to reference counts. The
+connection instance is a member of every group that has a positive
+reference count."))
   (:documentation
-   "DOC"))
+   "Instances of this class represent connections to Spread
+communication system and maintain a list of the Spread multicast
+groups in which they are members."))
 
 (defmethod initialize-instance :after ((instance connection)
 				       &key
@@ -77,7 +81,7 @@ instance.")
 (defmethod unref-group :around ((connection connection) (group string))
   (if (gethash group (slot-value connection 'groups))
       (call-next-method)
-      (log1 :warn "~A: Was asked to unreference unknown group ~S." connection group))) ;; TODO use context for connection instance?
+      (log1 :warn "~A: Was asked to unreference unknown group ~S." connection group)))
 
 (defmethod unref-group ((connection connection) (group string))
   (when (zerop (decf (gethash group (slot-value connection 'groups) 0)))
@@ -93,7 +97,7 @@ instance.")
 (defmethod send-message ((connection  connection)
 			 (destination list)
 			 (payload     simple-array))
-  (check-type payload spread:octet-vector "an octet-vector") ;; TODO rsb:octet-vector?
+  (check-type payload octet-vector "an octet-vector")
 
   (spread:send-bytes
    (slot-value connection 'connection) destination payload))
