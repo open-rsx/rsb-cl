@@ -33,8 +33,9 @@
 	    "The encoded data, for which the decoding failed."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The encoded data ~S could not be decoded~@:>"
-	     (decoding-error-encoded condition))
+     (bind (((:accessors-r/o (encoded decoding-error-encoded)) condition))
+       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~} ~_could not be decoded~@:>"
+	       (coerce encoded 'list)))
      (maybe-print-explanation condition stream)
      (maybe-print-cause condition stream)))
   (:documentation
