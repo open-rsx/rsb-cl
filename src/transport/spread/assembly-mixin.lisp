@@ -30,10 +30,7 @@
    (:age-limit positive-real
     :default 10
     :description
-    "The amount of time after which incomplete assemblies are
-pruned. Supplying this option only makes sense in conjunction with an
-unreliable communication mode since incomplete assemblies are never
-pruned in reliable communication modes."))
+    "The amount of time after which incomplete assemblies are pruned. Supplying this option only makes sense in conjunction with an unreliable communication mode since incomplete assemblies are never pruned in reliable communication modes."))
   (:documentation
    "This mixin adds an assembly pool and a `notification->event'
 method which can be used to assemble incoming notifications (which may

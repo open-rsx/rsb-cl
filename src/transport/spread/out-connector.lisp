@@ -36,10 +36,7 @@ should use."))
    (:max-fragment-size positive-fixnum
     :default 100000
     :description
-    "The maximum payload size that may be send in a single
-notification. The value of this options has to be chosen such that the
-combined sizes of payload and envelope data of notifications remain
-below the maximum message size allowed by spread."))
+    "The maximum payload size that may be send in a single notification. The value of this options has to be chosen such that the combined sizes of payload and envelope data of notifications remain below the maximum message size allowed by spread."))
   (:documentation
    "A connector for sending data over spread."))
 
