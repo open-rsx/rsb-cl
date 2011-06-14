@@ -51,13 +51,13 @@
 ;;
 
 (defconstant +version-major+ 0
-  "Major version number.")
+  "Major component of version number.")
 
 (defconstant +version-minor+ 3
-  "Major version number.")
+  "Minor component of version number.")
 
 (defconstant +version-revision+ 0
-  "Major version number.")
+  "Revision component of version number.")
 
 (defun version ()
   "Return a version of the form (MAJOR MINOR REVISION) "
