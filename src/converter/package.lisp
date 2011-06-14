@@ -59,3 +59,15 @@
    "This package contains mechanisms for converting between domain
 object (which are Lisp object) and data representation in different
 kinds of wire formats."))
+
+(in-package :rsb.converter)
+
+
+;;; Logging
+;;
+
+(log5:defcategory rsb.converter)
+
+(defmacro log1 (category format &rest args)
+  `(log5:log-for (or :rsb.converter ,(intern (string category) :log5))
+		 ,format ,@args))
