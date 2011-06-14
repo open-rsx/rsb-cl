@@ -53,7 +53,7 @@
 (defconstant +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 3
+(defconstant +version-minor+ 4
   "Minor component of version number.")
 
 (defconstant +version-revision+ 0
