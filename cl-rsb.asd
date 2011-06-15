@@ -320,6 +320,7 @@
 ;;; System connection with clon
 ;;
 
+#+asdf-system-connections
 (defsystem-connection :cl-rsb-and-com.dvlsoft.clon
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
