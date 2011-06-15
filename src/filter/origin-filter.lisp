@@ -27,6 +27,7 @@
 	   :accessor filter-origin
 	   :documentation
 	   ""))
+  (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :origin (missing-required-initarg 'origin-filter :origin))
   (:documentation
