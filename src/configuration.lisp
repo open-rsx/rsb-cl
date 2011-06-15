@@ -136,7 +136,7 @@ not returned."
     ;; transports.
     (iter (for transport in transports)
 	  (bind ((options (section-options transport options)))
-	    (when (option-value :enabled t options)
+	    (when (string= (option-value '(:enabled) "0" options) "1") ;;; TODO(jmoringe):
 	      (collect (cons transport (options->plist options))))))))
 
 
