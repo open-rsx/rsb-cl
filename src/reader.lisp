@@ -20,7 +20,7 @@
 (in-package :rsb)
 
 (defclass reader (participant
-		  rsb.ep:client)
+		  receiving-client)
   ()
   (:documentation
    "Instances of this class provide a pull-based interface for
@@ -33,7 +33,7 @@ receiving events."))
 		    (rsb.ep:client-configurator reader))))
     (rsb.ep:emit processor block?)))
 
-;; TODO maybe restart should be installed in transport layer
+;; TODO maybe restart should be installed in transport layer. it is installed there, now.
 (defmethod receive :around ((reader reader)
 			    &key &allow-other-keys)
   (let (result)

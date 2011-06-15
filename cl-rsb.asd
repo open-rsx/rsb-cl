@@ -177,10 +177,13 @@
 			       :depends-on ("configuration"))
 
 			      (:file       "participant")
+			      (:file       "receiving-client")
 			      (:file       "listener"
-			       :depends-on ("participant"))
+			       :depends-on ("participant"
+					    "receiving-client"))
 			      (:file       "reader"
-			       :depends-on ("participant"))
+			       :depends-on ("participant"
+					    "receiving-client"))
 			      (:file       "informer"
 			       :depends-on ("participant"))
 

@@ -20,7 +20,7 @@
 (in-package :rsb)
 
 (defclass listener (participant
-		    rsb.ep:client)
+		    receiving-client)
   ((error-hook :initarg  :error-hook
 	       :type     list
 	       :initform nil
@@ -31,15 +31,6 @@ errors."))
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
 
-(defmethod receiver-filters ((listener listener))
-  (rsb.ep:configurator-filters (rsb.ep:client-configurator listener)))
-
-(defmethod (setf receiver-filters) ((new-value list)
-				    (listener  listener))
-  (setf (rsb.ep:configurator-filters
-	 (rsb.ep:client-configurator listener))
-	new-value))
-
 (defmethod rsb.ep:handlers ((listener listener))
   ;(rsb.ep:handlers (rsb.ep:client-configurator listener))
   nil)
@@ -48,11 +39,6 @@ a mechanism for dispatching matching events to these handlers."))
   (rsb.ep:notify (rsb.ep:client-configurator listener) (first new-value) :handler-added))
   ;(setf (rsb.ep:handlers (rsb.ep:client-configurator listener))
 ;	new-value))
-
-(defmethod print-object ((object listener) stream)
-  (print-unreadable-id-object (object stream :type t)
-    (format stream "~A |(~D)"
-	    (scope-string (participant-scope object)) 0)))
 
 
 ;;; `listener' creation
