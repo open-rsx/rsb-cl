@@ -139,12 +139,7 @@
 					    "filter-mixin"))
 			      (:file       "origin-filter"
 			       :depends-on ("package" "protocol"
-					    "filter-mixin"))
-			      (:file       "regex-filter"
-			       :depends-on ("package" "protocol"
-					    "filter-mixin"
-					    "payload-matching-mixin"
-					    "fallback-policy-mixin"))))
+					    "filter-mixin"))))
 
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"
@@ -464,3 +459,21 @@ RSB events to/from XML documents."
   :components  ((:module     "converter"
 		 :pathname   "src/converter"
 		 :components ((:file       "xml")))))
+
+
+;;; System connection with cl-ppcre
+;;
+
+#+asdf-system-connections
+(defsystem-connection :cl-rsb-and-cl-ppcre
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     "0.3.0"
+  :license     "GPL3; see COPYING file for details."
+  :description "This system connections a regular expression filter
+for events with text content."
+  :requires    (cl-rsb
+		cl-ppcre)
+  :components  ((:module     "filter"
+		 :pathname   "src/filter"
+		 :components ((:file       "regex-filter")))))
