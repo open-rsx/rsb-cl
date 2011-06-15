@@ -50,9 +50,13 @@ configurator is responsible for.")
 	  (make-instance
 	   (ensure-processor-class
 	    (ecase direction
-	      (:in-push '(filtering-processor-mixin
+	      (:in-push '(error-policy-mixin
+			  filtering-processor-mixin
+			  deliver-timestamp-mixin
 			  broadcast-processor))
-	      (:in-pull '(filtering-processor-mixin
+	      (:in-pull '(error-policy-mixin
+			  filtering-processor-mixin
+			  deliver-timestamp-mixin
 			  pull-processor))
 	      (:out     '(broadcast-processor))))))))
 

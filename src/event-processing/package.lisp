@@ -83,6 +83,10 @@
    :filtering-processor-mixin
    :processor-filters)
 
+  ;; `deliver-timestamp-mixin' class
+  (:export
+   :deliver-timestamp-mixin)
+
   ;; `client' class and protocol
   (:export
    :client

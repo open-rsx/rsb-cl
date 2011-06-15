@@ -148,6 +148,8 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "filtering-processor-mixin"
 			       :depends-on ("package" "protocol"))
+			      (:file       "deliver-timestamp-mixin"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "configurator"
 			       :depends-on ("package"
