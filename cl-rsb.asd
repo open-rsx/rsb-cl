@@ -126,6 +126,8 @@
 			      (:file       "composite-filter"
 			       :depends-on ("package" "protocol"
 					    "filter-mixin"))
+			      (:file       "fallback-policy-mixin"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "scope-filter"
 			       :depends-on ("package" "protocol"

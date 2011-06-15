@@ -55,6 +55,11 @@
   (:export
    :disjoin-filter)
 
+  ;; `fallback-policy-mixin' class
+  (:export
+   :fallback-policy-mixin
+   :filter-fallback-policy)
+
   ;; `scope-filter' class
   (:export
    :scope-filter
