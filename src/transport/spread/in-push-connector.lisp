@@ -23,10 +23,6 @@
 ;;; Protocol for in-direction, push-based connector
 ;;
 
-(defgeneric receive-messages (connector)
-  (:documentation
-   "Receive messages and process them using `handle-message'."))
-
 (defgeneric handle-message (connector payload sender destination)
   (:documentation
    "Process the message from SENDER to DESTINATION consisting PAYLOAD
@@ -39,27 +35,19 @@ that arrived through connector."))
 (defmethod find-transport-class ((spec (eql :spread-in-push)))
   (find-class 'in-push-connector))
 
-(defclass in-push-connector (in-connector)
-  ((terminate? :initarg  :terminate?
-	       :type     boolean
-	       :initform nil
-	       :documentation
-	       ""))
+(defclass in-push-connector (in-connector
+			     threaded-receiver-mixin)
+  ()
   (:metaclass connector-class)
   (:direction :in-push)
   (:documentation
    "This connector class implements push-style event receiving for the
 Spread transport."))
 
-(defmethod initialize-instance :after ((instance in-push-connector)
-                                       &key)
-  (bt:make-thread (curry #'receive-messages instance)
-		  :name "spread receiver thread"))
-
+;; TODO handle communication errors
 (defmethod receive-messages ((connector in-push-connector))
-  (bind (((:accessors-r/o (connection connector-connection)) connector)
-	 ((:slots terminate?) connector))
-    (iter (until terminate?)
+  (bind (((:accessors-r/o (connection connector-connection)) connector))
+    (iter (while t)
 	  (multiple-value-call #'handle-message
 	    (values connector) (receive-message connection t)))))
 
