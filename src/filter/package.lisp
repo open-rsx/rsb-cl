@@ -60,6 +60,11 @@
    :scope-filter
    :filter-scope)
 
+  ;; `origin-filter' class
+  (:export
+   :origin-filter
+   :filter-origin)
+
   ;; DSL
   (:export
    :filter)
