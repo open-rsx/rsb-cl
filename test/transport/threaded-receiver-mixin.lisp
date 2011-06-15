@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for unit tests of the transport module.
+;;; threaded-receiver-mixin.lisp ---
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,29 +17,28 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.transport.test
-  (:use
-   :cl
-   :alexandria
-   :iterate
-   :lift
-
-   :rsb
-   :rsb.event-processing
-   :rsb.transport
-
-   :rsb.test)
-
-  (:export
-   :transport-root)
-  (:documentation
-   "This package contains unit tests for the transport module."))
-
 (in-package :rsb.transport.test)
 
-(deftestsuite transport-root (root)
+(defclass mock-receiver (threaded-receiver-mixin)
+  ())
+
+(defmethod receive-messages ((receiver mock-receiver))
+  (iter (while t) (sleep 100)))
+
+(deftestsuite threaded-receiver-mixin-root (transport-root)
   ()
   (:documentation
-   "Root unit test suite for the transport module."))
+   "Unit tests for the `threaded-receiver-mixin' class."))
+
+(addtest (threaded-receiver-mixin-root
+          :documentation
+	  "Smoke test for the `threaded-receiver-mixin' class.")
+  smoke
+
+  ;;; TODO(jmoringe): Currently not usable because spread (even when
+  ;;; just loaded) likes to block/handle some signals
+  (let ((receiver (make-instance 'mock-receiver)))
+    ;; (notify receiver (make-scope "/") :attached)
+    ;; (sleep 1)
+    ;; (notify receiver (make-scope "/") :detached)
+    ))

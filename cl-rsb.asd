@@ -211,6 +211,8 @@
 			      (:file       "conversion-mixin"
 			       :depends-on ("package"))
 			      (:file       "message-receiver-mixin"
+			       :depends-on ("package"))
+			      (:file       "threaded-receiver-mixin"
 			       :depends-on ("package"))))
 
 		(:module     "transport-inprocess"
@@ -294,7 +296,9 @@
 		(:module     "transport"
 		 :pathname   "test/transport"
 		 :depends-on ("test")
-		 :components ((:file       "package")))
+		 :components ((:file       "package")
+			      (:file       "threaded-receiver-mixin"
+			       :depends-on ("package"))))
 
 		(:module     "spread"
 		 :pathname   "test/transport/spread"

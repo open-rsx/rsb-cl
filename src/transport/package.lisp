@@ -71,6 +71,16 @@
 
    :message-receiver-mixin)
 
+  ;; Threaded receiver protocol and `threaded-receiver-mixin' class
+  (:export
+   :start-receiver
+   :stop-receiver
+
+   :receive-messages
+
+   :threaded-receiver-mixin
+   :connector-thread)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation. The central concept of the transport layer is a
@@ -83,3 +93,7 @@ be applied to the otherwise broadcast-style event delivery."))
 (in-package :rsb.transport)
 
 (log5:defcategory rsb.transport)
+
+(defmacro log1 (category format &rest args)
+  `(log5:log-for (or :rsb.transport ,(intern (string category) :log5))
+		 ,format ,@args))
