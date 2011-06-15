@@ -135,7 +135,7 @@
 					    "filter-mixin"))
 			      (:file       "origin-filter"
 			       :depends-on ("package" "protocol"
-					    "origin-filter"))))
+					    "filter-mixin"))))
 
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"
