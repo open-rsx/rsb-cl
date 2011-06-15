@@ -145,13 +145,17 @@
 			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))
+
 			      (:file       "broadcast-processor"
 			       :depends-on ("package" "protocol"))
 			      (:file       "pull-processor"
 			       :depends-on ("package" "protocol"))
+
 			      (:file       "filtering-processor-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "deliver-timestamp-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "error-policy-mixin"
 			       :depends-on ("package" "protocol"))
 
 			      (:file       "configurator"

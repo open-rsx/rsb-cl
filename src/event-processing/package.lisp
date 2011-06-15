@@ -87,6 +87,11 @@
   (:export
    :deliver-timestamp-mixin)
 
+  ;; `error-policy-mixin' class
+  (:export
+   :error-policy-mixin
+   :processor-error-policy)
+
   ;; `client' class and protocol
   (:export
    :client
