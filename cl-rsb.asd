@@ -139,7 +139,12 @@
 					    "filter-mixin"))
 			      (:file       "origin-filter"
 			       :depends-on ("package" "protocol"
-					    "filter-mixin"))))
+					    "filter-mixin"))
+			      (:file       "regex-filter"
+			       :depends-on ("package" "protocol"
+					    "filter-mixin"
+					    "payload-matching-mixin"
+					    "fallback-policy-mixin"))))
 
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"

@@ -75,6 +75,11 @@
    :origin-filter
    :filter-origin)
 
+  ;; `regex-filter' class
+  (:export
+   :regex-filter
+   :filter-regex)
+
   ;; DSL
   (:export
    :filter)
