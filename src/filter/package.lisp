@@ -60,6 +60,11 @@
    :fallback-policy-mixin
    :filter-fallback-policy)
 
+  ;; `payload-matching-mixin' class
+  (:export
+   :payload-matches?
+   :payload-matching-mixin)
+
   ;; `scope-filter' class
   (:export
    :scope-filter

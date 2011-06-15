@@ -128,6 +128,8 @@
 					    "filter-mixin"))
 			      (:file       "fallback-policy-mixin"
 			       :depends-on ("package" "protocol"))
+			      (:file       "payload-matching-mixin"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "scope-filter"
 			       :depends-on ("package" "protocol"
