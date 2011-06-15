@@ -52,3 +52,12 @@ that perform two tasks:
 + decode received messages
 The associated protocol is designed to be
 direction-agnostic (i.e. should work for both push and pull)."))
+
+(defmethod message->event :around ((connector   message-receiver-mixin)
+				   (message     t)
+				   (wire-schema t))
+  "Add a :receive timestamp to the generated event, if any."
+  (let ((event (call-next-method)))
+    (when event
+      (setf (timestamp event :receive) (local-time:now)))
+    event))
