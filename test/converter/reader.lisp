@@ -26,4 +26,5 @@
 
 (define-basic-converter-test-cases (:reader)
     `(("\"bla\"" string  "bla")
-      ("5"       integer 5)))
+      ("5"       integer 5)
+      ("5"       string  :error)))
