@@ -1,4 +1,4 @@
-;;; xpath-filter.lisp ---
+;;; xpath-filter.lisp --- XPath filtering based on XML event payload.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -22,7 +22,9 @@
 (defmethod find-filter-class ((spec (eql :xpath)))
   (find-class 'xpath-filter))
 
-(defclass xpath-filter (filter-mixin)
+(defclass xpath-filter (filter-mixin
+			payload-matching-mixin
+			fallback-policy-mixin)
   ((xpath          :initarg  :xpath
 		   :type     string
 		   :accessor filter-xpath
@@ -38,6 +40,8 @@ events.")
 		   "A compiled version of the XPath of the
 filter. Computed lazily."))
   (:metaclass closer-mop:funcallable-standard-class)
+  (:default-initargs
+   :xpath (missing-required-initarg 'xpath-filter :xpath))
   (:documentation
    "This filter discriminates based on XML content contained in
 events."))
@@ -48,15 +52,20 @@ events."))
     (unless compiled-xpath
       (setf compiled-xpath (xpath:compile-xpath xpath)))))
 
-(defmethod matches? ((filter xpath-filter) (event event))
+;; TODO ill-formed documents: return nil or error?
+(defmethod payload-matches? ((filter xpath-filter) (payload stp:document))
   "Match the data of EVENT against the XPath of FILTER."
-  (bind (((:slots compiled-xpath) filter)
-	 (data (event-data event))
-	 (doc  (if (stringp data)
-		   (cxml:parse data (stp:make-builder))
-		   data)))
+  (bind (((:accessors-r/o
+	   (compiled-xpath filter-compiled-xpath)) filter))
     (not (xpath:node-set-empty-p
-	  (xpath:evaluate-compiled compiled-xpath doc t)))))
+	  (xpath:evaluate-compiled compiled-xpath payload t)))))
+
+(defmethod payload-matches? ((filter xpath-filter) (payload string))
+  (let ((doc (ignore-errors
+	       (cxml:parse payload (stp:make-builder)))))
+    (if doc
+	(payload-matches? filter doc)
+	:cannot-tell)))
 
 (defmethod print-object ((object xpath-filter) stream)
   (with-slots (xpath compiled-xpath) object
