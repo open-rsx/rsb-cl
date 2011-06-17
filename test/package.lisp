@@ -34,6 +34,10 @@
   (:export
    :root)
 
+  ;; Test environment
+  (:export
+   :spread-port)
+
   ;; Test utilities
   (:export
    :check-print
@@ -45,7 +49,8 @@
 (in-package :rsb.test)
 
 (deftestsuite root ()
-  ()
+  ((spread-port (asdf:component-property
+		 (asdf:find-system :cl-rsb-test) :spread-port)))
   (:setup
    (let ((spread-port (asdf:component-property
 		       (asdf:find-system :cl-rsb-test) :spread-port)))
