@@ -35,7 +35,8 @@
 	("?"                     nil)
 	("?foo=bar"              (:foo "bar"))
 	("?bar=baz;whoop=nooble" (:bar "baz" :whoop "nooble"))
-	("?first=yes&amp=yes"    (:first "yes" :amp "yes")))
+	("?first=yes&amp=yes"    (:first "yes" :amp "yes"))
+	("?host=foo;port=4444"   ()))
 
     (let* ((uri    (puri:parse-uri uri-string))
 	   (result (uri-options uri)))

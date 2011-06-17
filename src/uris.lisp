@@ -29,8 +29,12 @@
 	 (names-and-values (map 'list (curry #'split-sequence #\=)
 				queries)))
     (iter (for (name value) in names-and-values)
-	  (collect (make-keyword (string-upcase name)))
-	  (collect value))))
+	  (let ((key (make-keyword (string-upcase name))))
+	    (if (member key '(:host :port))
+		(warn "~@<Ignoring query-option ~S - use ~:*~(~A~) part ~
+of the URI instead.~@:>"
+		      key)
+		(appending (list key value)))))))
 
 (defun uri->scope-and-options (uri &optional defaults)
   "Dissect URI of the form
@@ -73,5 +77,5 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\"))
       (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
 	    fragment uri))
     (values (make-scope path)
-	    (when transport 
+	    (when transport
 	      (list (cons transport (append uri-options options)))))))
