@@ -48,8 +48,7 @@ message."))
 	       :documentation
 	       "The underlying spread connection used by the connector
 instance.")
-   (groups     :initarg  :groups
-	       :type     hash-table
+   (groups     :type     hash-table
 	       :initform (make-hash-table :test #'equal)
 	       :documentation
 	       "A mapping of group names to reference counts. The
@@ -60,10 +59,24 @@ reference count."))
 communication system and maintain a list of the Spread multicast
 groups in which they are members."))
 
-(defmethod initialize-instance :after ((instance connection)
-				       &key
-				       name)
-  (setf (slot-value instance 'connection) (spread:connect name)))
+(defmethod shared-initialize :before ((instance   connection)
+				      (slot-names t)
+				      &key
+				      name
+				      connection)
+  (unless (or name connection)
+    (missing-required-initarg 'connector :either-name-or-connection))
+
+  (when (and name connection)
+    (error "~@<The initargs ~{~S~^, ~} are mutually exclusive.~@:>"
+	   '(:name :connection))))
+
+(defmethod shared-initialize :after ((instance   connection)
+                                     (slot-names t)
+                                     &key
+				     name)
+  (when name
+    (setf (slot-value instance 'connection) (spread:connect name))))
 
 (defmethod ref-group ((connection connection) (group string))
   (when (= (incf (gethash group (slot-value connection 'groups) 0)) 1)
