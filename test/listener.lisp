@@ -26,6 +26,8 @@
    "Unit tests for the `listener' class and `make-listener'
 function."))
 
+(define-basic-participant-test-cases :listener)
+
 (addtest (listener-root
           :documentation
 	  "Test participating in a channel via `make-listener'.")
@@ -64,5 +66,3 @@ function."))
 ;;	 (let ((*listener-stream* stream))
 ;;	   (receive sub :block? t)))
 ;;        :test #'regexp-matches))))
-
-(define-basic-participant-test-cases :listener)
