@@ -290,6 +290,8 @@
 			       :depends-on ("package"))
 			      (:file       "listener"
 			       :depends-on ("package"))
+			      (:file       "reader"
+			       :depends-on ("package"))
 			      (:file       "informer"
 			       :depends-on ("package"))))
 

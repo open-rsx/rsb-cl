@@ -41,7 +41,10 @@
   ;; Test utilities
   (:export
    :check-print
-   :check-event)
+
+   :check-event
+
+   :participant-suite)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
