@@ -25,17 +25,13 @@
 (defclass xpath-filter (filter-mixin
 			payload-matching-mixin
 			fallback-policy-mixin)
-  ((xpath          :initarg  :xpath
-		   :type     string
+  ((xpath          :type     string
 		   :accessor filter-xpath
-		   :initform "."
 		   :documentation
 		   "The XPath used by the filter to discriminate
 events.")
-   (compiled-xpath :initarg  :compiled-xpath
-		   :type     (or null function)
+   (compiled-xpath :type     function
 		   :reader   filter-compiled-xpath
-		   :initform nil
 		   :documentation
 		   "A compiled version of the XPath of the
 filter. Computed lazily."))
@@ -46,11 +42,19 @@ filter. Computed lazily."))
    "This filter discriminates based on XML content contained in
 events."))
 
-(defmethod matches? :before ((filter xpath-filter) (event event))
-  "Compile the XPath, if it has not yet been compiled."
-  (with-slots (xpath compiled-xpath) filter
-    (unless compiled-xpath
-      (setf compiled-xpath (xpath:compile-xpath xpath)))))
+(defmethod shared-initialize :after ((instance   xpath-filter)
+                                     (slot-names t)
+                                     &key
+				     xpath)
+  (check-type xpath string "a string")
+
+  (setf (filter-xpath instance) xpath))
+
+(defmethod (setf filter-xpath) :before ((new-value string)
+					(filter    xpath-filter))
+  "Compile the XPath."
+  (setf (slot-value filter 'compiled-xpath)
+	(xpath:compile-xpath new-value)))
 
 ;; TODO ill-formed documents: return nil or error?
 (defmethod payload-matches? ((filter xpath-filter) (payload stp:document))
