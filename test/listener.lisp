@@ -22,6 +22,11 @@
 (deftestsuite listener-root (root
 			     participant-suite)
   ()
+  (:function
+   (send-some (informer)
+     (iter (repeat 100)
+	   (send informer "foo")
+	   (send informer "bar"))))
   (:documentation
    "Unit tests for the `listener' class and `make-listener'
 function."))
@@ -45,24 +50,17 @@ function."))
 	  "Test receiving data sent by an informer.")
   receive
 
-  ;; Test blocking receive
   (with-informer (informer "/foo" t)
     (with-listener (listener "/foo")
-      (iter (repeat 100)
-	    (send informer "<foo/>")
-	    (send informer "<bar/>")))))
+      ;; Test receive
+      (send-some informer)
 
-;; (addtest (listener-root
-;;           :documentation
-;;	  "Test binding *listener-stream*.")
-;;   listener-stream
-;;
-;;   (with-informer (informer "sub-stream" t)
-;;     (with-listener (sub "sub-stream")
-;;       (send informer "<foo/>")
-;;       (ensure-same
-;;        (concatenate 'string +optional-xml-declaration+ "<foo>.*</foo>$")
-;;        (with-output-to-string (stream)
-;;	 (let ((*listener-stream* stream))
-;;	   (receive sub :block? t)))
-;;        :test #'regexp-matches))))
+      ;; Test receive with filters
+      (push (filter :origin :origin (uuid:make-v1-uuid))
+	    (receiver-filters listener))
+      (send-some informer)
+
+      ;; Test receive with handlers
+      (push #'(lambda (event) (declare (ignore event)))
+	    (rsb.ep:handlers listener))
+      (send-some informer))))

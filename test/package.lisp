@@ -28,7 +28,8 @@
 
    :lift
 
-   :rsb)
+   :rsb
+   :rsb.filter)
 
   ;; Root test suite
   (:export
@@ -71,6 +72,8 @@
 	 (print-object thing stream))))))
   (:function
    (check-event (event scope data)
+     (ensure
+      (typep (event-id event) 'uuid:uuid))
      (ensure-same
       (event-scope event) (make-scope scope)
       :test #'scope=)
