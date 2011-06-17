@@ -311,6 +311,8 @@
 		 :depends-on ("test")
 		 :components ((:file       "package")
 			      (:file       "fundamental"
+			       :depends-on ("package"))
+			      (:file       "reader"
 			       :depends-on ("package"))))
 
 		(:module     "transport"

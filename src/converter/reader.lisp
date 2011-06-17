@@ -19,25 +19,35 @@
 
 (in-package :rsb.converter)
 
+(defmethod wire->domain? ((converter   (eql :reader))
+			  (wire-data   string)
+			  (wire-schema t))
+  (values converter wire-schema))
+
+(defmethod domain->wire? ((converter     (eql :reader))
+			  (domain-object t))
+  (values converter 'string (type-of domain-object)))
+
 (defmethod wire->domain ((converter   (eql :reader))
 			 (wire-data   string)
-			 (wire-schema symbol))
+			 (wire-schema t))
   (with-standard-io-syntax
     (read-from-string wire-data)))
 
 (defmethod wire->domain :around ((converter   (eql :reader))
 				 (wire-data   string)
-				 (wire-schema symbol))
+				 (wire-schema t))
   (let ((expected-type wire-schema)
 	(result        (call-next-method)))
     (unless (typep result expected-type)
       (error 'wire->domain-conversion-error
-	     :encoded     wire-data
-	     :wire-schema wire-schema
-	     :domain-type expected-type
-	     :format-control "~@<The value is not ~A is not of the expected type ~A.~@:>"
+	     :wire-schema      wire-schema
+	     :encoded          wire-data
+	     :domain-type      expected-type
+	     :format-control   "~@<The value is not ~A is not of the ~
+expected type ~A.~@:>"
 	     :format-arguments `(,result ,expected-type)))
-    result)) ;; TODO also type-error?
+    result))
 
 (defmethod domain->wire ((converter     (eql :reader))
 			 (domain-object t))
