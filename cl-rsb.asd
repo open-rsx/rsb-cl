@@ -316,6 +316,8 @@
 			      (:file       "fundamental"
 			       :depends-on ("package"))
 			      (:file       "reader"
+			       :depends-on ("package"))
+			      (:file       "xml"
 			       :depends-on ("package"))))
 
 		(:module     "transport"

@@ -50,7 +50,10 @@
   (:documentation
    "Root unit test suite for the converter module."))
 
-(defmacro define-basic-converter-test-cases ((converter) cases)
+(defmacro define-basic-converter-test-cases ((converter
+					      &key
+					      (domain-test 'equalp))
+					     cases)
   "Emit basic test cases for CONVERTER."
   (let ((suite-name (symbolicate converter "-ROOT")))
     `(progn
@@ -96,7 +99,7 @@
 	     (t
 	      (let ((result (wire->domain ,converter wire-data wire-schema)))
 		(ensure-same result domain-object
-			     :test #'equalp))))))
+			     :test (function ,domain-test)))))))
 
        (addtest (,suite-name
 		 :documentation
@@ -129,4 +132,4 @@
 		     (domain->wire ,converter domain-object))
 		    (decoded (wire->domain ,converter encoded encoded-wire-schema)))
 	       (ensure-same domain-object decoded
-			    :test #'equal))))))))
+			    :test (function ,domain-test)))))))))

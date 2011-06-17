@@ -20,8 +20,17 @@
 (in-package :rsb.converter)
 
 
-;;; Wire -> domain conversions
+;;; Domain <-> DOM conversion
 ;;
+
+(defmethod wire->domain? ((converter   (eql :xml-dom))
+			  (wire-data   stp:document)
+			  (wire-schema t))
+  (values converter t))
+
+(defmethod domain->wire? ((converter     (eql :xml-dom))
+			  (domain-object t))
+  (values converter 'stp:document (type-of domain-object)))
 
 (defmethod wire->domain ((converter   (eql :xml-dom))
 			 (wire-data   stp:document)
@@ -29,43 +38,64 @@
   (let ((root (stp:document-element wire-data)))
     (cxml-location:xml-> root wire-schema)))
 
-(defmethod wire->domain ((converter   (eql :xml-string))
-			 (wire-data   string)
-			 (wire-schema t))
-  (cxml:parse wire-data (stp:make-builder)))
-
-(defmethod wire->domain ((converter   (eql :xml-bytes))
-			 (wire-data   simple-array)
-			 (wire-schema t))
-  (check-type wire-data octet-vector "an octet-vector")
-
-  (cxml:parse-octets wire-data (stp:make-builder)))
-
-
-;;; Domain -> wire conversions
-;;
-
 (defmethod domain->wire ((converter     (eql :xml-dom))
 			 (domain-object t))
-  (let* ((root     (stp:make-element "object")) ;; TODO this is somehow arbitrary
+  (let* ((root     (stp:make-element "payload"))
 	 (document (stp:make-document root)))
     (cxml-location:->xml domain-object root :any)
-    (values document domain-object)))
+    (values document (type-of domain-object))))
+
+
+;;; DOM <-> string conversion
+;;
+
+(defmethod wire->domain? ((converter   (eql :xml-string))
+			  (wire-data   string)
+			  (wire-schema (eql :utf-8-xml)))
+  (values converter 'stp:document))
+
+(defmethod domain->wire? ((converter     (eql :xml-string))
+			  (domain-object stp:document))
+  (values converter 'string :utf-8-xml))
+
+(defmethod wire->domain ((converter   (eql :xml-string))
+			 (wire-data   string)
+			 (wire-schema (eql :utf-8-xml)))
+  (cxml:parse wire-data (stp:make-builder)))
 
 (defmethod domain->wire ((converter     (eql :xml-string))
 			 (domain-object stp:document))
   (values
-   (stp:serialize domain-object (cxml:make-string-sink))
-   :TODO))
+   (stp:serialize domain-object (cxml:make-string-sink
+				 :omit-xml-declaration-p t))
+   :utf-8-xml))
+
+
+;;; DOM <-> bytes conversions
+;;
+
+(defmethod wire->domain? ((converter   (eql :xml-bytes))
+			  (wire-data   simple-array)
+			  (wire-schema (eql :bytes-xml)))
+  (when (typep wire-data 'octet-vector)
+    (values converter 'stp:document)))
+
+(defmethod domain->wire? ((converter     (eql :xml-bytes))
+			  (domain-object stp:document))
+  (values converter 'string :bytes-xml))
+
+(defmethod wire->domain ((converter   (eql :xml-bytes))
+			 (wire-data   simple-array)
+			 (wire-schema (eql :bytes-xml)))
+  (check-type wire-data octet-vector "an octet-vector")
+
+  (cxml:parse-octets wire-data (stp:make-builder)))
 
 (defmethod domain->wire ((converter     (eql :xml-bytes))
-			 (domain-object t))
+			 (domain-object stp:document))
   (values
-   (stp:serialize domain-object (cxml:make-octet-vector-sink))
-   :TODO))
-
-;; TODO control ?xml declaration
-;; (cxml:make-string-sink :omit-xml-declaration-p t)
-;; TODO control indent
-;; For indent
-;; (apply #'cxml:make-string-sink (when indent? '(:indentation 2)))
+   (coerce
+    (stp:serialize domain-object (cxml:make-octet-vector-sink
+				  :omit-xml-declaration-p t))
+    'octet-vector)
+   :bytes-xml))
