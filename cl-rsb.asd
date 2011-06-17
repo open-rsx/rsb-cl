@@ -118,6 +118,8 @@
 		 :pathname   "src/filter"
 		 :depends-on ("src-early")
 		 :components ((:file       "package")
+			      (:file       "types"
+			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))
 
@@ -127,7 +129,7 @@
 			       :depends-on ("package" "protocol"
 					    "filter-mixin"))
 			      (:file       "fallback-policy-mixin"
-			       :depends-on ("package" "protocol"))
+			       :depends-on ("package" "types" "protocol"))
 			      (:file       "payload-matching-mixin"
 			       :depends-on ("package" "protocol"))
 
