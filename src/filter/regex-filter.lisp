@@ -44,11 +44,13 @@ event payloads that are strings against a given regular expression."))
                                      (slot-names t)
                                      &key
 				     regex)
+  (check-type regex string "a string")
+
   (setf (filter-regex instance) regex))
 
 (defmethod (setf filter-regex) :before ((new-value string)
 					(filter    regex-filter))
-  "Create a new scanner for FITLER for the regex NEW-VALUE."
+  "Create a new scanner for FILTER for the regex NEW-VALUE."
   (setf (slot-value filter 'scanner)
 	(cl-ppcre:create-scanner new-value)))
 
