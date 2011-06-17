@@ -20,6 +20,36 @@
 (in-package :rsb)
 
 
+;;; Error handling
+;;
+
+;; not invoking any restart says processing should be canceled and the
+;; stack should be unwound.
+
+(intern "LOG")
+;; log restart: log the error and continue
+
+(defun log-error (condition)
+  "Invoke the 'log restart, requesting CONDITION to be logging and
+processing to be continued."
+  (let ((restart (find-restart 'log)))
+    (if restart
+	(invoke-restart restart  condition)
+	(warn "~@<Restart ~S not found; unwinding.~@:>" 'log))))
+
+(intern "IGNORE")
+;; ignore restart: ignore the error silently
+
+(defun ignore-error (condition)
+  "Invoke the 'ignore restart, requesting processing to be continued
+without further actions."
+  (declare (ignore condition))
+  (let ((restart (find-restart 'ignore)))
+    (if restart
+	(invoke-restart restart)
+	(warn "~@<Restart ~S not found; unwinding.~@:>" 'ignore))))
+
+
 ;;; Component URL protocol
 ;;
 

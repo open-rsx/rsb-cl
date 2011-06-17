@@ -72,6 +72,13 @@
 
   ;; Restarts
   (:export
+
+   :log
+   :log-error
+
+   :ignore
+   :ignore-error
+
    :use-scope
    :use-uri)
 
