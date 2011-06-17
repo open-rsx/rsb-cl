@@ -68,7 +68,16 @@
    :*scope-group-cache*
    :*scope-group-cache-max-size*
    :scope->group
-   :scope->group/no-cache)
+   :scope->group/no-cache
+
+   :connection
+
+   :in-connector
+   :message->event
+
+   :in-pull-connector
+
+   :out-connector)
 
   (:documentation
    "This package contains a transport implementation based on the
