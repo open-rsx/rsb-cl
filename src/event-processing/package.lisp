@@ -97,6 +97,10 @@
    :client
    :client-configurator)
 
+  ;; Exported for unit test
+  (:export
+   :merge-implementation-infos)
+
   (:documentation
    "This package contains protocol, classes and methods for routing
 and processing of events."))

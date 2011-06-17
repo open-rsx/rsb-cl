@@ -309,6 +309,13 @@
 			      (:file       "scope-filter"
 			       :depends-on ("package"))))
 
+		(:module     "event-processing"
+		 :pathname   "test/event-processing"
+		 :depends-on ("test")
+		 :components ((:file       "package")
+			      (:file       "util"
+			       :depends-on ("package"))))
+
 		(:module     "converter"
 		 :pathname   "test/converter"
 		 :depends-on ("test")

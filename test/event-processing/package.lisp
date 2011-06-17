@@ -1,4 +1,4 @@
-;;; util.lisp ---
+;;; package.lisp --- Package definition for unit tests of the event-processing module.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,13 +17,25 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsb.event-processing)
+(cl:in-package :cl-user)
 
-(defun merge-implementation-infos (&optional info1 info2)
-  (cond
-    ((and (not info1) (not info2))
-     :implemented)
-    ((and (eq info1 :implemented) (eq info2 :implemented))
-     :implemented)
-    (t
-     :not-implemented)))
+(defpackage :rsb.event-processing.test
+  (:use
+   :cl
+   :lift
+
+   :rsb
+   :rsb.event-processing
+
+   :rsb.test)
+
+  (:documentation
+   "This package contains unit tests for the event-processing
+module"))
+
+(in-package :rsb.event-processing.test)
+
+(deftestsuite event-processing-root (root)
+  ()
+  (:documentation
+   "Root unit test suite for the event-processing module."))
