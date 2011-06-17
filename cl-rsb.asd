@@ -314,6 +314,8 @@
 		 :depends-on ("test")
 		 :components ((:file       "package")
 			      (:file       "util"
+			       :depends-on ("package"))
+			      (:file       "error-policy-mixin"
 			       :depends-on ("package"))))
 
 		(:module     "converter"
