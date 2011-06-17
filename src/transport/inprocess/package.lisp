@@ -22,6 +22,7 @@
 (defpackage :rsb.transport.inprocess
   (:shadow
    :connector)
+
   (:use
    :cl
    :alexandria
@@ -31,6 +32,13 @@
    :rsb.event-processing
    :rsb.filter
    :rsb.transport)
+
+  ;; Exported for unit tests
+  (:export
+   :in-pull-connector
+   :in-push-connector
+   :out-connector)
+
   (:documentation
    "This package contains a transport that delivers RSB events within
 a process."))
