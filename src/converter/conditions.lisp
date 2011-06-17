@@ -19,12 +19,13 @@
 
 (in-package :rsb.converter)
 
-(define-condition conversion-error (rsb:rsb-error)
+(define-condition conversion-error (rsb-error)
   ((wire-schema :initarg  :wire-schema
 		:type     symbol
 		:reader   conversion-error-wire-schema
 		:documentation
-		""))
+		"This wire-schema to or from which the failed
+conversion would have converted."))
   (:report
    (lambda (condition stream)
      (format stream "~@<A conversion to or from wire-schema ~S failed.~@:>"
@@ -38,12 +39,14 @@ conversion-related condition classes."))
 		:type     t
 		:reader   conversion-error-encoded
 		:documentation
-		"")
+		"The wire-data that could not be converted into a
+domain object.")
    (domain-type :initarg  :domain-type
 		:type     t
 		:reader   conversion-error-domain-type
 		:documentation
-		""))
+		"The type of the domain object object that would have
+been produced by a successful conversion."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The wire data ~S (in ~S schema) could not be ~
@@ -60,12 +63,14 @@ domain object."))
 		  :type     t
 		  :reader   conversion-error-domain-object
 		  :documentation
-		  "")
+		  "The domain object that could not be converter into
+a wire representation.")
    (wire-type     :initarg  :wire-type
 		  :type     t
 		  :reader   conversion-error-wire-type
 		  :documentation
-		  ""))
+		  "The type of the wire-data that would have been
+produced by a successful conversion."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The domain object ~S could not be converted to ~
