@@ -325,6 +325,8 @@
 			      (:file       "util"
 			       :depends-on ("package"))
 			      (:file       "fragmentation"
+			       :depends-on ("package"))
+			      (:file       "connection"
 			       :depends-on ("package")))))
   :in-order-to ((test-op (load-op :cl-rsb-test))))
 
