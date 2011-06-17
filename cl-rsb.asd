@@ -293,6 +293,9 @@
 			      (:file       "reader"
 			       :depends-on ("package"))
 			      (:file       "informer"
+			       :depends-on ("package"))
+
+			      (:file       "macros"
 			       :depends-on ("package"))))
 
 		(:module     "filter"
