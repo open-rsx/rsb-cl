@@ -30,40 +30,14 @@
 and an event process for a client that is an event receiving
 participant."))
 
-;; TODO this patterns occurs over and over
-#|
-(defmethod (setf configurator-filters) :around ((new-value    list)
-						(configurator in-route-configurator))
-  "Notify interested parties of the change in the set of
-listeners."
-  (bind (((:slots-r/o in-connectors (old-value listeners)) channel)
-	 ((:flet connect-handler (connector listener))
-	  (hooks:add-to-hook (hooks:object-hook connector 'push-hook)
-			     (curry #'push1 listener))))
-    (prog1
-	(call-next-method)
-      (let ((added   (set-difference new-value old-value))
-	    (removed (set-difference old-value new-value))) ;; TODO we could use hooks for this
-	(log5:log-for (or rsb log5:info) "~@<~S added   filters ~{~S~^, ~}~@:>" channel added)
-	(log5:log-for (or rsb log5:info) "~@<~S removed filters ~{~S~^, ~}~@:>" channel removed)
-
-
-	(map-product #'connect-handler          in-connectors added)
-	;; TODO disconnect
-	(map-product (rcurry #'notify :removed) in-connectors removed)
-	))))
-|#
-
 
 ;;; Connectors
 ;;
 
 (defmethod notify ((configurator in-route-configurator)
-		   (connector    t
-				 ;; rsb.transport::connector
-				 )
+		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o
+  (bind (((:accessors
 	   (scope     configurator-scope)
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
@@ -73,18 +47,20 @@ listeners."
 
     (iter (for filter in filters)
 	  (log1 :info "~S adding filter ~S to ~S" configurator filter connector)
-	  (notify connector filter :added))
+	  (unless (eq (notify connector filter :filter-added) :implemented)
+	    (pushnew filter (processor-filters processor))))
 
     ;; Notify processor regarding new connector and add to connectors
     ;; handlers.
     (notify processor connector action)
 
     (log1 :info "~S connecting ~S -> ~S" configurator connector processor)
-    (push processor (handlers connector))))
+    (push processor (handlers connector))
+
+    :implemented))
 
 (defmethod notify ((configurator in-route-configurator)
-		   (connector    t ;; rsb.transport::connector
-				 )
+		   (connector    t)
 		   (action       (eql :connector-removed)))
   (bind (((:accessors-r/o
 	   (scope     configurator-scope)
@@ -100,10 +76,12 @@ listeners."
     ;; Notify remove connector regarding filters and scope.
     (iter (for filter in filters)
 	  (log1 :info "~S removing filter ~S to ~S" configurator filter connector)
-	  (notify connector filter :removed))
+	  (notify connector filter :filter-removed))
 
     (log1 :info "~S detaching connector ~S to ~S" configurator connector scope)
-    (notify connector scope :detached)))
+    (notify connector scope :detached)
+
+    :implemented))
 
 
 ;;; Filters
@@ -112,21 +90,45 @@ listeners."
 (defmethod notify ((configurator in-route-configurator)
 		   (filter       t)
 		   (action       (eql :filter-added)))
+  "Add FILTER from CONFIGURATOR's filter list and notify its
+connectors and processor."
+  (bind (((:accessors
+	   (connectors configurator-connectors)
+	   (processor  configurator-processor)
+	   (filters    configurator-filters)) configurator))
+    ;; Add FILTER to the filter list of CONFIGURATOR.
+    (push filter filters)
+
+    ;; Notify all connectors about the added filter. Unless all
+    ;; connectors implemented the filter, add it to the processor.
+    (case (reduce #'merge-implementation-infos
+		  (map 'list (rcurry #'notify filter action) connectors))
+      (:not-implemented
+       (push filter (processor-filters processor))))
+
+    ;; We implemented the filter either way.
+    :implemented))
+
+(defmethod notify ((configurator in-route-configurator)
+		   (filter       t)
+		   (action       (eql :filter-removed)))
   "Remove FILTER from CONFIGURATOR's filter list and notify its
-connectors."
-  (push filter (configurator-filters configurator))
+connectors and processor."
+  (bind (((:accessors
+	   (connectors configurator-connectors)
+	   (processor  configurator-processor)
+	   (filters    configurator-filters)) configurator))
+    ;; Remove FILTER from PROCESSORS filter list.
+    (removef (processor-filters processor) filter)
 
-  (reduce #'merge-implementation-infos
-	  (map 'list (rcurry #'notify filter :added)
-	       (configurator-connectors configurator))))
+    ;; Notify all connectors about the removed filter. Implementation
+    ;; info do not matter in this case.
+    (map nil (rcurry #'notify filter action) connectors)
 
-#|
- (defmethod notify ((configurator in-route-configurator)
-		   (filter       filter)
-		   (action       t))
-  "DOC"
-  (map 'nil (rcurry #'notify filter action) in-connectors))
-|#
+    ;; Remove FILTER from the filter list of CONFIGURATOR.
+    (removef filters filter)
+
+    :implemented))
 
 
 ;;; Handlers
