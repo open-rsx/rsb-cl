@@ -75,10 +75,10 @@ participant."))
 
     ;; Notify remove connector regarding filters and scope.
     (iter (for filter in filters)
-	  (log1 :info "~S removing filter ~S to ~S" configurator filter connector)
+	  (log1 :info "~S removing filter ~S from ~S" configurator filter connector)
 	  (notify connector filter :filter-removed))
 
-    (log1 :info "~S detaching connector ~S to ~S" configurator connector scope)
+    (log1 :info "~S detaching connector ~S from ~S" configurator connector scope)
     (notify connector scope :detached)
 
     :implemented))
