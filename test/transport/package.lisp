@@ -24,6 +24,7 @@
    :cl
    :alexandria
    :iterate
+   :bind
    :lift
 
    :rsb

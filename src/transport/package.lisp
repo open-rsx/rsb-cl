@@ -91,6 +91,10 @@
 
    :error-handling-sender-mixin)
 
+  ;; `restart-message-receiver-mixin' class
+  (:export
+   :restart-message-receiver-mixin)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation.
