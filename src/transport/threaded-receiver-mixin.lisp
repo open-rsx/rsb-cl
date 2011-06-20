@@ -41,11 +41,28 @@
 ;;
 
 (defclass threaded-receiver-mixin ()
-  ((thread :type     (or null bt:thread)
-	   :accessor connector-thread
-	   :initform nil
-	   :documentation
-	   "Stores the receiver thread of the connector."))
+  ((thread            :type     (or null bt:thread)
+		      :accessor connector-thread
+		      :initform nil
+		      :documentation
+		      "Stores the receiver thread of the connector.")
+   (started?          :accessor connector-started?
+		      :initform nil
+		      :documentation
+		      "Non-nil, if the connector has been
+started (i.e. thread is running and did its setup stuff), nil
+otherwise.")
+   (control-mutex     :reader   connector-control-mutex
+		      :initform (bt:make-recursive-lock
+				 "Receive Control Mutex")
+
+		      :documentation
+		      "Required for thread startup synchronization.")
+   (control-condition :reader   connector-control-condition
+		      :initform (bt:make-condition-variable
+				 :name "Receiver Control Condition")
+		      :documentation
+		      "Required for thread startup synchronization."))
   (:documentation
    "This mixin class is intended to be mixed into message receiving
 connector classes which want do so in a dedicated thread. This mixin
@@ -66,15 +83,28 @@ thread."))
 
 (defmethod start-receiver ((connector threaded-receiver-mixin))
   (log1 :info "~A Starting receiver thread" connector)
-  (setf (connector-thread connector)
-	(bt:make-thread (curry #'receive-messages connector)
-			:name (format nil "Message Receiver Thread for ~A"
-				      connector))))
+  (bind (((:accessors
+	   (thread            connector-thread)
+	   (control-mutex     connector-control-mutex)
+	   (control-condition connector-control-condition)) connector))
+    (setf thread (bt:make-thread (curry #'receive-messages connector)
+				 :name (format nil "Message Receiver Thread for ~A"
+					       connector)))
+    ;; Wait until the thread has entered `receive-messages' and
+    ;; established the catch environment for the `terminate-thread'
+    ;; tag.
+    (bt:with-lock-held (control-mutex)
+      (iter (until (connector-started? connector))
+	    (bt:condition-wait control-condition control-mutex)))))
 
 (defmethod stop-receiver ((connector threaded-receiver-mixin))
   (bind (((:accessors (thread connector-thread)) connector))
+    ;; Interrupt the receiver thread and throw our `terminate-thread'
+    ;; tag.
     (log1 :info "~A Interrupting receiver thread" connector)
-    (bt:interrupt-thread thread #'(lambda () (throw 'terminate nil)))
+    (bt:interrupt-thread thread #'(lambda () (throw 'terminate-thread nil)))
+
+    ;; The thread should be terminating or already have terminated.
     (log1 :info "~A Joining receiver thread" connector)
     (bt:join-thread thread)
     (setf thread nil)))
@@ -82,7 +112,16 @@ thread."))
 (defmethod receive-messages :around ((connector threaded-receiver-mixin))
   "Catch the 'terminate tag that is thrown to indicate interruption
 requests."
-  (catch 'terminate
+  (catch 'terminate-thread
+    ;; Notify the thread which is waiting in `start-receiver' that we
+    ;; can catch the 'terminate-thread tag now.
+    (bind (((:accessors
+	     (started?          connector-started?)
+	     (control-mutex     connector-control-mutex)
+	     (control-condition connector-control-condition)) connector))
+      (bt:with-lock-held (control-mutex)
+	(setf started? t)
+	(bt:condition-notify control-condition)))
     (log1 :info "~A Entering receive loop" connector)
     (call-next-method))
   (log1 :info "~A Left receive loop" connector))
