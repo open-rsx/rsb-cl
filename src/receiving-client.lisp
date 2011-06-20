@@ -19,7 +19,8 @@
 
 (in-package :rsb)
 
-(defclass receiving-client (rsb.ep:client)
+(defclass receiving-client (participant
+			    rsb.ep:client)
   ((filters :type     list
 	    :initform nil
 	    :accessor receiver-filters
@@ -53,4 +54,4 @@ listeners."
   (print-unreadable-id-object (object stream :type t)
     (format stream "~A |(~D)"
 	    (scope-string (participant-scope object))
-	    (receiver-filters object))))
+	    (length (receiver-filters object)))))

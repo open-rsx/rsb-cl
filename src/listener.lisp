@@ -19,8 +19,7 @@
 
 (in-package :rsb)
 
-(defclass listener (participant
-		    receiving-client)
+(defclass listener (receiving-client)
   ((error-hook :initarg  :error-hook
 	       :type     list
 	       :initform nil

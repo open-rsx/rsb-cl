@@ -19,8 +19,7 @@
 
 (in-package :rsb)
 
-(defclass reader (participant
-		  receiving-client)
+(defclass reader (receiving-client)
   ()
   (:documentation
    "Instances of this class provide a pull-based interface for
