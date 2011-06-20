@@ -124,7 +124,6 @@
    :scope
    :scope-components
    :scope-string
-   :scope-relative? :scope-absolute?
 
    :scope=
    :sub-scope?
