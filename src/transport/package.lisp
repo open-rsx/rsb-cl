@@ -20,7 +20,8 @@
 (cl:in-package :cl-user)
 
 (defpackage :rsb.transport
-  (:nicknames :rsbt)
+  (:nicknames :rsb.tp)
+
   (:use
    :cl
    :alexandria
@@ -79,16 +80,22 @@
    :receive-messages
 
    :threaded-receiver-mixin
+   :connector-started?
    :connector-thread)
 
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
-implementation. The central concept of the transport layer is a
-\"port\". Port instances handle incoming and outgoing events (see
-`handle'). The function `make-connector' can be used to create port
-instances for different kinds of transports. The efficiency of data
-handling can be increased by notifying ports of restrictions that can
-be applied to the otherwise broadcast-style event delivery."))
+implementation.
+
+The central concept of the transport layer is a \"connector\".
+Connector instances handle incoming and outgoing events (see
+`rsb.event-processing:handle'). The function `make-connector' can be
+used to create connector instances for different kinds of
+transports.
+
+The efficiency of data handling can be increased by notifying
+connectors of restrictions that can be applied to the otherwise
+broadcast-style event delivery."))
 
 (in-package :rsb.transport)
 
