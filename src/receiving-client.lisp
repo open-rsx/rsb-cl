@@ -20,19 +20,34 @@
 (in-package :rsb)
 
 (defclass receiving-client (rsb.ep:client)
-  ()
+  ((filters :type     list
+	    :initform nil
+	    :accessor receiver-filters
+	    :documentation
+	    "The list of filters that events have to match in order to
+be received by the participant."))
   (:documentation
    "This class is intended to be used as a superclass of event
 processing configuration clients that receive and filter events."))
 
-(defmethod receiver-filters ((participant receiving-client))
-  (rsb.ep:configurator-filters (rsb.ep:client-configurator participant)))
+(defmethod (setf receiver-filters) :around ((new-value   list)
+					    (participant receiving-client))
+  "Notify interested parties of the change in the set of
+listeners."
+  (bind (((:accessors-r/o
+	   (old-value    receiver-filters)
+	   (configurator rsb.ep:client-configurator)) participant))
+    (prog1
+	(call-next-method)
+      (let ((added   (set-difference new-value old-value))
+	    (removed (set-difference old-value new-value)))
+	(log1 :info "~S added   filters ~{~S~^, ~}" participant added)
+	(log1 :info "~S removed filters ~{~S~^, ~}" participant removed)
 
-(defmethod (setf receiver-filters) ((new-value   list)
-				    (participant receiving-client))
-  (setf (rsb.ep:configurator-filters
-	 (rsb.ep:client-configurator participant))
-	new-value))
+	(iter (for filter in added)
+	      (rsb.ep:notify configurator filter :filter-added))
+	(iter (for filter in removed)
+	      (rsb.ep:notify configurator filter :filter-removed))))))
 
 (defmethod print-object ((object receiving-client) stream)
   (print-unreadable-id-object (object stream :type t)
