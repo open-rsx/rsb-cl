@@ -1,4 +1,4 @@
-;;; threaded-receiver-mixin.lisp ---
+;;; threaded-receiver-mixin.lisp --- Unit tests for the threaded-receive-mixin class.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -23,6 +23,8 @@
   ())
 
 (defmethod receive-messages ((receiver mock-receiver))
+  "This causes a timeout of the test case, if the interruption does
+not work properly."
   (iter (while t) (sleep 100)))
 
 (deftestsuite threaded-receiver-mixin-root (transport-root)
@@ -35,10 +37,19 @@
 	  "Smoke test for the `threaded-receiver-mixin' class.")
   smoke
 
-  ;;; TODO(jmoringe): Currently not usable because spread (even when
-  ;;; just loaded) likes to block/handle some signals
+  ;; As a workaround for https://bugs.launchpad.net/asdf/+bug/507378,
+  ;; force `receive-messages' to be updated.
+  #+sbcl (handler-case
+	     (sb-ext:with-timeout .1
+	       (receive-messages (make-instance 'mock-receiver)))
+	   (sb-ext:timeout (condition) (declare (ignore condition))))
+
+  ;; We try attaching and detaching with different timing behaviors.
   (let ((receiver (make-instance 'mock-receiver)))
-    ;; (notify receiver (make-scope "/") :attached)
-    ;; (sleep 1)
-    ;; (notify receiver (make-scope "/") :detached)
-    ))
+    (iter (repeat 100)
+	  (notify receiver (make-scope "/") :attached)
+	  (notify receiver (make-scope "/") :detached)
+
+	  (notify receiver (make-scope "/") :attached)
+	  (sleep .1)
+	  (notify receiver (make-scope "/") :detached))))

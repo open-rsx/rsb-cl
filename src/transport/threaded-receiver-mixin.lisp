@@ -43,15 +43,12 @@
 (defclass threaded-receiver-mixin ()
   ((thread            :type     (or null bt:thread)
 		      :accessor connector-thread
+		      :reader   connector-started?
 		      :initform nil
 		      :documentation
-		      "Stores the receiver thread of the connector.")
-   (started?          :accessor connector-started?
-		      :initform nil
-		      :documentation
-		      "Non-nil, if the connector has been
-started (i.e. thread is running and did its setup stuff), nil
-otherwise.")
+		      "Stores the receiver thread of the
+connector. Additionally used to indicate the state of the connector,
+i.e. if non-nil thread is running and did its setup stuff.")
    (control-mutex     :reader   connector-control-mutex
 		      :initform (bt:make-recursive-lock
 				 "Receive Control Mutex")
@@ -84,12 +81,13 @@ thread."))
 (defmethod start-receiver ((connector threaded-receiver-mixin))
   (log1 :info "~A Starting receiver thread" connector)
   (bind (((:accessors
-	   (thread            connector-thread)
 	   (control-mutex     connector-control-mutex)
 	   (control-condition connector-control-condition)) connector))
-    (setf thread (bt:make-thread (curry #'receive-messages connector)
-				 :name (format nil "Message Receiver Thread for ~A"
-					       connector)))
+    ;; Launch the thread.
+    (bt:make-thread (curry #'receive-messages connector)
+		    :name (format nil "Message Receiver Thread for ~A"
+				  connector))
+
     ;; Wait until the thread has entered `receive-messages' and
     ;; established the catch environment for the `terminate-thread'
     ;; tag.
@@ -116,11 +114,11 @@ requests."
     ;; Notify the thread which is waiting in `start-receiver' that we
     ;; can catch the 'terminate-thread tag now.
     (bind (((:accessors
-	     (started?          connector-started?)
+	     (thread            connector-thread)
 	     (control-mutex     connector-control-mutex)
 	     (control-condition connector-control-condition)) connector))
       (bt:with-lock-held (control-mutex)
-	(setf started? t)
+	(setf thread (bt:current-thread))
 	(bt:condition-notify control-condition)))
     (log1 :info "~A Entering receive loop" connector)
     (call-next-method))
