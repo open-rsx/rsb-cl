@@ -117,6 +117,10 @@ contained in NOTIFICATION."
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
 into one notification."
+  ;; Set the :send timestamp of EVENT to enable the caller to read it.
+  (setf (timestamp event :send) (local-time:now))
+
+  ;; Put EVENT into one or more notifications.
   (bind (((:accessors-r/o
 	   (id event-id) (scope event-scope) (origin event-origin)
 	   (data       event-data)
@@ -166,7 +170,7 @@ notification are chosen."
 			:create-time (timestamp->unix-microseconds
 				      (getf timestamps :create))
 			:send-time   (timestamp->unix-microseconds
-				      (local-time:now))))
+				      (getf timestamps :send))))
 	 (notification (make-instance
 			'rsb.protocol::notification
 			:id             (uuid:uuid-to-byte-array id)
