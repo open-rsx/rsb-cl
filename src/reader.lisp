@@ -33,21 +33,6 @@ receiving events."))
 		    (rsb.ep:client-configurator reader))))
     (rsb.ep:emit processor block?)))
 
-;; TODO maybe restart should be installed in transport layer. it is installed there, now.
-(defmethod receive :around ((reader reader)
-			    &key &allow-other-keys)
-  (let (result)
-    (tagbody
-     skip
-       (restart-case ;; TODO the restart-case is expensive; add restartable? parameter?
-	   (setf result (call-next-method))
-	 (skip ()
-	   :report (lambda (stream)
-		     (format stream "~@<Skip the event and try to ~
-receive the next one.~@:>"))
-	   (go skip))))
-    result))
-
 
 ;;; `reader' creation
 ;;
