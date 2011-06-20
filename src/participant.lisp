@@ -1,4 +1,4 @@
-;;; participant.lisp ---
+;;; participant.lisp --- A superclass for participant classes.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -42,6 +42,7 @@ notifications on one channel of the bus."))
 ;;; Participant creation
 ;;
 
+;;; TODO(jmoringe): infer direction?
 (defun make-participant (class scope direction transports &rest args)
   "Make and return a participant instance of CLASS that participates
 in the channel designated by SCOPE. DIRECTION is one
