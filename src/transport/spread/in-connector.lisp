@@ -35,18 +35,13 @@ connector classes for Spread."))
 (defmethod notify ((connector in-connector)
 		   (scope     scope)
 		   (action    (eql :attached)))
-  (bind (((:accessors-r/o (connection connector-connection)) connector)
-	 (group-name (scope->group scope))) ;; TODO pass a private/thread-local scope cache?
-    (ref-group connection group-name))
-  :implemented)
+  (ref-group (connector-connection connector) (scope->group scope)))
+;; TODO pass a private/thread-local scope cache?
 
 (defmethod notify ((connector in-connector)
 		   (scope     scope)
 		   (action    (eql :detached)))
-  (bind (((:accessors-r/o (connection connector-connection)) connector)
-	 (group-name (scope->group scope)))
-    (unref-group connection group-name))
-  :implemented)
+  (unref-group (connector-connection connector) (scope->group scope)))
 
 (defmethod message->event ((connector   in-connector)
 			   (message     simple-array)
