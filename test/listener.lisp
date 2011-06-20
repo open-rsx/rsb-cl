@@ -43,7 +43,9 @@ function."))
 	("inprocess://localhost/listener/construction" "/listener/construction"))
 
     (let ((listener (make-listener arg)))
-      (check-participant listener expected-scope))))
+      (unwind-protect
+	   (check-participant listener expected-scope)
+	(detach/ignore-errors listener)))))
 
 (addtest (listener-root
           :documentation

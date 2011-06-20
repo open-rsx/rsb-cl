@@ -32,9 +32,9 @@
   construction
 
   (let ((informer (make-informer "/informer/construction" t)))
-    ;(destroy pub)
-    )
-  )
+    (unwind-protect
+	 (check-participant informer)
+      (detach/ignore-errors informer))))
 
 (addtest (informer-root
           :documentation
