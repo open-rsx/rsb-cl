@@ -84,16 +84,31 @@ mean to call some handlers, for example."))
 
 (defgeneric notify (recipient subject action)
   (:documentation
-   "Methods should return one of the symbols :not-implemented
-or :implemented to indicate whether the combination of SUBJECT and
-ACTION could be implemented by RECIPIENT."))
+   "When ACTION is either :filter-added or :filter-removed, methods
+should return one of the symbols :not-implemented or :implemented to
+indicate whether the combination of the filter SUBJECT and ACTION
+could be implemented by RECIPIENT."))
 
 
 ;;; Default behavior
 ;;
 
 (defmethod notify ((recipient t) (subject t) (action t))
-  "The default behavior is to do nothing and state the fact."
+  "The default behavior is to do nothing."
+  (values))
+
+(defmethod notify ((recipient t)
+		   (subject   t)
+		   (action    (eql :filter-added)))
+  "The default behavior for filter actions is to do nothing and state
+the fact."
+  :not-implemented)
+
+(defmethod notify ((recipient t)
+		   (subject   t)
+		   (action    (eql :filter-removed)))
+  "The default behavior for filter actions is to do nothing and state
+the fact."
   :not-implemented)
 
 
