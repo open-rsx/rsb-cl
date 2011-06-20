@@ -122,17 +122,11 @@ case, the payloads of LEFT and RIGHT are not considered."
 	   (funcall data-test (event-data left) (event-data right)))))
 
 (defmethod print-object ((object event) stream)
-  (bind (((:slots scope type data) object)
-	 (*print-length* (or *print-length* 5)))
-    (print-unreadable-id-object (object stream :type t)
-      (format stream "~@<~A ~S ~S~@[ (~D)~]~@:>"
-	      (scope-string scope)
-	      type
-	      (etypecase data
-		(string (%maybe-shorten-string data *print-length*))
-		(t      data))
-	      (when (typep data 'sequence)
-		(length data))))))
+  (print-unreadable-id-object (object stream :type t)
+    (format stream "~@<~A ~S ~/rsb::print-event-data/~@:>"
+	    (scope-string (event-scope object))
+	    (event-type object)
+	    (event-data object))))
 
 
 ;;; Convenience
@@ -164,6 +158,19 @@ plist META-DATA."
 
 ;;; Utility functions
 ;;
+
+(defun print-event-data (stream data colon? at?)
+  "Print the event payload DATA to stream in a type-dependent manner.
+This function is intended for use with the / `format' control. COLON?
+and AT? are ignored."
+  (declare (ignore colon? at?))
+  (let ((*print-length* (or *print-length* 5)))
+    (format stream "~S~@[ (~D)~]"
+	    (etypecase data
+	      (string (%maybe-shorten-string data *print-length*))
+	      (t      data))
+	    (when (typep data 'sequence)
+	      (length data)))))
 
 (defun %maybe-shorten-string (string max)
   "DOC"
