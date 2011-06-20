@@ -71,11 +71,12 @@ does not work properly, yet.~@:>")))
 event or maybe nil when BLOCK? is nil."
   (bind (((:accessors (connectors    processor-connectors)
 		      (current-event processor-current-event)) processor))
-   (when (some (rcurry #'emit block?) connectors)
-     ;; TODO Round-robin may make sense for multiple connectors in
-     ;; non-blocking mode.
-     ;; (setf connectors (rotate connectors -1))
-     current-event)))
+    (setf current-event nil)
+    ;; Round-robin for multiple connectors in non-blocking mode.
+    (iter (some (rcurry #'emit block?)
+		(setf connectors (rotate connectors -1)))
+	  (until (or current-event (not block?))))
+    current-event))
 
 (defmethod handle ((processor pull-processor)
 		   (event     event))
