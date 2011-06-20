@@ -44,22 +44,14 @@ that arrived through connector."))
    "This connector class implements push-style event receiving for the
 Spread transport."))
 
-;; TODO handle communication errors
 (defmethod receive-messages ((connector in-push-connector))
-  (bind (((:accessors-r/o (connection connector-connection)) connector))
-    (iter (while t)
-	  (multiple-value-call #'handle-message
-	    (values connector) (receive-message connection t)))))
-
-(defmethod handle-message ((connector   in-push-connector)
-			   (payload     simple-array)
-			   (sender      string)
-			   (destination list))
-  "Try to converter NOTIFICATION into one or zero events. Accordingly,
-return either an `event' instance or nil."
-  (let ((event (message->event connector payload :undetermined)))
-    ;; Due to fragmentation of large events into multiple
-    ;; notifications and error handling policies, we may not obtain an
-    ;; `event' instance from the notification.
-    (when event
-      (handle connector event))))
+  (iter (while t)
+	(let* ((message (receive-message connector t))
+	       ;; Try to convert MESSAGE into one or zero events (in
+	       ;; the latter case, EVENT is nil).
+	       (event   (message->event connector message :undetermined)))
+	  ;; Due to fragmentation of large events into multiple
+	  ;; notifications and error handling policies, we may not
+	  ;; obtain an `event' instance from the notification.
+	  (when event
+	    (handle connector event)))))
