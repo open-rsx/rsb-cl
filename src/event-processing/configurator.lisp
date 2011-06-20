@@ -79,6 +79,10 @@ configurator is responsible for.")
   "Detach all connectors from the scope of CONFIGURATOR."
   (iter (for connector in (configurator-connectors configurator))
 	(restart-case
-	    (notify configurator connector :connector-removed)
+	    ;; Give each connector ten seconds to detach. If one takes
+	    ;; longer, skip it.
+	    #+sbcl (sb-ext:with-timeout 10
+		     (notify configurator connector :connector-removed))
+	    #-sbcl (notify configurator connector :connector-removed)
 	  (ignore-error ()
 	    :report "Ignore the error and continue with the remaining connectors."))))

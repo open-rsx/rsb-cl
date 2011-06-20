@@ -71,11 +71,12 @@ the transport or transports it uses for this participation."))
   "Like `detach' but handle errors that occur during detaching by
 continuing in a best effort manner instead of signaling."
   (handler-bind
-      ((error #'(lambda (condition)
-		  (warn "~@<Error during detaching: ~A~@:>" condition)
-		  (let ((ignore-error (find-restart 'ignore-error)))
-		    (when ignore-error
-		      (invoke-restart ignore-error))))))
+      (((or error #+sbcl sb-ext:timeout)
+	#'(lambda (condition)
+	    (warn "~@<Error during detaching: ~A~@:>" condition)
+	    (let ((ignore-error (find-restart 'ignore-error)))
+	      (when ignore-error
+		(invoke-restart ignore-error))))))
     (detach participant)))
 
 
