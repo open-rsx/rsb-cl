@@ -33,8 +33,7 @@ events.")
    (compiled-xpath :type     function
 		   :reader   filter-compiled-xpath
 		   :documentation
-		   "A compiled version of the XPath of the
-filter. Computed lazily."))
+		   "A compiled version of the XPath of the filter."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :xpath (missing-required-initarg 'xpath-filter :xpath))
@@ -61,10 +60,12 @@ events."))
   "Match the data of EVENT against the XPath of FILTER."
   (bind (((:accessors-r/o
 	   (compiled-xpath filter-compiled-xpath)) filter))
-    (not (xpath:node-set-empty-p
-	  (xpath:evaluate-compiled compiled-xpath payload t)))))
+    (xpath-result->filter-result
+     (xpath:evaluate-compiled compiled-xpath payload t))))
 
 (defmethod payload-matches? ((filter xpath-filter) (payload string))
+  "Try to parse PAYLOAD as an XML document and proceed with the
+matching in case of success."
   (let ((doc (ignore-errors
 	       (cxml:parse payload (stp:make-builder)))))
     (if doc
@@ -76,3 +77,15 @@ events."))
     (print-unreadable-object (object stream :type t :identity t)
       (format stream "~A~:[~; [compiled]~]"
 	      xpath compiled-xpath))))
+
+
+;;; Utility functions
+;;
+
+(defun xpath-result->filter-result (result)
+  "Return a non-nil if RESULT represents a matching XPath result and
+nil otherwise."
+  (etypecase result
+    (xpath:node-set (not (xpath:node-set-empty-p result)))
+    (string         (emptyp result))
+    (t              result)))
