@@ -20,6 +20,8 @@
 (cl:in-package :cl-user)
 
 (defpackage :rsb.transport.spread
+  (:nicknames :rsb.tp.spread)
+
   (:shadow
    :connector)
 
