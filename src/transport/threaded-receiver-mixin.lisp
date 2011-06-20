@@ -79,7 +79,7 @@ thread."))
   (stop-receiver connector))
 
 (defmethod start-receiver ((connector threaded-receiver-mixin))
-  (log1 :info "~A Starting receiver thread" connector)
+  (log1 :info connector "Starting receiver thread")
   (bind (((:accessors
 	   (control-mutex     connector-control-mutex)
 	   (control-condition connector-control-condition)) connector))
@@ -99,11 +99,11 @@ thread."))
   (bind (((:accessors (thread connector-thread)) connector))
     ;; Interrupt the receiver thread and throw our `terminate-thread'
     ;; tag.
-    (log1 :info "~A Interrupting receiver thread" connector)
+    (log1 :info connector "Interrupting receiver thread")
     (bt:interrupt-thread thread #'(lambda () (throw 'terminate-thread nil)))
 
     ;; The thread should be terminating or already have terminated.
-    (log1 :info "~A Joining receiver thread" connector)
+    (log1 :info connector "Joining receiver thread")
     (bt:join-thread thread)
     (setf thread nil)))
 
@@ -120,6 +120,6 @@ requests."
       (bt:with-lock-held (control-mutex)
 	(setf thread (bt:current-thread))
 	(bt:condition-notify control-condition)))
-    (log1 :info "~A Entering receive loop" connector)
+    (log1 :info connector "Entering receive loop")
     (call-next-method))
-  (log1 :info "~A Left receive loop" connector))
+  (log1 :info connector "Left receive loop"))

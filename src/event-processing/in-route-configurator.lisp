@@ -42,11 +42,11 @@ participant."))
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
     ;; Notify new connector regarding scope and filters.
-    (log1 :info "~S attaching connector ~S to ~S" configurator connector scope)
+    (log1 :info configurator "Attaching connector ~S to ~S" connector scope)
     (notify connector scope :attached)
 
     (iter (for filter in filters)
-	  (log1 :info "~S adding filter ~S to ~S" configurator filter connector)
+	  (log1 :info configurator "Adding filter ~S to ~S" filter connector)
 	  (unless (eq (notify connector filter :filter-added) :implemented)
 	    (pushnew filter (processor-filters processor))))
 
@@ -54,7 +54,7 @@ participant."))
     ;; handlers.
     (notify processor connector action)
 
-    (log1 :info "~S connecting ~S -> ~S" configurator connector processor)
+    (log1 :info configurator "Connecting ~S -> ~S" connector processor)
     (push processor (handlers connector))
 
     :implemented))
@@ -68,17 +68,17 @@ participant."))
 	   (processor configurator-processor)) configurator))
     ;; Remove processor from connectors handlers and notify regarding
     ;; removed connector.
-    (log1 :info "~S disconnecting ~S -> ~S" configurator connector processor)
+    (log1 :info configurator "Disconnecting ~S -> ~S" connector processor)
     (removef (handlers connector) processor)
 
     (notify processor connector action)
 
     ;; Notify remove connector regarding filters and scope.
     (iter (for filter in filters)
-	  (log1 :info "~S removing filter ~S from ~S" configurator filter connector)
+	  (log1 :info configurator "Removing filter ~S from ~S" filter connector)
 	  (notify connector filter :filter-removed))
 
-    (log1 :info "~S detaching connector ~S from ~S" configurator connector scope)
+    (log1 :info configurator "Detaching connector ~S from ~S" connector scope)
     (notify connector scope :detached)
 
     :implemented))
@@ -138,12 +138,12 @@ connectors and processor."
 		   (handler      t)
 		   (action       (eql :handler-added)))
   (bind ((processor (configurator-processor configurator)))
-    (log1 :info "~S adding handler ~S to ~S" configurator handler processor)
+    (log1 :info configurator "Adding handler ~S to ~S" handler processor)
     (push handler (handlers processor))))
 
 (defmethod notify ((configurator in-route-configurator)
 		   (handler      t)
 		   (action       (eql :handler-removed)))
   (bind ((processor (configurator-processor configurator)))
-    (log1 :info "~S removing handler ~S from ~S" configurator handler processor)
+    (log1 :info configurator "Removing handler ~S from ~S" handler processor)
     (removef (handlers processor) handler)))

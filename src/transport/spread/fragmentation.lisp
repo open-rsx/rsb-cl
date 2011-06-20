@@ -91,7 +91,7 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
 	 ((:accessors-r/o
 	   (id rsb.protocol::notification-data-part)) fragment))
-    (log1 :info "~S processing fragment ~S" assembly id)
+    (log1 :info assembly "Processing fragment ~{~2,'0X~}" (coerce id 'list))
     (cond
       ;; Bounds check for fragment id.
       ((not (<= 0 id (1- (length fragments))))
@@ -248,7 +248,7 @@ delete them."
 			 :test #'>=
 			 :key  #'assembly-age)))
 	(when old
-	  (log1 :info "~S Removing partial assemblies ~_~{~S~^, ~}" pool old)
+	  (log1 :info pool "Removing partial assemblies ~_~{~S~^, ~}" old)
 	  (iter (for assembly in old)
 		(remhash (assembly-id assembly) assemblies)))))))
 

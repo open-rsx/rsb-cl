@@ -59,19 +59,19 @@ process."))
 (defmethod notify ((connector in-pull-connector)
 		   (scope     scope)
 		   (action    (eql :attached)))
-  (log1 :info "~S Attaching to scope ~S" connector scope)
+  (log1 :info connector "Attaching to scope ~S" scope)
   (push connector (by-scope scope)))
 
 (defmethod notify ((connector in-pull-connector)
 		   (scope     scope)
 		   (action    (eql :detached)))
-  (log1 :info "~S detaching from scope ~S" connector scope)
+  (log1 :info connector "Detaching from scope ~S" scope)
   (removef (by-scope scope) connector :count 1))
 
 (defmethod handle ((connector in-pull-connector)
 		   (event     event))
   "Put EVENT into the queue maintained by CONNECTOR."
-  (log1 :info "~S adding event ~S" connector event)
+  (log1 :info connector "Adding event ~S" event)
   #+sbcl (sb-concurrency:send-message (connector-queue connector) event)
   #-sbcl (appendf (connector-queue connector) event))
 

@@ -37,10 +37,10 @@
   (bind (((:accessors-r/o
 	   (scope     configurator-scope)
 	   (processor configurator-processor)) configurator))
-    (log1 :info "~S attaching connector ~S to scope ~S" configurator connector scope)
+    (log1 :info configurator "Attaching connector ~S to scope ~S" connector scope)
     (notify connector scope :attached)
 
-    (log1 :info "~S connecting ~S -> ~S" configurator connector processor)
+    (log1 :info configurator "Connecting ~S -> ~S" connector processor)
     (push connector (handlers processor))))
 
 (defmethod notify ((configurator out-route-configurator)

@@ -71,8 +71,8 @@ participant instance as its \"client\"."))
 	(call-next-method)
       (let ((added   (set-difference new-value old-value))
 	    (removed (set-difference old-value new-value)))
-	(log1 :info "~@<~S added   connectors ~{~S~^, ~}~@:>" configurator added)
-	(log1 :info "~@<~S removed connectors ~{~S~^, ~}~@:>" configurator removed)
+	(log1 :info configurator "Added   connectors ~{~S~^, ~}" added)
+	(log1 :info configurator "Removed connectors ~{~S~^, ~}" removed)
 
 	(iter (for connector in added)
 	      (notify configurator connector :connector-added))
@@ -81,6 +81,7 @@ participant instance as its \"client\"."))
 
 (defmethod detach ((configurator configurator))
   "Detach all connectors from the scope of CONFIGURATOR."
+  (log1 :info configurator "Detaching ~D connector~:P" (length (configurator-connectors configurator)))
   (iter (for connector in (configurator-connectors configurator))
 	(restart-case
 	    ;; Give each connector ten seconds to detach. If one takes
