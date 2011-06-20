@@ -69,19 +69,3 @@ connectors."))
 	  (or connection
 	      (make-instance 'connection
 			     :name name)))))
-
-(defmethod notify ((connector connector)
-		   (scope     scope)
-		   (action    (eql :attached)))
-  (bind (((:accessors-r/o (connection connector-connection)) connector)
-	 (group-name (scope->group scope)))
-    (ref-group connection group-name))
-  :implemented)
-
-(defmethod notify ((connector connector)
-		   (scope     scope)
-		   (action    (eql :detached)))
-  (bind (((:accessors-r/o (connection connector-connection)) connector)
-	 (group-name (scope->group scope)))
-    (unref-group connection group-name))
-  :implemented)
