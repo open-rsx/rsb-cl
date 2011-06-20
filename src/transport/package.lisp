@@ -83,6 +83,14 @@
    :connector-started?
    :connector-thread)
 
+  ;; Error handling mixin classes
+  (:export
+   :error-handling-push-receiver-mixin
+
+   :error-handling-pull-receiver-mixin
+
+   :error-handling-sender-mixin)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation.

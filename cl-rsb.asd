@@ -235,6 +235,8 @@
 			      (:file       "message-receiver-mixin"
 			       :depends-on ("package"))
 			      (:file       "threaded-receiver-mixin"
+			       :depends-on ("package"))
+			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))))
 
 		(:module     "transport-inprocess"
@@ -340,6 +342,8 @@
 		 :depends-on ("test")
 		 :components ((:file       "package")
 			      (:file       "threaded-receiver-mixin"
+			       :depends-on ("package"))
+			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))))
 
 		(:module     "spread"
