@@ -237,3 +237,7 @@
 ;;
 
 (log5:defcategory rsb)
+
+(defmacro log1 (category format &rest args)
+  `(log5:log-for (or :rsb ,(intern (string category) :log5))
+		 ,format ,@args))
