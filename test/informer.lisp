@@ -19,7 +19,8 @@
 
 (in-package :rsb.test)
 
-(deftestsuite informer-root (root)
+(deftestsuite informer-root (root
+			     participant-suite)
   ()
   (:documentation
    "Unit tests for the `informer' class and `make-informer' function."))
@@ -33,7 +34,7 @@
 
   (let ((informer (make-informer "/informer/construction" t)))
     (unwind-protect
-	 (check-participant informer)
+	 (check-participant informer "/informer/construction")
       (detach/ignore-errors informer))))
 
 (addtest (informer-root
