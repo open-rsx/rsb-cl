@@ -69,10 +69,18 @@ option."))
 CONNECTOR."
   (connector-direction (class-of connector)))
 
+(defmethod connector-direction ((connector class))
+  "Stop if we hit a class which is not a `connector-class'."
+  (values))
+
 (defmethod connector-wire-type ((connector standard-object))
   "Default behavior is to retrieve the wire-type from the class of
 CONNECTOR."
   (connector-wire-type (class-of connector)))
+
+(defmethod connector-wire-type ((class class))
+  "Stop if we hit a class which is not a `connector-class'."
+  (values))
 
 (defmethod connector-schemas ((class class))
   "Default behavior is to claim to support no schemas."

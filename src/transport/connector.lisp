@@ -61,9 +61,6 @@ options."))
   (when direction
     (setf (slot-value instance 'direction) (first direction))))
 
-(defmethod connector-wire-type ((class class))
-  (values))
-
 (defmethod connector-wire-type ((class connector-class))
   "Use wire-type stored in CLASS or retrieve from superclasses if
 necessary. "
