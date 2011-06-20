@@ -20,34 +20,42 @@
 (in-package :rsb.event-processing.test)
 
 (deftestsuite error-policy-mixin-root (event-processing-root)
-  ((simple-processor (make-instance (ensure-processor-class
-				     '(error-policy-mixin
-				       broadcast-processor))))
-   (simple-event     (make-event "/" "bla")))
+  ((simple-processor (make-instance 'error-policy-mixin)))
   (:documentation
    "Test suite for the `error-policy-mixin' class."))
 
-(defun signaling-handler (event)
-  "A handler that unconditionally signals an error."
-  (error "~@<I hate ~A.~@:>" event))
+(defun signaling-function ()
+  "A function that unconditionally signals an error."
+  (restart-case
+      (error "~@<I like to signal.~@:>")
+    (log    (condition) (declare (ignore condition)) nil)
+    (ignore () nil)))
 
-(addtest (error-policy-mixin-root
-          :documentation
-	  "Test basic error handling policies of the
+(macrolet
+    ((define-smoke-test (name &body invoke-form)
+       `(addtest (error-policy-mixin-root
+		  :documentation
+		  "Test basic error handling policies of the
 `error-policy-mixin' class.")
-  smoke
+	  ,name
 
-  (push #'signaling-handler (handlers simple-processor))
+	  ;; Error policy nil means to just unwind.
+	  (setf (processor-error-policy simple-processor) nil)
+	  (ensure-condition 'simple-error
+	    ,@invoke-form)
 
-  ;; Error policy nil means to just unwind.
-  (setf (processor-error-policy simple-processor) nil)
-  (ensure-condition 'simple-error
-    (handle simple-processor simple-event))
+	  ;; The error policy #'ignore-error should prevent the error
+	  ;; from being signaled.
+	  (setf (processor-error-policy simple-processor) #'ignore-error)
+	  ,@invoke-form
 
-  ;; Error policy nil means to just unwind.
-  (setf (processor-error-policy simple-processor) #'ignore-error)
-  (handle simple-processor simple-event)
+	  ;; The error policy #'log-error should prevent the error
+	  ;; from being signaled.
+	  (setf (processor-error-policy simple-processor) #'log-error)
+	  ,@invoke-form)))
 
-  ;; Error policy nil means to just unwind.
-  (setf (processor-error-policy simple-processor) #'log-error)
-  (handle simple-processor simple-event))
+  (define-smoke-test smoke/function
+      (invoke-with-error-policy simple-processor #'signaling-function))
+
+  (define-smoke-test smoke/macro
+      (with-error-policy (simple-processor) (signaling-function))))

@@ -1,4 +1,4 @@
-;;; error-policy-mixin.lisp --- A mixin for dispatch error handling.
+;;; error-policy-mixin.lisp --- A mixin for client-supplied error policies.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -25,44 +25,30 @@
 		 :accessor processor-error-policy
 		 :initform nil
 		 :documentation
-		 "Nil or a function to be called in case of dispatch
-errors. Functions installed here should be prepared to be called from
-multiple threads simultaneously."))
+		 "Stores the error policy that should be applied in
+case of errors. Nil or a function to be called in case of dispatch
+errors. Functions will be called with the condition object is sole
+argument.
+Functions installed here should be prepared to be called from multiple
+threads simultaneously."))
   (:documentation
-   "This mixin class is intended to mixed into processor classes that
-perform potentially error signaling tasks in their `dispatch'
-methods. This class adds an :around method on `dispatch' that installs
-restarts for error recovery and optionally calls an error policy
-function."))
+   "This class is intended to be mixed into classes that need to
+handle conditions according to a client-supplied policy."))
 
-(defmethod dispatch :around ((processor error-policy-mixin)
-			     (event     event))
-  "Install log and ignore restarts around a call to the next
-`dispatch' method. In case of an error, call the error-policy function
-of PROCESSOR, if any."
+(defun invoke-with-error-policy (processor thunk)
+  "Invoke THUNK with a handler that applies the error policy of
+PROCESSOR."
   (handler-bind
       ((error #'(lambda (condition)
 		  (bind (((:accessors-r/o
 			   (policy processor-error-policy)) processor))
 		    (unless policy
-		      (log1 :info "~@<Processor ~A does not have a ~
-error handling policy installed; unwinding.~@:>"
-			    processor))
+		      (log1 :warn processor "Do not have a error handling policy installed; unwinding"))
 		    (when policy
 		      (funcall policy condition))))))
-    (restart-case
-	(call-next-method)
-      (log (&optional condition)
-	:report (lambda (stream)
-		  (format stream "~@<Log a message and ignore the ~
-failure to dispatch event ~A.~@:>"
-			  event))
-	(log1 :warn "~@<Event processor ~A failed to dispatch the event ~
-~A~@[: ~A~].~@:>" processor event condition)
-	nil)
-      (ignore ()
-	:report (lambda (stream)
-		  (format stream "~@<Ignore the failure to dispatch ~
-event ~A.~@:>"
-			  event))
-	nil))))
+    (funcall thunk)))
+
+(defmacro with-error-policy ((processor) &body body)
+  "Execute BODY with a condition handler that applies the error policy
+of processor."
+  `(invoke-with-error-policy ,processor #'(lambda () ,@body)))

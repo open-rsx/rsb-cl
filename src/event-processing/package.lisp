@@ -90,7 +90,14 @@
   ;; `error-policy-mixin' class
   (:export
    :error-policy-mixin
-   :processor-error-policy)
+   :processor-error-policy
+
+   :invoke-with-error-policy
+   :with-error-policy)
+
+  ;; `error-handling-dispatcher-mixin' class
+  (:export
+   :error-handling-dispatcher-mixin)
 
   ;; `client' class and protocol
   (:export

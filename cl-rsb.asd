@@ -163,6 +163,8 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "error-policy-mixin"
 			       :depends-on ("package" "protocol"))
+			      (:file       "error-handling-dispatcher-mixin"
+			       :depends-on ("package" "error-policy-mixin"))
 
 			      (:file       "configurator"
 			       :depends-on ("package"
@@ -219,7 +221,9 @@
 
 		(:module     "transport"
 		 :pathname   "src/transport"
-		 :depends-on ("src" "converter") ;; for conversion-mixin
+		 :depends-on ("src"
+			      "event-processing" ;; for error-policy-mixin
+			      "converter")       ;; for conversion-mixin
 		 :components ((:file       "package")
 			      (:file       "protocol"
 			       :depends-on ("package"))
@@ -316,6 +320,8 @@
 			      (:file       "util"
 			       :depends-on ("package"))
 			      (:file       "error-policy-mixin"
+			       :depends-on ("package"))
+			      (:file       "error-handling-dispatcher-mixin"
 			       :depends-on ("package"))))
 
 		(:module     "converter"

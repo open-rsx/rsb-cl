@@ -54,11 +54,11 @@ participant instance as its \"client\"."))
 	  (make-instance
 	   (ensure-processor-class
 	    (ecase direction
-	      (:in-push '(error-policy-mixin
+	      (:in-push '(error-handling-dispatcher-mixin
 			  filtering-processor-mixin
 			  deliver-timestamp-mixin
 			  broadcast-processor))
-	      (:in-pull '(error-policy-mixin
+	      (:in-pull '(error-handling-dispatcher-mixin
 			  filtering-processor-mixin
 			  deliver-timestamp-mixin
 			  pull-processor))
