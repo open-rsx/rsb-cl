@@ -32,13 +32,17 @@ configurator is responsible for.")
 	       :accessor configurator-connectors
 	       :initform nil
 	       :documentation
-	       "")
+	       "Stores the list of connector instances the client uses
+to access the bus.")
    (processor  :initarg  :processor
 	       :reader   configurator-processor
 	       :documentation
-	       ""))
+	       "Stores the processor instance that handles incoming or
+outgoing events."))
   (:documentation
-   "DOC"))
+   "This class is intended to be used as a superclass of configurator
+classes for specific directions. Every configurator instance has a
+participant instance as its \"client\"."))
 
 (defmethod shared-initialize :after ((instance   configurator)
                                      (slot-names t)
