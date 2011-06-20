@@ -18,16 +18,6 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
 (in-package :rsb.transport.spread)
-
-
-;;; Protocol for in-direction, push-based connector
-;;
-
-(defgeneric handle-message (connector payload sender destination)
-  (:documentation
-   "Process the message from SENDER to DESTINATION consisting PAYLOAD
-that arrived through connector."))
-
 
 ;;; `in-push-connector' class
 ;;
