@@ -43,6 +43,11 @@ connector classes for Spread."))
 		   (action    (eql :detached)))
   (unref-group (connector-connection connector) (scope->group scope)))
 
+(defmethod receive-message ((connector in-connector)
+			    (block?    t))
+  "Delegate receiving a message to the connection of CONNECTOR."
+  (receive-message (connector-connection connector) block?))
+
 (defmethod message->event ((connector   in-connector)
 			   (message     simple-array)
 			   (wire-schema t))

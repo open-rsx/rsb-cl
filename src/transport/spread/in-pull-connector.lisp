@@ -31,21 +31,19 @@
 transport."))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
-  (bind (((:accessors-r/o (connection connector-connection)) connector))
-    (iter ;; Maybe block until a notification is received. Try to
-	  ;; convert into an event and return the event in case of
-	  ;; success. In blocking mode, wait for the next
-	  ;; notification.
-	  (bind (((:values payload _ _)
-		  (receive-message connection block?))
-		 (event (when payload
-			  (message->event connector payload :undetermined))))
+  (iter ;; Maybe block until a notification is received. Try to
+        ;; convert into an event and return the event in case of
+        ;; success. In blocking mode, wait for the next notification.
+    (bind (((:values payload _ _)
+	    (receive-message connector block?))
+	   (event (when payload
+		    (message->event connector payload :undetermined))))
 
-	    ;; Due to fragmentation of large events into multiple
-	    ;; notifications, non-blocking receive mode and error
-	    ;; handling policies, we may not obtain an `event'
-	    ;; instance from the notification.
-	    (when event
-	      (dispatch connector event))
-	    (when (or event (not block?))
-	      (return event))))))
+      ;; Due to fragmentation of large events into multiple
+      ;; notifications, non-blocking receive mode and error
+      ;; handling policies, we may not obtain an `event'
+      ;; instance from the notification.
+      (when event
+	(dispatch connector event))
+      (when (or event (not block?))
+	(return event)))))
