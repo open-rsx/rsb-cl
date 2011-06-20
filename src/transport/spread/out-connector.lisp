@@ -41,13 +41,13 @@ should use."))
    "A connector for sending data over spread."))
 
 (defmethod handle ((connector out-connector) (event event))
-  (bind ((max-fragment-size (connector-max-fragment-size connector))
-	 (group-names       (scope->groups (event-scope event)))
-	 (notifications     (event->notifications
-			     connector event max-fragment-size))) ;; TODO only if group is populated?
+  (bind (((:accessors-r/o
+	   (connection        connector-connection)
+	   (max-fragment-size connector-max-fragment-size)) connector)
+	 (group-names   (scope->groups (event-scope event)))
+	 (notifications (event->notifications
+			 connector event max-fragment-size))) ;; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (iter (for notification in notifications)
-	  (send-message (slot-value connector 'connection)
-			group-names
-			(pb::pack1 notification)))))
+	  (send-message connection group-names (pb::pack1 notification)))))
