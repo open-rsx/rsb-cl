@@ -152,8 +152,10 @@
 
    :event=)
 
-  ;; Participant
+  ;; Participant protocol and `participant' class
   (:export
+   :detach :detach/ignore-errors
+
    :participant
    :participant-id
    :participant-scope)

@@ -74,3 +74,11 @@ configurator is responsible for.")
 	      (notify configurator connector :connector-added))
 	(iter (for connector in removed)
 	      (notify configurator connector :connector-removed))))))
+
+(defmethod detach ((configurator configurator))
+  "Detach all connectors from the scope of CONFIGURATOR."
+  (iter (for connector in (configurator-connectors configurator))
+	(restart-case
+	    (notify configurator connector :connector-removed)
+	  (ignore-error ()
+	    :report "Ignore the error and continue with the remaining connectors."))))

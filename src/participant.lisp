@@ -34,6 +34,10 @@ notifications on one channel of the bus."))
 			     (participant-id participant)))
    (relative-url (participant-scope participant))))
 
+(defmethod detach ((participant participant))
+  "Let PARTICIPANT's configurator do the heavy lifting."
+  (detach (rsb.ep:client-configurator participant)))
+
 (defmethod print-object ((object participant) stream)
   (print-unreadable-id-object (object stream :type t)
     (format stream "~A" (scope-string (participant-scope object)))))
@@ -78,7 +82,8 @@ Return three values:
     ;; We want the generated method to be specialized on URI
     ;; designators.
     (unless (eq (second (first args)) 'puri:uri)
-      (error "~@<The specializer of the first parameter is ~S but should be ~S.~@:>"
+      (error "~@<The specializer of the first parameter is ~S, but ~
+should be ~S.~@:>"
 	     (second (first args)) 'puri:uri))
 
     `(progn

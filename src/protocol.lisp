@@ -59,6 +59,26 @@ without further actions."
 anchored at an absolute location like a transport URL."))
 
 
+;;; Common participant protocol
+;;
+
+(defgeneric detach (participant)
+  (:documentation
+   "Detach PARTICIPANT from the channel in which it participates and
+the transport or transports it uses for this participation."))
+
+(defun detach/ignore-errors (participant)
+  "Like `detach' but handle errors that occur during detaching by
+continuing in a best effort manner instead of signaling."
+  (handler-bind
+      ((error #'(lambda (condition)
+		  (warn "~@<Error during detaching: ~A~@:>" condition)
+		  (let ((ignore-error (find-restart 'ignore-error)))
+		    (when ignore-error
+		      (invoke-restart ignore-error))))))
+    (detach participant)))
+
+
 ;;; Common protocol for receiving participants
 ;;
 

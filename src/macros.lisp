@@ -31,8 +31,7 @@ ends normally or because of a control transfer."
   `(let ((,var (make-listener ,scope-or-uri ,@args)))
      (unwind-protect
 	 (progn ,@body)
-       ;(destroy ,var)
-       )))
+       (detach/ignore-errors ,var))))
 
 (defmacro with-reader ((var scope-or-uri
 			&rest args
@@ -46,8 +45,7 @@ ends normally or because of a control transfer."
   `(let ((,var (make-reader ,scope-or-uri ,@args)))
      (unwind-protect
 	 (progn ,@body)
-       ;(destroy ,var)
-       )))
+       (detach/ignore-errors ,var))))
 
 (defmacro with-handler (listener
 			((event-var) &body handler-body)
@@ -57,13 +55,13 @@ ends normally or because of a control transfer."
 
   (once-only (listener)
     (with-unique-names (handler-var)
-     `(let ((,handler-var (function (lambda (,event-var)
-			    ,@handler-body))))
-	(unwind-protect
-	     (progn
-	       (push ,handler-var (rsb.ep:handlers ,listener))
-	       ,@body)
-	  (removef (rsb.ep:handlers ,listener) ,handler-var))))))
+      `(let ((,handler-var (function (lambda (,event-var)
+			     ,@handler-body))))
+	 (unwind-protect
+	      (progn
+		(push ,handler-var (rsb.ep:handlers ,listener))
+		,@body)
+	   (removef (rsb.ep:handlers ,listener) ,handler-var))))))
 
 (defmacro with-informer ((var scope type
 			  &rest args
@@ -77,5 +75,4 @@ of a control transfer."
   `(let ((,var (make-informer ,scope ,type ,@args)))
      (unwind-protect
 	 (progn ,@body)
-       ;(destroy ,var)
-       )))
+       (detach/ignore-errors ,var))))
