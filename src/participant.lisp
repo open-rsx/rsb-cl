@@ -43,7 +43,15 @@ notifications on one channel of the bus."))
 ;;
 
 (defun make-participant (class scope direction transports &rest args)
-  "Make and return a participant instance of CLASS "
+  "Make and return a participant instance of CLASS that participates
+in the channel designated by SCOPE. DIRECTION is one
+of :in-push, :in-pull and :out. TRANSPORTS is a list of connector
+classes. ARGS are arguments for the created transport instances.
+
+Return three values:
++ the `participant' instance
++ the associated `rsb.event-processing:configurator' instance
++ the list of instantiated `rsb.transport:connectors'"
   (let* ((configurator (make-instance
 			(ecase direction
 			  ((:in-push :in-pull) 'rsb.ep:in-route-configurator)
@@ -73,6 +81,7 @@ notifications on one channel of the bus."))
 	     (second (first args)) 'puri:uri))
 
     `(progn
+       ;; This method operates on URIs.
        (defmethod ,make-name (,@args
 			      &key
 			      (transports (transport-options)))
@@ -80,6 +89,8 @@ notifications on one channel of the bus."))
 		 (uri->scope-and-options ,designator-arg transports)))
 	   (,make-name scope ,@(rest arg-names) :transports options)))
 
+       ;; This method operates on strings which turns into either URIs
+       ;; (if the string contains a colon) or scopes.
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
 			      &key
 			      (transports (transport-options)))
