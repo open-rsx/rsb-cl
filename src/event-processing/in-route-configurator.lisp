@@ -1,4 +1,4 @@
-;;; in-route-configurator.lisp ---
+;;; in-route-configurator.lisp --- Configurator for incoming event route.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -24,9 +24,11 @@
 	    :initform nil
 	    :accessor configurator-filters
 	    :documentation
-	    ""))
+	    "Stores the list of filters installed by the client."))
   (:documentation
-   "DOC"))
+   "Instances of this class configure in-direction connectors, filters
+and an event process for a client that is an event receiving
+participant."))
 
 ;; TODO this patterns occurs over and over
 #|
@@ -110,7 +112,8 @@ listeners."
 (defmethod notify ((configurator in-route-configurator)
 		   (filter       t)
 		   (action       (eql :filter-added)))
-  "DOC"
+  "Remove FILTER from CONFIGURATOR's filter list and notify its
+connectors."
   (push filter (configurator-filters configurator))
 
   (reduce #'merge-implementation-infos
