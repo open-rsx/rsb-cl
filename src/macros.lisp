@@ -30,7 +30,7 @@ ends normally or because of a control transfer."
 
   `(let ((,var (make-listener ,scope-or-uri ,@args)))
      (unwind-protect
-	 (progn ,@body)
+	  (progn ,@body)
        (detach/ignore-errors ,var))))
 
 (defmacro with-reader ((var scope-or-uri
@@ -44,7 +44,7 @@ ends normally or because of a control transfer."
 
   `(let ((,var (make-reader ,scope-or-uri ,@args)))
      (unwind-protect
-	 (progn ,@body)
+	  (progn ,@body)
        (detach/ignore-errors ,var))))
 
 (defmacro with-handler (listener
@@ -74,5 +74,5 @@ of a control transfer."
 
   `(let ((,var (make-informer ,scope ,type ,@args)))
      (unwind-protect
-	 (progn ,@body)
+	  (progn ,@body)
        (detach/ignore-errors ,var))))
