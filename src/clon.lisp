@@ -146,7 +146,7 @@ strings."
 			(list :enabled 'boolean
 			      :default nil
 			      :description
-			      "Enable this transport?")
+			      "Controls whether this transport should be part of the set of transports that are used by default, that is when no transport is specified explicitly.")
 			(rsb.transport:connector-options class)))
 	(let ((item (apply #'maybe-make-connector-option name option)))
 	  (if (listp item)
@@ -174,8 +174,8 @@ schemas~;supports the following schema~P: ~2:*~{~(~A~)~^, ~}~]."
   "Make and return a `clon:text' instance that lists options which
 have been excluded as a result of repeated occurrence."
   (com.dvlsoft.clon:make-text
-   :contents (format nil "This following option~P ~:[have~;has~] ~
-already been described above: ~{~(~A~)~^, ~}."
+   :contents (format nil "This connector also supports the following ~
+option~P which ~:[have~;has~] been described above: ~{~(~A~)~^, ~}."
 		     (length names) (length= 1 names) names)))
 
 (defun make-options-for-connector-class (class)
@@ -193,7 +193,8 @@ options for connector class CLASS."
 	   :header pretty-name
 	   :item   (make-schemas-text schemas)
 	   (append
-	    (or items (list :item +no-options-text+))
+	    (or items (unless repeated
+			(list :item +no-options-text+)))
 	    (when repeated
 	      (list :item (make-repeated-text repeated)))))))
 
