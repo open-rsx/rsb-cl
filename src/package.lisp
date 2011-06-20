@@ -149,7 +149,9 @@
    :make-event
    :make-event/typed
 
-   :event=)
+   :event=
+
+   :print-event-data)
 
   ;; Participant protocol and `participant' class
   (:export
