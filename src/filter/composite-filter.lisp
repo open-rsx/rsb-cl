@@ -54,7 +54,7 @@ rather than subclasses."))
    "Instances of this class make filtering decisions by forming the
 logical and of the decisions made by their subordinate filters."))
 
-(defmethod matches? ((filter conjoin-filter) (event event))
+(defmethod matches? ((filter conjoin-filter) (event t))
   (every (rcurry #'matches? event) (filter-children filter)))
 
 
@@ -74,5 +74,5 @@ logical and of the decisions made by their subordinate filters."))
    "Instances of this class make filtering decisions by forming the
 logical or of the decisions made by their subordinate filters."))
 
-(defmethod matches? ((filter disjoin-filter) (event event))
+(defmethod matches? ((filter disjoin-filter) (event t))
   (some (rcurry #'matches? event) (filter-children filter)))

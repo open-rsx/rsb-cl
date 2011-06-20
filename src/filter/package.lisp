@@ -86,6 +86,7 @@
 
   (:documentation
    "This package contains event filters. In general, filters are unary
-predicates that discriminate `rsb:event' instances . The filters in
-this package are implemented as funcallable classes with a specialized
-`matches?' method as the funcallable instance function."))
+predicates that discriminate arbitrary object and in particular
+`rsb:event' instances. The filters in this package are implemented as
+funcallable classes with a specialized `matches?' method as the
+funcallable instance function."))
