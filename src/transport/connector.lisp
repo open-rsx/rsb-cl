@@ -1,4 +1,4 @@
-;;; connector.lisp ---
+;;; connector.lisp --- Metaclass and superclass for connector classes.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
