@@ -111,12 +111,3 @@
   (:documentation
    "This package contains protocol, classes and methods for routing
 and processing of events."))
-
-
-(in-package :rsb.event-processing)
-
-(log5:defcategory :rsb.event-processing)
-
-(defmacro log1 (category format &rest args)
-  `(log5:log-for (or :rsb.event-processing ,(intern (string category) :log5))
-		 ,format ,@args))

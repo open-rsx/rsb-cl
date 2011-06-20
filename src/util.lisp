@@ -216,3 +216,32 @@ similar."
 				:search t
 				:output stream))
 	  :count 1 :from-end t))
+
+(defmacro log1 (category object-or-message &rest args)
+  "Log a message consisting of OBJECT-OR-MESSAGE and ARGS to the
+category designated by the keyword CATEGORY.
+If OBJECT-OR-MESSAGE is a string, it is assumed to be the message. In
+this case, ARGS are assumed to be format arguments for the message
+format string.
+If OBJECT-OR-MESSAGE is not a string, it is assumed to be the object
+at which the log message originates. In this case, the first element
+of ARGS is assumed to be the message string and the remaining
+arguments are assumed to be format arguments."
+  (check-type category keyword)
+
+  (bind ((category (intern (string category) :log5))
+	 (package  (iter (for name in (cons (package-name *package*)
+					    (package-nicknames *package*)))
+			 (finding name minimizing (length name))))
+	 (object   (unless (stringp object-or-message)
+		     object-or-message))
+	 ((message &rest args)
+	  (if object
+	      args
+	      (cons object-or-message args))))
+    (if object
+	`(log5:with-context ,package
+	   (log5:with-context ,object
+	     (log5:log-for ,category ,message ,@args)))
+	`(log5:with-context ,package
+	   (log5:log-for ,category ,message ,@args)))))

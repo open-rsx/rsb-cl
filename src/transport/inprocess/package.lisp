@@ -42,11 +42,3 @@
   (:documentation
    "This package contains a transport that delivers RSB events within
 a process."))
-
-(in-package :rsb.transport.inprocess)
-
-(log5:defcategory rsb.transport.inprocess)
-
-(defmacro log1 (category format &rest args)
-  `(log5:log-for (or :rsb.transport.inprocess ,(intern (string category) :log5))
-		 ,format ,@args))

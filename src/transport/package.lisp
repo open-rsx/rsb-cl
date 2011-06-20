@@ -104,11 +104,3 @@ transports.
 The efficiency of data handling can be increased by notifying
 connectors of restrictions that can be applied to the otherwise
 broadcast-style event delivery."))
-
-(in-package :rsb.transport)
-
-(log5:defcategory rsb.transport)
-
-(defmacro log1 (category format &rest args)
-  `(log5:log-for (or :rsb.transport ,(intern (string category) :log5))
-		 ,format ,@args))

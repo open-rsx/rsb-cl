@@ -89,7 +89,3 @@
 predicates that discriminate `rsb:event' instances . The filters in
 this package are implemented as funcallable classes with a specialized
 `matches?' method as the funcallable instance function."))
-
-(in-package :rsb.filter)
-
-(log5:defcategory rsb.filter)

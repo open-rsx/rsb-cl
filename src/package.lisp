@@ -214,6 +214,10 @@
 
    :with-informer)
 
+  ;; Logging
+  (:export
+   :log1)
+
   ;; Utility functions and macros
   (:export
    :print-id
@@ -231,15 +235,3 @@
 + subscribing to publishers
 + publishing events
 + event processing"))
-
-(in-package :rsb)
-
-
-;;; Logging
-;;
-
-(log5:defcategory rsb)
-
-(defmacro log1 (category format &rest args)
-  `(log5:log-for (or :rsb ,(intern (string category) :log5))
-		 ,format ,@args))

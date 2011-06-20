@@ -82,11 +82,3 @@
   (:documentation
    "This package contains a transport implementation based on the
 spread group communication system."))
-
-(in-package :rsb.transport.spread)
-
-(log5:defcategory rsb.transport.spread)
-
-(defmacro log1 (category format &rest args)
-  `(log5:log-for (or :rsb.transport.spread ,(intern (string category) :log5))
-		 ,format ,@args))
