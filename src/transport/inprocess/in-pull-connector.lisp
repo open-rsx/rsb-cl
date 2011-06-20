@@ -95,5 +95,8 @@ CONNECTOR, if there are any. If there are no queued events, block."
   t)
 
 (defmethod print-object ((object in-pull-connector) stream)
-    (print-unreadable-object (object stream :type t :identity t)
-      (format stream "(~D)" (connector-queue-count object))))
+  (print-unreadable-object (object stream :identity t)
+    (format stream "~A ~A (~D)"
+	    (connector-direction object)
+	    (connector-relative-url object "/")
+	    (connector-queue-count object))))
