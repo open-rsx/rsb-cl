@@ -29,10 +29,11 @@
 	 :documentation
 	 ""))
   (:documentation
-   "In the RSB version of the communication pattern (Publish-Subscribe,
-1:m-Communication) formed by publishers and subscribers, publishers
-broadcast RSB events for subscribers to receive. Each publisher has an
-associated SCOPE and type and known about its subscribers."))
+   "An informer is a participant that publishes events to a specific
+channel. Other participants on the same channel or a channel that
+includes the informer's channel can receive these events. It is
+possible for multiple informers to send events for the same
+channel."))
 
 (defmethod send :before ((informer informer) (data event))
   (bind (((:accessors-r/o (scope participant-scope)
