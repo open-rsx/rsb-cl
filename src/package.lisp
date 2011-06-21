@@ -32,8 +32,11 @@
   (:export
    :octet-vector
 
+   :error-policy
+
    :implementation-feedback
-   :direction)
+   :direction
+   :wire-type)
 
   ;; Conditions
   (:export

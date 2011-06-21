@@ -43,11 +43,20 @@
 	 (every #'valid-char? string))))
 
 
-;;; Transport-related types
+;;; Event-processing-related types
 ;;
+
+(deftype error-policy ()
+  "Objects of this type designate behaviors in case of errors."
+  '(or null function))
 
 (deftype implementation-feedback ()
   '(member :implemented :not-implemented))
 
 (deftype direction ()
   '(member :in-push :in-pull :out))
+
+(deftype wire-type ()
+  "A certain type of data exchanged \"on the wire\" of a transport
+mechanism."
+  '(or symbol list))
