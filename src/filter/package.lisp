@@ -70,6 +70,11 @@
    :scope-filter
    :filter-scope)
 
+  ;; `type-filter' class
+  (:export
+   :type-filter
+   :filter-type)
+
   ;; `origin-filter' class
   (:export
    :origin-filter
@@ -79,6 +84,12 @@
   (:export
    :regex-filter
    :filter-regex)
+
+  ;; `xpath-filter' class
+  (:export
+   :xpath-filter
+   :filter-xpath
+   :filter-compiled-xpath)
 
   ;; DSL
   (:export
