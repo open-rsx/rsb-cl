@@ -24,6 +24,7 @@
 ;;
 
 (defclass in-connector (connector
+			restart-message-receiver-mixin
 			broadcast-processor
 			assembly-mixin)
   ()
