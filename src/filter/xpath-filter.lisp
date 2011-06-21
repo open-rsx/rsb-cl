@@ -73,10 +73,8 @@ matching in case of success."
 	:cannot-tell)))
 
 (defmethod print-object ((object xpath-filter) stream)
-  (with-slots (xpath compiled-xpath) object
-    (print-unreadable-object (object stream :type t :identity t)
-      (format stream "~A~:[~; [compiled]~]"
-	      xpath compiled-xpath))))
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~S" (filter-xpath object))))
 
 
 ;;; Utility functions
