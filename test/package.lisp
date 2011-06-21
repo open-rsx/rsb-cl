@@ -80,6 +80,7 @@
      (ensure-same
       (event-data event) data
       :test #'equalp)))
+  (:timeout 20)
   (:documentation
    "Root unit test suite of the cl-rsb system."))
 
