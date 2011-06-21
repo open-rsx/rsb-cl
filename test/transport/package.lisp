@@ -35,6 +35,14 @@
 
   (:export
    :transport-root)
+
+  (:export
+   :connector-suite
+   :check-connector-class
+   :check-connector
+
+   :define-basic-connector-test-cases)
+
   (:documentation
    "This package contains unit tests for the transport module."))
 
@@ -44,3 +52,86 @@
   ()
   (:documentation
    "Root unit test suite for the transport module."))
+
+(deftestsuite connector-suite ()
+  ()
+  (:function
+   (check-connector-class (class
+			   expected-direction
+			   expected-wire-type
+			   expected-schemas)
+     (let ((direction (connector-direction class))
+	   (wire-type (connector-wire-type class))
+	   (schemas   (connector-schemas class))
+	   (options   (connector-options class)))
+       ;; Check direction.
+       (ensure (typep direction 'direction))
+       (ensure-same direction expected-direction
+		    :test #'eq)
+       ;; Check wire-type
+       (ensure (typep wire-type 'wire-type))
+       (ensure-same wire-type expected-wire-type
+		    :test #'equal)
+       ;; Check schemas.
+       (iter (for schema in schemas)
+	     (ensure (typep schema 'keyword)))
+       (ensure-same schemas expected-schemas
+		    :test #'equal)
+       ;; Check options.
+       (iter (for option in options)
+	     (ensure (typep option 'list))))))
+  (:function
+   (check-connector (connector expected-direction expected-wire-type)
+     ;; Check direction.
+     (let ((direction (connector-direction connector))
+	   (wire-type (connector-wire-type connector))
+	   (url       (connector-url connector))
+	   (rel-url   (connector-relative-url connector "/foo")))
+       ;; Check direction.
+       (ensure (typep direction 'direction))
+       (ensure-same direction expected-direction
+		    :test #'eq)
+       ;; Check wire-type
+       (ensure (typep wire-type 'wire-type))
+       (ensure-same wire-type expected-wire-type
+		    :test #'equal)
+       ;; Check URLs.
+       (ensure (typep url 'puri:uri))
+       (ensure (typep rel-url 'puri:uri))
+       (ensure-same (puri:uri-path rel-url) "/foo/"
+		    :test #'string=))))
+  (:documentation
+   "This test suite class is intended to be used as a superclass of
+transport test suites."))
+
+(defmacro define-basic-connector-test-cases
+    (class
+     &key
+     (suite-name (symbolicate class "-ROOT"))
+     construct-args
+     expected-direction
+     expected-wire-type
+     expected-schemas)
+  "Define basic test cases for the connector class CLASS."
+  `(progn
+     (addtest (,suite-name
+	       :documentation
+	       ,(format nil "Test basic properties of the ~A connector class."
+			class))
+       class
+
+       (check-connector-class
+	(find-class ',class)
+	,expected-direction
+	,expected-wire-type
+	,expected-schemas))
+
+     (addtest (,suite-name
+	       :documentation
+	       ,(format nil "Test basic properties of a ~A connector instance."
+			class))
+       construct
+
+       (let ((instance (make-instance ',class ,@construct-args)))
+	 (check-connector
+	  instance ,expected-direction ,expected-wire-type)))))
