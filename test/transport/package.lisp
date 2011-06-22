@@ -107,7 +107,8 @@ transport test suites."))
 (defmacro define-basic-connector-test-cases
     (class
      &key
-     (suite-name (symbolicate class "-ROOT"))
+     (suite-name        (symbolicate class "-ROOT"))
+     (name              (guess-connector-name class))
      construct-args
      expected-direction
      expected-wire-type
@@ -115,8 +116,20 @@ transport test suites."))
   "Define basic test cases for the connector class CLASS."
   `(progn
      (addtest (,suite-name
+          :documentation
+	  ,(format nil "Test whether `find-connector-class' can find ~
+the ~A connector class."
+		   class))
+       find-connector-class
+
+       (ensure-same (find-class ',class)
+		    (find-connector-class ',name ,expected-direction)
+		    :test #'eq))
+
+     (addtest (,suite-name
 	       :documentation
-	       ,(format nil "Test basic properties of the ~A connector class."
+	       ,(format nil "Test basic properties of the ~A connector ~
+class."
 			class))
        class
 
@@ -128,10 +141,30 @@ transport test suites."))
 
      (addtest (,suite-name
 	       :documentation
-	       ,(format nil "Test basic properties of a ~A connector instance."
+	       ,(format nil "Test basic properties of a ~A connector ~
+instance."
 			class))
        construct
 
        (let ((instance (make-instance ',class ,@construct-args)))
 	 (check-connector
-	  instance ,expected-direction ,expected-wire-type)))))
+	  instance ,expected-direction ,expected-wire-type)))
+
+     (addtest (,suite-name
+          :documentation
+	  ,(format nil "Test printing a ~A connector instance."
+		   class))
+       print
+       (let ((instance (make-instance ',class ,@construct-args)))
+	 (with-output-to-string (stream)
+	   (print-object instance stream))))))
+
+
+;;; Utility functions
+;;
+
+(defun guess-connector-name (class-name)
+  "Guess the keyword naming the connector class named CLASS-NAME."
+  (let* ((package-name (package-name (symbol-package class-name)))
+	 (.-position   (position #\. package-name :from-end t)))
+    (make-keyword (subseq package-name (1+ .-position)))))
