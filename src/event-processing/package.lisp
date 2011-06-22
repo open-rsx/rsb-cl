@@ -58,19 +58,20 @@
    :clear-processor-classes
    :processor-classes)
 
-  ;;
+  ;; `configurator' class
   (:export
    :configurator
+   :configurator-scope
    :configurator-direction
    :configurator-processor
    :configurator-connectors)
 
-  ;;
+  ;; `in-route-configurator' class
   (:export
    :in-route-configurator
    :configurator-filters)
 
-  ;;
+  ;; `out-route-configurator' class
   (:export
    :out-route-configurator)
 
