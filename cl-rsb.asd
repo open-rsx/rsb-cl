@@ -351,6 +351,13 @@
 			      (:file       "restart-message-receiver-mixin"
 			       :depends-on ("package"))))
 
+		(:module     "inprocess"
+		 :pathname   "test/transport/inprocess"
+		 :depends-on ("test" "transport")
+		 :components ((:file       "package")
+			      (:file       "in-pull-connector"
+			       :depends-on ("package"))))
+
 		(:module     "spread"
 		 :pathname   "test/transport/spread"
 		 :depends-on ("test" "transport")
