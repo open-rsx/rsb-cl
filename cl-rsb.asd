@@ -327,6 +327,9 @@
 			      (:file       "error-policy-mixin"
 			       :depends-on ("package"))
 			      (:file       "error-handling-dispatcher-mixin"
+			       :depends-on ("package"))
+
+			      (:file       "in-route-configurator"
 			       :depends-on ("package"))))
 
 		(:module     "converter"
