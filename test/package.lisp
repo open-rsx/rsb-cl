@@ -94,7 +94,12 @@
       (participant-scope participant) (make-scope scope)
       :test #'scope=)
      (ensure
-      (typep (participant-id participant) 'uuid:uuid))))
+      (typep (participant-id participant) 'uuid:uuid))
+     ;; URI stuff
+     (relative-url participant)
+     (abstract-uri participant)
+     (let ((urls (transport-specific-urls participant)))
+       (ensure (length= 1 urls)))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))
