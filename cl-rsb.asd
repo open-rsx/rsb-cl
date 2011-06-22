@@ -356,6 +356,10 @@
 		 :depends-on ("test" "transport")
 		 :components ((:file       "package")
 			      (:file       "in-pull-connector"
+			       :depends-on ("package"))
+			      (:file       "in-push-connector"
+			       :depends-on ("package"))
+			      (:file       "out-connector"
 			       :depends-on ("package"))))
 
 		(:module     "spread"
