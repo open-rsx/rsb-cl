@@ -1,4 +1,4 @@
-;;; configurator-client.lisp ---
+;;; configurator-client.lisp --- A client that knows its configurator.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -24,7 +24,8 @@
 		 :type     configurator
 		 :reader   client-configurator
 		 :documentation
-		 ""))
+		 "The configurator instance working for this
+client."))
   (:default-initargs
    :configurator (missing-required-initarg 'client :configurator))
   (:documentation
