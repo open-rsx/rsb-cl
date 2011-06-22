@@ -1,4 +1,4 @@
-;;; protocol.lisp ---
+;;; protocol.lisp --- Protocol of the transport module.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
