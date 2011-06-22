@@ -31,3 +31,11 @@ client."))
   (:documentation
    "Instance of this of this class are clients of the event processing
 subsystem in the sense that they have an associated `configurator'."))
+
+(defmethod transport-specific-urls ((component client))
+  "Return transport URL for connectors used by COMPONENT."
+  (iter (for connector in (configurator-connectors
+			   (client-configurator component)))
+	(collect
+	    (funcall (find-symbol "CONNECTOR-RELATIVE-URL" :rsb.transport)
+		     connector component))))

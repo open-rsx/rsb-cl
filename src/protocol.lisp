@@ -58,6 +58,30 @@ without further actions."
    "Return a relative URL that allows to locate COMPONENT when
 anchored at an absolute location like a transport URL."))
 
+(defgeneric abstract-uri (component)
+  (:documentation
+   "Return a URI with \"rsb\" scheme, no host and port information
+merged with the relative URL of COMPONENT."))
+
+(defgeneric transport-specific-urls (component)
+  (:documentation
+   "Return a list of URLs each of which describes the location and/or
+reachability of COMPONENT in transport-specific way."))
+
+
+;;; Default behavior
+;;
+
+(defmethod abstract-uri ((component t))
+  "Merge the relative URL of COMPONENT with a scheme-only \"anchor\"."
+  (puri:merge-uris (relative-url component)
+		   (make-instance 'puri:uri
+				  :scheme :rsb)))
+
+(defmethod transport-specific-urls ((component t))
+  "For arbitrary COMPONENTs, location information is not available."
+  nil)
+
 
 ;;; Common participant protocol
 ;;

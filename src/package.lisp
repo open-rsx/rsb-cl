@@ -120,7 +120,9 @@
 
   ;; Component URL protocol
   (:export
-   :relative-url)
+   :relative-url
+   :abstract-uri
+   :transport-specific-urls)
 
   ;; Scope
   (:export
