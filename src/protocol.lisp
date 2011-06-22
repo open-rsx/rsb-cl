@@ -34,7 +34,7 @@
 processing to be continued."
   (let ((restart (find-restart 'log)))
     (if restart
-	(invoke-restart restart  condition)
+	(invoke-restart restart condition)
 	(warn "~@<Restart ~S not found; unwinding.~@:>" 'log))))
 
 (intern "IGNORE")
@@ -104,8 +104,6 @@ RECEIVER to NEW-VALUE."))
    "Listen to events on the channel designated by SCOPE.
 If successful return a `listener' instance. Otherwise an error of type
 `listener-creation-failed' is signaled."))
-
-;; TODO unlisten, also use detach?
 
 
 ;;; Reader protocol
