@@ -127,7 +127,8 @@ transports. Options for transports which are disabled in CONFIG are
 not returned."
   (bind (((:flet options->plist (options))
 	  (iter (for (key . value) in options)
-		(when (length= 1 key)
+		(when (and (length= 1 key)
+			   (not (eq (first key) :enabled)))
 		  (collect (first key)) (collect value))))
 	 (options    (section-options :transport config))
 	 (transports (remove-duplicates
@@ -136,7 +137,8 @@ not returned."
     ;; transports.
     (iter (for transport in transports)
 	  (bind ((options (section-options transport options)))
-	    (when (string= (option-value '(:enabled) "0" options) "1") ;;; TODO(jmoringe):
+	    (when (or (eq (option-value '(:enabled) nil options) t)
+		      (string= (option-value '(:enabled) "0" options) "1")) ;;; TODO(jmoringe):
 	      (collect (cons transport (options->plist options))))))))
 
 
