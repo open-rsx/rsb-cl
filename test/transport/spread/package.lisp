@@ -39,7 +39,7 @@ module"))
 
 (in-package :rsb.transport.spread.test)
 
-(deftestsuite spread-root (transport-root)
+(deftestsuite transport-spread-root (transport-root)
   ()
   (:documentation
    "Root unit test suite for the transport.spread module."))

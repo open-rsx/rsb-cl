@@ -19,7 +19,7 @@
 
 (in-package :rsb.transport.spread.test)
 
-(deftestsuite fragmentation-root (spread-root)
+(deftestsuite fragmentation-root (transport-spread-root)
   ()
   (:function
    (octetify (data)

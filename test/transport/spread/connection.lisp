@@ -19,7 +19,7 @@
 
 (in-package :rsb.transport.spread.test)
 
-(deftestsuite spread-connection-root (spread-root)
+(deftestsuite spread-connection-root (transport-spread-root)
   ()
   (:documentation
    "Unit tests for the `connection' class."))

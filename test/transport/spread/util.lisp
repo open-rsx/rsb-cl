@@ -19,7 +19,7 @@
 
 (in-package :rsb.transport.spread.test)
 
-(deftestsuite util-root (spread-root)
+(deftestsuite util-root (transport-spread-root)
   ()
   (:setup
    (clrhash *scope-group-cache*))
