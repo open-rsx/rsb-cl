@@ -1,4 +1,4 @@
-;;; out-connector.lisp ---
+;;; out-connector.lisp --- An out-direction connector for inprocess communication.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -34,7 +34,3 @@ process."))
   (iter (for super in (super-scopes (event-scope event)
 				    :include-self? t))
 	(handle (by-scope super) event)))
-
-;; TODO we could implement an unfiltered semantic here:
-;; (t-sinks (gethash t *by-scope*))
-;; (map nil (rcurry #'handle event) t-sinks)
