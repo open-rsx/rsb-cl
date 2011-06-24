@@ -95,6 +95,10 @@
   (:export
    :restart-message-receiver-mixin)
 
+  ;; `threaded-message-receiver-mixin' class
+  (:export
+   :threaded-message-receiver-mixin)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation.

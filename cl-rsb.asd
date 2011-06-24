@@ -240,7 +240,11 @@
 			       :depends-on ("package"))
 			      (:file       "restart-message-receiver-mixin"
 			       :depends-on ("package" "protocol"
-					    "message-receiver-mixin"))))
+					    "message-receiver-mixin"))
+			      (:file       "threaded-message-receiver-mixin"
+			       :depends-on ("package"
+					    "message-receiver-mixin"
+					    "threaded-receiver-mixin"))))
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"
