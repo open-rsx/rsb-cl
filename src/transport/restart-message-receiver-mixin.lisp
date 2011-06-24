@@ -32,8 +32,7 @@ events in a `message->event' method."))
   "Call the next method with log and ignore restarts installed that
 will both retry receiving a message, but with and without emitting a
 log message respectively. "
-  (iter (while t)
-	(restart-case
+  (iter (restart-case
 	    (return-from receive-message (call-next-method))
 	  (log (&optional condition)
 	    :report (lambda (stream)

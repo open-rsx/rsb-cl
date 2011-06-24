@@ -25,7 +25,7 @@
 (defmethod receive-messages ((receiver mock-receiver))
   "This causes a timeout of the test case, if the interruption does
 not work properly."
-  (iter (while t) (sleep 100)))
+  (iter (sleep 100)))
 
 (deftestsuite threaded-receiver-mixin-root (transport-root)
   ()

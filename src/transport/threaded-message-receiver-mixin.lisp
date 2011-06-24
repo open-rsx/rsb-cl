@@ -31,8 +31,7 @@ thread."))
 (defmethod receive-messages ((connector threaded-message-receiver-mixin))
   "Receive a message that can be decoded into an event. Return the
 event."
-  (iter (while t)
-	(bind (((:values notification wire-schema)
+  (iter (bind (((:values notification wire-schema)
 		(receive-message connector t))
 	       ;; Try to convert NOTIFICATION into one or zero events
 	       ;; (in the latter case, EVENT is nil).
