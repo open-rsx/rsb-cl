@@ -65,10 +65,7 @@ contained in NOTIFICATION."
 		 :type              t
 		 :data              (rsb.converter:wire->domain
 				     converter (or data payload)
-				     (make-keyword
-				      (string-upcase
-				       (sb-ext:octets-to-string
-					wire-schema :external-format :ascii)))) ;; TODO
+				     (bytes->wire-schema wire-schema))
 		 :create-timestamp? nil))
 
     ;; Sender and timestamps TODO should these really be optional?
@@ -177,9 +174,7 @@ notification are chosen."
 			:scope          (sb-ext:string-to-octets
 					 (scope-string scope)
 					 :external-format :ascii)
-			:wire-schema    (sb-ext:string-to-octets
-					 (string-downcase (string wire-schema))
-					 :external-format :ascii)
+			:wire-schema    (wire-schema->bytes wire-schema)
 			:num-data-parts num-data-parts
 			:data-part      data-part
 			:data           data
@@ -214,9 +209,8 @@ notification are chosen."
 (defun timestamp->unix-microseconds (timestamp)
   "Convert the `local-time:timestamp' instance TIMESTAMP into an
 integer which counts the number of microseconds since UNIX epoch."
-  (nth-value
-   0 (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
-	(* 1       (local-time:timestamp-microsecond timestamp)))))
+  (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
+     (* 1       (local-time:timestamp-microsecond timestamp))))
 
 (defun unix-microseconds->timestamp (unix-microseconds)
   "Convert UNIX-MICROSECONDS to an instance of
@@ -225,3 +219,19 @@ integer which counts the number of microseconds since UNIX epoch."
 	  (floor unix-microseconds 1000000)))
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))
+
+(defun wire-schema->bytes (wire-schema)
+  "Convert WIRE-SCHEMA to an ASCII representation stored in an
+octet-vector."
+  (let ((*readtable* (copy-readtable nil)))
+    (setf (readtable-case *readtable*) :invert)
+    (sb-ext:string-to-octets
+     (princ-to-string wire-schema)
+     :external-format :ascii)))
+
+(defun bytes->wire-schema (bytes)
+  "Return a keyword representing the wire-schema encoded in bytes."
+  (let ((*readtable* (copy-readtable nil)))
+    (setf (readtable-case *readtable*) :invert)
+    (make-keyword (sb-ext:octets-to-string
+		   bytes :external-format :ascii))))
