@@ -18,6 +18,7 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
 (in-package :rsb.transport.spread)
+
 
 ;;; `in-push-connector' class
 ;;
@@ -26,22 +27,10 @@
   (find-class 'in-push-connector))
 
 (defclass in-push-connector (in-connector
-			     threaded-receiver-mixin)
+			     threaded-message-receiver-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
   (:documentation
    "This connector class implements push-style event receiving for the
 Spread transport."))
-
-(defmethod receive-messages ((connector in-push-connector))
-  (iter (while t)
-	(let* ((message (receive-message connector t))
-	       ;; Try to convert MESSAGE into one or zero events (in
-	       ;; the latter case, EVENT is nil).
-	       (event   (message->event connector message :undetermined)))
-	  ;; Due to fragmentation of large events into multiple
-	  ;; notifications and error handling policies, we may not
-	  ;; obtain an `event' instance from the notification.
-	  (when event
-	    (handle connector event)))))

@@ -47,7 +47,9 @@ connector classes for Spread."))
 (defmethod receive-message ((connector in-connector)
 			    (block?    t))
   "Delegate receiving a message to the connection of CONNECTOR."
-  (receive-message (connector-connection connector) block?))
+  (values
+   (receive-message (connector-connection connector) block?)
+   :undetermined))
 
 (defmethod message->event ((connector   in-connector)
 			   (message     simple-array)
