@@ -235,7 +235,7 @@
 			      (:file       "message-receiver-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "threaded-receiver-mixin"
-			       :depends-on ("package"))
+			       :depends-on ("package" "protocol"))
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
 			      (:file       "restart-message-receiver-mixin"

@@ -20,23 +20,6 @@
 (in-package :rsb.transport)
 
 
-;;; Threaded receiver protocol
-;;
-
-(defgeneric start-receiver (connector)
-  (:documentation
-   "Ask CONNECTOR to start a receiver thread that runs
-`receive-messages' until interrupted"))
-
-(defgeneric stop-receiver (connector)
-  (:documentation
-   "Ask CONNECTOR to stop receiving messages."))
-
-(defgeneric receive-messages (connector)
-  (:documentation
-   "CONNECTOR receives and processes messages until interrupted."))
-
-
 ;;; Mixin class `threaded-receiver-mixin'
 ;;
 

@@ -111,6 +111,23 @@ event, return nil instead. Signal a `decoding-error' if something goes
 wrong."))
 
 
+;;; Threaded receiver protocol
+;;
+
+(defgeneric start-receiver (connector)
+  (:documentation
+   "Ask CONNECTOR to start a receiver thread that runs
+`receive-messages' until interrupted"))
+
+(defgeneric stop-receiver (connector)
+  (:documentation
+   "Ask CONNECTOR to stop receiving messages."))
+
+(defgeneric receive-messages (connector)
+  (:documentation
+   "CONNECTOR receives and processes messages until interrupted."))
+
+
 ;;; Transport implementations
 ;;
 
