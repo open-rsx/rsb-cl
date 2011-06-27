@@ -176,6 +176,8 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "deliver-timestamp-mixin"
 			       :depends-on ("package" "protocol"))
+			      (:file       "tagging-processor-mixin"
+			       :depends-on ("package" "protocol"))
 			      (:file       "error-policy-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "error-handling-dispatcher-mixin"

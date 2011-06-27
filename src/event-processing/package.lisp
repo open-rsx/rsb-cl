@@ -97,6 +97,12 @@
   (:export
    :deliver-timestamp-mixin)
 
+  ;; `tagging-processor-mixin' class
+  (:export
+   :tagging-processor-mixin
+   :processor-tags
+   :processor-tag?)
+
   ;; `error-policy-mixin' class
   (:export
    :error-policy-mixin
