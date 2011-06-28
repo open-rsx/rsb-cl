@@ -48,14 +48,12 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors
-	   (scope     configurator-scope)
+  (bind (((:accessors-r/o
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
-    ;; Notify new connector regarding scope and filters.
-    (log1 :info configurator "Attaching connector ~S to ~S" connector scope)
-    (notify connector scope :attached)
+    (call-next-method)
 
+    ;; Notify new connector regarding filters.
     (iter (for filter in filters)
 	  (log1 :info configurator "Adding filter ~S to ~S" filter connector)
 	  (unless (eq (notify connector filter :filter-added) :implemented)
@@ -72,7 +70,6 @@ participant."))
 		   (connector    t)
 		   (action       (eql :connector-removed)))
   (bind (((:accessors-r/o
-	   (scope     configurator-scope)
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
     ;; Remove processor from connectors handlers and notify regarding
@@ -82,13 +79,12 @@ participant."))
 
     (notify processor connector action)
 
-    ;; Notify remove connector regarding filters and scope.
+    ;; Notify remove connector regarding filters.
     (iter (for filter in filters)
 	  (log1 :info configurator "Removing filter ~S from ~S" filter connector)
 	  (notify connector filter :filter-removed))
 
-    (log1 :info configurator "Detaching connector ~S from ~S" connector scope)
-    (notify connector scope :detached)))
+    (call-next-method)))
 
 
 ;;; Filters

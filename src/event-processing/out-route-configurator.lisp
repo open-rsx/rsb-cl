@@ -33,26 +33,18 @@
 ;;; Connectors
 ;;
 
-;; TODO same behavior in in-route-configurator
 (defmethod notify ((configurator out-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o
-	   (scope     configurator-scope)
-	   (processor configurator-processor)) configurator))
-    (log1 :info configurator "Attaching connector ~S to scope ~S" connector scope)
-    (notify connector scope :attached)
-
-    (log1 :info configurator "Connecting ~S -> ~S" connector processor)
+  (bind (((:accessors-r/o (processor configurator-processor)) configurator))
+    (call-next-method)
+    (log1 :info configurator "Connecting ~S -> ~S" processor connector)
     (push connector (handlers processor))))
 
 (defmethod notify ((configurator out-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-removed)))
-  (bind (((:accessors-r/o
-	   (scope     configurator-scope)
-	   (processor configurator-processor)) configurator))
-
+  (bind (((:accessors-r/o (processor configurator-processor)) configurator))
+    (log1 :info configurator "Disconnecting ~S -> ~S" processor connector)
     (removef (handlers processor) connector)
-
-    (notify connector scope :detached)))
+    (call-next-method)))

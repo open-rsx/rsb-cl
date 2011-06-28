@@ -85,3 +85,21 @@ participant instance as its \"client\"."))
 	    #-sbcl (notify configurator connector :connector-removed)
 	  (ignore-error ()
 	    :report "Ignore the error and continue with the remaining connectors."))))
+
+
+;;; Connectors
+;;
+
+(defmethod notify ((configurator configurator)
+		   (connector    t)
+		   (action       (eql :connector-added)))
+  (bind (((:accessors-r/o (scope configurator-scope)) configurator))
+    (log1 :info configurator "Attaching connector ~S to scope ~S" connector scope)
+    (notify connector scope :attached)))
+
+(defmethod notify ((configurator configurator)
+		   (connector    t)
+		   (action       (eql :connector-removed)))
+  (bind (((:accessors-r/o (scope configurator-scope)) configurator))
+    (log1 :info configurator "Detaching connector ~S from ~S" connector scope)
+    (notify connector scope :detached)))
