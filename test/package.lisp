@@ -99,7 +99,10 @@
      (relative-url participant)
      (abstract-uri participant)
      (let ((urls (transport-specific-urls participant)))
-       (ensure (length= 1 urls)))))
+       (ensure (length= 1 urls)
+	       :report    "~@<The participant has ~D transport-specific ~
+URLs (~{~A~^, ~}), not ~D.~@:>"
+	       :arguments ((length urls) urls 1)))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))
