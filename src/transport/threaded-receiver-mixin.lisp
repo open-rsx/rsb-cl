@@ -34,8 +34,7 @@ connector. Additionally used to indicate the state of the connector,
 i.e. if non-nil thread is running and did its setup stuff.")
    (control-mutex     :reader   connector-control-mutex
 		      :initform (bt:make-recursive-lock
-				 "Receive Control Mutex")
-
+				 "Receiver Control Mutex")
 		      :documentation
 		      "Required for thread startup synchronization.")
    (control-condition :reader   connector-control-condition
