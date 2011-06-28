@@ -96,6 +96,8 @@
 ;;
 
 ;; Forward declaration of `*default-configuration*'
+(declaim (special *default-configuration*))
+
 (defvar *default-configuration*)
 
 (defun section-options (section &optional
