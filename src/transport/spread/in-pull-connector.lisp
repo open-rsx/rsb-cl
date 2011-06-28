@@ -22,7 +22,8 @@
 (defmethod find-transport-class ((spec (eql :spread-in-pull)))
   (find-class 'in-pull-connector))
 
-(defclass in-pull-connector (in-connector)
+(defclass in-pull-connector (error-handling-pull-receiver-mixin
+			     in-connector)
   ()
   (:metaclass connector-class)
   (:direction :in-pull)
