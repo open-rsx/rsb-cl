@@ -55,14 +55,6 @@
 (deftestsuite root ()
   ((spread-port (asdf:component-property
 		 (asdf:find-system :cl-rsb-test) :spread-port)))
-  (:setup
-   (let ((spread-port (asdf:component-property
-		       (asdf:find-system :cl-rsb-test) :spread-port)))
-     (setf *default-configuration*
-	   (append
-	    `(((:transport :spread :host) . "localhost")
-	      ((:transport :spread :port) . ,spread-port))
-	    (options-from-default-sources)))))
   (:function
    (check-print (thing)
      (ensure
@@ -87,7 +79,7 @@
 (deftestsuite participant-suite ()
   ()
   (:dynamic-variables
-   (*default-configuration* '(((:transport :inprocess :enabled) t))))
+   (*default-configuration* '(((:transport :inprocess :enabled) . "1"))))
   (:function
    (check-participant (participant scope)
      (ensure-same
