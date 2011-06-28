@@ -47,7 +47,6 @@ participant instance as its \"client\"."))
 (defmethod shared-initialize :after ((instance   configurator)
                                      (slot-names t)
                                      &key
-				     direction
 				     processor)
   (unless processor
     (setf (slot-value instance 'processor) (make-processor instance))))
@@ -58,7 +57,6 @@ participant instance as its \"client\"."))
   (apply #'make-instance
 	 (ensure-processor-class (collect-processor-mixins configurator))
 	 args))
-
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)
 						   (configurator configurator))
