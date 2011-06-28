@@ -20,6 +20,10 @@
 (cl:in-package :cl-user)
 
 (defpackage :rsb.transport.inprocess
+  (:nicknames
+   :rsb.tp.inprocess
+   :rsb.tp.inproc)
+
   (:shadow
    :connector)
 
