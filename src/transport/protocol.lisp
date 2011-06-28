@@ -82,6 +82,11 @@ CONNECTOR."
   "Stop if we hit a class which is not a `connector-class'."
   (values))
 
+(defmethod connector-schemas ((connector standard-object))
+  "Default behavior is to retrieve the list of schemas from the class
+of CONNECTOR."
+  (connector-schemas (class-of connector)))
+
 (defmethod connector-schemas ((class class))
   "Default behavior is to claim to support no schemas."
   nil)
