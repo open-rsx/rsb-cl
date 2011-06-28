@@ -50,19 +50,15 @@ participant instance as its \"client\"."))
 				     direction
 				     processor)
   (unless processor
-    (setf (slot-value instance 'processor)
-	  (make-instance
-	   (ensure-processor-class
-	    (ecase direction
-	      (:in-push '(error-handling-dispatcher-mixin
-			  filtering-processor-mixin
-			  deliver-timestamp-mixin
-			  broadcast-processor))
-	      (:in-pull '(error-handling-dispatcher-mixin
-			  filtering-processor-mixin
-			  deliver-timestamp-mixin
-			  pull-processor))
-	      (:out     '(broadcast-processor))))))))
+    (setf (slot-value instance 'processor) (make-processor instance))))
+
+(defmethod make-processor ((configurator configurator)
+			   &rest args
+			   &key &allow-other-keys)
+  (apply #'make-instance
+	 (ensure-processor-class (collect-processor-mixins configurator))
+	 args))
+
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)
 						   (configurator configurator))

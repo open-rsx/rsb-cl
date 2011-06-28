@@ -58,6 +58,11 @@
    :clear-processor-classes
    :processor-classes)
 
+  ;; Configurator protocol
+  (:export
+   :make-processor
+   :collect-processor-mixins)
+
   ;; `configurator' class
   (:export
    :configurator

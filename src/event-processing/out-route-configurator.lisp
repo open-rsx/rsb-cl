@@ -26,6 +26,9 @@
   (:documentation
    "DOC"))
 
+(defmethod collect-processor-mixins append ((configurator out-route-configurator))
+  '(broadcast-processor))
+
 
 ;;; Connectors
 ;;

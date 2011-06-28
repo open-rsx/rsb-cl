@@ -112,6 +112,26 @@ the fact."
   :not-implemented)
 
 
+;;; Configurator protocol
+;;
+
+(defgeneric make-processor (configurator
+			    &rest args
+			    &key &allow-other-keys)
+  (:documentation
+   "Make and return a suitable processor instance for
+CONFIGURATOR. Methods of this generic function will usually call
+`collect-processor-mixins' and `ensure-processor-class' obtain the
+desired class of the processor being made. ARGS are passed to
+`make-instance' after the class has been determined."))
+
+(defgeneric collect-processor-mixins (configurator)
+  (:method-combination append)
+  (:documentation
+   "Return a list of names of mixin classes which should be combined
+to make the processor class for CONFIGURATOR."))
+
+
 ;;; Processor classes
 ;;
 

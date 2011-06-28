@@ -30,6 +30,17 @@
 and an event process for a client that is an event receiving
 participant."))
 
+(defmethod collect-processor-mixins append ((configurator in-route-configurator))
+  (ecase (configurator-direction configurator)
+    (:in-push '(error-handling-dispatcher-mixin
+		filtering-processor-mixin
+		deliver-timestamp-mixin
+		broadcast-processor))
+    (:in-pull '(error-handling-dispatcher-mixin
+		filtering-processor-mixin
+		deliver-timestamp-mixin
+		pull-processor))))
+
 
 ;;; Connectors
 ;;
