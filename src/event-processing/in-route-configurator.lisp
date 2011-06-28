@@ -66,9 +66,7 @@ participant."))
     (notify processor connector action)
 
     (log1 :info configurator "Connecting ~S -> ~S" connector processor)
-    (push processor (handlers connector))
-
-    :implemented))
+    (push processor (handlers connector))))
 
 (defmethod notify ((configurator in-route-configurator)
 		   (connector    t)
@@ -90,9 +88,7 @@ participant."))
 	  (notify connector filter :filter-removed))
 
     (log1 :info configurator "Detaching connector ~S from ~S" connector scope)
-    (notify connector scope :detached)
-
-    :implemented))
+    (notify connector scope :detached)))
 
 
 ;;; Filters
