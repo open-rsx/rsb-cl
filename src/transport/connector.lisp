@@ -120,23 +120,12 @@ group communication framework."))
   (puri:merge-uris uri (connector-url connector)))
 
 (defmethod connector-relative-url ((connector connector)
-				   (scope     rsb::scope)) ;; TODO can we remove this? scope has relative-url
-  "DOC"
-  (connector-relative-url
-   connector
-   (make-instance 'puri:uri
-				  :path        (rsb::scope-string scope)
-				  ;;:parsed-path (rsb::scope-components scope)
-				  )
-   ))
-
-(defmethod connector-relative-url ((connector connector)
 				   (thing     string))
   (connector-relative-url connector (make-scope thing)))
 
 (defmethod connector-relative-url ((connector connector)
 				   (thing     t))
-  (connector-relative-url connector (rsb::relative-url thing)))
+  (connector-relative-url connector (relative-url thing)))
 
 (defmethod print-object ((object connector) stream)
   (print-unreadable-object (object stream :identity t)
