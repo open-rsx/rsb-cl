@@ -231,7 +231,8 @@ octet-vector."
 
 (defun bytes->wire-schema (bytes)
   "Return a keyword representing the wire-schema encoded in bytes."
-  (let ((*readtable* (copy-readtable nil)))
+  (let ((*package*   (find-package :keyword))
+	(*readtable* (copy-readtable nil)))
     (setf (readtable-case *readtable*) :invert)
-    (make-keyword (sb-ext:octets-to-string
-		   bytes :external-format :ascii))))
+    (read-from-string (sb-ext:octets-to-string
+		       bytes :external-format :ascii))))
