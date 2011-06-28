@@ -23,5 +23,7 @@
 ;;; Configuration
 ;;
 
+(declaim (special *default-configuration*))
+
 (defvar *default-configuration* (options-from-default-sources)
   "DOC")
