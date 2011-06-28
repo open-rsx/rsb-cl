@@ -20,20 +20,6 @@
 (in-package :rsb)
 
 
-;;; Stream variables
-;;
-
-(declaim (special *listener-stream* *informer-stream*))
-
-(defvar *listener-stream* nil
-  "When this variable is bound to a stream, data received via RSB
-listeners is written to that stream.")
-
-(defvar *informer-stream* nil
-  "When this variable is bound to a stream, data sent via RSB is
-written to that stream.")
-
-
 ;;; Configuration
 ;;
 

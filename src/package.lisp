@@ -87,10 +87,7 @@
 
   ;; Special Variables
   (:export
-   :*default-configuration*
-
-   :*subscriber-stream*
-   :*publisher-stream*)
+   :*default-configuration*)
 
   ;; Hooks
   (:export
