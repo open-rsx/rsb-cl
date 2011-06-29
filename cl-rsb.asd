@@ -445,7 +445,8 @@ on the spread group communication system."
 			       :depends-on ("package" "util"
 					    "connection" "conversion"))
 			      (:file       "in-connector"
-			       :depends-on ("package" "connector"))
+			       :depends-on ("package" "connector"
+					    "assembly-mixin"))
 			      (:file       "in-push-connector"
 			       :depends-on ("package" "in-connector"))
 			      (:file       "in-pull-connector"
