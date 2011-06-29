@@ -227,8 +227,11 @@
 		 :components ((:file       "package")
 			      (:file       "protocol"
 			       :depends-on ("package"))
-			      (:file       "connector"
+			      (:file       "connector-class"
 			       :depends-on ("package" "protocol"))
+			      (:file       "connector"
+			       :depends-on ("package" "protocol"
+					    "connector-class"))
 
 			      (:file       "conversion-mixin"
 			       :depends-on ("package"))
