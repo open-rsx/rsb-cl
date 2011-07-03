@@ -56,6 +56,12 @@ Return two values: scope and transport options.
 Examples:
 RSB> (uri->scope-and-options (puri:parse-uri \"spread:\"))
 => (make-scope \"/\") '((:spread))
+:test #'equal
+RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
+=> (make-scope \"/\") '((:spread :port 4811 :host \"localhost\"))
+:test #'equal
+RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
+=> (make-scope \"/\") '((:spread :port 4811))
 :test #'equal"
   (bind (((:accessors-r/o
 	   (transport   puri:uri-scheme)
