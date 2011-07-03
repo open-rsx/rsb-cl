@@ -1,4 +1,4 @@
-;;; connector.lisp ---
+;;; connector.lisp --- Superclass for inprocess connector classes.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -54,7 +54,7 @@ scopes.")
 		 ;; object) should be a reasonable wire-type
   (:schemas   :inprocess)
   (:documentation
-   "DOC"))
+   "Superclass for connector classes of the inprocess transport."))
 
 
 ;;; Utility functions
