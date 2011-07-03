@@ -84,7 +84,8 @@ participant instance as its \"client\"."))
 		     (notify configurator connector :connector-removed))
 	    #-sbcl (notify configurator connector :connector-removed)
 	  (ignore-error ()
-	    :report "Ignore the error and continue with the remaining connectors."))))
+	    :report "~@<Ignore the error and continue with the ~
+remaining connectors.~@:>"))))
 
 
 ;;; Connectors
