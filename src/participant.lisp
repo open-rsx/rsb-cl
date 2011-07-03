@@ -70,6 +70,7 @@ Return three values:
 			      :configurator configurator
 			      args)))
 
+    ;; Associate constructed CONNECTORS to CONFIGURATOR instance.
     (setf (rsb.ep:configurator-connectors configurator) connectors)
 
     (values participant configurator connectors)))
@@ -95,8 +96,8 @@ should be ~S.~@:>"
 		 (uri->scope-and-options ,designator-arg transports)))
 	   (,make-name scope ,@(rest arg-names) :transports options)))
 
-       ;; This method operates on strings which turns into either URIs
-       ;; (if the string contains a colon) or scopes.
+       ;; This method operates on strings which it turns into either
+       ;; URIs (if the string contains a colon) or scopes.
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
 			      &key
 			      (transports (transport-options)))
