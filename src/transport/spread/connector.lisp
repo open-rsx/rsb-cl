@@ -58,7 +58,7 @@ connectors."))
 				     connection)
   (bind (((:values hostname port) (if (and host port)
 				      (values host port)
-				      (parse-spread-name name)))
+				      (spread:parse-daemon-name name)))
 	 (name (or (format nil "~D@~A" port hostname)))
 	 ((:accessors-r/o (uri connector-url)) instance))
     (when hostname

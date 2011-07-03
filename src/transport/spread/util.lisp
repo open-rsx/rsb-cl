@@ -28,15 +28,6 @@
   (/ (get-internal-real-time)
      internal-time-units-per-second))
 
-(defun parse-spread-name (name)
-  "Split NAME into a port and host components.
-Return two values the host component as string or nil if it not
-specified and the port component as string."
-  (let ((@ (position #\@ name)))
-    (if @
-        (values (subseq name (1+ @)) (subseq name 0 @))
-	(values nil name))))
-
 
 ;;; Scope -> spread group mapping
 ;;
