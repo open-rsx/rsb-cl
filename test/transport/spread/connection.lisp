@@ -35,8 +35,10 @@
     (make-instance 'connection
 		   :name name)
 
+    ;; Neither :connection nor :name => missing required initarg
     (ensure-condition 'missing-required-initarg
       (make-instance 'connection))
+    ;; Both :connection and :name => mutually exclusive initargs
     (ensure-condition 'error
       (make-instance 'connection
 		     :name       "3333@localhost"
