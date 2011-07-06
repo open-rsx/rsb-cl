@@ -54,7 +54,7 @@ efficiently, if SCOPE is interned."
 
 (defun scope->group/no-cache (scope)
   "Return a spread group name derived from SCOPE."
-  (let* ((octets (sb-ext:string-to-octets (rsb:scope-string scope)))
+  (let* ((octets (sb-ext:string-to-octets (scope-string scope)))
 	 (hash   (ironclad:digest-sequence :md5 octets))
 	 (string (format nil "~(~{~2,'0x~}~)" (coerce hash 'list))))
     (setf (aref string 31) #\Null)
