@@ -51,4 +51,4 @@ should use."))
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (iter (for notification in notifications)
-	  (send-message connection group-names (pb::pack1 notification)))))
+	  (send-message connection group-names (pb:pack* notification)))))
