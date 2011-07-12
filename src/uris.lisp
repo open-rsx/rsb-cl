@@ -63,25 +63,42 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
 RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
 => (make-scope \"/\") '((:spread :port 4811))
 :test #'equal"
-  (bind (((:accessors-r/o
-	   (transport   puri:uri-scheme)
-	   (host        puri:uri-host)
-	   (port        puri:uri-port)
-	   (path        puri:uri-path)
-	   (fragment    puri:uri-fragment)
-	   (uri-options uri-options)) uri)
-	 (options (copy-list
-		   (rest (find transport defaults :key #'first)))))
+  (bind (((:accessors-r/o (transport   puri:uri-scheme)
+			  (host        puri:uri-host)
+			  (port        puri:uri-port)
+			  (path        puri:uri-path)
+			  (fragment    puri:uri-fragment)
+			  (uri-options uri-options)) uri)
+	 (transport-options
+	  (%transport-options transport defaults host port)))
     (when (eq transport :rsb)
       (error "~@<~S schema is not supported yet.~@:>"
 	     transport))
-    (when host
-      (setf (getf options :host) host))
-    (when port
-      (setf (getf options :port) port))
     (when fragment
       (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
 	    fragment uri))
     (values (make-scope path)
-	    (when transport
-	      (list (cons transport (append uri-options options)))))))
+	    (map 'list (curry #'%merge-options uri-options)
+		 transport-options))))
+
+
+;;; Utility functions
+;;
+
+(defun %transport-options (transport defaults host port)
+  "Extract options for TRANSPORT from DEFAULTS if TRANSPORT is not
+nil. If HOST and PORT are not nil, replace the host and port options
+in the extracted transport options. Return the resulting options."
+  (if (and transport (not (eq transport :rsb)))
+      (list (%merge-options
+	     (append (when host (list :host host))
+		     (when port (list :port port)))
+	     (or (find transport defaults :key #'first)
+		 (list transport))))
+      defaults))
+
+(defun %merge-options (options transport-options)
+  "Merge OPTIONS into TRANSPORT-OPTIONS such that options in OPTIONS
+take precedence."
+  (bind (((transport &rest transport-options) transport-options))
+    (cons transport (append options transport-options))))
