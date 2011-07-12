@@ -34,8 +34,9 @@
   (:report
    (lambda (condition stream)
      (bind (((:accessors-r/o (encoded decoding-error-encoded)) condition))
-       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~} ~_could not be decoded~@:>"
-	       (coerce encoded 'list)))
+       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~_could not be decoded~@:>"
+	       (coerce (subseq encoded 0 (min 200 (length encoded))) 'list)
+	       (> (length encoded) 200)))
      (maybe-print-explanation condition stream)
      (maybe-print-cause condition stream)))
   (:documentation
