@@ -288,7 +288,6 @@
   :license     "GPL3; see COPYING file for details."
   :description "Unit Tests for the cl-rsb system."
   :depends-on  (:lift
-		:cxml-stp
 		:cl-protobuf
 		:cl-spread
 		:cl-rsb)
@@ -346,8 +345,6 @@
 			      (:file       "fundamental"
 			       :depends-on ("package"))
 			      (:file       "reader"
-			       :depends-on ("package"))
-			      (:file       "xml"
 			       :depends-on ("package"))))
 
 		(:module     "transport"
@@ -481,43 +478,6 @@ RSB events to/from Google protocol buffers."
 		(:module     "converter-protocol-buffer"
 		 :pathname   "src/converter"
 		 :components ((:file       "protocol-buffers")))))
-
-
-;;; System connection with cxml-stp and xpath
-;;
-
-#+asdf-system-connections
-(defsystem-connection :cl-rsb-and-cxml-stp-and-xpath
-  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.3.0"
-  :license     "GPL3; see COPYING file for details."
-  :description "This system connections provides methods to filter RSB
-events with XML data."
-  :requires    (cl-rsb
-		cxml-stp
-		xpath)
-  :components  ((:module     "filter"
-		 :pathname   "src/filter"
-		 :components ((:file       "xpath-filter")))))
-
-
-;;; System connection with cxml-location
-;;
-
-#+asdf-system-connections
-(defsystem-connection :cl-rsb-and-cxml-location
-  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.3.0"
-  :license     "GPL3; see COPYING file for details."
-  :description "This system connections provides methods to serialize/deserialize
-RSB events to/from XML documents."
-  :requires    (cl-rsb
-		cxml-location)
-  :components  ((:module     "converter"
-		 :pathname   "src/converter"
-		 :components ((:file       "xml")))))
 
 
 ;;; System connection with cl-ppcre
