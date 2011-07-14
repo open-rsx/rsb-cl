@@ -57,6 +57,11 @@ Return three values:
 + the `participant' instance
 + the associated `rsb.event-processing:configurator' instance
 + the list of instantiated `rsb.transport:connectors'"
+  ;; Signal an error if no transports have been supplied.
+  (unless transports
+    (error 'no-transports
+	   :scope scope))
+
   (let* ((configurator (make-instance
 			(ecase direction
 			  ((:in-push :in-pull) 'rsb.ep:in-route-configurator)

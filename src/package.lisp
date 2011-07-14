@@ -65,6 +65,8 @@
    :informer-creation-failed
    :informer-creation-failed-type
 
+   :no-transports
+
    :invalid-event
    :invalid-event-event
 

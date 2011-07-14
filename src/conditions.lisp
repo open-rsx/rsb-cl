@@ -141,8 +141,8 @@ to connect to the bus."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
-designated by ~A.~@:>"
-	     (participation-failed-scope condition))))
+designated by scope ~S.~@:>"
+	     (scope-string (participation-failed-scope condition)))))
   (:documentation
    "This error is signaled when the creation of a participant (which
 implies participation in a channel) fails."))
@@ -174,6 +174,19 @@ designated by ~A and type ~S.~@:>"
   (:documentation
    "This error is signaled when an attempt to create an informer
 fails."))
+
+(define-condition no-transports (participation-failed)
+  ()
+  (:default-initargs
+   :transports nil)
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Failed to participate in the channel ~
+designated by scope ~S because no transports have been selected.~@:>"
+	     (scope-string (participation-failed-scope condition)))))
+  (:documentation
+   "This error is signaled when the creation of a participant fails
+because an empty list of transports is supplied."))
 
 
 ;;; Event sending conditions
