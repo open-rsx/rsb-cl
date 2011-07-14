@@ -35,7 +35,7 @@ function."))
   '("/listener/construction" nil "/listener/construction")
   '("inprocess://localhost/listener/construction" nil
     "/listener/construction")
-  '("/" (:transports nil)  :error))
+  '("/" (:transports nil) :error))
 
 (addtest (listener-root
           :documentation

@@ -116,7 +116,7 @@ KIND."
 	     (list ,@cases)
 
 	   (if (eq expected-scope :error)
-	       (ensure-condition 'error
+	       (ensure-condition error
 		 (apply #',make-name uri args))
 	       (let ((participant (apply #',make-name uri args)))
 		 (unwind-protect
