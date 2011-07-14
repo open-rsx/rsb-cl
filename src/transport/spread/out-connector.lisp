@@ -50,4 +50,4 @@ should use."))
     (iter (for notification in notifications)
 	  (send-message (slot-value connector 'connection)
 			group-names
-			(pb::pack1 notification)))))
+			(pb:pack* notification)))))

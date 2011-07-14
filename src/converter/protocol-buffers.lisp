@@ -31,5 +31,5 @@
 (defmethod domain->wire ((converter     (eql :protocol-buffer))
 			 (domain-object standard-object))
   (values
-   (pb::pack1 domain-object)
+   (pb:pack* domain-object)
    (type-of domain-object)))
