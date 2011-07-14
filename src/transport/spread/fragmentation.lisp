@@ -264,8 +264,4 @@ list of the generated chunks."
   (iter (for offset :from 0 :by chunk-size)
 	(while (< offset (length data)))
 	(for size next (min chunk-size (- (length data) offset)))
-	(collect
-	    (make-array size
-			:element-type           (array-element-type data)
-			:displaced-to           data
-			:displaced-index-offset offset))))
+	(collect (subseq data offset (+ offset size)))))
