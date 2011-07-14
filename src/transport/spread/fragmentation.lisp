@@ -115,7 +115,7 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
   (with-slots (fragments) object
     (print-unreadable-object (object stream :type t)
       (format stream "~:@(~{~2,'0X~}~) (~D/~D) age ~5,2F s"
-	      (coerce (subseq (assembly-id object) 0 8) 'list)
+	      (coerce (subseq (assembly-id object) 0 4) 'list)
 	      (count-if-not #'null fragments) (length fragments)
 	      (assembly-age object)))))
 
