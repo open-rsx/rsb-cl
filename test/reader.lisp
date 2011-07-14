@@ -25,4 +25,6 @@
   (:documentation
    "Unit tests for the `reader' class and `make-reader' function."))
 
-(define-basic-participant-test-cases :reader)
+(define-basic-participant-test-cases :reader
+  '("/reader/construction" nil                "/reader/construction")
+  '("/                   " (:transpsorts nil) :error))

@@ -25,17 +25,9 @@
   (:documentation
    "Unit tests for the `informer' class and `make-informer' function."))
 
-(define-basic-participant-test-cases :informer)
-
-(addtest (informer-root
-          :documentation
-	  "Test creating a informer.")
-  construction
-
-  (let ((informer (make-informer "/informer/construction" t)))
-    (unwind-protect
-	 (check-participant informer "/informer/construction")
-      (detach/ignore-errors informer))))
+(define-basic-participant-test-cases :informer
+  '("/informer/construction" (t)                 "/informer/construction")
+  '("/"                      (t :transports nil) :error))
 
 (addtest (informer-root
           :documentation

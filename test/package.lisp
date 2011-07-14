@@ -99,12 +99,30 @@ URLs (~{~A~^, ~}), not ~D.~@:>"
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))
 
-(defmacro define-basic-participant-test-cases (kind)
+(defmacro define-basic-participant-test-cases (kind &body cases)
   "Define basic test cases for the participant subclass designated by
 KIND."
   (let ((suite-name (symbolicate kind "-ROOT"))
+	(make-name  (symbolicate "MAKE-" kind))
 	(with-name  (symbolicate "WITH-" kind)))
     `(progn
+       (addtest (,suite-name
+		 :documentation
+		 ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
+			  kind make-name))
+	 construction
+
+	 (ensure-cases (uri args expected-scope)
+	     (list ,@cases)
+
+	   (if (eq expected-scope :error)
+	       (ensure-condition 'error
+		 (apply #',make-name uri args))
+	       (let ((participant (apply #',make-name uri args)))
+		 (unwind-protect
+		      (check-participant participant expected-scope)
+		   (detach/ignore-errors participant))))))
+
        (addtest (,suite-name
 		 :documentation
 		 ,(format nil "Test `print-object' method on `~(~A~)' class."

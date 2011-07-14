@@ -31,21 +31,11 @@
    "Unit tests for the `listener' class and `make-listener'
 function."))
 
-(define-basic-participant-test-cases :listener)
-
-(addtest (listener-root
-          :documentation
-	  "Test participating in a channel via `make-listener'.")
-  construction
-
-  (ensure-cases (arg expected-scope)
-      '(("/listener/construction"                      "/listener/construction")
-	("inprocess://localhost/listener/construction" "/listener/construction"))
-
-    (let ((listener (make-listener arg)))
-      (unwind-protect
-	   (check-participant listener expected-scope)
-	(detach/ignore-errors listener)))))
+(define-basic-participant-test-cases :listener
+  '("/listener/construction" nil "/listener/construction")
+  '("inprocess://localhost/listener/construction" nil
+    "/listener/construction")
+  '("/" (:transports nil)  :error))
 
 (addtest (listener-root
           :documentation
