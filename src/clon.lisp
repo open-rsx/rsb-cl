@@ -19,10 +19,13 @@
 
 (in-package :rsb)
 
-(defun make-options ()
+(defun make-options (&key
+		     show?)
   "Make and return commandline option definitions. The returned option
-tree has a `com.dvlsoft.clon:group' instance at its root."
-  (com.dvlsoft.clon:defgroup (:header "RSB Options")
+tree has a `com.dvlsoft.clon:group' instance at its root. SHOW? can be
+used to control whether the options should be included in help texts."
+  (com.dvlsoft.clon:defgroup (:header "RSB Options"
+			      :hidden (not show?))
 
     (group (:header "Plugins")
 	   (path    :long-name     "rsb-plugins-path"
