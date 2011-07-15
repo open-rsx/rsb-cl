@@ -21,7 +21,8 @@
 
 (defclass connector (rsb.transport:connector
 		     conversion-mixin)
-  ((connection :type     connection
+  ((connection :initarg  :connection
+	       :type     connection
 	       :reader   connector-connection
 	       :documentation
 	       ""))
@@ -49,6 +50,17 @@
   (:documentation
    "This class serves as a superclass for spread in and out
 connectors."))
+
+(defmethod initialize-instance :before ((instance connector)
+					&key
+					connection
+					name
+					port)
+  "Make sure that at least one of CONNECTION, NAME and PORT is
+supplied."
+  (unless (or connection name port)
+    (missing-required-initarg
+     'connector :either-connection-or-name-or-port)))
 
 (defmethod shared-initialize :after ((instance connector) (slot-names t)
 				     &key
