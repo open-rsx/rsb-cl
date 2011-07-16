@@ -70,7 +70,7 @@ RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
 => :fundamental-string 'rsb:octet-vector :string"))
 
 
-;;; Default behavior for the converter info protocol.
+;;; Default behavior
 ;;
 
 (defmethod no-applicable-method ((function (eql (fdefinition 'wire->domain?)))
@@ -87,6 +87,52 @@ the data."
 converter and data, the converter cannot handle the data."
   (declare (ignore args))
   nil)
+
+(defmethod wire->domain :around ((converter   t)
+				 (wire-data   t)
+				 (wire-schema t))
+  "Install \"retry\" and \"use-value\" restarts around the call to the
+next `wire->domain' method."
+  (iter
+   (restart-case
+       (return (call-next-method))
+     (retry ()
+       :report (lambda (stream)
+		 (format stream "~@<Retry converting ~S (in ~S schema) using converter ~A.~@:>"
+			 wire-data wire-schema converter))
+       nil)
+     (use-value (value)
+       :report      (lambda (stream)
+		      (format stream "~@<Supply a replacement value ~
+to use instead of converting ~S (in ~S schema) using converter ~
+~A.~@:>"
+			      wire-data wire-schema converter))
+       :interactive (lambda ()
+		      (format *query-io* "Enter replacement value (evaluated): ")
+		      (list (read *query-io*)))
+       (return value)))))
+
+(defmethod domain->wire :around ((converter     t)
+				 (domain-object t))
+  "Install \"retry\" and \"use-value\" restarts around the call to the
+next `domain->wire' method."
+  (iter
+    (restart-case
+	(return (call-next-method))
+      (retry ()
+	:report (lambda (stream)
+		  (format stream "~@<Retry converting ~A using converter ~A.~@:>"
+			  domain-object converter))
+	nil)
+      (use-value (value)
+	:report      (lambda (stream)
+		       (format stream "~@<Supply a replacement value ~
+to use instead of converting ~A using converter ~A.~@:>"
+			       domain-object converter))
+	:interactive (lambda ()
+		       (format *query-io* "Enter replacement value (evaluated): ")
+		       (list (read *query-io*)))
+	(return value)))))
 
 
 ;;; Converter implementations
