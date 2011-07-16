@@ -83,8 +83,8 @@ participant instance as its \"client\"."))
 	    #+sbcl (sb-ext:with-timeout 10
 		     (notify configurator connector :connector-removed))
 	    #-sbcl (notify configurator connector :connector-removed)
-	  (ignore-error ()
-	    :report "~@<Ignore the error and continue with the ~
+	    (continue ()
+	      :report "~@<Ignore the error and continue with the ~
 remaining connectors.~@:>"))))
 
 
