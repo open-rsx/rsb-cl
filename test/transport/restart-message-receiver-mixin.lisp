@@ -54,7 +54,7 @@ provided by `restart-message-receiver-mixin-root'.")
 			  (invoke-restart (find-restart restart)))))
 	    (receive-message simple-connector t))))
     (do-one 'log)
-    (do-one 'ignore)))
+    (do-one 'continue)))
 
 (addtest (restart-message-receiver-mixin-root
           :documentation
@@ -71,5 +71,5 @@ provided by `restart-message-receiver-mixin-root'.")
 			  (invoke-restart (find-restart restart)))))
 	    (message->event
 	     simple-connector (make-event "/" "bla") :string))))
-    (do-one 'ignore)
-    (do-one 'log)))
+    (do-one 'log)
+    (do-one 'continue)))

@@ -43,7 +43,7 @@ failure to dispatch event ~A.~@:>"
 			  event))
 	(log1 :warn processor "Failed to dispatch the event ~A~@[: ~A~]" event condition)
 	nil)
-      (ignore ()
+      (continue ()
 	:report (lambda (stream)
 		  (format stream "~@<Ignore the failure to dispatch ~
 event ~A.~@:>"

@@ -47,11 +47,11 @@ performed by the `~(~A~)' class."
 		,@invoke)
 
 	      (setf (processor-error-policy simple-handler)
-		    #'ignore-error)
+		    #'continue)
 	      ,@invoke
 
 	      (setf (processor-error-policy simple-handler)
-		    #'ignore-error)
+		    #'log-error)
 	      ,@invoke)))))
 
   (define-error-handling-mixin-tests
@@ -59,8 +59,8 @@ performed by the `~(~A~)' class."
       (emit ((block? t))
 	    (restart-case
 		(error "~@<emit signaled an error.~@:>")
-	      (log    (condition) (declare (ignore condition)) nil)
-	      (ignore ()          nil)))
+	      (log      (condition) (declare (ignore condition)) nil)
+	      (continue ()          nil)))
 
     (emit simple-handler t))
 
@@ -69,8 +69,8 @@ performed by the `~(~A~)' class."
       (receive-messages ()
 	    (restart-case
 		(error "~@<receive-messages signaled an error.~@:>")
-	      (log    (condition) (declare (ignore condition)) nil)
-	      (ignore ()          nil)))
+	      (log      (condition) (declare (ignore condition)) nil)
+	      (continue ()          nil)))
 
     (receive-messages simple-handler))
 
@@ -79,7 +79,7 @@ performed by the `~(~A~)' class."
       (handle ((event event))
 	    (restart-case
 		(error "~@<handle signaled an error.~@:>")
-	      (log    (condition) (declare (ignore condition)) nil)
-	      (ignore ()          nil)))
+	      (log      (condition) (declare (ignore condition)) nil)
+	      (continue ()          nil)))
 
     (handle simple-handler (make-event "/" "bla"))))

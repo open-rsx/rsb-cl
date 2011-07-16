@@ -41,7 +41,7 @@ the failed receiving attempt and continue with the next ~
 notification.~@:>"))
 	    (log1 :warn connector "Failed to receive a notification~@[: ~_~A~]" condition)
 	    nil)
-	  (ignore ()
+	  (continue ()
 	    :report (lambda (stream)
 		      (format stream "~@<Ignore the failed receiving ~
 attempt and continue with the next notification.~@:>"))
@@ -59,9 +59,9 @@ but with and without emitting a log message respectively."
       :report (lambda (stream)
 		(format stream "~@<Log a message and ignore the ~
 failed decoding and continue with the next event.~@:>"))
-      (log1 :warn connector "Failed to decode a message~@[: ~_~A~]" condition)
+      (log1 :warn connector "Failed to decode a notification~@[: ~_~A~]" condition)
       nil)
-    (ignore ()
+    (continue ()
       :report (lambda (stream)
 		(format stream "~@<Ignore the failed decoding and ~
 continue with the next event.~@:>"))

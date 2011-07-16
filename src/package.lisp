@@ -77,12 +77,16 @@
 
   ;; Restarts
   (:export
+   :retry
 
-   :log
+   ;; continue provided by CL
+   ;; use-value likewise
+
+   ;; log is in CL
    :log-error
 
-   :ignore
-   :ignore-error
+   ;; warn is in CL
+   :signal-warning
 
    :use-scope
    :use-uri)

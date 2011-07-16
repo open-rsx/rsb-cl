@@ -23,31 +23,39 @@
 ;;; Error handling
 ;;
 
-;; not invoking any restart says processing should be canceled and the
+;; not invoking any restart says processing should be aborted and the
 ;; stack should be unwound.
 
-(intern "LOG")
-;; log restart: log the error and continue
+(macrolet
+    ((define-restart (name (&rest args) doc
+		      &key
+		      (function-name name))
+       `(progn
+	  (defmethod documentation ((thing (eql ',name)) (kind (eql 'restart)))
+	    ,doc)
 
-(defun log-error (condition)
-  "Invoke the 'log restart, requesting CONDITION to be logging and
-processing to be continued."
-  (let ((restart (find-restart 'log)))
-    (if restart
-	(invoke-restart restart condition)
-	(warn "~@<Restart ~S not found; unwinding.~@:>" 'log))))
+	  (defun ,function-name (,@args)
+	    ,(format nil "Invoke the ~A restart; ~A" name doc)
+	    (let ((restart (find-restart ',name)))
+	      (if restart
+		  (invoke-restart restart ,@args)
+		(warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name)))))))
 
-(intern "IGNORE")
-;; ignore restart: ignore the error silently
+  (define-restart retry ()
+    "Retry the failed operation.")
 
-(defun ignore-error (condition)
-  "Invoke the 'ignore restart, requesting processing to be continued
-without further actions."
-  (declare (ignore condition))
-  (let ((restart (find-restart 'ignore)))
-    (if restart
-	(invoke-restart restart)
-	(warn "~@<Restart ~S not found; unwinding.~@:>" 'ignore))))
+  ;; use-value restart and function is provided by CL.
+
+  ;; continue restart and function are provided by CL.
+
+  (define-restart log (condition)
+    "Log the error and continue processing."
+    :function-name log-error)
+
+  (define-restart warn (condition)
+    "Signal a warning instead of the original condition and continue
+processing."
+    :function-name signal-warning))
 
 
 ;;; Component URL protocol
@@ -98,9 +106,7 @@ continuing in a best effort manner instead of signaling."
       (((or error #+sbcl sb-ext:timeout)
 	#'(lambda (condition)
 	    (warn "~@<Error during detaching: ~A~@:>" condition)
-	    (let ((ignore-error (find-restart 'ignore-error)))
-	      (when ignore-error
-		(invoke-restart ignore-error))))))
+	    (continue))))
     (detach participant)))
 
 

@@ -28,8 +28,8 @@
   "A function that unconditionally signals an error."
   (restart-case
       (error "~@<I like to signal.~@:>")
-    (log    (condition) (declare (ignore condition)) nil)
-    (ignore () nil)))
+    (log      (condition) (declare (ignore condition)) nil)
+    (continue () nil)))
 
 (macrolet
     ((define-smoke-test (name &body invoke-form)
@@ -44,9 +44,9 @@
 	  (ensure-condition 'simple-error
 	    ,@invoke-form)
 
-	  ;; The error policy #'ignore-error should prevent the error
-	  ;; from being signaled.
-	  (setf (processor-error-policy simple-processor) #'ignore-error)
+	  ;; The error policy #'continue should prevent the error from
+	  ;; being signaled.
+	  (setf (processor-error-policy simple-processor) #'continue)
 	  ,@invoke-form
 
 	  ;; The error policy #'log-error should prevent the error

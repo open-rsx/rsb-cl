@@ -44,9 +44,9 @@
   (ensure-condition 'simple-error
     (handle simple-processor simple-event))
 
-  ;; The error policy #'ignore-error should prevent the error from
-  ;; being signaled.
-  (setf (processor-error-policy simple-processor) #'ignore-error)
+  ;; The error policy #'continue should prevent the error from being
+  ;; signaled.
+  (setf (processor-error-policy simple-processor) #'continue)
   (handle simple-processor simple-event)
 
   ;; The error policy #'log-error should prevent the error from being
