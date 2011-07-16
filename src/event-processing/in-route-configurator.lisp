@@ -48,9 +48,8 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o
-	   (filters   configurator-filters)
-	   (processor configurator-processor)) configurator))
+  (bind (((:accessors-r/o (filters   configurator-filters)
+			  (processor configurator-processor)) configurator))
     (call-next-method)
 
     ;; Notify new connector regarding filters.
@@ -59,8 +58,8 @@ participant."))
 	  (unless (eq (notify connector filter :filter-added) :implemented)
 	    (pushnew filter (processor-filters processor))))
 
-    ;; Notify processor regarding new connector and add to connectors
-    ;; handlers.
+    ;; Notify PROCESSOR regarding added CONNECTOR and add PROCESSOR to
+    ;; CONNECTOR's handlers.
     (notify processor connector action)
 
     (log1 :info configurator "Connecting ~S -> ~S" connector processor)
