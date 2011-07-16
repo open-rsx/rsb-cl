@@ -19,7 +19,8 @@
 
 (in-package :rsb.event-processing)
 
-(defclass configurator (scope-mixin)
+(defclass configurator (scope-mixin
+			error-policy-mixin)
   ((scope      :reader   configurator-scope)
    (direction  :initarg  :direction
 	       :type     direction
@@ -39,6 +40,8 @@ to access the bus.")
 	       :documentation
 	       "Stores the processor instance that handles incoming or
 outgoing events."))
+  (:default-initargs
+   :error-policy #'log-error)
   (:documentation
    "This class is intended to be used as a superclass of configurator
 classes for specific directions. Every configurator instance has a
@@ -48,15 +51,22 @@ participant instance as its \"client\"."))
                                      (slot-names t)
                                      &key
 				     processor)
+  ;; Create a processor if none has been supplied.
   (unless processor
-    (setf (slot-value instance 'processor) (make-processor instance))))
+    (setf (slot-value instance 'processor) (make-processor instance)))
 
-(defmethod make-processor ((configurator configurator)
-			   &rest args
-			   &key &allow-other-keys)
-  (apply #'make-instance
-	 (ensure-processor-class (collect-processor-mixins configurator))
-	 args))
+  ;; Propagate the selected error policy into the processor and
+  ;; potentially connectors.
+  (setf (processor-error-policy instance)
+	(processor-error-policy instance)))
+
+(defmethod (setf processor-error-policy) :around  ((new-value    t)
+						   (configurator configurator))
+  (bind (((:accessors-r/o (processor configurator-processor)) configurator))
+    (log1 :info configurator "Installing new error policy ~S in processor ~S" new-value processor)
+    (setf (processor-error-policy processor) new-value)
+
+    (call-next-method)))
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)
 						   (configurator configurator))
@@ -72,6 +82,16 @@ participant instance as its \"client\"."))
 	      (notify configurator connector :connector-added))
 	(iter (for connector in removed)
 	      (notify configurator connector :connector-removed))))))
+
+(defmethod collect-processor-mixins append ((configurator configurator))
+  '(error-policy-mixin))
+
+(defmethod make-processor ((configurator configurator)
+			   &rest args
+			   &key &allow-other-keys)
+  (apply #'make-instance
+	 (ensure-processor-class (collect-processor-mixins configurator))
+	 args))
 
 (defmethod detach ((configurator configurator))
   "Detach all connectors from the scope of CONFIGURATOR."
