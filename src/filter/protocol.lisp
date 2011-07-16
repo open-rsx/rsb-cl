@@ -28,24 +28,40 @@
    "Return non-nil if EVENT matches the criteria of FILTER."))
 
 
-;;;
+;;; Filter class family
 ;;
 
 (dynamic-classes:define-findable-class-family filter
-    "")
+    "The classes in this family implement event filtering strategies
+by providing methods on the `matches?' function. Filter instances
+should also be funcallable. Filter instances are usually constructed
+using the `make-filter' and `filter' functions.")
 
 (defun make-filter (name &rest args)
-  "DOC"
+  "Construct an instance of the filter class designated by NAME using
+ARGS as initargs."
   (apply #'make-instance (find-filter-class name) args))
 
-;; DSL:
+
+;;; Filter construction mini-DSL
+;;
 
 (defgeneric filter (spec
 		    &rest args
 		    &key &allow-other-keys)
   (:documentation
-   "SPEC is a list of the form
-   (TYPE ARGS)"))
+   "Construct and return a filter instance according to SPEC and
+ARGS. where SPEC is either a keyword designating a filter class or a
+list of the form
+
+  (CLASS (CHILDSPEC1) (CHILDSPEC2) ...)
+
+where CLASS designates a filter class and CHILDSPECN is of the same
+form as SPEC. When this second form is used, CLASS has to designate a
+composite filter class for which will `make-instance' will be called
+with initargs consisting of ARGS and an additional :children
+initarg. The value of this initarg is computed by recursively applying
+`filter' to each CHILDSPECN."))
 
 (defmethod filter ((spec symbol)
 		   &rest args
