@@ -60,8 +60,7 @@ contained in NOTIFICATION."
     (setf event (make-instance
 		 'rsb:event
 		 :id                (uuid:byte-array-to-uuid id)
-		 :scope             (make-scope (sb-ext:octets-to-string
-						 scope :external-format :ascii))
+		 :scope             (make-scope (bytes->string scope))
 		 :type              t
 		 :data              (rsb.converter:wire->domain
 				     converter (or data payload)
@@ -96,11 +95,8 @@ contained in NOTIFICATION."
       (setf (timestamp event :receive) (local-time:now))
 
       (iter (for user-time in-vector (rsb.protocol::meta-data-user-times meta-data))
-	    (setf (timestamp event (make-keyword
-				    (string-upcase
-				     (sb-ext:octets-to-string
-				      (rsb.protocol::user-time-key user-time)
-				      :external-format :ascii))))
+	    (setf (timestamp event (bytes->keyword
+				    (rsb.protocol::user-time-key user-time)))
 		  (unix-microseconds->timestamp
 		   (rsb.protocol::user-time-timestamp user-time)))))
 
@@ -171,9 +167,7 @@ notification are chosen."
 	 (notification (make-instance
 			'rsb.protocol::notification
 			:id             (uuid:uuid-to-byte-array id)
-			:scope          (sb-ext:string-to-octets
-					 (scope-string scope)
-					 :external-format :ascii)
+			:scope          (string->bytes (scope-string scope))
 			:wire-schema    (wire-schema->bytes wire-schema)
 			:num-data-parts num-data-parts
 			:data-part      data-part
@@ -193,15 +187,11 @@ notification are chosen."
 	  (unless (eq key :create) ;; the event should not have :send,
 				   ;; :receive or :deliver at this
 				   ;; point
-	    (let ((name (sb-ext:string-to-octets
-			 (string-downcase (string key))
-			 :external-format :ascii))
-		  (flat (timestamp->unix-microseconds value)))
-	      (vector-push-extend
-	       (make-instance 'rsb.protocol::user-time
-			      :key       name
-			      :timestamp flat)
-	       (rsb.protocol::meta-data-user-times meta-data1)))))
+	    (vector-push-extend
+	     (make-instance 'rsb.protocol::user-time
+			    :key       (keyword->bytes key)
+			    :timestamp (timestamp->unix-microseconds value))
+	     (rsb.protocol::meta-data-user-times meta-data1))))
 
     ;; Return the complete notification instance.
     notification))
@@ -220,19 +210,32 @@ integer which counts the number of microseconds since UNIX epoch."
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))
 
+(defun string->bytes (string)
+  "Converter STRING into an octet-vector."
+  (sb-ext:string-to-octets string :external-format :ascii))
+
+(defun bytes->string (bytes)
+  "Convert BYTES into a string."
+  (sb-ext:octets-to-string bytes :external-format :ascii))
+
+(defun keyword->bytes (keyword)
+  "Convert the name of KEYWORD into an octet-vector."
+  (string->bytes (string-downcase (string keyword))))
+
+(defun bytes->keyword (bytes)
+  "Converter BYTES into a keyword."
+  (make-keyword (string-upcase (bytes->string bytes))))
+
 (defun wire-schema->bytes (wire-schema)
   "Convert WIRE-SCHEMA to an ASCII representation stored in an
 octet-vector."
   (let ((*readtable* (copy-readtable nil)))
     (setf (readtable-case *readtable*) :invert)
-    (sb-ext:string-to-octets
-     (princ-to-string wire-schema)
-     :external-format :ascii)))
+    (string->bytes (princ-to-string wire-schema))))
 
 (defun bytes->wire-schema (bytes)
   "Return a keyword representing the wire-schema encoded in bytes."
   (let ((*package*   (find-package :keyword))
 	(*readtable* (copy-readtable nil)))
     (setf (readtable-case *readtable*) :invert)
-    (read-from-string (sb-ext:octets-to-string
-		       bytes :external-format :ascii))))
+    (read-from-string (bytes->string bytes))))
