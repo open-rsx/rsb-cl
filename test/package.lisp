@@ -45,7 +45,10 @@
 
    :check-event
 
-   :participant-suite)
+   :participant-suite
+   :define-basic-participant-test-cases
+
+   :define-restart-method-test-case)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
@@ -135,3 +138,38 @@ KIND."
 	    (not (emptyp
 		  (with-output-to-string (stream)
 		    (format stream "~A" participant))))))))))
+
+(defmacro define-restart-method-test-case ((class method (instance-var &rest args)
+				            &key
+					    (restarts '(log continue)))
+					   &body body)
+    (let ((suite-name (symbolicate class "-ROOT"))
+	  (case-name  (symbolicate method "-SMOKE"))
+	  (var-name   (symbolicate "*" method "-FAIL?*")))
+      `(progn
+	 ;; Define a method that signals an error unless a variable is
+	 ;; set.
+	 (defvar ,var-name t)
+
+	 (defmethod ,method ((,instance-var ,class) ,@args)
+	   (when ,var-name (error "~@<~S failed.~@:>" ',method)))
+
+	 ;; Define the test case that invokes the method and fails if
+	 ;; the error is not by restarts.
+	 (addtest (,suite-name
+		   :documentation
+		   ,(format nil "Smoke test for the :around method on ~
+`~(~A~)' provided by `~(~A~)'."
+			    method class))
+	   ,case-name
+
+	   (bind (((:flet do-one (restart))
+		   (setf ,var-name t)
+		   (handler-bind
+		       ((error #'(lambda (condition)
+				   (declare (ignore condition))
+				   (setf ,var-name nil)
+				   (invoke-restart (find-restart restart)))))
+		     ,@body)))
+	     ,@(iter (for restart in restarts)
+		     (collect `(do-one ',restart))))))))

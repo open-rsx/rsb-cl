@@ -19,57 +19,17 @@
 
 (in-package :rsb.transport.test)
 
-(defvar *receive-message-fail?* t)
-
-(defmethod receive-message ((connector restart-message-receiver-mixin)
-			    (block?    t))
-  (when *receive-message-fail?*
-    (error "~@<No message here.~@:>")))
-
-(defvar *message->event-fail?* t)
-
-(defmethod message->event ((connector   restart-message-receiver-mixin)
-			   (message     t)
-			   (wire-schema t))
-  (when *message->event-fail?*
-    (error "~@<Event producing failed.~@:>")))
-
 (deftestsuite restart-message-receiver-mixin-root (transport-root)
   ((simple-connector (make-instance 'restart-message-receiver-mixin)))
   (:documentation
    "Unit tests for the `restart-message-receiver-mixin' class."))
 
-(addtest (restart-message-receiver-mixin-root
-          :documentation
-	  "Smoke test for the :around method on `receive-message'
-provided by `restart-message-receiver-mixin-root'.")
-  receive-message-smoke
+(define-restart-method-test-case
+    (restart-message-receiver-mixin
+     receive-message (connector (block? t)))
+  (receive-message simple-connector t))
 
-  (bind (((:flet do-one (restart))
-	  (setf *receive-message-fail?* t)
-	  (handler-bind
-	      ((error #'(lambda (condition)
-			  (declare (ignore condition))
-			  (setf *receive-message-fail?* nil)
-			  (invoke-restart (find-restart restart)))))
-	    (receive-message simple-connector t))))
-    (do-one 'log)
-    (do-one 'continue)))
-
-(addtest (restart-message-receiver-mixin-root
-          :documentation
-	  "Smoke test for the :around method on `message->event'
-provided by `restart-message-receiver-mixin-root'.")
-  message->event-smoke
-
-  (bind (((:flet do-one (restart))
-	  (setf *message->event-fail?* t)
-	  (handler-bind
-	      ((error #'(lambda (condition)
-			  (declare (ignore condition))
-			  (setf *message->event-fail?* nil)
-			  (invoke-restart (find-restart restart)))))
-	    (message->event
-	     simple-connector (make-event "/" "bla") :string))))
-    (do-one 'log)
-    (do-one 'continue)))
+(define-restart-method-test-case
+    (restart-message-receiver-mixin
+     message->event (connector (message t) (wire-schema t)))
+  (message->event simple-connector (make-event "/" "bla") :string))
