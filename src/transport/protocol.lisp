@@ -133,6 +133,21 @@ wrong."))
    "CONNECTOR receives and processes messages until interrupted."))
 
 
+;;; Notification sender protocol
+;;
+
+(defgeneric send-notification (connector notification)
+  (:documentation
+   "Send NOTIFICATION via CONNECTOR."))
+
+(defgeneric event->notification (connector event)
+  (:documentation
+   "Convert EVENT into a notification for sending via
+CONNECTOR. Return the notification. If EVENT cannot be converted into
+a notification, maybe return nil, depending on the error handling
+policy. Maybe signal an `encoding-error' if something goes wrong."))
+
+
 ;;; Transport implementations
 ;;
 

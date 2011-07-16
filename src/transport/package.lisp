@@ -83,6 +83,11 @@
    :connector-started?
    :connector-thread)
 
+  ;; Notification sender protocol
+  (:export
+   :send-notification
+   :event->notification)
+
   ;; Error handling mixin classes
   (:export
    :error-handling-push-receiver-mixin
@@ -94,6 +99,10 @@
   ;; `restart-message-receiver-mixin' class
   (:export
    :restart-message-receiver-mixin)
+
+  ;; `restart-notification-sender-mixin' class
+  (:export
+   :restart-notification-sender-mixin)
 
   ;; `threaded-message-receiver-mixin' class
   (:export

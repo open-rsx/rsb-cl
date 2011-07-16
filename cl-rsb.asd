@@ -249,7 +249,9 @@
 			      (:file       "threaded-message-receiver-mixin"
 			       :depends-on ("package"
 					    "message-receiver-mixin"
-					    "threaded-receiver-mixin"))))
+					    "threaded-receiver-mixin"))
+			      (:file       "restart-notification-sender-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"

@@ -22,7 +22,8 @@
 (defmethod find-transport-class ((spec (eql :spread-out)))
   (find-class 'out-connector))
 
-(defclass out-connector (error-handling-sender-mixin
+(defclass out-connector (restart-notification-sender-mixin
+			 error-handling-sender-mixin
 			 connector)
   ((max-fragment-size :initarg  :max-fragment-size
 		      :type     positive-fixnum
@@ -42,13 +43,24 @@ should use."))
    "A connector for sending data over spread."))
 
 (defmethod handle ((connector out-connector) (event event))
-  (bind (((:accessors-r/o
-	   (connection        connector-connection)
-	   (max-fragment-size connector-max-fragment-size)) connector)
-	 (group-names   (scope->groups (event-scope event)))
-	 (notifications (event->notifications
-			 connector event max-fragment-size))) ;; TODO only if group is populated?
+  (bind ((group-names   (scope->groups (event-scope event)))
+	 (notifications (event->notification connector event))) ;; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
+    (send-notification connector (cons group-names notifications))))
+
+(defmethod event->notification ((connector out-connector)
+				(event     event))
+  "Delegate conversion to `event->notifications'. The primary purpose
+of this method is performing the conversion with restarts installed."
+  (event->notifications
+   connector event (connector-max-fragment-size connector)))
+
+(defmethod send-notification ((connector                out-connector)
+			      (groups-and-notifications cons))
+  "Send each notification using `send-message'. The primary purpose of
+this method is sending the notifications with restarts installed."
+  (bind (((:accessors-r/o (connection connector-connection)) connector)
+	 ((group-names . notifications) groups-and-notifications))
     (iter (for notification in notifications)
 	  (send-message connection group-names (pb:pack* notification)))))
