@@ -120,6 +120,8 @@
 		 :components ((:file       "package")
 			      (:file       "types"
 			       :depends-on ("package"))
+			      (:file       "conditions"
+			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))
 

@@ -27,6 +27,11 @@
 
    :rsb)
 
+  ;; Conditions
+  (:export
+   :filter-construction-error
+   :filter-construction-error-spec)
+
   ;; Filter protocol
   (:export
    :matches?)

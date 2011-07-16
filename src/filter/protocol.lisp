@@ -50,7 +50,12 @@
 (defmethod filter ((spec symbol)
 		   &rest args
 		   &key)
-  (apply #'make-filter spec args))
+  (handler-case
+      (apply #'make-filter spec args)
+    (error (condition)
+      (error 'filter-construction-error
+	     :spec  spec
+	     :cause condition))))
 
 (defmethod filter ((spec list)
 		   &rest args
