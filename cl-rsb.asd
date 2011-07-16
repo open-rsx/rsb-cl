@@ -364,6 +364,8 @@
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
 			      (:file       "restart-message-receiver-mixin"
+			       :depends-on ("package"))
+			      (:file       "restart-notification-sender-mixin"
 			       :depends-on ("package"))))
 
 		(:module     "inprocess"
