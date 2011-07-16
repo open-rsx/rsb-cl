@@ -51,10 +51,27 @@
    "This class can be mixed into test suite classes which contain
 tests for filters."))
 
-(defmacro define-basic-filter-test-cases (class &rest matches)
+(defmacro define-basic-filter-test-cases ((class spec) construct-cases &rest matches)
   "Define basic test cases for the filter class CLASS."
   (let ((suite-name (symbolicate class "-ROOT")))
     `(progn
+       (addtest (,suite-name
+		 :documentation
+		 ,(format nil "Test construction instances of the `~(~A~)' filter class."
+			  class))
+	 construct
+
+	 (ensure-cases (args expected)
+	     ,construct-cases
+
+	   (if (eq expected :error)
+	       (ensure-condition error
+		 (apply #'make-instance ',class args))
+	       (progn
+		 (apply #'make-instance ',class args)
+		 (apply #'make-filter ,spec args)
+		 (apply #'filter ,spec args)))))
+
        (addtest (,suite-name
 		 :documentation
 		 ,(format nil "Smoke test for the `~(~A~)' filter class."

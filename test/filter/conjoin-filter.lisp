@@ -28,5 +28,9 @@
   (:documentation
    "Unit tests for the `conjoin-filter' class."))
 
-(define-basic-filter-test-cases conjoin-filter
-    nil nil nil t nil nil nil)
+(define-basic-filter-test-cases (conjoin-filter :and)
+    ;; construct cases
+    '((() :ok))
+
+  ;; expected matching results
+  nil nil nil t nil nil nil)

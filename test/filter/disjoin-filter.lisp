@@ -28,6 +28,10 @@
   (:documentation
    "Unit tests for the `disjoin-filter' class."))
 
-
-(define-basic-filter-test-cases disjoin-filter
-    nil t t t t t nil)
+(define-basic-filter-test-cases (disjoin-filter :or)
+    ;; Construction
+    '(;; these are ok
+      (()              :on)
+      ((:children nil) :ok))
+  ;; Matching results
+  nil t t t t t nil)

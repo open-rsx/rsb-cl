@@ -25,5 +25,13 @@
   (:documentation
    "Unit tests for the `scope-filter' class."))
 
-(define-basic-filter-test-cases scope-filter
+(define-basic-filter-test-cases (scope-filter :scope)
+    ;; construct cases
+    '(;; missing required initargs
+      (()              :error)
+      ;; invalid scope
+      ((:scope "<>!")  :error)
+      ;; these are ok
+      ((:scope "/foo") :ok))
+
     nil t t t t t t)
