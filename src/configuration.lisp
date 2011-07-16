@@ -143,6 +143,20 @@ not returned."
 		      (string= (option-value '(:enabled) "0" options) "1")) ;;; TODO(jmoringe):
 	      (collect (cons transport (options->plist options))))))))
 
+(defun process-transport-options (options)
+  "If OPTIONS is of the form
+
+  \(TRANSPORT KEY1 VALUE1 KEY2 VALUE2 ... &inherit)
+
+replace &inherit with the default configuration options for
+TRANSPORT. Otherwise return OPTIONS unmodified."
+  (bind (((transport &rest transport-options) options))
+    (if (ends-with '&inherit transport-options)
+	(append (list transport)
+		(butlast transport-options)
+		(rest (find transport (transport-options) :key #'first)))
+	(cons transport transport-options))))
+
 
 ;;; Utility functions
 ;;

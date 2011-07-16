@@ -62,6 +62,10 @@ Return three values:
     (error 'no-transports
 	   :scope scope))
 
+  ;; Replace &inherit marker in transport options with actual default
+  ;; options for respective transports.
+  (setf transports (map 'list #'process-transport-options transports))
+
   (let* ((configurator (make-instance
 			(ecase direction
 			  ((:in-push :in-pull) 'rsb.ep:in-route-configurator)

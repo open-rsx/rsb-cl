@@ -186,7 +186,8 @@
 			      (:file       "variables"
 			       :depends-on ("configuration"))
 
-			      (:file       "participant")
+			      (:file       "participant"
+			       :depends-on ("configuration"))
 			      (:file       "receiving-client")
 			      (:file       "listener"
 			       :depends-on ("participant"

@@ -206,7 +206,9 @@
 
    :make-options
    :make-options-for-connector-classes
-   :make-options-for-connector-class)
+   :make-options-for-connector-class
+
+   :&inherit)
 
   ;; URI-related function
   (:export
