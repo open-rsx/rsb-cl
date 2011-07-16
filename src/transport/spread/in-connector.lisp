@@ -60,15 +60,15 @@ connector classes for Spread."))
 
     ;; Try to unpack MESSAGE into a `notification' instance. Signal
     ;; `decoding-error' if that fails.
-    (handler-case
-	(setf notification (pb:unpack message 'rsb.protocol::notification))
-      (error (condition)
-	(error 'decoding-error
-	       :encoded          message
-	       :format-control   "~@<The data could not be unpacked as a ~
-protocol buffer of kind ~S.~:@>"
-	       :format-arguments '(rsb.protocol::notification)
-	       :cause            condition)))
+    (handler-bind
+	((error #'(lambda (condition)
+		    (error 'decoding-error
+			   :encoded          message
+			   :format-control "~@<The data could not be ~
+unpacked as a protocol buffer of kind ~S.~:@>"
+			   :format-arguments '(rsb.protocol::notification)
+			   :cause            condition))))
+      (setf notification (pb:unpack message 'rsb.protocol::notification)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -82,13 +82,13 @@ protocol buffer of kind ~S.~:@>"
     ;;       In this case, an error is signaled
     ;; 2. The notification does not form a complete event
     ;;    In this case, nil is returned.
-    (handler-case
-	(notification->event pool converter notification)
-      (error (condition)
-	(error 'decoding-error
-	       :encoded          message
-	       :format-control   "~@<After unpacking, the notification ~
-~S could not be converted into an event.~:@>"
-	       :format-arguments `(,(with-output-to-string (stream)
-				      (describe notification stream)))
-	       :cause            condition)))))
+    (handler-bind
+	((error #'(lambda (condition)
+		    (error 'decoding-error
+			   :encoded          message
+			   :format-control "~@<After unpacking, the ~
+notification ~S could not be converted into an event.~:@>"
+			   :format-arguments `(,(with-output-to-string (stream)
+						  (describe notification stream)))
+			   :cause            condition))))
+      (notification->event pool converter notification))))
