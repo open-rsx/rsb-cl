@@ -35,7 +35,26 @@ function."))
   '("/listener/construction" nil "/listener/construction")
   '("inprocess://localhost/listener/construction" nil
     "/listener/construction")
-  '("/" (:transports nil) :error))
+  '("/" (:transports nil)  :error))
+
+(addtest (listener-root
+          :documentation
+	  "Test adding and removing handlers to/from a `listener'
+instance.")
+  handlers
+
+  (with-listener (listener "/foo")
+    ;; Initially, there should not be any handlers.
+    (ensure-null (rsb.ep:handlers listener))
+
+    ;; Test adding and removing a handler.
+    (let ((handler #'(lambda (event) (declare (ignore event)))))
+      (push handler (rsb.ep:handlers listener))
+      (ensure-same (rsb.ep:handlers listener) (list handler)
+		   :test #'equal)
+
+      (removef (rsb.ep:handlers listener) handler)
+      (ensure-null (rsb.ep:handlers listener)))))
 
 (addtest (listener-root
           :documentation

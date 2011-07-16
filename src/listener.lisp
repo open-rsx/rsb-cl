@@ -20,7 +20,14 @@
 (in-package :rsb)
 
 (defclass listener (receiving-client)
-  ((error-hook :initarg  :error-hook
+  ((handlers   :initarg  :handlers
+	       :type     list
+	       :accessor rsb.ep:handlers
+	       :initform nil
+	       :documentation
+	       "Stores the list of handlers two which events received
+by this listener should be dispatched.")
+   (error-hook :initarg  :error-hook
 	       :type     list
 	       :initform nil
 	       :documentation
@@ -30,14 +37,20 @@ errors."))
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
 
-(defmethod rsb.ep:handlers ((listener listener))
-  ;(rsb.ep:handlers (rsb.ep:client-configurator listener))
-  nil)
-
-(defmethod (setf rsb.ep:handlers) ((new-value list) (listener listener))
-  (rsb.ep:notify (rsb.ep:client-configurator listener) (first new-value) :handler-added))
-  ;(setf (rsb.ep:handlers (rsb.ep:client-configurator listener))
-;	new-value))
+(defmethod (setf rsb.ep:handlers) :around ((new-value list)
+					   (listener  listener))
+  (let* ((configurator (rsb.ep:client-configurator listener))
+	 (old-value    (rsb.ep:handlers listener))
+	 (added        (set-difference new-value old-value))
+	 (removed      (set-difference old-value new-value)))
+    (prog1
+	(call-next-method)
+      (log1 :info listener "Added   handlers ~{~S~^, ~}" added)
+      (log1 :info listener "Removed handlers ~{~S~^, ~}" removed)
+      (iter (for handler in added)
+	    (rsb.ep:notify configurator handler :handler-added))
+      (iter (for handler in removed)
+	    (rsb.ep:notify configurator handler :handler-removed)))))
 
 
 ;;; `listener' creation
@@ -46,7 +59,7 @@ a mechanism for dispatching matching events to these handlers."))
 (defmethod make-listener ((scope scope)
 			  &key
 			  (transports (transport-options)))
-  (make-participant 'listener scope :in-push  transports))
+  (make-participant 'listener scope :in-push transports))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))
 
