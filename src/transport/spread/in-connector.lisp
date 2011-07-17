@@ -87,7 +87,7 @@ unpacked as a protocol buffer of kind ~S.~:@>"
 		    (error 'decoding-error
 			   :encoded          message
 			   :format-control "~@<After unpacking, the ~
-notification ~A could not be converted into an event.~:@>"
+notification~&~A~&could not be converted into an event.~:@>"
 			   :format-arguments `(,(with-output-to-string (stream)
 						  (describe notification stream)))
 			   :cause            condition))))
