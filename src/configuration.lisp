@@ -123,7 +123,9 @@
 ;;;
 ;;
 
-(defun transport-options (&optional (config *default-configuration*))
+(defun transport-options (&key
+			  (config *default-configuration*)
+			  exclude-disabled?)
   "Collect and interpret options in CONFIG that apply to
 transports. Options for transports which are disabled in CONFIG are
 not returned."
@@ -139,7 +141,8 @@ not returned."
     ;; transports.
     (iter (for transport in transports)
 	  (bind ((options (section-options transport options)))
-	    (when (or (eq (option-value '(:enabled) nil options) t)
+	    (when (or (not exclude-disabled?)
+		      (eq (option-value '(:enabled) nil options) t)
 		      (string= (option-value '(:enabled) "0" options) "1")) ;;; TODO(jmoringe):
 	      (collect (cons transport (options->plist options))))))))
 

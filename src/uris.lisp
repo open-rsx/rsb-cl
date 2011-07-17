@@ -19,6 +19,13 @@
 
 (in-package :rsb)
 
+(defun uri-transport (uri)
+  "If URI specifies a transport configuration, return three values:
+the transport name, hostname and port. Both hostname and port can be
+nil. If URI does not specify a transport, return nil."
+  (when (puri:uri-scheme uri)
+    (values (puri:uri-scheme uri) (puri:uri-host uri) (puri:uri-port uri))))
+
 (defun uri-options (uri)
   "Translate the query part of URI into a plist of options."
   (bind (((:flet separator? (char))
@@ -63,10 +70,8 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
 RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
 => (make-scope \"/\") '((:spread :port 4811))
 :test #'equal"
-  (bind (((:accessors-r/o (transport   puri:uri-scheme)
-			  (host        puri:uri-host)
-			  (port        puri:uri-port)
-			  (path        puri:uri-path)
+  (bind (((:values transport host port) (uri-transport uri))
+	 ((:accessors-r/o (path        puri:uri-path)
 			  (fragment    puri:uri-fragment)
 			  (uri-options uri-options)) uri)
 	 (transport-options

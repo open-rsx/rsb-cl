@@ -98,9 +98,12 @@ should be ~S.~@:>"
 
     `(progn
        ;; This method operates on URIs.
-       (defmethod ,make-name (,@args
-			      &key
-			      (transports (transport-options)))
+       (defmethod ,make-name
+	   (,@args
+	    &key
+	    (transports (transport-options
+			 :exclude-disabled?
+			 (not (uri-transport ,designator-arg)))))
 	 (bind (((:values scope options)
 		 (uri->scope-and-options ,designator-arg transports)))
 	   (,make-name scope ,@(rest arg-names) :transports options)))
@@ -109,12 +112,14 @@ should be ~S.~@:>"
        ;; URIs (if the string contains a colon) or scopes.
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
 			      &key
-			      (transports (transport-options)))
-	 (if (find #\: ,designator-arg)
-	     (,make-name (puri:parse-uri ,designator-arg) ,@(rest arg-names)
-			 :transports transports)
-	     (,make-name (make-scope ,designator-arg) ,@(rest arg-names)
-			 :transports transports))))))
+			      (transports nil transports-supplied?))
+	 (apply #',make-name
+		(if (find #\: ,designator-arg)
+		    (puri:parse-uri ,designator-arg)
+		    (make-scope ,designator-arg))
+		,@(rest arg-names)
+		(when transports-supplied?
+		  (list :transports transports)))))))
 
 (defmacro define-participant-creation-restart-method (kind &rest args)
   "Emit an :around method on `make-KIND' that establishes restarts.
