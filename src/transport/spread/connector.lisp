@@ -28,8 +28,7 @@
 	       ""))
   (:metaclass connector-class)
   (:default-initargs
-   :schema :spread
-   :host   (load-time-value (hostname) t))
+   :schema :spread)
   (:wire-type octet-vector)
   (:schemas   :spread)
   (:options
@@ -64,20 +63,23 @@ supplied."
 
 (defmethod shared-initialize :after ((instance connector) (slot-names t)
 				     &key
-				     host
-				     port
+				     connection
 				     name
-				     connection)
-  (bind (((:values hostname port) (if (and host port)
-				      (values host port)
-				      (spread:parse-daemon-name name)))
-	 (name (or (format nil "~D@~A" port hostname)))
+				     host
+				     port)
+  (bind (((:values host port)
+	  (cond
+	    ((and host port) (values host port))
+	    (port            (values nil  port))
+	    (name            (spread:parse-daemon-name name))))
+	 (name (format nil "~D~@[@~A~]" port host))
 	 ((:accessors-r/o (uri connector-url)) instance))
-    (when hostname
-      (setf (puri:uri-host uri) hostname))
+    (when host
+      (setf (puri:uri-host uri) host))
     (setf (puri:uri-port uri) port)
 
-    (setf (slot-value instance 'connection)
-	  (or connection
-	      (make-instance 'connection
-			     :name name)))))
+    ;; Unless a connection has been supplied, connect to the spread
+    ;; daemon designated by NAME.
+    (unless connection
+      (setf (slot-value instance 'connection)
+	    (make-instance 'connection :name name)))))
