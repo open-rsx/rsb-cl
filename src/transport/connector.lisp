@@ -23,7 +23,8 @@
 ;;; `connector' class
 ;;
 
-(defclass connector (uri-mixin)
+(defclass connector (uri-mixin
+		     error-policy-mixin)
   ((rsb::uri :reader   connector-url))
   (:documentation
    "A connector implements access to the bus by means of a particular

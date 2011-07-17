@@ -62,9 +62,14 @@ participant instance as its \"client\"."))
 
 (defmethod (setf processor-error-policy) :around  ((new-value    t)
 						   (configurator configurator))
-  (bind (((:accessors-r/o (processor configurator-processor)) configurator))
+  (bind (((:accessors-r/o (processor  configurator-processor)
+			  (connectors configurator-connectors)) configurator))
     (log1 :info configurator "Installing new error policy ~S in processor ~S" new-value processor)
     (setf (processor-error-policy processor) new-value)
+
+    (iter (for connector in connectors)
+	  (log1 :info configurator "Installing new error policy ~S in connector ~S" new-value connector)
+	  (setf (processor-error-policy connector) new-value))
 
     (call-next-method)))
 
@@ -114,7 +119,12 @@ remaining connectors.~@:>"))))
 (defmethod notify ((configurator configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o (scope configurator-scope)) configurator))
+  (bind (((:accessors-r/o
+	   (scope        configurator-scope)
+	   (error-policy processor-error-policy)) configurator))
+    (log1 :info configurator "Installing new error policy ~S in connector ~S" error-policy connector)
+    (setf (processor-error-policy connector) error-policy)
+
     (log1 :info configurator "Attaching connector ~S to scope ~S" connector scope)
     (notify connector scope :attached)))
 
