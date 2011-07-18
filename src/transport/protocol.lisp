@@ -173,7 +173,14 @@ the requested class cannot be found."
   "Create a connector instance for the direction designated by
 DIRECTION of the kind the designated by NAME. Pass ARGS to the
 constructed instance."
-  (apply #'make-instance (find-connector-class name direction) args))
+  (handler-bind
+      ((error #'(lambda (condition)
+		  (error 'connector-construction-failed
+			 :name      name
+			 :direction direction
+			 :args      args
+			 :cause     condition))))
+    (apply #'make-instance (find-connector-class name direction) args)))
 
 (defun make-connectors (specs direction)
   "Create zero or more connector instances for the direction

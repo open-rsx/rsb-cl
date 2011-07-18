@@ -228,8 +228,10 @@
 			      "event-processing" ;; for error-policy-mixin
 			      "converter")       ;; for conversion-mixin
 		 :components ((:file       "package")
-			      (:file       "protocol"
+			      (:file       "conditions"
 			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package" "conditions"))
 			      (:file       "connector-class"
 			       :depends-on ("package" "protocol"))
 			      (:file       "connector"

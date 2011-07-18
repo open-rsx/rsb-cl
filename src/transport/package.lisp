@@ -32,6 +32,13 @@
    :rsb.event-processing
    :rsb.converter)
 
+  ;; Conditions
+  (:export
+   :connector-construction-failed
+   :connector-construction-failed-name
+   :connector-construction-failed-direction
+   :connector-construction-failed-args)
+
   ;; Connector protocol
   (:export
    :connector-direction ;; work on connector classes and instances
