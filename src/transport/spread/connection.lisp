@@ -59,14 +59,18 @@ reference count."))
 communication system and maintain a list of the Spread multicast
 groups in which they are members."))
 
+(defmethod initialize-instance :before ((instance connection)
+					&key
+					connection
+					name)
+  (unless (or name connection)
+    (missing-required-initarg 'connector :either-name-or-connection)))
+
 (defmethod shared-initialize :before ((instance   connection)
 				      (slot-names t)
 				      &key
-				      name
-				      connection)
-  (unless (or name connection)
-    (missing-required-initarg 'connector :either-name-or-connection))
-
+				      connection
+				      name)
   (when (and name connection)
     (error "~@<The initargs ~{~S~^, ~} are mutually exclusive.~@:>"
 	   '(:name :connection))))
