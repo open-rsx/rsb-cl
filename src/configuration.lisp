@@ -33,9 +33,8 @@
 		 (name (name->option-name name)))
 	    (when name
 	      (cons name value)))))
-    (effective-options
-     (remove-if #'null (map 'list #'variable->option
-			    (sb-impl::posix-environ))))))
+    (remove-if #'null (map 'list #'variable->option
+			   (sb-impl::posix-environ)))))
 
 
 ;;; Configuration file
@@ -79,17 +78,16 @@
 + ~/.config/rsb.conf
 + $(PWD)/rsb.conf
 + Environment Variables"
-  (effective-options
-   (append
-    (options-from-environment)
-    (with-input-from-file (stream "rsb.conf"
-				  :if-does-not-exist nil)
-      (when stream (options-from-stream stream)))
-    (with-input-from-file (stream "~/.config/rsb.conf"
-				  :if-does-not-exist nil)
-      (when stream (options-from-stream stream)))
-    '(((:transport :spread :converter)
-       . (:fundamental-utf-8-string :fundamental-bytes))))))
+  (merge-options
+   (options-from-environment)
+   (with-input-from-file (stream "rsb.conf"
+				 :if-does-not-exist nil)
+     (when stream (options-from-stream stream)))
+   (with-input-from-file (stream "~/.config/rsb.conf"
+				 :if-does-not-exist nil)
+     (when stream (options-from-stream stream)))
+   '(((:transport :spread :converter)
+      . (:fundamental-utf-8-string :fundamental-bytes)))))
 
 
 ;;;
@@ -154,23 +152,31 @@ not returned."
 replace &inherit with the default configuration options for
 TRANSPORT. Otherwise return OPTIONS unmodified."
   (bind (((transport &rest transport-options) options))
-    (if (ends-with '&inherit transport-options)
-	(append (list transport)
-		(butlast transport-options)
-		(rest (find transport (transport-options) :key #'first)))
-	(cons transport transport-options))))
+    (cons transport
+	  (if (ends-with '&inherit transport-options)
+	      (append (butlast transport-options)
+		      (rest (find transport (transport-options)
+				  :key #'first)))
+	      transport-options))))
 
 
 ;;; Utility functions
 ;;
 
 (defun string->option-name (string &optional (separator #\.))
-  "DOC"
+  "Split STRING at all occurrences of SEPARATOR, producing an option
+name."
   (map 'list (compose #'make-keyword #'string-upcase)
        (split-sequence separator string)))
 
+(defun merge-options (&rest options)
+  "Return options that result from merging OPTIONS with options
+occurring earlier taking precedence over later ones."
+  (effective-options (apply #'append options)))
+
 (defun effective-options (options)
-  "DOC"
+  "Remove \"shadowed\" options in OPTIONS and return the resulting
+options."
   (remove-duplicates options
 		     :key      #'car
 		     :test     #'equal
