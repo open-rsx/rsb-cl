@@ -19,15 +19,34 @@
 
 (in-package :rsb.converter)
 
+(defmethod wire->domain? ((converter   (eql :protocol-buffer))
+			  (wire-data   simple-array)
+			  (wire-schema symbol))
+
+  (let* ((descriptor (pb:find-descriptor (string wire-schema)
+					 :error? nil))
+	 (class      (pb:descriptor-class descriptor)))
+    (when class
+      (values converter (class-name class)))))
+
+(defmethod domain->wire? ((converter     (eql :protocol-buffer))
+			  (domain-object standard-object))
+  (when (pb:message-descriptor domain-object)
+    (values
+     converter 'octet-vector (class-name (class-of domain-object)))))
+
 (defmethod wire->domain ((converter   (eql :protocol-buffer))
 			 (wire-data   simple-array)
 			 (wire-schema symbol))
   (check-type wire-data octet-vector)
 
-  (let ((type (pb::proto-type-name->lisp-type-symbol
-	       (string wire-schema))))
-    (nth-value 0 (pb:unpack wire-data type))))
+  (let* ((descriptor (pb:find-descriptor (string wire-schema)
+					 :error? nil))
+	 (class      (pb:descriptor-class descriptor)))
+    (nth-value 0 (pb:unpack wire-data class))))
 
 (defmethod domain->wire ((converter     (eql :protocol-buffer))
 			 (domain-object standard-object))
-  (values (pb:pack* domain-object) (type-of domain-object)))
+  (let* ((descriptor  (pb:message-descriptor domain-object))
+	 (wire-schema (pb:descriptor-qualified-name descriptor)))
+   (values (pb:pack* domain-object) wire-schema)))
