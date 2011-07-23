@@ -31,12 +31,12 @@
        (t
 	data))))
   (:function
-   (make-notification (uuid length id data)
+   (make-notification (sequence-number length id data)
      (make-instance 'rsb.protocol::notification
-		    :id             (uuid:uuid-to-byte-array uuid)
-		    :num-data-parts length
-		    :data-part      id
-		    :data           data)))
+		    :sequence-number sequence-number
+		    :num-data-parts  length
+		    :data-part       id
+		    :data            data)))
   (:documentation
    "Unit tests for the fragmentation and assembly of
 data/notifications."))
@@ -47,13 +47,13 @@ data/notifications."))
 instance.")
   assemble-smoke
 
-  (ensure-cases (uuid num-parts parts part-ids expected)
-      `((,(uuid:make-v1-uuid)
+  (ensure-cases (sequence-number num-parts parts part-ids expected)
+      `((0
 	 5
 	 ("foo" "bar" "baz" "a" "b")
 	 (0     1     2     3   4)
 	 "foobarbazab")
-	(,(uuid:make-v1-uuid)
+	(1
 	 2
 	 ("foo" "baz" "foo" "a" "bar")
 	 (0     5     0     2   1)
@@ -62,7 +62,7 @@ instance.")
     (let* ((fragments (iter (for part in parts)
 			    (for i    in part-ids)
 			    (collect (make-notification
-				      uuid num-parts i (octetify part))))))
+				      sequence-number num-parts i (octetify part))))))
       (map-permutations
        (lambda (permutation)
 	 (let* ((pool      (make-instance 'assembly-pool))
@@ -110,12 +110,11 @@ instance.")
 	("fooobaar"   4))
 
     (let* ((fragments     (fragment-data (octetify data) chunk-size))
-	   (uuid          (uuid:make-v1-uuid))
 	   (notifications (iter (for fragment in    fragments)
-				(for i        :from 0)
-				(collect
-				    (make-notification
-				     uuid (length fragments) i (octetify fragment)))))
+				  (for i        :from 0)
+				  (collect
+				      (make-notification
+				       0 (length fragments) i (octetify fragment)))))
 	   (pool          (make-instance 'assembly-pool))
 	   (result        (assembly-concatenated-data
 			   (lastcar (map 'list (curry #'merge-fragment pool)
@@ -129,15 +128,18 @@ instance.")
 are added to an assembly.")
   warnings
 
-  (let ((uuid (uuid:make-v1-uuid))
-	(pool (make-instance 'assembly-pool)))
-    (merge-fragment pool (make-notification uuid 3 0 (octetify "foo")))
+  (let ((sequence-number 0)
+	(pool            (make-instance 'assembly-pool)))
+    (merge-fragment pool (make-notification
+			  sequence-number 3 0 (octetify "foo")))
 
     (ensure-condition 'invalid-fragment-id
-      (merge-fragment pool (make-notification uuid 3 5 (octetify "foo"))))
+      (merge-fragment pool (make-notification
+			    sequence-number 3 5 (octetify "foo"))))
 
     (ensure-condition 'duplicate-fragment
-      (merge-fragment pool (make-notification uuid 3 0 (octetify "foo"))))))
+      (merge-fragment pool (make-notification
+			    sequence-number 3 0 (octetify "foo"))))))
 
 (addtest (fragmentation-root
           :documentation
@@ -160,8 +162,7 @@ are added to an assembly.")
 
   (let ((pool (make-instance 'pruning-assembly-pool
 			     :age-limit 1)))
-    (merge-fragment pool (make-notification
-			  (uuid:make-v1-uuid) 2 0 (octetify "bla")))
+    (merge-fragment pool (make-notification 0 2 0 (octetify "bla")))
     (let ((count (assembly-pool-count pool)))
       (ensure-same
        count 1
