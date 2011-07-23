@@ -87,7 +87,7 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
     result))
 
 (defmethod add-fragment! ((assembly  assembly)
-			  (fragment  rsb.protocol::notification))
+			  (fragment  rsb.protocol:notification))
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
 	 ((:accessors-r/o
 	   (id rsb.protocol::notification-data-part)) fragment))
@@ -112,12 +112,12 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
   assembly)
 
 (defmethod print-object ((object assembly) stream)
-  (with-slots (fragments) object
-    (print-unreadable-object (object stream :type t)
-      (format stream "~8,'0D (~D/~D) age ~5,2F s"
-	      (assembly-id object)
-	      (count-if-not #'null fragments) (length fragments)
-	      (assembly-age object)))))
+  (print-unreadable-object (object stream :type t)
+    (format stream "~8,'0D (~D/~D) age ~5,2F s"
+	    (assembly-id object)
+	    (count-if-not #'null (assembly-fragments object))
+	    (length (assembly-fragments object))
+	    (assembly-age object))))
 
 
 ;;; Partial assembly storage protocol
@@ -144,6 +144,7 @@ built from the complete assembly. Otherwise, return nil."))
 
 (defclass assembly-pool ()
   ((assemblies :type     hash-table
+	       :reader   %assembly-pool-assemblies
 	       :initform (make-hash-table :test #'equalp)
 	       :documentation
 	       "This hash-table maps event ids to `assembly'
@@ -154,12 +155,12 @@ necessary when fragments are submitted by calls to
 `merge-fragment'."))
 
 (defmethod assembly-pool-count ((pool assembly-pool))
-  (hash-table-count (slot-value pool 'assemblies)))
+  (hash-table-count (%assembly-pool-assemblies pool)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
 			    (id   integer)
 			    (size integer))
-  (bind (((:slots-r/o assemblies) pool))
+  (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool))
     (or (gethash id assemblies)
 	(setf (gethash id assemblies)
 	      (make-instance 'assembly
@@ -168,7 +169,7 @@ necessary when fragments are submitted by calls to
 
 (defmethod merge-fragment ((pool         assembly-pool)
 			   (notification t))
-    (bind (((:slots-r/o assemblies) pool)
+    (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
 	   ((:accessors-r/o
 	     (id   rsb.protocol::notification-sequence-number)
 	     (size rsb.protocol::notification-num-data-parts))
@@ -187,7 +188,8 @@ necessary when fragments are submitted by calls to
 ;;
 
 (defclass pruning-assembly-pool (assembly-pool)
-  ((lock      :initform (bt:make-lock "Assemblies Lock")
+  ((lock      :reader   %assembly-pool-lock
+	      :initform (bt:make-lock "Assemblies Lock")
 	      :documentation
 	      "This lock protects the collection of `assembly'
 instances from concurrent modification by the pruning thread and calls
@@ -231,18 +233,19 @@ MIN-AGE."))
 			      (bt:join-thread thread)))))
 
 (defmethod assembly-pool-count :around ((pool pruning-assembly-pool))
-  (bt:with-lock-held ((slot-value pool 'lock))
+  (bt:with-lock-held ((%assembly-pool-lock pool))
     (call-next-method)))
 
 (defmethod merge-fragment :around ((pool         pruning-assembly-pool)
 				   (notification t))
-  (bt:with-lock-held ((slot-value pool 'lock))
+  (bt:with-lock-held ((%assembly-pool-lock pool))
     (call-next-method)))
 
 (defun delete-partial-assemblies (pool min-age)
   "Find `assembly' instance in POOL whose age is at least MIN-AGE and
 delete them."
-  (bind (((:slots-r/o assemblies lock) pool))
+  (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)
+			  (lock       %assembly-pool-lock)) pool))
     (bt:with-lock-held (lock)
       (let ((old (remove min-age (hash-table-values assemblies)
 			 :test #'>=
