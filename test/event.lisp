@@ -48,6 +48,31 @@
 
 (addtest (event-root
           :documentation
+	  "Test computation of event sequence numbers.")
+  id-computation
+
+  ;; Test some examples. Note that event ids cannot be computed
+  ;; without origin id.
+  (ensure-cases (sequence-number origin expected)
+      `((0 nil nil)
+	(0
+	 ,(make-id "D8FBFEF4-4EB0-4C89-9716-C425DED3C527")
+	 ,(make-id "84F43861-433F-5253-AFBB-A613A5E04D71"))
+	(378
+	 ,(make-id "BF948D47-618F-4B04-AAC5-0AB5A1A79267")
+	 ,(make-id "BD27BE7D-87DE-5336-BECA-44FC60DE46A0")))
+    (let ((event (apply #'make-instance 'event
+			:sequence-number sequence-number
+			:scope           (make-scope "/")
+			(when origin
+			  (list :origin origin)))))
+      (if expected
+	  (ensure-same (event-id event) expected
+		       :test #'rsb::uuid=)
+	  (ensure-null (event-id event))))))
+
+(addtest (event-root
+          :documentation
 	  "Test comparing events for equality using `event='.")
   comparison
 
