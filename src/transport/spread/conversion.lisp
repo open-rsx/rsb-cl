@@ -60,6 +60,8 @@ contained in NOTIFICATION."
     (setf event (make-instance
 		 'rsb:event
 		 :sequence-number   sequence-number
+		 :origin            (uuid:byte-array-to-uuid
+				     (rsb.protocol::notification-sender-id meta-data))
 		 :scope             (make-scope (bytes->string scope))
 		 :type              t
 		 :data              (rsb.converter:wire->domain
@@ -67,7 +69,7 @@ contained in NOTIFICATION."
 				     (bytes->wire-schema wire-schema))
 		 :create-timestamp? nil))
 
-    ;; Sender and timestamps TODO should these really be optional?
+    ;; "User infos" and timestamps
     (when meta-data
       ;; "User infos"
       (iter (for user-info in-vector (rsb.protocol::meta-data-user-infos meta-data))
@@ -75,11 +77,6 @@ contained in NOTIFICATION."
 				    (rsb.protocol::user-info-key user-info)))
 		  (bytes->string (rsb.protocol::user-info-value user-info))))
 
-      ;; Set origin, if present
-      (unless (emptyp (rsb.protocol::meta-data-sender-id meta-data))
-	(setf (event-origin event)
-	      (uuid:byte-array-to-uuid
-	       (rsb.protocol::meta-data-sender-id meta-data))))
       ;; Set :create timestamp, if present
       (unless (zerop (rsb.protocol::meta-data-create-time meta-data))
 	(setf (timestamp event :create)
@@ -160,7 +157,6 @@ and DATA-PART are not supplied, values that indicate a non-fragmented
 notification are chosen."
   (bind ((meta-data1   (make-instance
 			'rsb.protocol::meta-data
-			:sender-id   (uuid:uuid-to-byte-array origin)
 			:create-time (timestamp->unix-microseconds
 				      (getf timestamps :create))
 			:send-time   (timestamp->unix-microseconds
@@ -168,6 +164,7 @@ notification are chosen."
 	 (notification (make-instance
 			'rsb.protocol::notification
 			:sequence-number sequence-number
+			:sender-id       (uuid:uuid-to-byte-array origin)
 			:scope           (string->bytes (scope-string scope))
 			:wire-schema     (wire-schema->bytes wire-schema)
 			:num-data-parts  num-data-parts
