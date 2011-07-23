@@ -59,6 +59,9 @@
   ((spread-port (asdf:component-property
 		 (asdf:find-system :cl-rsb-test) :spread-port)))
   (:function
+   (make-id (source)
+     (uuid:make-uuid-from-string source)))
+  (:function
    (check-print (thing)
      (ensure
       (funcall
