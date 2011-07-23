@@ -30,7 +30,7 @@
 
 #+sbcl (asdf:load-system :sb-posix)
 
-(when (find-system :asdf-system-connections)
+(when (find-system :asdf-system-connections nil)
   (load-system :asdf-system-connections))
 
 (when (find-symbol "DOC-OP" :asdf)
@@ -378,7 +378,7 @@ on the spread group communication system."
 ;;; System connection with cl-protobuf
 ;;
 
-(or (when (find-system :cl-protobuf)
+(or (when (find-system :cl-protobuf nil)
       (load-system :cl-protobuf))
     (warn "~@<Cannot load definition of system connection ~
 cl-rsb-and-cl-protobuf unless system cl-protobuf can be loaded~@:>"))
