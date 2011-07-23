@@ -36,7 +36,7 @@ returned."))
 
 (defclass assembly ()
   ((id         :initarg  :id
-	       :type     octet-vector
+	       :type     sequence-number
 	       :reader   assembly-id
 	       :documentation
 	       "The id of notifications that are assembled in this
@@ -114,8 +114,8 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 (defmethod print-object ((object assembly) stream)
   (with-slots (fragments) object
     (print-unreadable-object (object stream :type t)
-      (format stream "~:@(~{~2,'0X~}~) (~D/~D) age ~5,2F s"
-	      (coerce (subseq (assembly-id object) 0 4) 'list)
+      (format stream "~8,'0D (~D/~D) age ~5,2F s"
+	      (assembly-id object)
 	      (count-if-not #'null fragments) (length fragments)
 	      (assembly-age object)))))
 
@@ -157,7 +157,7 @@ necessary when fragments are submitted by calls to
   (hash-table-count (slot-value pool 'assemblies)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
-			    (id   simple-array)
+			    (id   integer)
 			    (size integer))
   (bind (((:slots-r/o assemblies) pool))
     (or (gethash id assemblies)
@@ -170,7 +170,7 @@ necessary when fragments are submitted by calls to
 			   (notification t))
     (bind (((:slots-r/o assemblies) pool)
 	   ((:accessors-r/o
-	     (id rsb.protocol::notification-id)
+	     (id   rsb.protocol::notification-sequence-number)
 	     (size rsb.protocol::notification-num-data-parts))
 	    notification))
       (let ((assembly (ensure-assembly pool id size)))
