@@ -208,6 +208,8 @@ integer which counts the number of microseconds since UNIX epoch."
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))
 
+(declaim (inline string->bytes bytes->string))
+
 (defun string->bytes (string)
   "Converter STRING into an octet-vector."
   (sb-ext:string-to-octets string :external-format :ascii))
@@ -218,22 +220,22 @@ integer which counts the number of microseconds since UNIX epoch."
 
 (defun keyword->bytes (keyword)
   "Convert the name of KEYWORD into an octet-vector."
-  (string->bytes (string-downcase (string keyword))))
+  (let ((*readtable* (copy-readtable nil)))
+    (setf (readtable-case *readtable*) :invert)
+    (string->bytes (princ-to-string keyword))))
 
 (defun bytes->keyword (bytes)
   "Converter BYTES into a keyword."
-  (make-keyword (string-upcase (bytes->string bytes))))
-
-(defun wire-schema->bytes (wire-schema)
-  "Convert WIRE-SCHEMA to an ASCII representation stored in an
-octet-vector."
-  (let ((*readtable* (copy-readtable nil)))
-    (setf (readtable-case *readtable*) :invert)
-    (string->bytes (princ-to-string wire-schema))))
-
-(defun bytes->wire-schema (bytes)
-  "Return a keyword representing the wire-schema encoded in bytes."
   (let ((*package*   (find-package :keyword))
 	(*readtable* (copy-readtable nil)))
     (setf (readtable-case *readtable*) :invert)
     (read-from-string (bytes->string bytes))))
+
+(defun wire-schema->bytes (wire-schema)
+  "Convert WIRE-SCHEMA to an ASCII representation stored in an
+octet-vector."
+  (keyword->bytes wire-schema))
+
+(defun bytes->wire-schema (bytes)
+  "Return a keyword representing the wire-schema encoded in bytes."
+  (bytes->keyword bytes))
