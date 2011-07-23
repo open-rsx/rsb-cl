@@ -71,10 +71,9 @@ contained in NOTIFICATION."
     (when meta-data
       ;; "User infos"
       (iter (for user-info in-vector (rsb.protocol::meta-data-user-infos meta-data))
-	    (setf (meta-data event (make-keyword
-				    (string-upcase
-				     (rsb.protocol::user-info-key user-info))))
-		  (rsb.protocol::user-info-value user-info)))
+	    (setf (meta-data event (bytes->keyword
+				    (rsb.protocol::user-info-key user-info)))
+		  (bytes->string (rsb.protocol::user-info-value user-info))))
 
       ;; Set origin, if present
       (unless (emptyp (rsb.protocol::meta-data-sender-id meta-data))
@@ -125,8 +124,8 @@ into one notification."
 	  (rsb.converter:domain->wire converter data)))
     (if (> (length wire-data) max-fragment-size)
 
-	;; Split DATA1 into multiple fragment and make a notification
-	;; for each fragment.
+	;; Split WIRE-DATA into multiple fragment and make a
+	;; notification for each fragment.
 	(bind ((fragments     (fragment-data wire-data max-fragment-size))
 	       (num-fragments (length fragments)))
 	  (iter (for fragment in    fragments)
@@ -139,7 +138,7 @@ into one notification."
 				       :data-part      i
 				       :num-data-parts num-fragments))))
 
-	;; DATA1 fits into a single notification.
+	;; WIRE-DATA fits into a single notification.
 	(list (make-notification sequence-number scope origin
 				 wire-schema wire-data
 				 :meta-data  meta-data
@@ -180,8 +179,8 @@ notification are chosen."
     (iter (for (key value) on meta-data :by #'cddr)
 	  (vector-push-extend
 	   (make-instance 'rsb.protocol::user-info
-			  :key   (string-downcase (string key))
-			  :value (prin1-to-string value))
+			  :key   (keyword->bytes key)
+			  :value (string->bytes value))
 	   (rsb.protocol::meta-data-user-infos meta-data1)))
 
     ;; Add TIMESTAMPS.
