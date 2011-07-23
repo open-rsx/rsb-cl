@@ -32,6 +32,8 @@
   (:export
    :octet-vector
 
+   :sequence-number
+
    :error-policy
 
    :implementation-feedback

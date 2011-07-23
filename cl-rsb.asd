@@ -111,7 +111,7 @@
 			       :depends-on ("package" "scope"))
 
 			      (:file       "util"
-			       :depends-on ("package" "scope"
+			       :depends-on ("package" "types" "scope"
 					    "protocol"))))
 
 		(:module     "filter"

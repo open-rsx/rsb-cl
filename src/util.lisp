@@ -20,6 +20,31 @@
 (in-package :rsb)
 
 
+;;; Sequence number functions
+;;
+
+(declaim (ftype (function (&optional sequence-number)
+			  (function () sequence-number))
+		make-sequence-number-generator))
+
+(defun make-sequence-number-generator (&optional (start 0))
+  "Return a function that returns increasing numbers starting with
+START."
+  #+sbcl
+  (let ((current (list (list start))))
+    (declare (type (cons (cons sequence-number null) null) current))
+    #'(lambda ()
+	;; Keep trying to store the incremented value until it works.
+	(iter (for old next (car current))
+	      (for new next (list (1+ (the sequence-number
+					(car old)))))
+	      (until (eq old (sb-ext:compare-and-swap
+			      (car current) old new)))
+	      (finally (return (car old))))))
+  #-sbcl
+  #.(error "Not implemented."))
+
+
 ;;; UUID utility functions
 ;;
 
