@@ -148,6 +148,7 @@
   ;; Event
   (:export
    :event
+   :event-sequence-number
    :event-id
    :event-scope
    :event-origin

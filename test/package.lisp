@@ -68,7 +68,7 @@
   (:function
    (check-event (event scope data)
      (ensure
-      (typep (event-id event) 'uuid:uuid))
+      (typep (event-id event) '(or null uuid:uuid)))
      (ensure-same
       (event-scope event) (make-scope scope)
       :test #'scope=)

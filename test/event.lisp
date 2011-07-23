@@ -62,24 +62,27 @@
 
     (let* ((origin (uuid:make-v1-uuid))
 	   (left   (make-event scope1 data1))
-	   (right  (progn
-		     (sleep .01)
-		     (make-event scope2 data2))))
+	   (right  (make-event scope2 data2)))
+
+      (setf (event-sequence-number left) 0)
       (when origin1?
 	(setf (event-origin left) origin))
+
+      (setf (event-sequence-number right) 1)
       (when origin2?
 	(setf (event-origin right) origin))
-      (iter (for (ids? origins? timestamps? expected)
+
+      (iter (for (sequence-numbers? origins? timestamps? expected)
 		 in `((nil nil nil ,=1?)
 		      (t   nil nil ,=2?)
 		      (nil t   nil ,=3?)
 		      (nil nil t   ,=4?)))
 	    (ensure-same
 	     (event= left right
-		     :compare-ids?       ids?
-		     :compare-origins?   origins?
-		     :compare-timestamps timestamps?
-		     :data-test          #'equal)
+		     :compare-sequence-numbers? sequence-numbers?
+		     :compare-origins?          origins?
+		     :compare-timestamps        timestamps?
+		     :data-test                 #'equal)
 	     expected)))))
 
 (addtest (event-root
