@@ -22,12 +22,19 @@
 (defclass informer (participant
 		    rsb.ep:client
 		    rsb.ep:broadcast-processor)
-  ((type :initarg  :type
-	 :type     (or symbol list)
-	 :reader   informer-type
-	 :initform t
-	 :documentation
-	 ""))
+  ((type                      :initarg  :type
+			      :type     (or symbol list)
+			      :reader   informer-type
+			      :initform t
+			      :documentation
+			      "")
+   (sequence-number-generator :type     function
+			      :reader   %informer-sequence-number-generator
+			      :initform (make-sequence-number-generator)
+			      :documentation
+			      "Stores a thread-safe sequence number
+generation function which is used to generate sequence numbers for
+events sent by this informer."))
   (:documentation
    "An informer is a participant that publishes events to a specific
 channel. Other participants on the same channel or a channel that
@@ -53,8 +60,12 @@ channel."))
 	     :expected-scope scope))))
 
 (defmethod send ((informer informer) (event event))
-  ;; Set EVENT's origin to our id.
-  (setf (event-origin event) (participant-id informer))
+  ;; Set EVENT's sequence number to our next sequence number and
+  ;; origin to our id.
+  (setf (event-sequence-number event)
+	(funcall (%informer-sequence-number-generator informer))
+	(event-origin event)
+	(participant-id informer))
   ;; Send EVENT.
   (rsb.ep:handle informer event)
   ;; Return event to the client in case we created it on the fly.

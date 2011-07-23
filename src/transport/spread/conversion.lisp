@@ -50,16 +50,16 @@ payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
   (bind (((:accessors-r/o
-	   (id          rsb.protocol::notification-id)
-	   (scope       rsb.protocol::notification-scope)
-	   (wire-schema rsb.protocol::notification-wire-schema)
-	   (payload     rsb.protocol::notification-data)
-	   (meta-data   rsb.protocol::notification-meta-data)) notification)
+	   (sequence-number rsb.protocol::notification-sequence-number)
+	   (scope           rsb.protocol::notification-scope)
+	   (wire-schema     rsb.protocol::notification-wire-schema)
+	   (payload         rsb.protocol::notification-data)
+	   (meta-data       rsb.protocol::notification-meta-data)) notification)
 	 (event))
 
     (setf event (make-instance
 		 'rsb:event
-		 :id                (uuid:byte-array-to-uuid id)
+		 :sequence-number   sequence-number
 		 :scope             (make-scope (bytes->string scope))
 		 :type              t
 		 :data              (rsb.converter:wire->domain
@@ -115,10 +115,12 @@ into one notification."
 
   ;; Put EVENT into one or more notifications.
   (bind (((:accessors-r/o
-	   (id event-id) (scope event-scope) (origin event-origin)
-	   (data       event-data)
-	   (meta-data  event-meta-data)
-	   (timestamps event-timestamps)) event)
+	   (sequence-number event-sequence-number)
+	   (scope           event-scope)
+	   (origin          event-origin)
+	   (data            event-data)
+	   (meta-data       event-meta-data)
+	   (timestamps      event-timestamps)) event)
 	 ((:values wire-data wire-schema)
 	  (rsb.converter:domain->wire converter data)))
     (if (> (length wire-data) max-fragment-size)
@@ -130,7 +132,7 @@ into one notification."
 	  (iter (for fragment in    fragments)
 		(for i        :from 0)
 		(collect
-		    (make-notification id scope origin
+		    (make-notification sequence-number scope origin
 				       wire-schema fragment
 				       :meta-data      meta-data
 				       :timestamps     timestamps
@@ -138,7 +140,7 @@ into one notification."
 				       :num-data-parts num-fragments))))
 
 	;; DATA1 fits into a single notification.
-	(list (make-notification id scope origin
+	(list (make-notification sequence-number scope origin
 				 wire-schema wire-data
 				 :meta-data  meta-data
 				 :timestamps timestamps)))))
@@ -147,15 +149,15 @@ into one notification."
 ;;; Utility functions
 ;;
 
-(defun make-notification (id scope origin wire-schema data
+(defun make-notification (sequence-number scope origin wire-schema data
 			  &key
 			  meta-data
 			  timestamps
 			  (num-data-parts 1)
 			  (data-part      0))
-  "Make a `rsb.protocol:notification' instance with ID, SCOPE,
-WIRE-SCHEMA, DATA and optionally META-DATA. When NUM-DATA-PARTS and
-DATA-PART are not supplied, values that indicate a non-fragmented
+  "Make a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
+SCOPE, WIRE-SCHEMA, DATA and optionally META-DATA. When NUM-DATA-PARTS
+and DATA-PART are not supplied, values that indicate a non-fragmented
 notification are chosen."
   (bind ((meta-data1   (make-instance
 			'rsb.protocol::meta-data
@@ -166,13 +168,13 @@ notification are chosen."
 				      (getf timestamps :send))))
 	 (notification (make-instance
 			'rsb.protocol::notification
-			:id             (uuid:uuid-to-byte-array id)
-			:scope          (string->bytes (scope-string scope))
-			:wire-schema    (wire-schema->bytes wire-schema)
-			:num-data-parts num-data-parts
-			:data-part      data-part
-			:data           data
-			:meta-data      meta-data1)))
+			:sequence-number sequence-number
+			:scope           (string->bytes (scope-string scope))
+			:wire-schema     (wire-schema->bytes wire-schema)
+			:num-data-parts  num-data-parts
+			:data-part       data-part
+			:data            data
+			:meta-data       meta-data1)))
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)

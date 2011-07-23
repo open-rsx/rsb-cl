@@ -22,39 +22,52 @@
 (define-plist-data-mixin meta-data)
 (define-plist-data-mixin timestamp)
 
-(defclass event (uuid-mixin
-		 scope-mixin
+(defclass event (scope-mixin
 		 plist-meta-data-mixin
 		 plist-timestamp-mixin)
-  ((id        :accessor event-id)
-   (scope     :accessor event-scope)
-   (origin    :initarg  :origin
-	      :type     (or null uuid:uuid)
-	      :accessor event-origin
-	      :initform nil
-	      :documentation
-	      "Stores the id of the participant by which the event was
+  ((sequence-number :initarg  :sequence-number
+		    :type     sequence-number
+		    :accessor event-sequence-number
+		    :documentation
+		    "Stores a sequence number of the event \"within\"
+the participant sending the event.")
+   (id              :type     (or null uuid:uuid)
+		    :reader   event-id
+		    :writer   (setf %event-id)
+		    :documentation
+		    "Stores a unique id that is lazily computed from
+the unique id of the participant sending the event (stored in the
+origin slot) and the sequence number of the event.")
+   (scope           :accessor event-scope)
+   (origin          :initarg  :origin
+		    :type     (or null uuid:uuid)
+		    :accessor event-origin
+		    :initform nil
+		    :documentation
+		    "Stores the id of the participant by which the event was
 published onto the bus.")
-   (type      :initarg  :type
-	      :type     (or symbol list)
-	      :accessor event-type
-	      :initform t ;; TODO could also use (type-of data)
-	      :documentation
-	      "Note: in most cases, the can be inferred from the
-contents of the data slot. This slot allows the data to treated under
-the assumption of it being of a certain type. The most common use case
-probably is forcing a more general type.")
-   (data      :initarg  :data
-	      :type     t
-	      :accessor event-data
-	      :documentation
-	      "")
-   (meta-data :accessor event-meta-data)
-   (timestamp :accessor event-timestamps))
+   (type            :initarg  :type
+		    :type     (or symbol list)
+		    :accessor event-type
+		    :initform t ;; TODO could also use (type-of data)
+		    :documentation
+		    "Note: in most cases, the type can be inferred
+from the contents of the data slot. This slot allows the data to
+treated under the assumption of it being of a certain type. The most
+common use case probably is forcing a more general type.")
+   (data            :initarg  :data
+		    :type     t
+		    :accessor event-data
+		    :documentation
+		    "")
+   (meta-data       :accessor event-meta-data)
+   (timestamp       :accessor event-timestamps))
   (:documentation
    "Basic unit of information that is exchanged between informers and
 listeners. An event is a composite structure consisting of
-+ an id
++ a sequence number
++ an id (derived from the sequence number and the id of the sending
+  participant)
 + a scope
 + the id of the participant that sent the event
 + a payload
@@ -77,18 +90,31 @@ listeners. An event is a composite structure consisting of
                                      (slot-names t)
                                      &key
 				     (create-timestamp? t))
+  ;; Initialize or invalidate id.
+  (setf (%event-id instance) nil)
+
+  ;; Maybe set create timestamp.
   (when create-timestamp?
-   (setf (timestamp instance :create) (local-time:now))))
+    (setf (timestamp instance :create) (local-time:now))))
+
+(defmethod event-id :before ((event event))
+  (%maybe-set-event-id event))
+
+(defmethod (setf event-sequence-number) :after ((new-value t) (event event))
+  (setf (%event-id event) nil))
+
+(defmethod (setf event-origin) :after ((new-value t) (event event))
+  (setf (%event-id event) nil))
 
 (defun event= (left right
 	       &key
-	       (compare-ids?       t)
-	       (compare-origins?   t)
-	       (compare-timestamps t)
-	       (data-test          #'equal))
+	       (compare-sequence-numbers? t)
+	       (compare-origins?          t)
+	       (compare-timestamps        t)
+	       (data-test                 #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
-If COMPARE-IDS? is non-nil, return nil unless LEFT and RIGHT have
-identical ids.
+If COMPARE-SEQUENCE-NUMBERS? is non-nil, return nil unless LEFT and
+RIGHT have identical sequence numbers.
 If COMPARE-ORIGINS? is non-nil, return nil unless LEFT and RIGHT have
 identical origins.
 COMPARE-TIMESTAMPS can be nil, t or a list of timestamp keys to
@@ -96,8 +122,9 @@ compare. If it is t, all RSB timestamps are
 compared (currently :create, :send, :receive and :deliver).
 DATA-TEST has to be a function of two arguments or nil. In the latter
 case, the payloads of LEFT and RIGHT are not considered."
-  (and (or (not compare-ids?)
-	   (uuid= (event-id left) (event-id right)))
+  (and (or (not compare-sequence-numbers?)
+	   (= (event-sequence-number left)
+	      (event-sequence-number right)))
        ;; Scope and origin
        (scope= (event-scope left) (event-scope right))
        (or (not compare-origins?)
@@ -113,15 +140,16 @@ case, the payloads of LEFT and RIGHT are not considered."
 				 compare-timestamps))
 		 (let ((value-left  (timestamp left key))
 		       (value-right (timestamp right key)))
-		  (always (or (and (null value-left) (null value-right))
-			      (local-time:timestamp=
-			       value-left value-right))))))
+		   (always (or (and (null value-left) (null value-right))
+			       (local-time:timestamp=
+				value-left value-right))))))
        ;; Data and type
        (type= (event-type left) (event-type right))
        (or (null data-test)
 	   (funcall data-test (event-data left) (event-data right)))))
 
 (defmethod print-object ((object event) stream)
+  (%maybe-set-event-id object) ;; force id computation
   (print-unreadable-id-object (object stream :type t)
     (format stream "~@<~A ~S ~/rsb::print-event-data/~@:>"
 	    (scope-string (event-scope object))
@@ -158,6 +186,18 @@ plist META-DATA."
 
 ;;; Utility functions
 ;;
+
+(declaim (inline %maybe-set-event-id))
+
+(defun %maybe-set-event-id (event)
+  "When the id slot of EVENT is nil compute a unique id based on the
+origin id of EVENT and the sequence number of EVENT. If EVENT does not
+have an origin, do nothing."
+  (when (and (not (slot-value event 'id)) (event-origin event))
+    (setf (%event-id event)
+	  (uuid:make-v5-uuid
+	   (event-origin event)
+	   (format nil "~(~8,'0X~)" (event-sequence-number event))))))
 
 (defun print-event-data (stream data colon? at?)
   "Print the event payload DATA to stream in a type-dependent manner.
