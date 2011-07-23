@@ -61,7 +61,7 @@ contained in NOTIFICATION."
 		 'rsb:event
 		 :sequence-number   sequence-number
 		 :origin            (uuid:byte-array-to-uuid
-				     (rsb.protocol::notification-sender-id meta-data))
+				     (rsb.protocol::notification-sender-id notification))
 		 :scope             (make-scope (bytes->string scope))
 		 :type              t
 		 :data              (rsb.converter:wire->domain
