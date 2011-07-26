@@ -36,7 +36,7 @@ returned."))
 
 (defclass assembly ()
   ((id         :initarg  :id
-	       :type     sequence-number
+	       :type     simple-array
 	       :reader   assembly-id
 	       :documentation
 	       "The id of notifications that are assembled in this
@@ -113,8 +113,9 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 
 (defmethod print-object ((object assembly) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "~8,'0D (~D/~D) age ~5,2F s"
-	    (assembly-id object)
+    (format stream "~{~2,'0X~}:~{~2,'0X~} (~D/~D) age ~5,2F s"
+	    (coerce (subseq (assembly-id object) 4 8) 'list)
+	    (coerce (subseq (assembly-id object) 0 4) 'list)
 	    (count-if-not #'null (assembly-fragments object))
 	    (length (assembly-fragments object))
 	    (assembly-age object))))
@@ -158,7 +159,7 @@ necessary when fragments are submitted by calls to
   (hash-table-count (%assembly-pool-assemblies pool)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
-			    (id   integer)
+			    (id   simple-array)
 			    (size integer))
   (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool))
     (or (gethash id assemblies)
@@ -171,9 +172,11 @@ necessary when fragments are submitted by calls to
 			   (notification t))
     (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
 	   ((:accessors-r/o
-	     (id   rsb.protocol::notification-sequence-number)
-	     (size rsb.protocol::notification-num-data-parts))
-	    notification))
+	     (id        rsb.protocol::notification-sequence-number)
+	     (sender-id rsb.protocol::notification-sender-id)
+	     (size      rsb.protocol::notification-num-data-parts))
+	    notification)
+	   (id (%make-key id sender-id)))
       (let ((assembly (ensure-assembly pool id size)))
 	(when (assembly-complete? (add-fragment! assembly notification))
 	  (remhash id assemblies)
@@ -268,3 +271,14 @@ list of the generated chunks."
 	(while (< offset (length data)))
 	(for size next (min chunk-size (- (length data) offset)))
 	(collect (subseq data offset (+ offset size)))))
+
+
+;;; Utility functions
+;;
+
+(defun %make-key (sequence-number sender-id)
+  "Return a vector that can be used to identify the notification from
+which SEQUENCE-NUMBER and SENDER-ID have been extracted."
+  (concatenate 'octet-vector
+	       (nth-value 1 (binio:encode-uint32-be sequence-number))
+	       sender-id))
