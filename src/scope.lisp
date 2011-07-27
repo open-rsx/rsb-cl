@@ -52,7 +52,12 @@
 	       :accessor scope-interned?
 	       :initform nil
 	       :documentation
-	       "Non-nil if the scope has been interned."))
+	       "Non-nil if the scope has been interned.")
+   (%string    :type     (or null string)
+	       :accessor %scope-string
+	       :initform nil
+	       :documentation
+	       "Caches the string representation of the scope."))
   (:default-initargs
    :components (missing-required-initarg 'scope :components))
   (:documentation
@@ -60,8 +65,10 @@
 names."))
 
 (defmethod scope-string ((scope scope))
-  (with-output-to-string (stream)
-    (format stream "/~{~A/~}" (scope-components scope))))
+  (or (%scope-string scope)
+      (setf (%scope-string scope)
+	    (with-output-to-string (stream)
+	      (format stream "/~{~A/~}" (scope-components scope))))))
 
 (defmethod print-object ((object scope) stream)
   (print-unreadable-object (object stream :type t :identity t)
