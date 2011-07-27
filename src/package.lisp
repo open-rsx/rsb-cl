@@ -234,15 +234,20 @@
   ;; Utility functions and macros
   (:export
    :print-id
-   :print-unreadable-id-object)
+   :print-unreadable-id-object
 
-  ;; TODO temp utils
-  (:export
    :uuid-mixin
+
    :scope-mixin
+
    :uri-mixin
-   :push-source-mixin
+
+   :make-participant
+   :define-participant-creation-uri-methods
+   :define-participant-creation-restart-method
+
    :hostname)
+
   (:documentation
    "This package provides basic RSB functionality:
 + subscribing to publishers
