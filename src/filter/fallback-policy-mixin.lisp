@@ -45,7 +45,7 @@ policy. This method is only called, if no more specific method on
 `matches?' made a decision."
   (bind (((:accessors-r/o
 	   (fallback-policy filter-fallback-policy)) filter))
-    (case fallback-policy
+    (ecase fallback-policy
       (:match        t)
       (:do-not-match nil))))
 
