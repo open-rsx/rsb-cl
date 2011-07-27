@@ -267,7 +267,16 @@
 			      (:file       "in-pull-connector"
 			       :depends-on ("package" "connector"))
 			      (:file       "out-connector"
-			       :depends-on ("package" "connector")))))
+			       :depends-on ("package" "connector"))))
+
+		(:module     "patterns"
+		 :pathname   "src/patterns"
+		 :depends-on ("src")
+		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package")))))
 
   :in-order-to ((doc-op  (doc-op  :cl-rsb-doc))
 		(test-op (test-op :cl-rsb-test))))
