@@ -249,7 +249,18 @@
    :hostname)
 
   (:documentation
-   "This package provides basic RSB functionality:
-+ subscribing to publishers
-+ publishing events
-+ event processing"))
+   "This package contains most of the basic, client-facing
+functionality of cl-rsb:
++ `event' class
++ participant classes and associated protocols
+  + `reader' participant class
+    + `make-reader' method, `with-reader' macro
+    + `receiver-filters' accessor
+    + `receive' method
+  + `listener' participant class
+    + `make-listener' method, `with-listener' macro
+    + `receiver-filters' accessor
+  + `informer' participant class
+    + `make-informer' method, `with-informer macro
+    + `send' method
++ configuration system"))
