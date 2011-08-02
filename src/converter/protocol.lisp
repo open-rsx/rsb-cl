@@ -76,8 +76,8 @@ RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
 (defmethod no-applicable-method ((function (eql (fdefinition 'wire->domain?)))
 				 &rest args)
   "If there is no method on `wire->domain?' for a given combination of
-converter, wire-data and wire-schema, the converter is cannot handle
-the data."
+converter, wire-data and wire-schema, the converter cannot handle the
+data."
   (declare (ignore args))
   nil)
 
