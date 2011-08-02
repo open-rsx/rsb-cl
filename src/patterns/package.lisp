@@ -30,7 +30,11 @@
   (:export
    :remote-call-failed
    :remote-call-failed-method
-   :remote-call-failed-request)
+   :remote-call-failed-request
+
+   :remote-call-timeout
+
+   :remote-method-execution-error)
 
   ;; Method protocol
   (:export

@@ -27,16 +27,37 @@
 	    :documentation
 	    "Stores the method of the failed call.")
    (request :initarg  :request
-	    :reader  remote-call-failed-request
+	    :reader   remote-call-failed-request
 	    :documentation
 	    "Stores the request object that was passed to the method
 in the failed call."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to call method ~A with request ~A~:@>"
+     (format stream "~@<Failed to call method ~A with request ~
+~A:@>"
 	     (remote-call-failed-method  condition)
 	     (remote-call-failed-request condition))
      (maybe-print-cause condition stream)))
   (:documentation
    "This error is signaled when a remote method call fails for some
 reason."))
+
+(define-condition remote-call-timeout (remote-call-failed)
+  ()
+  (:documentation
+   "This error is signaled when a call to a remote method does not
+complete within a given amount of time."))
+
+(define-condition remote-method-execution-error (remote-call-failed)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Remote method ~A failed to execute for ~
+request ~A~:@>"
+	     (remote-call-failed-method  condition)
+	     (remote-call-failed-request condition))
+     (maybe-print-cause condition stream)))
+  (:documentation
+   "Error of this class are raised when a call to a remote method
+succeeds in calling the method on the remote side but fails in the
+actual remote method."))
