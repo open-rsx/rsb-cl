@@ -99,8 +99,12 @@ channel."))
   (bind (((:values informer configurator)
 	  (make-participant 'informer scope :out transports
 			    :type type)))
-    ;; TODO not sure who should set this up
-    (push (rsb.ep:configurator-processor configurator) (rsb.ep:handlers informer))
+    ;; Connect the processor of CONFIGURATOR to INFORMER as an event
+    ;; handler.
+    (push (rsb.ep:configurator-processor configurator)
+	  (rsb.ep:handlers informer))
+
+    ;; Return the ready-to-use `informer' instance.
     informer))
 
 (define-participant-creation-uri-methods informer
