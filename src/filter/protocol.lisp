@@ -66,12 +66,12 @@ initarg. The value of this initarg is computed by recursively applying
 (defmethod filter ((spec symbol)
 		   &rest args
 		   &key)
-  (handler-case
-      (apply #'make-filter spec args)
-    (error (condition)
-      (error 'filter-construction-error
-	     :spec  spec
-	     :cause condition))))
+  (handler-bind
+      ((error #'(lambda (condition)
+		  (error 'filter-construction-error
+			 :spec  (cons spec args)
+			 :cause condition))))
+    (apply #'make-filter spec args)))
 
 (defmethod filter ((spec list)
 		   &rest args
