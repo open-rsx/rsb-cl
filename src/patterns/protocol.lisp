@@ -32,14 +32,14 @@
    "Return the name of METHOD."))
 
 
-;;; Remote method protocol
+;;; Local and remote method invocation protocol
 ;;
 
 (defgeneric call (server method request)
   (:documentation
    "Call METHOD of SERVER with argument REQUEST and return the result
-of the method call. If the call fails for some reason, an error of
-type `remote-call-failed' is signaled."))
+of the method call. If a remote call fails for some reason, an error
+of type `remote-call-failed' is signaled."))
 
 
 ;;; Server protocol
