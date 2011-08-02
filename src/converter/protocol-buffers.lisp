@@ -22,7 +22,6 @@
 (defmethod wire->domain? ((converter   (eql :protocol-buffer))
 			  (wire-data   simple-array)
 			  (wire-schema symbol))
-
   (let* ((descriptor (pb:find-descriptor wire-schema
 					 :error? nil))
 	 (class      (when descriptor
@@ -41,8 +40,7 @@
 			 (wire-schema symbol))
   (check-type wire-data octet-vector)
 
-  (let* ((descriptor (pb:find-descriptor (string wire-schema)
-					 :error? nil))
+  (let* ((descriptor (pb:find-descriptor (string wire-schema)))
 	 (class      (pb:descriptor-class descriptor)))
     (nth-value 0 (pb:unpack wire-data class))))
 
