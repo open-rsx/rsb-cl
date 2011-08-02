@@ -127,26 +127,32 @@ RECEIVER to NEW-VALUE."))
 ;;; Listener protocol
 ;;
 
-(defgeneric make-listener (scope
+(defgeneric make-listener (scope-or-uri
 			   &key
 			   transports)
   (:documentation
-   "Listen to events on the channel designated by SCOPE.
+   "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
-`listener-creation-failed' is signaled."))
+`listener-creation-failed' is signaled. TRANSPORTS determines the
+transport configuration that is used to participate in the
+channel. See `rsb.transport::make-connectors' for details regarding
+acceptable values of TRANSPORTS."))
 
 
 ;;; Reader protocol
 ;;
 
-(defgeneric make-reader (scope
+(defgeneric make-reader (scope-or-uri
 			 &key
 			 transports)
   (:documentation
-   "Receive events on the channel designated by SCOPE.
-if successful, return a `reader' instance. Otherwise an error of type
-`reader-creation-failed' is signaled. The resulting `reader' instance
-can be used to receive data in \"pull\" manner using the `receive'
+   "Receive events on the channel designated by SCOPE-OR-URI.
+If successful, return a `reader' instance. Otherwise an error of type
+`reader-creation-failed' is signaled. TRANSPORTS determines the
+transport configuration that is used to participate in the
+channel. See `rsb.transport::make-connectors' for details regarding
+acceptable values of TRANSPORTS. The resulting `reader' instance can
+be used to receive data in \"pull\" manner using the `receive'
 function."))
 
 (defgeneric receive (reader
@@ -163,14 +169,16 @@ nil is returned."))
 ;;; Informer protocol
 ;;
 
-(defgeneric make-informer (scope type
+(defgeneric make-informer (scope-or-uri type
 			   &key
 			   transports)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
-SCOPE.
-If successful, return an `informer' instance. Otherwise an error of
-type `informer-creation-failed' is signaled."))
+SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
+an error of type `informer-creation-failed' is signaled. TRANSPORTS
+determines the transport configuration that is used to participate in
+the channel. See `rsb.transport::make-connectors' for details
+regarding acceptable values of TRANSPORTS."))
 
 (defgeneric send (informer data)
   (:documentation
