@@ -50,18 +50,15 @@
 			 (wire-schema t))
   (let ((child (wire->domain? converter wire-data wire-schema)))
     (unless child
-      (error 'wire->domain-conversion-error
-	     :wire-schema wire-schema
-	     :encoded     wire-data
-	     :domain-type :undetermined)) ;;; TODO(jmoringe): more precise condition
+      (error "~@<No converter could handle the wire-data ~S (in ~S ~
+wire-schema). Tried ~{~A~^, ~_~}~@:>"
+	     wire-data wire-schema converter)) ;;; TODO(jmoringe): more precise condition
     (wire->domain child wire-data wire-schema)))
 
 (defmethod domain->wire ((converter     sequence)
 			 (domain-object t))
   (let ((child (domain->wire? converter domain-object)))
     (unless child
-      (error 'domain->wire-conversion-error
-	     :wire-schema   :undetermined
-	     :domain-object domain-object
-	     :wire-type     :undetermined)) ;;; TODO(jmoringe): more precise condition
+      (error "~@<No converter could handle the domain-object ~S. Tried ~
+~{~A~^, ~_~}~@:>" domain-object converter)) ;;; TODO(jmoringe): more precise condition
     (domain->wire child domain-object)))
