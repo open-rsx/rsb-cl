@@ -23,9 +23,10 @@
 			  (wire-data   simple-array)
 			  (wire-schema symbol))
 
-  (let* ((descriptor (pb:find-descriptor (string wire-schema)
+  (let* ((descriptor (pb:find-descriptor wire-schema
 					 :error? nil))
-	 (class      (pb:descriptor-class descriptor)))
+	 (class      (when descriptor
+		       (pb:descriptor-class descriptor))))
     (when class
       (values converter (class-name class)))))
 
