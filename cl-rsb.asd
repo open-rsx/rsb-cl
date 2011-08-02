@@ -276,7 +276,18 @@
 			      (:file       "conditions"
 			       :depends-on ("package"))
 			      (:file       "protocol"
-			       :depends-on ("package")))))
+			       :depends-on ("package"))
+
+			      (:file       "server"
+			       :depends-on ("package" "protocol"))
+			      (:file       "local-server"
+			       :depends-on ("package" "protocol" "server"))
+			      (:file       "remote-server"
+			       :depends-on ("package" "protocol" "server"))
+
+			      (:file       "macros"
+			       :depends-on ("package" "local-server"
+					    "remote-server")))))
 
   :in-order-to ((doc-op  (doc-op  :cl-rsb-doc))
 		(test-op (test-op :cl-rsb-test))))

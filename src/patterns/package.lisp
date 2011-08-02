@@ -61,9 +61,12 @@
    :remote-server
    :make-remote-server)
 
-  ;; Utility macros
+  ;; Convenience and utility macros
   (:export
-   :define-rpc-method)
+   :with-local-server
+   :with-methods
+
+   :with-remote-server)
 
   (:documentation
    "This package contains implementations of communication patterns on
