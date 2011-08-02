@@ -42,7 +42,8 @@ includes the informer's channel can receive these events. It is
 possible for multiple informers to send events for the same
 channel."))
 
-(defmethod send :before ((informer informer) (data event))
+(defmethod send :before ((informer informer) (data event)
+			 &key)
   (bind (((:accessors-r/o (scope participant-scope)
 			  (type  informer-type)) informer))
     ;; Ensure that the type of DATA is a subtype of INFORMER's type
@@ -59,7 +60,8 @@ channel."))
 	     :event          data
 	     :expected-scope scope))))
 
-(defmethod send ((informer informer) (event event))
+(defmethod send ((informer informer) (event event)
+		 &key)
   ;; Set EVENT's sequence number to our next sequence number and
   ;; origin to our id.
   (setf (event-sequence-number event)
@@ -71,10 +73,13 @@ channel."))
   ;; Return event to the client in case we created it on the fly.
   event)
 
-(defmethod send ((informer informer) (data t))
-  (send informer (make-event/typed (participant-scope informer)
-				   data
-				   (informer-type informer))))
+(defmethod send ((informer informer) (data t)
+		 &rest meta-data
+		 &key)
+  (send informer (apply #'make-event/typed
+			(participant-scope informer)
+			data (informer-type informer)
+			meta-data)))
 ;; TODO type: (type-of data) ? or let event decide?
 
 (defmethod print-object ((object informer) stream)

@@ -180,7 +180,10 @@ determines the transport configuration that is used to participate in
 the channel. See `rsb.transport::make-connectors' for details
 regarding acceptable values of TRANSPORTS."))
 
-(defgeneric send (informer data)
+(defgeneric send (informer data
+		  &rest meta-data
+		  &key &allow-other-keys)
   (:documentation
    "Send DATA to participants of the channel in which INFORMER
-participates."))
+participates. Add key-value pairs in META-DATA to the meta-data of the
+event created from DATA."))
