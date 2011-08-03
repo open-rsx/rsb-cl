@@ -273,6 +273,8 @@
 		 :pathname   "src/patterns"
 		 :depends-on ("src")
 		 :components ((:file       "package")
+			      (:file       "variables"
+			       :depends-on ("package"))
 			      (:file       "conditions"
 			       :depends-on ("package"))
 			      (:file       "protocol"
@@ -281,9 +283,11 @@
 			      (:file       "server"
 			       :depends-on ("package" "protocol"))
 			      (:file       "local-server"
-			       :depends-on ("package" "protocol" "server"))
+			       :depends-on ("package" "variables"
+					    "protocol" "server"))
 			      (:file       "remote-server"
-			       :depends-on ("package" "protocol" "server"))
+			       :depends-on ("package" "variables"
+					    "protocol" "server"))
 
 			      (:file       "macros"
 			       :depends-on ("package" "local-server"

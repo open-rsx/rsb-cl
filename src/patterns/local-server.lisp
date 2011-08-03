@@ -43,15 +43,6 @@ and send the reply using the informer."
   (setf (rsb.ep:handlers (method-listener instance))
 	(list (curry #'call (method-server instance) instance))))
 
-(defmethod call :around ((server  t)
-			 (method  local-method)
-			 (request event))
-  "Ignore the call if REQUEST does not have a request id."
-  (if (meta-data request :|ServerRequestId|)
-      (call-next-method)
-      (warn "~@<Received a request without id: ~A.~@:>"
-	    request)))
-
 (defmethod call ((server  t)
 		 (method  local-method)
 		 (request event))
@@ -59,15 +50,18 @@ and send the reply using the informer."
 REQUEST. Send the result or an error notification back to the caller."
   (bind (((:accessors-r/o (informer method-informer)
 			  (callback method-callback)) method)
-	 (id (meta-data request :|ServerRequestId|))
-	 ((:values result error?)
-	  (handler-case
-	      (funcall callback (event-data request))
-	    (error (condition)
-	      (values (format nil "~A" condition) t)))))
-    (apply #'send informer result
-	   :|ServerRequestId| id
-	   (when error? (list :|isException| "yes")))))
+	 ;; If we got here via direct function calls within a single
+	 ;; thread, the event id-based mechanism is not required.
+	 (id (if *local-call*
+		 ""
+		 (format nil "~(~A~)" (event-id request))))) ;;; TODO(jmoringe): make a function
+    (handler-case
+	(send informer (funcall callback (event-data request))
+	     :|rsb:reply| id)
+      (error (condition)
+	(send informer (format nil "~A" condition)
+	      :|rsb:reply|  id
+	      :|rsb:error?| "1")))))
 
 
 ;;; `local-server' class

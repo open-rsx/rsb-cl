@@ -51,14 +51,20 @@ replies to method calls."
   (bind (((:accessors-r/o (lock  %method-lock)
 			  (calls %method-calls)) method))
     (push #'(lambda (event)
-	      (let ((key (meta-data event :|ServerRequestId|))) ;;; TODO(jmoringe):  function; warn id key is missing?
-		(when key
-		  (bt:with-lock-held (lock)
-		    (bind ((call      (gethash key calls))
-			   (condition (car call)))
-		      (when call
-			(setf (cdr call) event)
-			(bt:condition-notify condition)))))))
+	      ;; Check whether this is a direct call within a single
+	      ;; thread.
+	      (if *local-call*
+		  ;; If so, just store the result.
+		  (setf (cdr *local-call*)  event)
+		  ;; Otherwise extract the call id, look up the call,
+		  ;; store the result and notify the caller.
+		  (let ((key (meta-data event :|rsb:reply|)))
+		    (when key
+		      (bt:with-lock-held (lock)
+			(let ((call (gethash key calls)))
+			  (when call
+			    (setf (cdr call) event)
+			    (bt:condition-notify (car call)))))))))
 	  (rsb.ep:handlers new-value))))
 
 (defmethod call ((server  t)
@@ -71,39 +77,49 @@ data."
   (bind (((:accessors-r/o (informer method-informer)
 			  (lock     %method-lock)
 			  (calls    %method-calls)) method)
-	 (key  (princ-to-string (uuid:make-v4-uuid))) ;;; TODO(jmoringe): bottleneck
-	 (call (list (bt:make-condition-variable))))
-    ;; Register the method call.
-    (bt:with-lock-held (lock)
-      (setf (gethash key calls) call))
-
+	 (key)
+	 (call         (cons nil nil))
+	 (*local-call* call))
     ;; Send the request, wait for the reply and handle errors.
     (handler-case
 	(progn
-	  ;; Send the request to the remote server(s).
-	  (setf (meta-data request :|ServerRequestId|) key)
-	  (send informer request)
+	  ;; Send the request to the remote server(s) and register the
+	  ;; method call. We hold the lock the entire time to prevent
+	  ;; the reply from arriving before we registered the call.
+	  (bt:with-lock-held (lock)
+	    (setf request (send informer request))
+
+	    ;; If we already received the result via direct function
+	    ;; calls, we do not have to generate an id and store the
+	    ;; call.
+	    (unless (cdr call)
+	      (setf key                 (format nil "~(~A~)"
+						(event-id request))
+		    (car call)          (bt:make-condition-variable)
+		    (gethash key calls) call)))
 
 	  ;; Wait for the reply to arrive.
-	  (sb-ext:with-timeout (server-timeout server)
-	    (bt:with-lock-held (lock)
-	      (unwind-protect
-		   (iter (until (cdr call))
-			 (bt:condition-wait (car call) lock)
-			 (finally
-			  (let ((event (cdr call)))
-			    (if (meta-data event :|isException|)
-				(error 'remote-method-execution-error
-				       :method  method
-				       :request request
-				       :cause   (make-condition
-						 'simple-error
-						 :format-control   "~@<~A~@:>"
-						 :format-arguments (list (event-data event))))
-				(return (event-data event))))))
-		;; Remove the call, even in case of errors or other
-		;; non-local exits.
-		(remhash key calls)))))
+	  (if (cdr call)
+	      (event-data (cdr call))
+	      (sb-ext:with-timeout (server-timeout server)
+		(bt:with-lock-held (lock)
+		  (unwind-protect
+		       (iter (until (cdr call))
+			     (bt:condition-wait (car call) lock)
+			     (finally
+			      (let ((event (cdr call)))
+				(if (meta-data event :|rsb:error?|)
+				    (error 'remote-method-execution-error
+					   :method  method
+					   :request request
+					   :cause   (make-condition
+						     'simple-error
+						     :format-control   "~@<~A~@:>"
+						     :format-arguments (list (event-data event))))
+				    (return (event-data event))))))
+		    ;; Remove the call, even in case of errors or other
+		    ;; non-local exits.
+		    (remhash key calls))))))
       #+sbcl
       (sb-ext:timeout (condition)
 	(declare (ignore condition))
