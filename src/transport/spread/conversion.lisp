@@ -145,6 +145,14 @@ into one notification."
 ;;; Utility functions
 ;;
 
+(defvar *keyword-readtable*
+  (let ((readtable (copy-readtable nil)))
+    (setf (readtable-case readtable) :invert)
+    readtable)
+  "This readtable is used to print and read keywords. The goal is to
+get a natural mapping between Lisp keywords and corresponding strings
+for most cases.")
+
 (defun make-notification (sequence-number scope origin wire-schema data
 			  &key
 			  meta-data
@@ -220,16 +228,18 @@ integer which counts the number of microseconds since UNIX epoch."
 
 (defun keyword->bytes (keyword)
   "Convert the name of KEYWORD into an octet-vector."
-  (let ((*readtable* (copy-readtable nil)))
-    (setf (readtable-case *readtable*) :invert)
-    (string->bytes (princ-to-string keyword))))
+  (if (find #\: (symbol-name keyword))
+      (string->bytes (symbol-name keyword))
+      (let ((*readtable* *keyword-readtable*))
+	(string->bytes (princ-to-string keyword)))))
 
 (defun bytes->keyword (bytes)
   "Converter BYTES into a keyword."
-  (let ((*package*   (find-package :keyword))
-	(*readtable* (copy-readtable nil)))
-    (setf (readtable-case *readtable*) :invert)
-    (read-from-string (bytes->string bytes))))
+  (if (find (char-code #\:) bytes)
+      (intern (bytes->string bytes) (find-package :keyword))
+      (let ((*package*   (find-package :keyword))
+	    (*readtable* *keyword-readtable*))
+	(read-from-string (bytes->string bytes)))))
 
 (defun wire-schema->bytes (wire-schema)
   "Convert WIRE-SCHEMA to an ASCII representation stored in an
