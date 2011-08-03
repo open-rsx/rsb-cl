@@ -93,14 +93,15 @@ data."
 	    ;; calls, we do not have to generate an id and store the
 	    ;; call.
 	    (unless (cdr call)
-	      (setf key                 (format nil "~(~A~)"
+	      (setf *local-call*        nil ;; reused to signal that local call did not happen
+		    key                 (format nil "~(~A~)"
 						(event-id request))
 		    (car call)          (bt:make-condition-variable)
 		    (gethash key calls) call)))
 
 	  ;; Wait for the reply to arrive.
-	  (if (cdr call)
-	      (event-data (cdr call))
+	  (if *local-call*
+	      (event-data (cdr call)) ;;; TODO(jmoringe): handle remote errors
 	      (sb-ext:with-timeout (server-timeout server)
 		(bt:with-lock-held (lock)
 		  (unwind-protect
