@@ -58,8 +58,16 @@ classes."))
 (defmethod detach ((method method1))
   (bind (((:accessors-r/o (informer method-informer)
 			  (listener method-listener)) method))
-    (when informer (detach informer))
-    (when listener (detach listener))))
+    ;; For the sake of the `local-method' subclass: shutdown the
+    ;; listener first. This will prevent new method calls from being
+    ;; initiated and wait for in-progress calls to finish while still
+    ;; having the informer available for sending out reply events.
+    ;;
+    ;; This shutdown sequence doesn't help `remote-method', but the
+    ;; client should not detach a `remote-server' with in-progress
+    ;; method calls and expect replies to arrive anyway.
+    (when listener (detach listener))
+    (when informer (detach informer))))
 
 (defmethod print-object ((object method1) stream)
   (print-unreadable-object (object stream :type t :identity t)
