@@ -26,9 +26,10 @@
 (defmethod find-transport-class ((spec (eql :spread-in-push)))
   (find-class 'in-push-connector))
 
-(defclass in-push-connector (error-handling-push-receiver-mixin
-			     in-connector
-			     threaded-message-receiver-mixin)
+(defclass in-push-connector (in-connector
+			     threaded-message-receiver-mixin
+			     error-handling-push-receiver-mixin
+			     sometimes-interruptible-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)

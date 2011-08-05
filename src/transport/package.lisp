@@ -115,6 +115,11 @@
   (:export
    :threaded-message-receiver-mixin)
 
+  ;; `sometimes-interruptible-mixin' class
+  (:export
+   :sometimes-interruptible-mixin
+   :connector-interruptible?)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation.

@@ -254,6 +254,8 @@
 					    "message-receiver-mixin"
 					    "threaded-receiver-mixin"))
 			      (:file       "restart-notification-sender-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "sometimes-interruptible-mixin"
 			       :depends-on ("package" "protocol"))))
 
 		(:module     "transport-inprocess"
