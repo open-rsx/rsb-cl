@@ -83,6 +83,9 @@ data."
     ;; Send the request, wait for the reply and handle errors.
     (handler-case
 	(progn
+	  ;; Method has to be "REQUEST" for remote method calls.
+	  (setf (event-method request) :|request|)
+
 	  ;; Send the request to the remote server(s) and register the
 	  ;; method call. We hold the lock the entire time to prevent
 	  ;; the reply from arriving before we registered the call.

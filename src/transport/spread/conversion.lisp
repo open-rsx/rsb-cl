@@ -52,6 +52,7 @@ contained in NOTIFICATION."
   (bind (((:accessors-r/o
 	   (sequence-number rsb.protocol::notification-sequence-number)
 	   (scope           rsb.protocol::notification-scope)
+	   (method          rsb.protocol::notification-method)
 	   (wire-schema     rsb.protocol::notification-wire-schema)
 	   (payload         rsb.protocol::notification-data)
 	   (meta-data       rsb.protocol::notification-meta-data)) notification)
@@ -63,6 +64,8 @@ contained in NOTIFICATION."
 		 :origin            (uuid:byte-array-to-uuid
 				     (rsb.protocol::notification-sender-id notification))
 		 :scope             (make-scope (bytes->string scope))
+		 :method            (unless (emptyp method)
+				      (bytes->keyword method))
 		 :type              t
 		 :data              (rsb.converter:wire->domain
 				     converter (or data payload)
@@ -114,6 +117,7 @@ into one notification."
 	   (sequence-number event-sequence-number)
 	   (scope           event-scope)
 	   (origin          event-origin)
+	   (method          rsb::event-method)
 	   (data            event-data)
 	   (meta-data       event-meta-data)
 	   (timestamps      event-timestamps)) event)
@@ -128,7 +132,7 @@ into one notification."
 	  (iter (for fragment in    fragments)
 		(for i        :from 0)
 		(collect
-		    (make-notification sequence-number scope origin
+		    (make-notification sequence-number scope origin method
 				       wire-schema fragment
 				       :meta-data      meta-data
 				       :timestamps     timestamps
@@ -136,7 +140,7 @@ into one notification."
 				       :num-data-parts num-fragments))))
 
 	;; WIRE-DATA fits into a single notification.
-	(list (make-notification sequence-number scope origin
+	(list (make-notification sequence-number scope origin method
 				 wire-schema wire-data
 				 :meta-data  meta-data
 				 :timestamps timestamps)))))
@@ -153,16 +157,17 @@ into one notification."
 get a natural mapping between Lisp keywords and corresponding strings
 for most cases.")
 
-(defun make-notification (sequence-number scope origin wire-schema data
+(defun make-notification (sequence-number scope origin method
+			  wire-schema data
 			  &key
 			  meta-data
 			  timestamps
 			  (num-data-parts 1)
 			  (data-part      0))
   "Make a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
-SCOPE, WIRE-SCHEMA, DATA and optionally META-DATA. When NUM-DATA-PARTS
-and DATA-PART are not supplied, values that indicate a non-fragmented
-notification are chosen."
+SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA. When
+NUM-DATA-PARTS and DATA-PART are not supplied, values that indicate a
+non-fragmented notification are chosen."
   (bind ((meta-data1   (make-instance
 			'rsb.protocol::meta-data
 			:create-time (timestamp->unix-microseconds
@@ -179,6 +184,12 @@ notification are chosen."
 			:data-part       data-part
 			:data            data
 			:meta-data       meta-data1)))
+
+    ;; Store the method of the event in the new notification if the
+    ;; event has one.
+    (when method
+      (setf (rsb.protocol::notification-method notification)
+	    (keyword->bytes method)))
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)

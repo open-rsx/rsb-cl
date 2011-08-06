@@ -44,8 +44,16 @@ origin slot) and the sequence number of the event.")
 		    :accessor event-origin
 		    :initform nil
 		    :documentation
-		    "Stores the id of the participant by which the event was
-published onto the bus.")
+		    "Stores the id of the participant by which the
+event was published onto the bus.")
+   (method          :initarg  :method
+		    :type     (or null keyword)
+		    :accessor event-method
+		    :initform nil
+		    :documentation
+		    "Stores the name of a \"method category\" which
+characterizes the role of the event in a communication
+pattern (examples include \"request\", \"reply\", \"update\").")
    (type            :initarg  :type
 		    :type     (or symbol list)
 		    :accessor event-type
@@ -70,6 +78,7 @@ listeners. An event is a composite structure consisting of
   participant)
 + a scope
 + the id of the participant that sent the event
++ an optional \"method category\"
 + a payload
 + a type describing the payload
 + various timestamps
@@ -110,6 +119,7 @@ listeners. An event is a composite structure consisting of
 	       &key
 	       (compare-sequence-numbers? t)
 	       (compare-origins?          t)
+	       (compare-methods?          t)
 	       (compare-timestamps        t)
 	       (data-test                 #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
@@ -117,6 +127,8 @@ If COMPARE-SEQUENCE-NUMBERS? is non-nil, return nil unless LEFT and
 RIGHT have identical sequence numbers.
 If COMPARE-ORIGINS? is non-nil, return nil unless LEFT and RIGHT have
 identical origins.
+if COMPARE-METHODS? is non-nil, return nil unless LEFT and RIGHT have
+identical methods.
 COMPARE-TIMESTAMPS can be nil, t or a list of timestamp keys to
 compare. If it is t, all RSB timestamps are
 compared (currently :create, :send, :receive and :deliver).
@@ -127,12 +139,16 @@ case, the payloads of LEFT and RIGHT are not considered."
 	      (event-sequence-number right)))
        ;; Scope and origin
        (scope= (event-scope left) (event-scope right))
+       ;; Origin
        (or (not compare-origins?)
 	   (let ((left-origin  (event-origin left))
 		 (right-origin (event-origin right)))
 	     (or (and (not left-origin) (not right-origin))
 		 (and left-origin right-origin
 		      (uuid= left-origin right-origin)))))
+       ;; Method
+       (or (not compare-methods?)
+	   (eq (event-method left) (event-method right)))
        ;; Timestamps
        (or (null compare-timestamps)
 	   (iter (for key in (if (eq compare-timestamps t)
@@ -151,7 +167,8 @@ case, the payloads of LEFT and RIGHT are not considered."
 (defmethod print-object ((object event) stream)
   (%maybe-set-event-id object) ;; force id computation
   (print-unreadable-id-object (object stream :type t)
-    (format stream "~@<~A ~S ~/rsb::print-event-data/~@:>"
+    (format stream "~@<~@[~A ~]~A ~S ~/rsb::print-event-data/~@:>"
+	    (event-method object)
 	    (scope-string (event-scope object))
 	    (event-type object)
 	    (event-data object))))
@@ -162,26 +179,32 @@ case, the payloads of LEFT and RIGHT are not considered."
 
 (defun make-event (scope data
 		   &rest meta-data
-		   &key &allow-other-keys)
+		   &key
+		   method
+		   &allow-other-keys)
   "Construct an event addressed at SCOPE with payload DATA and,
 optionally, meta-data consisting of the keys and values in the plist
 META-DATA."
   (make-instance 'event
 		 :scope     (make-scope scope)
+		 :method    method
 		 :data      data
-		 :meta-data meta-data))
+		 :meta-data (remove-from-plist meta-data :method)))
 
 (defun make-event/typed (scope data type
 			 &rest meta-data
-			 &key &allow-other-keys)
+			 &key
+			 method
+			 &allow-other-keys)
   "Construct an event addressed at SCOPE with payload DATA and type TYPE.
 Optionally, add meta-data consisting of the keys and values in the
 plist META-DATA."
   (make-instance 'event
 		 :scope     (make-scope scope)
+		 :method    method
 		 :data      data
 		 :type      type
-		 :meta-data meta-data))
+		 :meta-data (remove-from-plist meta-data :method)))
 
 
 ;;; Utility functions

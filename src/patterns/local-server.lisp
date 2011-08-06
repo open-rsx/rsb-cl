@@ -57,9 +57,11 @@ REQUEST. Send the result or an error notification back to the caller."
 		 (format nil "~(~A~)" (event-id request))))) ;;; TODO(jmoringe): make a function
     (handler-case
 	(send informer (funcall callback (event-data request))
-	     :|rsb:reply| id)
+	      :method      :|reply|
+	      :|rsb:reply| id)
       (error (condition)
 	(send informer (format nil "~A" condition)
+	      :method       :|reply|
 	      :|rsb:reply|  id
 	      :|rsb:error?| "1")))))
 

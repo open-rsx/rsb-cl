@@ -152,6 +152,7 @@
    :event-id
    :event-scope
    :event-origin
+   :event-method
    :event-type
    :event-data
    :event-meta-data
