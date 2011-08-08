@@ -282,6 +282,10 @@
 			      (:file       "protocol"
 			       :depends-on ("package"))
 
+
+			      (:file       "future"
+			       :depends-on ("package" "protocol"))
+
 			      (:file       "server"
 			       :depends-on ("package" "protocol"))
 			      (:file       "local-server"
@@ -395,6 +399,13 @@
 			      (:file       "restart-message-receiver-mixin"
 			       :depends-on ("package"))
 			      (:file       "restart-notification-sender-mixin"
+			       :depends-on ("package"))))
+
+		(:module     "patterns"
+		 :pathname   "test/patterns"
+		 :depends-on ("test")
+		 :components ((:file       "package")
+			      (:file       "future"
 			       :depends-on ("package"))))
 
 		(:module     "inprocess"

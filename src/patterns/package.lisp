@@ -36,6 +36,16 @@
 
    :remote-method-execution-error)
 
+  ;; Future protocol
+  (:export
+   :future-done?
+   :future-result
+   :future-error)
+
+  ;; `future' class
+  (:export
+   :future)
+
   ;; Method protocol
   (:export
    :method-server
