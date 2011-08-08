@@ -55,21 +55,28 @@ replies to method calls."
 	      ;; thread.
 	      (if *local-call*
 		  ;; If so, just store the result.
-		  (setf (cdr *local-call*)  event)
+		  (progn
+		    (setf (cdr *local-call*) t)
+		    (%call-result->future
+		     method :request event *local-call*))
 		  ;; Otherwise extract the call id, look up the call,
 		  ;; store the result and notify the caller.
-		  (let ((key (meta-data event :|rsb:reply|)))
+		  (let ((key  (meta-data event :|rsb:reply|))
+			(call))
 		    (when key
 		      (bt:with-lock-held (lock)
-			(let ((call (gethash key calls)))
-			  (when call
-			    (setf (cdr call) event)
-			    (bt:condition-notify (car call)))))))))
+			(when (setf call (gethash key calls))
+			  (remhash key calls)))
+		      ;; Remove the call.
+		      (when call
+			(%call-result->future
+			 method :request event call))))))
 	  (rsb.ep:handlers new-value))))
 
 (defmethod call ((server  t)
 		 (method  remote-method)
-		 (request event))
+		 (request event)
+		 &key &allow-other-keys)
   "Call the remote method of METHOD transmitting REQUEST as request
 data."
   (method-listener method) ;; force creation ;;; TODO(jmoringe): can we improve this?
@@ -77,60 +84,24 @@ data."
   (bind (((:accessors-r/o (informer method-informer)
 			  (lock     %method-lock)
 			  (calls    %method-calls)) method)
-	 (key)
-	 (call         (cons nil nil))
-	 (*local-call* call))
-    ;; Send the request, wait for the reply and handle errors.
+	 (*local-call* (cons nil nil)))
     (handler-case
-	(progn
+	;; Send the request to the remote server(s) and register the
+	;; method call. We hold the lock the entire time to prevent
+	;; the reply from arriving before we registered the call.
+	(bt:with-lock-held (lock)
 	  ;; Method has to be "REQUEST" for remote method calls.
-	  (setf (event-method request) :|request|)
+	  (setf (event-method request) :|request|
+		request                (send informer request))
 
-	  ;; Send the request to the remote server(s) and register the
-	  ;; method call. We hold the lock the entire time to prevent
-	  ;; the reply from arriving before we registered the call.
-	  (bt:with-lock-held (lock)
-	    (setf request (send informer request))
-
-	    ;; If we already received the result via direct function
-	    ;; calls, we do not have to generate an id and store the
-	    ;; call.
-	    (unless (cdr call)
-	      (setf *local-call*        nil ;; reused to signal that local call did not happen
-		    key                 (format nil "~(~A~)"
-						(event-id request))
-		    (car call)          (bt:make-condition-variable)
-		    (gethash key calls) call)))
-
-	  ;; Wait for the reply to arrive.
-	  (if *local-call*
-	      (event-data (cdr call)) ;;; TODO(jmoringe): handle remote errors
-	      (sb-ext:with-timeout (server-timeout server)
-		(bt:with-lock-held (lock)
-		  (unwind-protect
-		       (iter (until (cdr call))
-			     (bt:condition-wait (car call) lock)
-			     (finally
-			      (let ((event (cdr call)))
-				(if (meta-data event :|rsb:error?|)
-				    (error 'remote-method-execution-error
-					   :method  method
-					   :request request
-					   :cause   (make-condition
-						     'simple-error
-						     :format-control   "~@<~A~@:>"
-						     :format-arguments (list (event-data event))))
-				    (return (event-data event))))))
-		    ;; Remove the call, even in case of errors or other
-		    ;; non-local exits.
-		    (remhash key calls))))))
-      #+sbcl
-      (sb-ext:timeout (condition)
-	(declare (ignore condition))
-	(error 'remote-call-timeout
-	       :method  method
-	       :request request))
-      ((not remote-method-execution-error) (condition)
+	  ;; If we already received the result via direct function
+	  ;; calls, we do not have to generate an id and store the
+	  ;; call.
+	  (if (cdr *local-call*)
+	      *local-call*
+	      (setf (gethash (format nil "~(~A~)" (event-id request)) calls)
+		    (make-instance 'future))))
+      (error (condition)
 	(error 'remote-call-failed
 	       :method  method
 	       :request request
@@ -138,10 +109,15 @@ data."
 
 (defmethod call :around ((server  t)
 			 (method  remote-method)
-			 (request event))
+			 (request event)
+			 &key
+			 (block? t))
   "TODO(jmoringe): document"
   (iter (restart-case
-	    (return-from call (call-next-method))
+	    (return-from call
+	      (if block?
+		  (event-data (future-result (call-next-method)))
+		  (call-next-method)))
 	  (retry ()
 	    :report (lambda (stream)
 		      (format stream "~@<Retry calling method ~A of ~
@@ -153,13 +129,7 @@ server ~A with request ~A.~@:>"
 ;;
 
 (defclass remote-server (server)
-  ((timeout :initarg  :timeout
-	    :type     positive-real
-	    :accessor server-timeout
-	    :initform 25
-	    :documentation
-	    "Stores the amount of seconds methods calls should wait
-for their replies to arrive before failing."))
+  ()
   (:documentation
    "Instances of this class represent remote servers in a way that
 allows calling methods on them as if they were local."))
@@ -169,23 +139,27 @@ allows calling methods on them as if they were local."))
 
 (defmethod call ((server  remote-server)
 		 (method  string)
-		 (request t))
+		 (request t)
+		 &rest args
+		 &key &allow-other-keys)
   "Create the method named METHOD if it does not already exist, then
 call it."
   (let ((method (or (server-method server method :error? nil)
 		    (setf (server-method server method)
 			  (make-instance 'remote-method
 					 :name method)))))
-    (call server method request)))
+    (apply #'call server method request args)))
 
 (defmethod call ((server  t)
 		 (method  remote-method)
-		 (request t))
+		 (request t)
+		 &rest args
+		 &key &allow-other-keys)
   (let ((event (make-instance 'event
 			      :scope (participant-scope
 				      (method-informer method))
 			      :data  request)))
-    (call server method event)))
+    (apply #'call server method event args)))
 
 
 ;;; `remote-server' creation
@@ -202,3 +176,23 @@ call it."
 
 (define-participant-creation-restart-method remote-server (scope scope))
 (define-participant-creation-restart-method remote-server (scope puri:uri))
+
+
+;;; Utility functions
+;;
+
+(defun %call-result->future (method request event future)
+  "Store data from METHOD, REQUEST and EVENT in FUTURE taking into
+account whether EVENT represents an error. Return the modified
+FUTURE."
+  (if (meta-data event :|rsb:error?|)
+      (setf (future-error future)
+	    (list 'remote-method-execution-error
+		  :method  method
+		  :request request
+		  :cause   (make-condition
+			    'simple-error
+			    :format-control   "~@<~A~@:>"
+			    :format-arguments (list (event-data event)))))
+      (setf (future-result future) event))
+  future)

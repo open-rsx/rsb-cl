@@ -48,7 +48,8 @@ and send the reply using the informer."
 
 (defmethod call ((server  t)
 		 (method  local-method)
-		 (request event))
+		 (request event)
+		 &key &allow-other-keys)
   "Invoke the call back function of METHOD with the payload of
 REQUEST. Send the result or an error notification back to the caller."
   (bind (((:accessors-r/o (informer method-informer)
