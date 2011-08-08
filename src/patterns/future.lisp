@@ -139,13 +139,7 @@ or for performance reasons."))
 		    (iter (until (slot-boundp future 'result))
 			  (bt:condition-wait condition lock)))
 		  (slot-value future 'result))))
-    (if (typep value 'future-failure-value)
-	;; When the stored value indicates an error, signal the error
-	;; or return the tag, depending on ERROR?.
-	(if error?
-	    (apply #'error (future-failure-condition value))
-	    (values nil (future-failure-tag value)))
-	(values value :done))))
+    (%dispatch-result value error?)))
 
 (defmethod (setf future-result) ((new-value t) (future future))
   (bt:with-lock-held ((%future-lock future))
@@ -156,9 +150,50 @@ or for performance reasons."))
 (defmethod (setf future-error) ((new-value t) (future future))
   ;; Store a result value that indicates an error. NEW-VALUE can be
   ;; used to (construct and) signal the error.
-  (setf (future-result future)
-	(list +future-failure-marker+ :failed (ensure-list new-value))))
+  (setf (future-result future) (%make-failure-value
+				(ensure-list new-value))))
 
 (defmethod print-object ((object future) stream)
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~A" (or (future-done? object) :running))))
+
+
+;;; Cons cells as futures
+;;
+
+(defmethod future-done? ((future cons))
+  (if (typep (car future) 'future-failure-value)
+      (future-failure-tag (car future))
+      :done))
+
+(defmethod future-result ((future cons)
+			  &key
+			  (error? t)
+			  &allow-other-keys)
+  (%dispatch-result (car future) error?))
+
+(defmethod (setf future-result) ((new-value t) (future cons))
+  (setf (car future) new-value))
+
+(defmethod (setf future-error) ((new-value t) (future cons))
+  (setf (car future) (%make-failure-value (ensure-list new-value))))
+
+
+;;; Utility functions
+;;
+
+(defun %dispatch-result (value error?)
+  "Return the result stored in VALUE or signal an error, depending on
+ERROR?"
+  (if (typep value 'future-failure-value)
+      ;; When the stored value indicates an error, signal the error or
+      ;; return the tag, depending on ERROR?.
+      (if error?
+	  (apply #'error (future-failure-condition value))
+	  (values nil (future-failure-tag value)))
+      (values value :done)))
+
+(defun %make-failure-value (condition-data)
+  "Return an object that can be used to indicate a failed operation
+for a condition described by CONDITION-DATA."
+  (list +future-failure-marker+ :failed condition-data))
