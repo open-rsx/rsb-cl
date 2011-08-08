@@ -43,6 +43,9 @@ and send the reply using the informer."
   (setf (rsb.ep:handlers (method-listener instance))
 	(list (curry #'call (method-server instance) instance))))
 
+(define-lazy-creation-method local-method listener ()  "request")
+(define-lazy-creation-method local-method informer (t) "reply")
+
 (defmethod call ((server  t)
 		 (method  local-method)
 		 (request event))
@@ -75,9 +78,6 @@ REQUEST. Send the result or an error notification back to the caller."
    "Instances of this class associate a collection of method instances
 which are implemented by callback functions with a scope under which
 these methods are exposed for remote clients."))
-
-(define-lazy-creation-method local-method listener ()  "request")
-(define-lazy-creation-method local-method informer (t) "reply")
 
 (defmethod (setf server-method) ((new-value function)
 				 (server    local-server)
