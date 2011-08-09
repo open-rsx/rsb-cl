@@ -44,6 +44,9 @@ for RESULT."))
    "Instances of this class represent methods provided by a remote
 server."))
 
+(define-lazy-creation-method remote-method listener ()  "reply")
+(define-lazy-creation-method remote-method informer (t) "request")
+
 (defmethod (setf %method-listener) :after ((new-value t)
 					   (method    remote-method))
   "After instantiating the listener for METHOD, install a handler for
@@ -133,9 +136,6 @@ server ~A with request ~A.~@:>"
   (:documentation
    "Instances of this class represent remote servers in a way that
 allows calling methods on them as if they were local."))
-
-(define-lazy-creation-method remote-method listener ()  "reply")
-(define-lazy-creation-method remote-method informer (t) "request")
 
 (defmethod call ((server  remote-server)
 		 (method  string)
