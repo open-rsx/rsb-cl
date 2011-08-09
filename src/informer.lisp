@@ -55,7 +55,7 @@ channel."))
 
     ;; Ensure that the destination scope of DATA is identical to
     ;; INFORMER's scope.
-    (unless (scope= (event-scope data) (participant-scope informer))
+    (unless (sub-scope? (event-scope data) (participant-scope informer))
       (error 'invalid-event-scope
 	     :event          data
 	     :expected-scope scope))))

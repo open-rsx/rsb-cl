@@ -44,20 +44,34 @@
 	  "Test the type check employed by the `send' method.")
   check-type
 
-  (with-informer (informer "/informer/check-type" 'string)
+  (with-informer (informer "/informer/check-type" 'sequence)
+    ;; In this case, the event cannot be constructed from the payload.
     (ensure-condition 'type-error
       (send informer 5))
+    ;; In this case, the event is not compatible with the informer's
+    ;; type.
     (ensure-condition 'invalid-event-type
       (send informer (make-event/typed
-		      "/informer/check-type" 5 'integer)))))
+		      "/informer/check-type" 5 'integer)))
+
+    ;; The following are compatible.
+    (send informer '(1 2))
+    (send informer (make-event/typed "/informer/check-type" "bla" 'string))
+    (send informer (make-event/typed "/informer/check-type" "bla" 'sequence))))
 
 (addtest (informer-root
           :documentation
 	  "Test the scope check employed by the `send' method.")
   check-scope
 
-  (with-informer (informer "/informer/check-scope" 'string)
-    (ensure-condition 'invalid-event-type
+  (with-informer (informer "/informer/check-scope" t)
+    ;; Identical scope and subscopes are allowed
+    (send informer (make-event "/informer/check-scope" "foo"))
+    (send informer (make-event "/informer/check-scope/subscope" "foo"))
+
+    ;; Scope is not identical to or a subscope of the informer's
+    ;; scope.
+    (ensure-condition 'invalid-event-scope
       (send informer (make-event "/informer/wrong-scope" "foo")))))
 
 ;; (addtest (informer-root

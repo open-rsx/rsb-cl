@@ -233,7 +233,7 @@ its type is unsuitable."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The scope ~A of the event ~S is not identical ~
-to the expected scope ~A.~:@>"
+to or a sub-scope of the expected scope ~A.~:@>"
 	     (event-scope (invalid-event-event condition))
 	     (invalid-event-event condition)
 	     (invalid-event-expected-scope condition))))
