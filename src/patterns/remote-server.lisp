@@ -59,9 +59,10 @@ replies to method calls."
 	      (if *local-call*
 		  ;; If so, just store the result.
 		  (progn
-		    (setf (cdr *local-call*) t)
 		    (%call-result->future
-		     method :request event *local-call*))
+		     method (cadr *local-call*) event
+		     (cddr *local-call*) *local-call*)
+		    (setf (cdr *local-call*) nil))
 		  ;; Otherwise extract the call id, look up the call,
 		  ;; store the result and notify the caller.
 		  (let ((key  (meta-data event :|rsb:reply|))
@@ -73,13 +74,16 @@ replies to method calls."
 		      ;; Remove the call.
 		      (when call
 			(%call-result->future
-			 method :request event call))))))
+			 method (cadr call) event
+			 (cddr call) (car call)))))))
 	  (rsb.ep:handlers new-value))))
 
 (defmethod call ((server  t)
 		 (method  remote-method)
 		 (request event)
-		 &key &allow-other-keys)
+		 &key
+		 (return :payload)
+		 &allow-other-keys)
   "Call the remote method of METHOD transmitting REQUEST as request
 data."
   (method-listener method) ;; force creation ;;; TODO(jmoringe): can we improve this?
@@ -87,7 +91,7 @@ data."
   (bind (((:accessors-r/o (informer method-informer)
 			  (lock     %method-lock)
 			  (calls    %method-calls)) method)
-	 (*local-call* (cons nil nil)))
+	 (*local-call* (cons nil (cons request return))))
     (handler-case
 	;; Send the request to the remote server(s) and register the
 	;; method call. We hold the lock the entire time to prevent
@@ -100,10 +104,12 @@ data."
 	  ;; If we already received the result via direct function
 	  ;; calls, we do not have to generate an id and store the
 	  ;; call.
-	  (if (cdr *local-call*)
+	  (if (null (cdr *local-call*))
 	      *local-call*
-	      (setf (gethash (format nil "~(~A~)" (event-id request)) calls)
-		    (make-instance 'future))))
+	      (let ((future (make-instance 'future)))
+		(setf (gethash (format nil "~(~A~)" (event-id request)) calls)
+		      (cons future (cons request return)))
+		future)))
       (error (condition)
 	(error 'remote-call-failed
 	       :method  method
@@ -114,12 +120,14 @@ data."
 			 (method  remote-method)
 			 (request event)
 			 &key
-			 (block? t))
-  "TODO(jmoringe): document"
+			 (block? t)
+			 &allow-other-keys)
+  "Establish restarts and take care retrieving future results if
+BLOCK? is non-nil."
   (iter (restart-case
 	    (return-from call
 	      (if block?
-		  (event-data (future-result (call-next-method)))
+		  (nth-value 0 (future-result (call-next-method)))
 		  (call-next-method)))
 	  (retry ()
 	    :report (lambda (stream)
@@ -181,7 +189,7 @@ call it."
 ;;; Utility functions
 ;;
 
-(defun %call-result->future (method request event future)
+(defun %call-result->future (method request event return future)
   "Store data from METHOD, REQUEST and EVENT in FUTURE taking into
 account whether EVENT represents an error. Return the modified
 FUTURE."
@@ -194,5 +202,7 @@ FUTURE."
 			    'simple-error
 			    :format-control   "~@<~A~@:>"
 			    :format-arguments (list (event-data event)))))
-      (setf (future-result future) event))
+      (setf (future-result future) (ecase return
+				     (:payload (event-data event))
+				     (:event   event))))
   future)
