@@ -24,6 +24,7 @@
    :iterate
    :lift
 
+   :rsb
    :rsb.patterns
 
    :rsb.test)

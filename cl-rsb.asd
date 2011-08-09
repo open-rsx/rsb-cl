@@ -406,6 +406,9 @@
 		 :depends-on ("test")
 		 :components ((:file       "package")
 			      (:file       "future"
+			       :depends-on ("package"))
+
+			      (:file       "integration"
 			       :depends-on ("package"))))
 
 		(:module     "inprocess"
