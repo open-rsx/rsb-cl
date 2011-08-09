@@ -65,7 +65,8 @@ BODY. TYPE specifies the type of acceptable requests."
 		   #'(lambda (,arg) ,@body))))
 	 ((:flet remove-one (spec))
 	  (bind (((name &rest _) spec))
-	    `(setf (server-method ,var ,(string name)) nil))))
+	    `(when (server-method ,var ,(string name) :error? nil)
+	       (setf (server-method ,var ,(string name)) nil)))))
     `(unwind-protect
 	  (progn ,@(map 'list #'add-one methods) ,@body)
        ,@(map 'list #'remove-one methods))))
