@@ -28,6 +28,9 @@
 
   ;; Conditions
   (:export
+   :no-such-method
+   :no-such-method-name
+
    :remote-call-failed
    :remote-call-failed-method
    :remote-call-failed-request

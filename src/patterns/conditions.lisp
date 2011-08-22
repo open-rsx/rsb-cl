@@ -19,6 +19,20 @@
 
 (in-package :rsb.patterns)
 
+(define-condition no-such-method (rsb-error)
+  ((name :initarg  :name
+	 :type     string
+	 :reader   no-such-method-name
+	 :documentation
+	 "Stores the name of the method that was specified but could
+not be found."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The specified method ~S does not exist.~@:>"
+	     (no-such-method-name condition))))
+  (:documentation
+   "This error is signaled when a specified method does not exist."))
+
 (define-condition remote-call-failed (rsb-error
 				      chainable-condition)
   ((method  :initarg  :method

@@ -126,7 +126,8 @@ generic support for retrieving, adding and removing methods."))
   (let ((method (gethash name (%server-methods server))))
     (or method
 	(when error?
-	  (error "~@<No such method ~S.~@:>" name)))))
+	  (error 'no-such-method
+		 :name name)))))
 
 (defmethod (setf server-method) ((new-value method1)
 				 (server    server)
