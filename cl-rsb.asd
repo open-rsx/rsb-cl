@@ -214,6 +214,9 @@
 			      (:file       "sequence"
 			       :depends-on ("package" "conditions"
 					    "protocol"))
+			      (:file       "force-wire-schema"
+			       :depends-on ("package" "protocol"))
+
 			      (:file       "fundamental"
 			       :depends-on ("package" "conditions"
 					    "protocol"))

@@ -55,6 +55,12 @@
    :no-such-converter
    :find-converter-class
    :converter-classes)
+
+  ;; `force-wire-schema' converter class
+  (:export
+   :force-wire-schema
+   :converter-wire-schema)
+
   (:documentation
    "This package contains mechanisms for converting between domain
 object (which are Lisp object) and data representation in different
