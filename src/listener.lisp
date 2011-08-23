@@ -59,7 +59,15 @@ a mechanism for dispatching matching events to these handlers."))
 (defmethod make-listener ((scope scope)
 			  &key
 			  (transports (transport-options)))
-  (make-participant 'listener scope :in-push transports))
+  (handler-bind
+      ;; Translate different kinds of errors into
+      ;; `listener-creation-failed' errors.
+      ((error #'(lambda (condition)
+		  (error 'listener-creation-failed
+			 :scope      scope
+			 :transports transports
+			 :cause      condition))))
+    (make-participant 'listener scope :in-push transports)))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))
 

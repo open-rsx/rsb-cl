@@ -96,16 +96,25 @@ channel."))
 			  (type  t)
 			  &key
 			  (transports (transport-options)))
-  (bind (((:values informer configurator)
-	  (make-participant 'informer scope :out transports
-			    :type type)))
-    ;; Connect the processor of CONFIGURATOR to INFORMER as an event
-    ;; handler.
-    (push (rsb.ep:configurator-processor configurator)
-	  (rsb.ep:handlers informer))
+  (handler-bind
+      ;; Translate different kinds of errors into
+      ;; `informer-creation-failed' errors.
+      ((error #'(lambda (condition)
+		  (error 'informer-creation-failed
+			 :scope      scope
+			 :transports transports
+			 :type       type
+			 :cause      condition))))
+    (bind (((:values informer configurator)
+	    (make-participant 'informer scope :out transports
+			      :type type)))
+      ;; Connect the processor of CONFIGURATOR to INFORMER as an event
+      ;; handler.
+      (push (rsb.ep:configurator-processor configurator)
+	    (rsb.ep:handlers informer))
 
-    ;; Return the ready-to-use `informer' instance.
-    informer))
+      ;; Return the ready-to-use `informer' instance.
+      informer)))
 
 (define-participant-creation-uri-methods informer
     (scope puri:uri) (type t))
