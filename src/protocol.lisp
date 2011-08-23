@@ -94,6 +94,15 @@ reachability of COMPONENT in transport-specific way."))
 ;;; Common participant protocol
 ;;
 
+(defgeneric participant-id (participant)
+  (:documentation
+   "Return the unique id of PARTICIPANT."))
+
+(defgeneric participant-scope (participant)
+  (:documentation
+   "Return the scope of the channel in which PARTICIPANT
+participates."))
+
 (defgeneric detach (participant)
   (:documentation
    "Detach PARTICIPANT from the channel in which it participates and
