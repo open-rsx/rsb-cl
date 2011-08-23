@@ -42,11 +42,12 @@ been constructed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for ~
-direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~@:>"
+direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~
+~/rsb::maybe-print-cause/~@:>"
 	     (connector-construction-failed-name      condition)
 	     (connector-construction-failed-direction condition)
-	     (connector-construction-failed-args      condition))
-     (maybe-print-cause condition stream)))
+	     (connector-construction-failed-args      condition)
+	     (chainable-condition-cause               condition))))
   (:documentation
    "This error is signaled when the construction of a connector
 instance fails."))

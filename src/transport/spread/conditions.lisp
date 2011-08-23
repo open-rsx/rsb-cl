@@ -33,12 +33,15 @@
 	    "The encoded data, for which the decoding failed."))
   (:report
    (lambda (condition stream)
-     (bind (((:accessors-r/o (encoded decoding-error-encoded)) condition))
-       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~_could not be decoded~@:>"
+     (bind (((:accessors-r/o (encoded decoding-error-encoded)
+			     (cause   chainable-condition-cause)) condition))
+       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
+~_could not be decoded ~
+~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
 	       (coerce (subseq encoded 0 (min 200 (length encoded))) 'list)
-	       (> (length encoded) 200)))
-     (maybe-print-explanation condition stream)
-     (maybe-print-cause condition stream)))
+	       (> (length encoded) 200)
+	       condition
+	       cause))))
   (:documentation
    "This error is signaled when decoding one or more notifications
 into an `event' instance fails."))
@@ -52,10 +55,11 @@ into an `event' instance fails."))
 	  "The event for which the encoding failed."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The event ~A could not be encoded into an octet-vector~@:>"
-	     (encoding-error-event condition))
-     (maybe-print-explanation condition stream)
-     (maybe-print-cause condition stream)))
+     (format stream "~@<The event ~A could not be encoded into an ~
+octet-vector~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
+	     (encoding-error-event      condition)
+	     condition
+	     (chainable-condition-cause condition))))
   (:documentation
    "This error is signaled when encoding an `event' instance into one
 or more notifications fails."))

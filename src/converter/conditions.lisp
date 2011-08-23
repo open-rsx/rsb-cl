@@ -19,7 +19,8 @@
 
 (in-package :rsb.converter)
 
-(define-condition conversion-error (rsb-error)
+(define-condition conversion-error (rsb-error
+				    chainable-condition)
   ((wire-schema :initarg  :wire-schema
 		:type     symbol
 		:reader   conversion-error-wire-schema
@@ -28,8 +29,10 @@
 conversion would have converted."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<A conversion to or from wire-schema ~S failed.~@:>"
-	     (conversion-error-wire-schema condition))))
+     (format stream "~@<A conversion to or from wire-schema ~S~
+failed~/rsb::maybe-print-cause/~@:>"
+	     (conversion-error-wire-schema condition)
+	     (chainable-condition-cause    condition))))
   (:documentation
    "This condition class can be used as a superclass for
 conversion-related condition classes."))
@@ -49,11 +52,12 @@ domain object.")
 been produced by a successful conversion."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The wire data ~S (in ~S schema) could not be ~
-converted to domain type ~S.~@:>"
+     (format stream "~@<The wire data ~S (in ~S wire-schema) could not ~
+be converted to domain type ~S~/rsb::maybe-print-cause/~@:>"
 	     (conversion-error-encoded     condition)
 	     (conversion-error-wire-schema condition)
-	     (conversion-error-domain-type condition))))
+	     (conversion-error-domain-type condition)
+	     (chainable-condition-cause    condition))))
   (:documentation
    "This error is signaled when wire data cannot be converted to a
 domain object."))
@@ -74,10 +78,12 @@ produced by a successful conversion."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The domain object ~S could not be converted to ~
-a wire-type ~S representation using the wire-schema ~S.~@:> "
+a wire-type ~S representation using the wire-schema ~
+~S~/rsb::maybe-print-cause/~@:> "
 	     (conversion-error-domain-object condition)
 	     (conversion-error-wire-type     condition)
-	     (conversion-error-wire-schema   condition))))
+	     (conversion-error-wire-schema   condition)
+	     (chainable-condition-cause      condition))))
   (:documentation
    "This error is signaled when a domain object cannot be converted to
 a wire-type representation."))

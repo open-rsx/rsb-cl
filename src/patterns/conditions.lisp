@@ -47,11 +47,11 @@ not be found."))
 in the failed call."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to call method ~S with request ~
-~A~:@>"
+     (format stream "~@<Failed to call method ~A with request ~
+~A~/rsb::maybe-print-cause/~:@>"
 	     (remote-call-failed-method  condition)
-	     (remote-call-failed-request condition))
-     (maybe-print-cause condition stream)))
+	     (remote-call-failed-request condition)
+	     (chainable-condition-cause  condition))))
   (:documentation
    "This error is signaled when a remote method call fails for some
 reason."))
@@ -67,10 +67,10 @@ complete within a given amount of time."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Remote method ~A failed to execute for ~
-request ~A~:@>"
+request ~A~/rsb::maybe-print-cause/~:@>"
 	     (remote-call-failed-method  condition)
-	     (remote-call-failed-request condition))
-     (maybe-print-cause condition stream)))
+	     (remote-call-failed-request condition)
+	     (chainable-condition-cause  condition))))
   (:documentation
    "Error of this class are raised when a call to a remote method
 succeeds in calling the method on the remote side but fails in the

@@ -37,22 +37,24 @@ which originally caused the condition to be signaled. This structure
 can continue recursively thus forming a chain of causing
 conditions."))
 
-(defun maybe-print-cause (condition stream)
-  "Print the condition that caused CONDITION to be signaled onto
-STREAM."
-  (when (chainable-condition-cause condition)
-    (format stream "~&Caused by:~&~A"
-	    (chainable-condition-cause condition))))
+(defun maybe-print-cause (stream cause &optional colon? at?)
+  "Print the condition CAUSE that caused an outer condition to be
+signaled onto STREAM."
+  (declare (ignore colon? at?))
+  (format stream "~@[~_Caused by:~&~@<> ~@;~A~@:>~]"
+	  cause))
 
-(defun maybe-print-explanation (condition stream)
+(defun maybe-print-explanation (stream condition &optional colon? at?)
   "Format the message contained in the `simple-condition' CONDITION on
 STREAM."
+  (declare (ignore colon? at?))
   (if (simple-condition-format-control condition)
       (progn
-	(format stream ":~&")
-	(apply #'format stream
-	       (simple-condition-format-control   condition)
-	       (simple-condition-format-arguments condition)))
+	(format stream ":~_")
+	(pprint-logical-block (stream nil :per-line-prefix "  ")
+	  (apply #'format stream
+		 (simple-condition-format-control   condition)
+		 (simple-condition-format-arguments condition))))
       (write-char #\. stream)))
 
 
@@ -125,9 +127,10 @@ classes."))
 ;;; Participant-related errors
 ;;
 
-(define-condition participation-failed (rsb-error)
+(define-condition participation-failed (rsb-error
+					chainable-condition)
   ((scope      :initarg  :scope
-	       :type     scope
+	       :type     (or puri:uri scope)
 	       :reader   participation-failed-scope
 	       :documentation
 	       "The scope of the channel in which the participant
@@ -141,11 +144,21 @@ to connect to the bus."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
-designated by scope ~S.~@:>"
-	     (scope-string (participation-failed-scope condition)))))
+designated by ~
+~S~/rsb::maybe-print-transport-configuration/~/rsb::maybe-print-cause/~@:>"
+	     (participation-failed-scope condition)
+	     (participation-failed-transports condition)
+	     (chainable-condition-cause condition))))
   (:documentation
    "This error is signaled when the creation of a participant (which
 implies participation in a channel) fails."))
+
+(defun maybe-print-transport-configuration (stream transports &optional colon? at?)
+  "Print the transport configuration TRANSPORTS to STREAM."
+  (declare (ignore colon? at?))
+  (format stream "~@[ using transport configuration~{~{~_+ ~@(~A~) ~
+transport with options~&~2T~@<~@;~@{~16S~^: ~S~^, ~_~}~:>~}~}~]"
+	  transports))
 
 (define-condition listener-creation-failed (participation-failed)
   ()
@@ -163,14 +176,18 @@ fails."))
   ((type :initarg  :type
 	 :type     (or list symbol)
 	 :reader   informer-creation-failed-type
+	 :initform nil
 	 :documentation
 	 "The type of the informer for which the creation failed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to create RSB informer in the channel ~
-designated by ~A and type ~S.~@:>"
-	     (participation-failed-scope    condition)
-	     (informer-creation-failed-type condition))))
+designated by ~S and type ~
+~S~/rsb::maybe-print-transport-configuration/~/rsb::maybe-print-cause/~@:>"
+	     (participation-failed-scope      condition)
+	     (informer-creation-failed-type   condition)
+	     (participation-failed-transports condition)
+	     (chainable-condition-cause       condition))))
   (:documentation
    "This error is signaled when an attempt to create an informer
 fails."))
@@ -182,7 +199,7 @@ fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
-designated by scope ~S because no transports have been selected.~@:>"
+designated by ~S because no transports have been selected.~@:>"
 	     (scope-string (participation-failed-scope condition)))))
   (:documentation
    "This error is signaled when the creation of a participant fails

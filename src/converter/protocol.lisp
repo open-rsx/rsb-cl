@@ -94,23 +94,30 @@ converter and data, the converter cannot handle the data."
   "Install \"retry\" and \"use-value\" restarts around the call to the
 next `wire->domain' method."
   (iter
-   (restart-case
-       (return (call-next-method))
-     (retry ()
-       :report (lambda (stream)
-		 (format stream "~@<Retry converting ~S (in ~S schema) using converter ~A.~@:>"
-			 wire-data wire-schema converter))
-       nil)
-     (use-value (value)
-       :report      (lambda (stream)
-		      (format stream "~@<Supply a replacement value ~
+    (restart-case
+	(handler-bind
+	    ((error #'(lambda (condition)
+			(error 'wire->domain-conversion-error
+			       :wire-schema wire-schema
+			       :encoded     wire-data
+			       :domain-type :undetermined
+			       :cause       condition))))
+	  (return (call-next-method)))
+      (retry ()
+	:report (lambda (stream)
+		  (format stream "~@<Retry converting ~S (in ~S schema) using converter ~A.~@:>"
+			  wire-data wire-schema converter))
+	nil)
+      (use-value (value)
+	:report      (lambda (stream)
+		       (format stream "~@<Supply a replacement value ~
 to use instead of converting ~S (in ~S schema) using converter ~
 ~A.~@:>"
-			      wire-data wire-schema converter))
-       :interactive (lambda ()
-		      (format *query-io* "Enter replacement value (evaluated): ")
-		      (list (read *query-io*)))
-       (return value)))))
+			       wire-data wire-schema converter))
+	:interactive (lambda ()
+		       (format *query-io* "Enter replacement value (evaluated): ")
+		       (list (read *query-io*)))
+	(return value)))))
 
 (defmethod domain->wire :around ((converter     t)
 				 (domain-object t))
@@ -118,7 +125,14 @@ to use instead of converting ~S (in ~S schema) using converter ~
 next `domain->wire' method."
   (iter
     (restart-case
-	(return (call-next-method))
+	(handler-bind
+	    ((error #'(lambda (condition)
+			(error 'domain->wire-conversion-error
+			       :wire-schema   :undetermined
+			       :domain-object domain-object
+			       :wire-type     :undetermined
+			       :cause         condition))))
+	  (return (call-next-method)))
       (retry ()
 	:report (lambda (stream)
 		  (format stream "~@<Retry converting ~A using converter ~A.~@:>"
