@@ -27,6 +27,22 @@
    "Instances of this class participate in the exchange of
 notifications on one channel of the bus."))
 
+(defmethod participant-converter ((participant t) (wire-type t)
+				  &key &allow-other-keys)
+  "Try to obtain the requested converter from the connectors of
+PARTICIPANT."
+  (let* ((configurator (rsb.ep:client-configurator participant))
+	 (connectors   (remove wire-type (rsb.ep:configurator-connectors
+					  configurator)
+			       :test-not #'subtypep
+			       :key      (find-symbol "CONNECTOR-WIRE-TYPE" :rsb.transport))))
+    (some #'(lambda (connector)
+	      (when (compute-applicable-methods
+		     (fdefinition (find-symbol "CONNECTOR-CONVERTER" :rsb.transport))  ;;; TODO(jmoringe):
+		     (list connector))
+		(funcall (find-symbol "CONNECTOR-CONVERTER" :rsb.transport) connector)))
+	  connectors)))
+
 (defmethod relative-url ((participant participant))
   (puri:merge-uris
    (make-instance 'puri:uri

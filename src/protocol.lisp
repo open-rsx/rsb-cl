@@ -103,6 +103,14 @@ reachability of COMPONENT in transport-specific way."))
    "Return the scope of the channel in which PARTICIPANT
 participates."))
 
+(defgeneric participant-converter (participant wire-type
+				   &key
+				   error?)
+  (:documentation
+   "Return the converter used PARTICIPANT for WIRE-TYPE.
+If PARTICIPANT does not have a converter for WIRE-TYPE, signal an
+error if ERROR? is non-nil, otherwise return nil."))
+
 (defgeneric detach (participant)
   (:documentation
    "Detach PARTICIPANT from the channel in which it participates and
@@ -117,6 +125,21 @@ continuing in a best effort manner instead of signaling."
 	    (warn "~@<Error during detaching: ~A~@:>" condition)
 	    (continue))))
     (detach participant)))
+
+
+;;; Default behavior
+;;
+
+(defmethod participant-converter :around ((participant t) (wire-type t)
+					  &key
+					  (error? t))
+  "Signal an error if the next method could not retrieve the
+converter."
+  (or (call-next-method)
+      (when error?
+	(error "~@<Participant ~A does not have a converter for
+wire-type ~A.~@:>"
+	       participant wire-type))))
 
 
 ;;; Common protocol for receiving participants

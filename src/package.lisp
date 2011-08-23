@@ -171,7 +171,8 @@
 
    :participant
    :participant-id
-   :participant-scope)
+   :participant-scope
+   :participant-converter)
 
   ;; Protocol for receiving participants
   (:export
