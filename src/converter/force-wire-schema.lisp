@@ -61,3 +61,7 @@ is set."
   (bind (((:accessors-r/o
 	   (wire-schema converter-wire-schema)) converter))
     (values domain-object wire-schema)))
+
+(defmethod print-object ((object force-wire-schema) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~A" (converter-wire-schema object))))
