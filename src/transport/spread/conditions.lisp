@@ -33,15 +33,14 @@
 	    "The encoded data, for which the decoding failed."))
   (:report
    (lambda (condition stream)
-     (bind (((:accessors-r/o (encoded decoding-error-encoded)
-			     (cause   chainable-condition-cause)) condition))
+     (bind (((:values data shortened?)
+	     (maybe-shorten-sequence (decoding-error-encoded condition))))
        (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
 ~_could not be decoded ~
 ~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
-	       (coerce (subseq encoded 0 (min 200 (length encoded))) 'list)
-	       (> (length encoded) 200)
+	       (coerce data 'list) shortened?
 	       condition
-	       cause))))
+	       (chainable-condition-cause condition)))))
   (:documentation
    "This error is signaled when decoding one or more notifications
 into an `event' instance fails."))

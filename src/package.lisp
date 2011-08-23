@@ -248,6 +248,8 @@
    :define-participant-creation-uri-methods
    :define-participant-creation-restart-method
 
+   :maybe-shorten-sequence
+
    :hostname)
 
   (:documentation

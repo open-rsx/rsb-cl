@@ -224,6 +224,12 @@ item identified by KEY."
 ;;; Utility functions
 ;;
 
+(defun maybe-shorten-sequence (thing)
+  (if (typep thing 'sequence)
+      (let ((length (length thing)))
+	(values (subseq thing 0 (min length 200)) (> length 200)))
+      (values thing nil)))
+
 (defun uuid= (left right)
   "Return non-nil if LEFT and RIGHT are equal UUIDs.
 This function can be removed once the UUID system gets something

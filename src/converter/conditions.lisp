@@ -52,12 +52,16 @@ domain object.")
 been produced by a successful conversion."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The wire data ~S (in ~S wire-schema) could not ~
-be converted to domain type ~S~/rsb::maybe-print-cause/~@:>"
-	     (conversion-error-encoded     condition)
-	     (conversion-error-wire-schema condition)
-	     (conversion-error-domain-type condition)
-	     (chainable-condition-cause    condition))))
+     (bind (((:values data shortened?)
+	     (maybe-shorten-sequence
+	      (conversion-error-encoded condition))))
+       (format stream "~@<The wire data ~S~:[~; ...~] (in ~S ~
+wire-schema) could not be converted to domain type ~
+~S~/rsb::maybe-print-cause/~@:>"
+	       data shortened?
+	       (conversion-error-wire-schema condition)
+	       (conversion-error-domain-type condition)
+	       (chainable-condition-cause    condition)))))
   (:documentation
    "This error is signaled when wire data cannot be converted to a
 domain object."))
