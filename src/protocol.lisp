@@ -120,7 +120,7 @@ the transport or transports it uses for this participation."))
   "Like `detach' but handle errors that occur during detaching by
 continuing in a best effort manner instead of signaling."
   (handler-bind
-      (((or error #+sbcl sb-ext:timeout)
+      (((or error bt:timeout)
 	#'(lambda (condition)
 	    (warn "~@<Error during detaching: ~A~@:>" condition)
 	    (continue))))

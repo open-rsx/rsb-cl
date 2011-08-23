@@ -105,9 +105,8 @@ participant instance as its \"client\"."))
 	(restart-case
 	    ;; Give each connector ten seconds to detach. If one takes
 	    ;; longer, skip it.
-	    #+sbcl (sb-ext:with-timeout 10
-		     (notify configurator connector :connector-removed))
-	    #-sbcl (notify configurator connector :connector-removed)
+	    (bt:with-timeout (10)
+	      (notify configurator connector :connector-removed))
 	    (continue ()
 	      :report "~@<Ignore the error and continue with the ~
 remaining connectors.~@:>"))))

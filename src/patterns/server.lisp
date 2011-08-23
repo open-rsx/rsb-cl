@@ -147,11 +147,10 @@ generic support for retrieving, adding and removing methods."))
 	(restart-case
 	    ;; Give each method ten seconds to detach. If one takes
 	    ;; longer, allow skipping it.
-	    #+sbcl (sb-ext:with-timeout 10
-		     (setf (server-method server (method-name method)) nil))
-	    #-sbcl (detach method)
-	    (continue ()
-	      :report "~@<Ignore the error and continue with the ~
+	    (bt:with-timeout (10)
+	      (setf (server-method server (method-name method)) nil))
+	  (continue ()
+	    :report "~@<Ignore the error and continue with the ~
 remaining methods.~@:>"))))
 
 (defmethod print-object ((object server) stream)
