@@ -72,7 +72,8 @@ names."))
 
 (defmethod print-object ((object scope) stream)
   (print-unreadable-object (object stream :type t :identity t)
-    (write-string (scope-string object) stream)))
+    (format stream "~A~:[~; *~]"
+	    (scope-string object) (scope-interned? object))))
 
 
 ;;;
