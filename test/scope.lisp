@@ -21,6 +21,8 @@
 
 (deftestsuite scope-root (root)
   ()
+  (:setup
+   (clrhash rsb::*scopes*))
   (:documentation
    "Unit tests for the `scope' class."))
 
@@ -42,14 +44,10 @@
    '("baz" "bar")
    :test #'equalp)
 
-  (ensure-condition 'type-error
-    (make-scope "/!@#/+1"))
-  (ensure-condition 'type-error
-    (make-scope #("!@#" "foo")))
-  (ensure-condition 'type-error
-    (make-scope #("/")))
-  (ensure-condition 'type-error
-    (make-scope '(""))))
+  (ensure-cases (invalid)
+      '("/foo " "/!@#/+1" #("!@#" "foo") #("/") '("") '())
+    (ensure-condition 'type-error
+      (make-scope invalid))))
 
 (addtest (scope-root
           :documentation
@@ -106,9 +104,37 @@
 
 (addtest (scope-root
           :documentation
+	  "Test interning of `scope' instances.")
+  intern
+
+  (ensure-cases (scope)
+      `("/"
+	"/foo"
+	,(make-scope "/")
+	,(make-scope "/foo")
+	,(make-scope "/" :intern? t)
+	,(make-scope "/foo" :intern? t))
+    (let ((result-1 (make-scope scope :intern? t))
+	  (result-2 (make-scope scope :intern? t))
+	  (result-3 (make-scope scope)))
+      (ensure (scope-interned? result-1))
+      (ensure (scope-interned? result-2))
+      ;; RESULT-3 can only be interned if SCOPE was of type `scope'
+      ;; and was already interned.
+      (ensure (eq (scope-interned? result-3)
+		  (when (typep scope 'scope)
+		    (scope-interned? scope))))
+
+      (ensure-same result-1 result-2 :test #'eq)
+      (ensure-same result-1 result-3 :test #'scope=))))
+
+(addtest (scope-root
+          :documentation
 	  "Test method on `print-object' for `scope' class.")
   print
 
-  (check-print (make-scope "/"))
-  (check-print (make-scope "/foo"))
-  (check-print (make-scope "/foo/bar/")))
+  (ensure-cases (scope intern?)
+      '(("/"         nil) ("/"         t)
+	("/foo"      nil) ("/foo"      t)
+	("/foo/bar/" nil) ("/foo/bar/" t))
+   (check-print (make-scope scope :intern? intern?))))
