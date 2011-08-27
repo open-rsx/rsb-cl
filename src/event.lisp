@@ -70,6 +70,8 @@ common use case probably is forcing a more general type.")
 		    "")
    (meta-data       :accessor event-meta-data)
    (timestamp       :accessor event-timestamps))
+  (:default-initargs
+   :intern-scope? nil)
   (:documentation
    "Basic unit of information that is exchanged between informers and
 listeners. An event is a composite structure consisting of
