@@ -155,12 +155,15 @@ components of THING1 and THING2."
 (defvar *scopes* (make-hash-table :test #'equal)
   "Maps scope strings to canonical `scope' instances.")
 
-(defun intern-scope (thing)
-  "Return the canonical `scope' instance designated by THING. May
-return THING, if it becomes the canonical instance."
-  (if (scope-interned? thing)
-      thing
-      (let ((scope (make-scope thing)))
+(defvar *scopes-lock* (bt:make-lock "scopes lock")
+  "Protects accesses to `*scopes*' during interning.")
+
+(defun intern-scope (scope)
+  "Return the canonical `scope' instance for SCOPE. May return SCOPE,
+if it becomes or already is the canonical instance."
+  (if (scope-interned? scope)
+      scope
+      (bt:with-lock-held (*scopes-lock*)
 	(setf (scope-interned? scope) t)
 	(ensure-gethash (scope-components scope) *scopes* scope))))
 
