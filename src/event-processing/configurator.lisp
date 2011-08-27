@@ -108,8 +108,9 @@ participant instance as its \"client\"."))
 	    (bt:with-timeout (10)
 	      (notify configurator connector :connector-removed))
 	    (continue ()
-	      :report "~@<Ignore the error and continue with the ~
-remaining connectors.~@:>"))))
+	      :report (lambda (stream)
+			(format stream "~@<Ignore the error and ~
+continue with the remaining connectors.~@:>"))))))
 
 
 ;;; Connectors
