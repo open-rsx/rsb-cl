@@ -32,27 +32,24 @@
 ;;; Scope -> spread group mapping
 ;;
 
-(defvar *scope-group-cache* (make-hash-table :test #'eq)
-  "This cache maps `scope' instances to the corresponding spread
-groups.")
+(declaim (special *scope->groups-cache* *scope->group-cache-max-size*))
 
-(defvar *scope-group-cache-max-size* 1024
+(defvar *scope->groups-cache* (make-hash-table :test #'eq
+					       :size 1024)
+  "This cache maps `scope' instances to the corresponding spread
+groups. The variable is special so each thread can have its own
+cache.")
+
+(defvar *scope->groups-cache-max-size* 1024
   "The maximum number of allowed entries in the scope -> group mapping
 cache.")
 
-(defun scope->group (scope)
-  "Return a spread group name derived from the SCOPE.
-This function uses a caching implementation which only works
-efficiently, if SCOPE is interned."
-  (or (gethash scope *scope-group-cache*)
-      (progn
-	(when (> (hash-table-count *scope-group-cache*)
-		 *scope-group-cache-max-size*)
-	  (clrhash *scope-group-cache*))
-	(setf (gethash scope *scope-group-cache*)
-	      (scope->group/no-cache scope)))))
+(defun make-scope->groups-cache ()
+  "Return a cache to which `*scope->groups-cache*' can be bound."
+  (make-hash-table :test #'eq
+		   :size *scope->groups-cache-max-size*))
 
-(defun scope->group/no-cache (scope)
+(defun scope->group (scope)
   "Return a spread group name derived from SCOPE."
   (let* ((octets (sb-ext:string-to-octets (scope-string scope)))
 	 (hash   (ironclad:digest-sequence :md5 octets))
@@ -60,7 +57,19 @@ efficiently, if SCOPE is interned."
     (setf (aref string 31) #\Null)
     string))
 
-(defun scope->groups (scope)
+(defun scope->groups/no-cache (scope)
   "Return a list of spread group names derived from SCOPE and its
 super-scopes."
   (map 'list #'scope->group (super-scopes scope :include-self? t)))
+
+(defun scope->groups (scope)
+  "Like `scope->groups/no-cache', but caches results.
+The cache implementation only works efficiently, if SCOPE is
+interned."
+  (or (gethash scope *scope->groups-cache*)
+      (progn
+	(when (>= (hash-table-count *scope->groups-cache*)
+		  *scope->groups-cache-max-size*)
+	  (clrhash *scope->groups-cache*))
+	(setf (gethash scope *scope->groups-cache*)
+	      (scope->groups/no-cache scope)))))

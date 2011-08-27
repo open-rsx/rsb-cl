@@ -36,3 +36,8 @@
   (:documentation
    "This connector class implements push-style event receiving for the
 Spread transport."))
+
+(defmethod receive-messages :around ((connector in-push-connector))
+  "Create a thread-local scope->groups cache for this connector."
+  (let ((*scope->groups-cache* (make-scope->groups-cache)))
+    (call-next-method)))

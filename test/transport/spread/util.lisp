@@ -22,46 +22,65 @@
 (deftestsuite util-root (transport-spread-root)
   ()
   (:setup
-   (clrhash *scope-group-cache*))
+   (clrhash *scope->groups-cache*))
   (:documentation
    "Test suite for the utility functions used in the spread
 backend."))
 
 (addtest (util-root
           :documentation
-	  "Smoke test for the `scope->group/no-cache' function.")
-  scope->group/no-cache/smoke
+	  "Smoke test for the `scope->group' function.")
+  scope->group/smoke
 
   (ensure-cases (string expected)
       '(("/"         "6666cd76f96956469e7be39d750cc7d")
 	("/foo/"     "4f87be8f6e593d167f5fd1ab238cfc2")
 	("/foo/bar/" "1c184f3891344400380281315d9e738"))
-    (let* ((scope  (make-scope string))
-	   (result (scope->group/no-cache scope)))
-      (ensure-same
-       result
-       (concatenate 'string expected '(#\Null))
-       :test #'string=))))
+    (let ((result (scope->group (make-scope string))))
+      (ensure-same result (concatenate 'string expected '(#\Null))
+		   :test #'string=))))
 
 (addtest (util-root
           :documentation
-	  "Smoke test for the `scope->group' function.")
-  scope->group/smoke
+	  "Smoke test for the non-caching variant of the
+`scope->groups' function.")
+  scope->groups/no-cache/smoke
 
-  (ensure-cases (scope) '("/foo/bar")
-    (let ((result-1 (scope->group (make-scope scope :intern? t)))
-	  (result-2 (scope->group (make-scope scope :intern? t)))
-	  (result-3 (scope->group (make-scope scope))))
+  (ensure-cases (scope expected-groups)
+      '(("/"        ("6666cd76f96956469e7be39d750cc7d"))
+	("/foo"     ("6666cd76f96956469e7be39d750cc7d"
+		     "4f87be8f6e593d167f5fd1ab238cfc2"))
+	("/foo/bar" ("6666cd76f96956469e7be39d750cc7d"
+		     "4f87be8f6e593d167f5fd1ab238cfc2"
+		     "1c184f3891344400380281315d9e738")))
+    (let ((result   (scope->groups/no-cache (make-scope scope)))
+	  (expected (map 'list (lambda (name)
+				 (concatenate 'string name '(#\Null)))
+			 expected-groups)))
+      (ensure-same result expected
+		   :test #'(rcurry #'set-equal :test #'string=)))))
+
+(addtest (util-root
+          :documentation
+	  "Smoke test for the `scope->groups' function.")
+  scope->groups/smoke
+
+  (ensure-cases (scope) '("/" "/foo" "/foo/bar")
+    (let ((result-1 (scope->groups (make-scope scope :intern? t)))
+	  (result-2 (scope->groups (make-scope scope :intern? t)))
+	  (result-3 (scope->groups (make-scope scope))))
       (ensure-same result-1 result-2 :test #'eq)
-      (ensure-same result-1 result-3 :test #'string=))))
+      (ensure-same result-1 result-3 :test #'equal))))
 
 (addtest (util-root
           :documentation
-	  "Test the cache flushing mechanism used by `scope->group'.")
-  scope->group/cache-flush
+	  "Test the cache flushing mechanism of the cache used by
+`scope->groups'.")
+  scope->groups/cache-flush
 
-  (iter (repeat (* 10 *scope-group-cache-max-size*))
-	(scope->group (rsb:make-scope "/bla/bli/boo")))
-
-  (ensure (<= (hash-table-count *scope-group-cache*)
-	      *scope-group-cache-max-size*)))
+  (iter (repeat (* 10 *scope->groups-cache-max-size*))
+	(ensure (<= (hash-table-count *scope->groups-cache*)
+		    *scope->groups-cache-max-size*))
+	(scope->group (make-scope "/bla/bli/boo"))
+	(ensure (<= (hash-table-count *scope->groups-cache*)
+		    *scope->groups-cache-max-size*))))

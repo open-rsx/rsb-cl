@@ -54,33 +54,6 @@
 
    :duplicate-fragment)
 
-  ;; Exported for unit tests
-  (:export
-   :assembly-complete?
-   :assembly-concatenated-data
-
-   :assembly-pool-count
-   :merge-fragment
-
-   :assembly-pool
-   :pruning-assembly-pool
-
-   :fragment-data
-
-   :*scope-group-cache*
-   :*scope-group-cache-max-size*
-   :scope->group
-   :scope->group/no-cache
-
-   :connection
-
-   :in-connector
-   :message->event
-
-   :in-pull-connector
-
-   :out-connector)
-
   (:documentation
    "This package contains a transport implementation based on the
 spread group communication system."))

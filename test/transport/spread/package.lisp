@@ -33,6 +33,33 @@
    :rsb.test
    :rsb.transport.test)
 
+  (:import-from :rsb.transport.spread
+   :assembly-complete?
+   :assembly-concatenated-data
+
+   :assembly-pool-count
+   :merge-fragment
+
+   :assembly-pool
+   :pruning-assembly-pool
+
+   :fragment-data
+
+   :*scope->groups-cache*
+   :*scope->groups-cache-max-size*
+   :scope->group
+   :scope->groups/no-cache
+   :scope->groups
+
+   :connection
+
+   :in-connector
+   :message->event
+
+   :in-pull-connector
+
+   :out-connector)
+
   (:documentation
    "This package contains unit tests for the transport.spread
 module"))
