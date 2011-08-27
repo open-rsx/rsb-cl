@@ -97,17 +97,22 @@ instances."))
 (defclass scope-mixin ()
   ((scope :type     scope
 	  :documentation
-	  ""))
+	  "Stores the scope that is associated to the instance. For
+long-lived and reused objects, interned scopes should be stored."))
   (:default-initargs
    :scope (missing-required-initarg 'scope-mixin :scope))
   (:documentation
-   "DOC"))
+   "This mixin class is intended to be mixed into classes instances of
+which have a mandatory associated scope."))
 
-(defmethod initialize-instance :after ((instance scope-mixin)
-                                       &key
-				       scope)
-  (setf (slot-value instance 'scope)
-	(make-scope scope)))
+(defmethod shared-initialize :after ((instance   scope-mixin)
+				     (slot-names t)
+				     &key
+				     scope
+				     (intern-scope? t))
+  (when scope
+    (setf (slot-value instance 'scope)
+	  (make-scope scope :intern? intern-scope?))))
 
 
 ;;; URI mixin
