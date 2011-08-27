@@ -57,7 +57,8 @@
    :transport-classes
 
    :find-connector-class
-   :make-connector)
+   :make-connector
+   :make-connectors)
 
   ;; `connector-class' metaclass
   (:export

@@ -35,12 +35,12 @@ PARTICIPANT."
 	 (connectors   (remove wire-type (rsb.ep:configurator-connectors
 					  configurator)
 			       :test-not #'subtypep
-			       :key      (find-symbol "CONNECTOR-WIRE-TYPE" :rsb.transport))))
+			       :key      #'rsb.transport:connector-wire-type)))
     (some #'(lambda (connector)
 	      (when (compute-applicable-methods
-		     (fdefinition (find-symbol "CONNECTOR-CONVERTER" :rsb.transport))  ;;; TODO(jmoringe):
+		     (fdefinition 'rsb.transport:connector-converter)
 		     (list connector))
-		(funcall (find-symbol "CONNECTOR-CONVERTER" :rsb.transport) connector)))
+		(rsb.transport:connector-converter connector)))
 	  connectors)))
 
 (defmethod relative-url ((participant participant))
@@ -88,8 +88,7 @@ Return three values:
 			  (:out                'rsb.ep:out-route-configurator))
 			:scope     scope
 			:direction direction))
-	 (connectors   (funcall (fdefinition (find-symbol "MAKE-CONNECTORS" :rsb.transport)) ;; TODO figure out package deps
-				transports direction))
+	 (connectors   (rsb.transport::make-connectors transports direction))
 	 (participant  (apply #'make-instance class
 			      :scope        scope
 			      :configurator configurator

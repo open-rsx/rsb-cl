@@ -179,32 +179,9 @@
 			      (:file       "client"
 			       :depends-on ("package" "configurator"))))
 
-		(:module      "src"
-		 :depends-on  ("src-early"
-			       "event-processing")
-		 :components ((:file       "configuration")
-			      (:file       "variables"
-			       :depends-on ("configuration"))
-
-			      (:file       "participant"
-			       :depends-on ("configuration"))
-			      (:file       "receiving-client")
-			      (:file       "listener"
-			       :depends-on ("participant"
-					    "receiving-client"))
-			      (:file       "reader"
-			       :depends-on ("participant"
-					    "receiving-client"))
-			      (:file       "informer"
-			       :depends-on ("participant"))
-
-			      (:file       "macros"
-			       :depends-on ("listener" "reader"
-					    "informer"))))
-
 		(:module     "converter"
 		 :pathname   "src/converter"
-		 :depends-on ("src")
+		 :depends-on ("src-early")
 		 :components ((:file       "package")
 			      (:file       "conditions"
 			       :depends-on ("package"))
@@ -227,7 +204,7 @@
 
 		(:module     "transport"
 		 :pathname   "src/transport"
-		 :depends-on ("src"
+		 :depends-on ("src-early"
 			      "event-processing" ;; for error-policy-mixin
 			      "converter")       ;; for conversion-mixin
 		 :components ((:file       "package")
@@ -260,6 +237,30 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "sometimes-interruptible-mixin"
 			       :depends-on ("package" "protocol"))))
+
+		(:module      "src"
+		 :depends-on  ("src-early"
+			       "event-processing"
+			       "transport")
+		 :components ((:file       "configuration")
+			      (:file       "variables"
+			       :depends-on ("configuration"))
+
+			      (:file       "participant"
+			       :depends-on ("configuration"))
+			      (:file       "receiving-client")
+			      (:file       "listener"
+			       :depends-on ("participant"
+					    "receiving-client"))
+			      (:file       "reader"
+			       :depends-on ("participant"
+					    "receiving-client"))
+			      (:file       "informer"
+			       :depends-on ("participant"))
+
+			      (:file       "macros"
+			       :depends-on ("listener" "reader"
+					     "informer"))))
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"
