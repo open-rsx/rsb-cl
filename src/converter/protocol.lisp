@@ -105,9 +105,9 @@ next `wire->domain' method."
 	  (return (call-next-method)))
       (retry ()
 	:report (lambda (stream)
-		  (format stream "~@<Retry converting ~S (in ~S schema) using converter ~A.~@:>"
-			  wire-data wire-schema converter))
-	nil)
+		  (format stream "~@<Retry converting ~S (in ~S ~
+schema) using converter ~A.~@:>"
+			  wire-data wire-schema converter)) nil)
       (use-value (value)
 	:report      (lambda (stream)
 		       (format stream "~@<Supply a replacement value ~
