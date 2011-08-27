@@ -158,6 +158,8 @@ components of THING1 and THING2."
 (defvar *scopes-lock* (bt:make-lock "scopes lock")
   "Protects accesses to `*scopes*' during interning.")
 
+(declaim (ftype (function (scope) scope) intern-scope))
+
 (defun intern-scope (scope)
   "Return the canonical `scope' instance for SCOPE. May return SCOPE,
 if it becomes or already is the canonical instance."
@@ -165,7 +167,8 @@ if it becomes or already is the canonical instance."
       scope
       (bt:with-lock-held (*scopes-lock*)
 	(setf (scope-interned? scope) t)
-	(ensure-gethash (scope-components scope) *scopes* scope))))
+	(nth-value 0 (ensure-gethash
+		      (scope-components scope) *scopes* scope)))))
 
 (defmethod relative-url ((scope scope))
   (make-instance 'puri:uri
