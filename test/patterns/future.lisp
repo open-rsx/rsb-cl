@@ -33,20 +33,20 @@ separate thread.")
   (ensure-cases (result-args result
 		 expected-done expected-error
 		 expected-value expected-tag)
-      '(;; Without timeout and with error signaling
+      '(;; Without timeout and with    error signaling
 	(()                         (:result :foo)  :done   nil :foo :done)
 	(()                         (:error  "bla") :failed t   nil  nil)
 	;; Without timeout and without error signaling
 	((:error? nil)              (:result :foo)  :done   nil :foo :done)
 	((:error? nil)              (:error  "bla") :failed nil nil  :failed)
-	;; With timeout and with error signaling
-	((:timeout .02)             (:result :foo)  :done   nil :foo :done)
-	((:timeout .02)             (:error  "bla") :failed t   nil  nil)
-	((:timeout .02)             (:none)         nil     t   nil  nil)
-	;; With timeout and without error signaling
-	((:timeout .02 :error? nil) (:result :foo)  :done   nil :foo :done)
-	((:timeout .02 :error? nil) (:error  "bla") :failed nil nil  :failed)
-	((:timeout .02 :error? nil) (:none)         nil     nil nil  :timeout))
+	;; With    timeout and with    error signaling
+	((:timeout .04)             (:result :foo)  :done   nil :foo :done)
+	((:timeout .04)             (:error  "bla") :failed t   nil  nil)
+	((:timeout .04)             (:none)         nil     t   nil  nil)
+	;; With    timeout and without error signaling
+	((:timeout .04 :error? nil) (:result :foo)  :done   nil :foo :done)
+	((:timeout .04 :error? nil) (:error  "bla") :failed nil nil  :failed)
+	((:timeout .04 :error? nil) (:none)         nil     nil nil  :timeout))
 
     (iter (repeat 10)
 	  (bind ((future (make-instance 'future))
@@ -65,7 +65,7 @@ separate thread.")
 	    (case (first result)
 	      (:result (setf (future-result future) (second result)))
 	      (:error  (setf (future-error future)  (second result))))
-	    (sleep .04)
+	    (sleep .08)
 	    (unless expected-error
 	      (ensure-same value expected-value)
 	      (ensure-same tag   expected-tag))
@@ -81,17 +81,17 @@ the same thread as everything else.")
   (ensure-cases (result-args result
 		 expected-done expected-error
 		 expected-value expected-tag)
-      '(;; Without timeout and with error signaling
+      '(;; Without timeout and with    error signaling
 	(()                         (:result :foo)  :done   nil      :foo :done)
 	(()                         (:error  "bla") :failed :error   nil  nil)
 	;; Without timeout and without error signaling
 	((:error? nil)              (:result :foo)  :done   nil      :foo :done)
 	((:error? nil)              (:error  "bla") :failed nil      nil  :failed)
-	;; With timeout and with error signaling
+	;; With    timeout and with    error signaling
 	((:timeout .02)             (:result :foo)  :done   nil      :foo :done)
 	((:timeout .02)             (:error  "bla") :failed :error   nil  nil)
 	((:timeout .02)             (:none)         nil     :timeout nil  nil)
-	;; With timeout and without error signaling
+	;; With    timeout and without error signaling
 	((:timeout .02 :error? nil) (:result :foo)  :done   nil      :foo :done)
 	((:timeout .02 :error? nil) (:error  "bla") :failed nil      nil  :failed)
 	((:timeout .02 :error? nil) (:none)         nil     nil      nil  :timeout))
