@@ -72,7 +72,7 @@ names."))
 
 (defmethod print-object ((object scope) stream)
   (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~A~:[~; *~]"
+    (format stream "~A~:[~; !~]"
 	    (scope-string object) (scope-interned? object))))
 
 
@@ -165,10 +165,13 @@ components of THING1 and THING2."
 if it becomes or already is the canonical instance."
   (if (scope-interned? scope)
       scope
-      (bt:with-lock-held (*scopes-lock*)
-	(setf (scope-interned? scope) t)
-	(nth-value 0 (ensure-gethash
-		      (scope-components scope) *scopes* scope)))))
+      (bind (((:values interned found?)
+	      (bt:with-lock-held (*scopes-lock*)
+		(ensure-gethash
+		 (scope-components scope) *scopes* scope))))
+	(unless found?
+	  (setf (scope-interned? interned) t))
+	interned)))
 
 (defmethod relative-url ((scope scope))
   (make-instance 'puri:uri

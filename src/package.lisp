@@ -134,6 +134,7 @@
    :scope
    :scope-components
    :scope-string
+   :scope-interned?
 
    :scope=
    :sub-scope?
