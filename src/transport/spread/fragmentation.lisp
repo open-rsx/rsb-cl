@@ -91,7 +91,7 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
 	 ((:accessors-r/o
 	   (id rsb.protocol::notification-data-part)) fragment))
-    (log1 :info assembly "Processing fragment ~D" id)
+    (log1 :trace assembly "Processing fragment ~D" id)
     (cond
       ;; Bounds check for fragment id.
       ((not (<= 0 id (1- (length fragments))))
