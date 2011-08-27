@@ -45,11 +45,12 @@ that cannot always be interrupted."))
 		     precondition))))
   new-value)
 
-(defmethod start-receiver :before ((connector sometimes-interruptible-mixin))
-  (setf (car (slot-value connector 'interruptible?)) :interruptible))
-
-(defmethod stop-receiver :before ((connector sometimes-interruptible-mixin))
-  (setf (connector-interruptible? connector) :interrupting))
+(defmethod stop-receiver :around ((connector sometimes-interruptible-mixin))
+  (unwind-protect
+       (progn
+	 (setf (connector-interruptible? connector) :interrupting)
+	 (call-next-method))
+    (setf (car (slot-value connector 'interruptible?)) :interruptible)))
 
 (defmethod handle :around ((connector sometimes-interruptible-mixin)
 			   (event     t))
