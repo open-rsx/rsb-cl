@@ -82,6 +82,7 @@
 		:iterate
 		:metabang-bind
 
+		:cl-protobuf ;; for binio for fundamental converters
 		#+sbcl sb-concurrency
 		:bordeaux-threads ;; or eager-future
 		:trivial-garbage

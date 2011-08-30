@@ -59,7 +59,7 @@
 				 :wire-type       (simple-array (unsigned-byte 8) (0))
 				 :data-type-class (eql nil))
     (nil)
-    ((binio:make-octet-vector 0)))
+    ((make-array 0 :element-type '(unsigned-byte 8))))
   (define-fundamental-converter (:fundamental-null t t
 				 :wire-type       t
 				 :wire-type-class t)
