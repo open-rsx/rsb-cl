@@ -130,14 +130,16 @@ data."
 			 (method  remote-method)
 			 (request event)
 			 &key
-			 (block? t)
+			 (block?  t)
+			 timeout
 			 &allow-other-keys)
   "Establish restarts and take care retrieving future results if
 BLOCK? is non-nil."
   (iter (restart-case
 	    (return-from call
 	      (if block?
-		  (nth-value 0 (future-result (call-next-method)))
+		  (nth-value 0 (future-result (call-next-method)
+					      :timeout timeout))
 		  (call-next-method)))
 	  (retry ()
 	    :report (lambda (stream)

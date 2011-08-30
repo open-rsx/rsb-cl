@@ -114,12 +114,16 @@ or for performance reasons."))
     ((null timeout)
      (call-next-method))
 
-    ;; If TIMEOUT has been supplied, only wait for the specified
-    ;; amount of time.
+    ;; If TIMEOUT has been supplied and errors should be signaled,
+    ;; only wait for the specified amount of time and let the timeout
+    ;; condition through, should it be signaled.
     (error?
      (bt:with-timeout (timeout)
        (call-next-method)))
 
+    ;; If TIMEOUT has been supplied, but error signaling is not
+    ;; desired, handle timeout conditions turning them into result
+    ;; values.
     (t
      (handler-case
 	 (bt:with-timeout (timeout)
