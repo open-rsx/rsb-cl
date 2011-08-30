@@ -23,7 +23,8 @@
 ;;; `remote-method' class
 ;;
 
-(defclass remote-method (method1)
+(defclass remote-method (method1
+			 closer-mop:funcallable-standard-object)
   ((lock  :initarg  :lock
 	  :initform (bt:make-lock)
 	  :reader   %method-lock
@@ -40,9 +41,18 @@ associated call information which is represented as a cons cell
 \(CONDITION . RESULT). RESULT is initially nil and gets set when a
 call completes. CONDITION is a condition variable that is used to wait
 for RESULT."))
+  (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Instances of this class represent methods provided by a remote
 server."))
+
+(defmethod initialize-instance :after ((instance remote-method)
+                                       &key)
+  (closer-mop:set-funcallable-instance-function
+   instance
+   #'(lambda (data-or-event &rest args)
+       (apply #'call (method-server instance) instance data-or-event
+	      args))))
 
 (define-lazy-creation-method remote-method listener ()  "reply")
 (define-lazy-creation-method remote-method informer (t) "request")
@@ -145,6 +155,15 @@ server ~A with request ~A.~@:>"
    "Instances of this class represent remote servers in a way that
 allows calling methods on them as if they were local."))
 
+(defmethod server-method ((server remote-server)
+			  (name   string)
+			  &key
+			  error?)
+  (or (call-next-method server name :error? error?)
+      (setf (server-method server name)
+	    (make-instance 'remote-method
+			   :name name))))
+
 (defmethod call ((server  remote-server)
 		 (method  string)
 		 (request t)
@@ -152,11 +171,7 @@ allows calling methods on them as if they were local."))
 		 &key &allow-other-keys)
   "Create the method named METHOD if it does not already exist, then
 call it."
-  (let ((method (or (server-method server method :error? nil)
-		    (setf (server-method server method)
-			  (make-instance 'remote-method
-					 :name method)))))
-    (apply #'call server method request args)))
+  (apply #'call server (server-method server method) request args))
 
 (defmethod call ((server  t)
 		 (method  remote-method)
