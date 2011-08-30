@@ -19,106 +19,88 @@
 
 (in-package :rsb.converter)
 
-
-;;; Null converter
-;;
+(macrolet
+    ((define-fundamental-converter ((name wire-schema data-type
+				     &key
+				     (wire-type       'octet-vector)
+				     (wire-type-class 'simple-array)
+				     (data-type-class data-type      data-type-class-supplied?))
+				    (&body wire->domain)
+				    (&body domain->wire))
+       `(progn
+	  (defmethod wire->domain? ((converter   (eql ,name))
+				    (wire-data   ,wire-type-class)
+				    (wire-schema (eql ,wire-schema)))
+	    (when (typep wire-data ',wire-type)
+	      (values converter ',data-type)))
 
-(defmethod wire->domain? ((converter   (eql :fundamental-null))
-			  (wire-data   t)
-			  (wire-schema t))
-  (values converter t))
+	  (defmethod domain->wire? ((converter     (eql ,name))
+				    (domain-object ,data-type-class))
+	    ,(if data-type-class-supplied?
+		 `(when (typep domain-object ',data-type)
+		    (values converter 'octet-vector ,wire-schema))
+		 `(values converter 'octet-vector ,wire-schema)))
 
-(defmethod domain->wire? ((converter     (eql :fundamental-null))
-			  (domain-object t))
-  (values converter t t))
+	  (defmethod wire->domain ((converter   (eql ,name))
+				   (wire-data   ,wire-type-class)
+				   (wire-schema (eql ,wire-schema)))
+	    (check-type wire-data ,wire-type)
 
-(defmethod wire->domain ((converter   (eql :fundamental-null))
-			 (wire-data   t)
-			 (wire-schema t))
-  wire-data)
+	    ,@wire->domain)
 
-(defmethod domain->wire ((converter     (eql :fundamental-null))
-			 (domain-object t))
-  (values domain-object t))
+	  (defmethod domain->wire ((converter     (eql ,name))
+				   (domain-object ,data-type-class))
+	    (check-type domain-object ,data-type)
 
-
-;;; ASCII string converter
-;;
+	    (values (progn ,@domain->wire) ,wire-schema)))))
 
-(defmethod wire->domain? ((converter   (eql :fundamental-ascii-string))
-			  (wire-data   simple-array)
-			  (wire-schema (eql :ascii-string)))
-  (when (typep wire-data '(vector (unsigned-byte 8)))
-    (values converter 'string)))
+  ;; Special fundamental converters
+  (define-fundamental-converter (:fundamental-void :void null
+				 :wire-type       (simple-array (unsigned-byte 8) (0))
+				 :data-type-class (eql nil))
+    (nil)
+    ((binio:make-octet-vector 0)))
+  (define-fundamental-converter (:fundamental-null t t
+				 :wire-type       t
+				 :wire-type-class t)
+    (wire-data)
+    (domain-object))
 
-(defmethod domain->wire? ((converter     (eql :fundamental-ascii-string))
-			  (domain-object string))
-  (values converter 'octet-vector :ascii-string))
+  ;; Sequence-like fundamental types
+  (define-fundamental-converter
+      (:fundamental-ascii-string :ascii-string string)
+    ((sb-ext:octets-to-string wire-data :external-format :ascii))
+    ((sb-ext:string-to-octets domain-object :external-format :ascii)))
+  (define-fundamental-converter
+      (:fundamental-utf-8-string :utf-8-string string)
+    ((sb-ext:octets-to-string wire-data :external-format :utf-8))
+    ((sb-ext:string-to-octets domain-object :external-format :utf-8)))
+  (define-fundamental-converter
+      (:fundamental-bytes :bytes (vector (unsigned-byte 8))
+       :data-type-class simple-array)
+    (wire-data)
+    ((coerce domain-object 'octet-vector)))
 
-(defmethod wire->domain ((converter   (eql :fundamental-ascii-string))
-			 (wire-data   simple-array)
-			 (wire-schema (eql :ascii-string)))
-  (check-type wire-data (vector (unsigned-byte 8)))
-
-  (sb-ext:octets-to-string wire-data :external-format :ascii))
-
-(defmethod domain->wire ((converter     (eql :fundamental-ascii-string))
-			 (domain-object string))
-  (values
-   (sb-ext:string-to-octets domain-object :external-format :ascii)
-   :ascii-string))
-
-
-;;; UTF-8 string converter
-;;
-
-(defmethod wire->domain? ((converter   (eql :fundamental-utf-8-string))
-			  (wire-data   simple-array)
-			  (wire-schema (eql :utf-8-string)))
-  (when (typep wire-data '(vector (unsigned-byte 8)))
-    (values converter 'string)))
-
-(defmethod domain->wire? ((converter     (eql :fundamental-utf-8-string))
-			  (domain-object string))
-  (values converter 'octet-vector :utf-8-string))
-
-(defmethod wire->domain ((converter   (eql :fundamental-utf-8-string))
-			 (wire-data   simple-array)
-			 (wire-schema (eql :utf-8-string)))
-  (check-type wire-data (vector (unsigned-byte 8)))
-
-  (sb-ext:octets-to-string wire-data :external-format :utf-8))
-
-(defmethod domain->wire ((converter     (eql :fundamental-utf-8-string))
-			 (domain-object string))
-  (values
-   (sb-ext:string-to-octets domain-object :external-format :utf-8)
-   :utf-8-string))
-
-
-;;; Bytes converter
-;;
-
-(defmethod wire->domain? ((converter   (eql :fundamental-bytes))
-			  (wire-data   simple-array)
-			  (wire-schema (eql :bytes)))
-  (when (typep wire-data 'octet-vector)
-    (values converter 'string)))
-
-(defmethod domain->wire? ((converter     (eql :fundamental-bytes))
-			  (domain-object simple-array))
-  (when (typep domain-object '(vector (unsigned-byte 8)))
-    (values converter 'octet-vector :bytes)))
-
-(defmethod wire->domain ((converter   (eql :fundamental-bytes))
-			 (wire-data   simple-array)
-			 (wire-schema (eql :bytes)))
-  (check-type wire-data octet-vector)
-
-  wire-data)
-
-(defmethod domain->wire ((converter     (eql :fundamental-bytes))
-			 (domain-object simple-array))
-  (check-type domain-object (vector (unsigned-byte 8)))
-
-  (values (coerce domain-object 'octet-vector) :bytes))
+  ;; Numeric fundamental types
+  (define-fundamental-converter (:fundamental-double :double double-float)
+    ((binio:decode-double-le wire-data))
+    ((nth-value 1 (binio:encode-double-le domain-object))))
+  (define-fundamental-converter (:fundamental-float :float single-float)
+    ((binio:decode-float-le wire-data))
+    ((nth-value 1 (binio:encode-float-le domain-object))))
+  (define-fundamental-converter (:fundamental-int32 :int32 (signed-byte 32)
+				 :data-type-class integer)
+    ((binio:decode-sint32-le wire-data))
+    ((nth-value 1 (binio:encode-sint32-le domain-object))))
+  (define-fundamental-converter (:fundamental-int64 :int64 (signed-byte 64)
+				 :data-type-class integer)
+    ((binio:decode-sint64-le wire-data))
+    ((nth-value 1 (binio:encode-sint64-le domain-object))))
+  (define-fundamental-converter (:fundamental-uint32 :uint32 (unsigned-byte 64)
+				 :data-type-class integer)
+    ((binio:decode-uint32-le wire-data))
+    ((nth-value 1 (binio:encode-uint32-le domain-object))))
+  (define-fundamental-converter (:fundamental-uint64 :uint64 (unsigned-byte 64)
+				 :data-type-class integer)
+    ((binio:decode-uint64-le wire-data))
+    ((nth-value 1 (binio:encode-uint64-le domain-object)))))
