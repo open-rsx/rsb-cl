@@ -37,7 +37,8 @@
 	     "Stores the name of the method.")
    (informer :initarg  :informer
 	     :type     (or null informer)
-	     :reader   method-informer
+	     :reader   %method-informer ;; without lazy creation
+	     :reader   method-informer  ;; with lazy creation
 	     :writer   (setf %method-informer)
 	     :initform nil
 	     :documentation
@@ -45,7 +46,8 @@
 method. The instance is created lazily when first used.")
    (listener :initarg  :listener
 	     :type     (or null listener)
-	     :reader   method-listener
+	     :reader   %method-listener ;; without lazy creation
+	     :reader   method-listener  ;; with lazy creation
 	     :writer   (setf %method-listener)
 	     :initform nil
 	     :documentation
@@ -56,8 +58,8 @@ method. The instance is created lazily when first used."))
 classes."))
 
 (defmethod detach ((method method1))
-  (bind (((:accessors-r/o (informer method-informer)
-			  (listener method-listener)) method))
+  (bind (((:accessors-r/o (informer %method-informer)
+			  (listener %method-listener)) method))
     ;; For the sake of the `local-method' subclass: shutdown the
     ;; listener first. This will prevent new method calls from being
     ;; initiated and wait for in-progress calls to finish while still
