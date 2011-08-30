@@ -25,6 +25,22 @@
    "Root unit test suite for fundamental converters."))
 
 
+;;; Converter fundamental-void
+;;
+
+(deftestsuite fundamental-void-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-void' converter."))
+
+(define-basic-converter-test-cases (:fundamental-void)
+    `((,(octetify #())  :void nil)
+      (,(octetify #(1)) :void :not-applicable)
+      (:not-applicable  :void t)
+      (:not-applicable  :void ,(octetify #()))
+      (:not-applicable  :void ,(octetify #(1)))))
+
+
 ;;; Converter fundamental-null
 ;;
 
@@ -50,12 +66,13 @@
 
 (define-basic-converter-test-cases (:fundamental-ascii-string)
     `((,(octetify #())         :ascii-string "")
+      (:not-applicable         :ascii-string :not-a-string)
       (,(octetify #(65 65 65)) :ascii-string "AAA")
       (:error                  :ascii-string "Aλ")
       (,(octetify #(65 129))   :ascii-string :error)))
 
 
-;;; Converter fundamental-utf-8--string
+;;; Converter fundamental-utf-8-string
 ;;
 
 (deftestsuite fundamental-utf-8-string-root (fundamental-root)
@@ -65,6 +82,7 @@
 
 (define-basic-converter-test-cases (:fundamental-utf-8-string)
     `((,(octetify #())           :utf-8-string "")
+      (:not-applicable           :utf-8-string :not-a-string)
       (,(octetify #(65 65 65))   :utf-8-string "AAA")
       (,(octetify #(65 206 187)) :utf-8-string "Aλ")
       (,(octetify #(255))        :utf-8-string :error)))
@@ -80,6 +98,7 @@
 
 (define-basic-converter-test-cases (:fundamental-bytes)
     `((,(octetify #())         :bytes ,(octetify #()))
+      (:not-applicable         :bytes :not-an-octet-vector)
       (,(octetify #(65 65 65)) :bytes ,(octetify #(65 65 65)))))
 
 ;; Local Variables:

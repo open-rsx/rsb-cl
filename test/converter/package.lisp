@@ -66,10 +66,15 @@
 
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
-	   (unless (eq wire-data :error)
-	     (let ((result (wire->domain? ,converter wire-data wire-schema)))
-	       (ensure-same result ,converter
-			    :ignore-multiple-values? t)))))
+	   (cond
+	     ((member wire-data '(:error :not-applicable)))
+	     ((eq domain-object :not-applicable)
+	      (let ((result (wire->domain? ,converter wire-data wire-schema)))
+		(ensure-null result)))
+	     (t
+	      (let ((result (wire->domain? ,converter wire-data wire-schema)))
+		(ensure-same result ,converter
+			     :ignore-multiple-values? t))))))
 
        (addtest (,suite-name
 		 :documentation
@@ -79,9 +84,14 @@
 
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
-	   (unless (eq domain-object :error)
-	     (let ((result (domain->wire? ,converter domain-object)))
-	       (ensure-same result (values ,converter wire-schema))))))
+	   (cond
+	     ((member domain-object '(:error :not-applicable)))
+	     ((eq wire-data :not-applicable)
+	      (let ((result (domain->wire? ,converter domain-object)))
+		(ensure-null result)))
+	     (t
+	      (let ((result (domain->wire? ,converter domain-object)))
+		(ensure-same result (values ,converter wire-schema)))))))
 
        (addtest (,suite-name
 		 :documentation
@@ -92,8 +102,8 @@
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
 	   (cond
-	     ((eq wire-data :error))
-	     ((eq domain-object :error)
+	     ((member wire-data '(:error :not-applicable)))
+	     ((member domain-object '(:error :not-applicable))
 	      (ensure-condition 'error
 		(wire->domain ,converter wire-data wire-schema)))
 	     (t
@@ -110,8 +120,8 @@
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
 	   (cond
-	     ((eq domain-object :error))
-	     ((eq wire-data :error)
+	     ((member domain-object '(:error :not-applicable)))
+	     ((member wire-data '(:error :not-applicable))
 	      (ensure-condition 'error
 		(domain->wire ,converter domain-object)))
 	     (t
@@ -127,7 +137,8 @@
 
 	 (ensure-cases (wire-data wire-schema domain-object)
 	     ,cases
-	   (unless (or (eq wire-data :error) (eq domain-object :error))
+	   (unless (or (member wire-data '(:error :not-applicable))
+		       (member domain-object '(:error :not-applicable)))
 	     (bind (((:values encoded encoded-wire-schema)
 		     (domain->wire ,converter domain-object))
 		    (decoded (wire->domain ,converter encoded encoded-wire-schema)))
