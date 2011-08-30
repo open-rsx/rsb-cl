@@ -42,9 +42,12 @@ been fragmented into multiple notifications."
 	  (one-notification->event
 	   converter
 	   (aref (assembly-fragments assembly) 0)
-	   (assembly-concatenated-data assembly))))))
+	   :data (assembly-concatenated-data assembly))))))
 
-(defun one-notification->event (converter notification &optional data)
+(defun one-notification->event (converter notification
+				&key
+				data
+				expose-wire-schema?)
   "Convert NOTIFICATION to an `event' instance using CONVERTER for the
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
@@ -52,25 +55,25 @@ contained in NOTIFICATION."
   (bind (((:accessors-r/o
 	   (sequence-number rsb.protocol::notification-sequence-number)
 	   (scope           rsb.protocol::notification-scope)
+	   (sender-id       rsb.protocol::notification-sender-id)
 	   (method          rsb.protocol::notification-method)
 	   (wire-schema     rsb.protocol::notification-wire-schema)
 	   (payload         rsb.protocol::notification-data)
 	   (meta-data       rsb.protocol::notification-meta-data)) notification)
-	 (event))
-
-    (setf event (make-instance
-		 'rsb:event
-		 :sequence-number   sequence-number
-		 :origin            (uuid:byte-array-to-uuid
-				     (rsb.protocol::notification-sender-id notification))
-		 :scope             (make-scope (bytes->string scope))
-		 :method            (unless (emptyp method)
-				      (bytes->keyword method))
-		 :type              t
-		 :data              (rsb.converter:wire->domain
-				     converter (or data payload)
-				     (bytes->wire-schema wire-schema))
-		 :create-timestamp? nil))
+	 (wire-schema (bytes->wire-schema wire-schema))
+	 (data        (rsb.converter:wire->domain
+		       converter (or data payload)
+		       wire-schema))
+	 (event       (make-instance
+		       'rsb:event
+		       :sequence-number   sequence-number
+		       :origin            (uuid:byte-array-to-uuid sender-id)
+		       :scope             (make-scope (bytes->string scope))
+		       :method            (unless (emptyp method)
+					    (bytes->keyword method))
+		       :type              t
+		       :data              data
+		       :create-timestamp? nil)))
 
     ;; "User infos" and timestamps
     (when meta-data
@@ -98,6 +101,11 @@ contained in NOTIFICATION."
 				    (rsb.protocol::user-time-key user-time)))
 		  (unix-microseconds->timestamp
 		   (rsb.protocol::user-time-timestamp user-time)))))
+
+    ;; When requested, store the wire-schema in the as a meta-data
+    ;; item.
+    (when expose-wire-schema?
+      (setf (meta-data event :rsb.wire-schema) (string wire-schema)))
 
     event))
 
