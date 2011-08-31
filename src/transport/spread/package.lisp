@@ -22,6 +22,9 @@
 (defpackage :rsb.transport.spread
   (:nicknames :rsb.tp.spread)
 
+  (:shadowing-import-from :rsb.protocol
+   :meta-data)
+
   (:shadow
    :connector)
 
@@ -33,7 +36,8 @@
 
    :rsb
    :rsb.event-processing
-   :rsb.transport)
+   :rsb.transport
+   :rsb.protocol)
 
   ;; Conditions
   (:export

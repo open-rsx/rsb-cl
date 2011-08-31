@@ -27,7 +27,7 @@
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
-  (if (<= (rsb.protocol::notification-num-data-parts notification) 1)
+  (if (<= (notification-num-data-parts notification) 1)
 
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
@@ -53,13 +53,13 @@ payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
   (bind (((:accessors-r/o
-	   (sequence-number rsb.protocol::notification-sequence-number)
-	   (scope           rsb.protocol::notification-scope)
-	   (sender-id       rsb.protocol::notification-sender-id)
-	   (method          rsb.protocol::notification-method)
-	   (wire-schema     rsb.protocol::notification-wire-schema)
-	   (payload         rsb.protocol::notification-data)
-	   (meta-data       rsb.protocol::notification-meta-data)) notification)
+	   (sequence-number notification-sequence-number)
+	   (scope           notification-scope)
+	   (sender-id       notification-sender-id)
+	   (method          notification-method)
+	   (wire-schema     notification-wire-schema)
+	   (payload         notification-data)
+	   (meta-data       notification-meta-data)) notification)
 	 (wire-schema (bytes->wire-schema wire-schema))
 	 (data        (rsb.converter:wire->domain
 		       converter (or data payload)
@@ -78,34 +78,34 @@ contained in NOTIFICATION."
     ;; "User infos" and timestamps
     (when meta-data
       ;; "User infos"
-      (iter (for user-info in-vector (rsb.protocol::meta-data-user-infos meta-data))
-	    (setf (meta-data event (bytes->keyword
-				    (rsb.protocol::user-info-key user-info)))
-		  (bytes->string (rsb.protocol::user-info-value user-info))))
+      (iter (for user-info in-vector (meta-data-user-infos meta-data))
+	    (setf (rsb:meta-data event (bytes->keyword
+					(user-info-key user-info)))
+		  (bytes->string (user-info-value user-info))))
 
       ;; Set :create timestamp, if present
-      (unless (zerop (rsb.protocol::meta-data-create-time meta-data))
+      (unless (zerop (meta-data-create-time meta-data))
 	(setf (timestamp event :create)
 	      (unix-microseconds->timestamp
-	       (rsb.protocol::meta-data-create-time meta-data))))
+	       (meta-data-create-time meta-data))))
       ;; Set :send timestamp, if present
-      (unless (zerop (rsb.protocol::meta-data-send-time meta-data))
+      (unless (zerop (meta-data-send-time meta-data))
 	(setf (timestamp event :send)
 	      (unix-microseconds->timestamp
-	       (rsb.protocol::meta-data-send-time meta-data))))
+	       (meta-data-send-time meta-data))))
       ;; Set :receive timestamp
       (setf (timestamp event :receive) (local-time:now))
 
-      (iter (for user-time in-vector (rsb.protocol::meta-data-user-times meta-data))
+      (iter (for user-time in-vector (meta-data-user-times meta-data))
 	    (setf (timestamp event (bytes->keyword
-				    (rsb.protocol::user-time-key user-time)))
+				    (user-time-key user-time)))
 		  (unix-microseconds->timestamp
-		   (rsb.protocol::user-time-timestamp user-time)))))
+		   (user-time-timestamp user-time)))))
 
     ;; When requested, store the wire-schema in the as a meta-data
     ;; item.
     (when expose-wire-schema?
-      (setf (meta-data event :rsb.wire-schema) (string wire-schema)))
+      (setf (rsb:meta-data event :rsb.wire-schema) (string wire-schema)))
 
     event))
 
@@ -125,7 +125,7 @@ into one notification."
 	   (sequence-number event-sequence-number)
 	   (scope           event-scope)
 	   (origin          event-origin)
-	   (method          rsb::event-method)
+	   (method          event-method)
 	   (data            event-data)
 	   (meta-data       event-meta-data)
 	   (timestamps      event-timestamps)) event)
@@ -177,13 +177,13 @@ SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA. When
 NUM-DATA-PARTS and DATA-PART are not supplied, values that indicate a
 non-fragmented notification are chosen."
   (bind ((meta-data1   (make-instance
-			'rsb.protocol::meta-data
+			'meta-data
 			:create-time (timestamp->unix-microseconds
 				      (getf timestamps :create))
 			:send-time   (timestamp->unix-microseconds
 				      (getf timestamps :send))))
 	 (notification (make-instance
-			'rsb.protocol::notification
+			'notification
 			:sequence-number sequence-number
 			:sender-id       (uuid:uuid-to-byte-array origin)
 			:scope           (string->bytes (scope-string scope))
@@ -196,16 +196,15 @@ non-fragmented notification are chosen."
     ;; Store the method of the event in the new notification if the
     ;; event has one.
     (when method
-      (setf (rsb.protocol::notification-method notification)
-	    (keyword->bytes method)))
+      (setf (notification-method notification) (keyword->bytes method)))
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)
 	  (vector-push-extend
-	   (make-instance 'rsb.protocol::user-info
+	   (make-instance 'user-info
 			  :key   (keyword->bytes key)
 			  :value (string->bytes value))
-	   (rsb.protocol::meta-data-user-infos meta-data1)))
+	   (meta-data-user-infos meta-data1)))
 
     ;; Add TIMESTAMPS.
     (iter (for (key value) on timestamps :by #'cddr)
@@ -213,10 +212,10 @@ non-fragmented notification are chosen."
 				   ;; :receive or :deliver at this
 				   ;; point
 	    (vector-push-extend
-	     (make-instance 'rsb.protocol::user-time
+	     (make-instance 'user-time
 			    :key       (keyword->bytes key)
 			    :timestamp (timestamp->unix-microseconds value))
-	     (rsb.protocol::meta-data-user-times meta-data1))))
+	     (meta-data-user-times meta-data1))))
 
     ;; Return the complete notification instance.
     notification))

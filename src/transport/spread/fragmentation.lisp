@@ -76,7 +76,7 @@ ASSEMBLY."
 (defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
 fragments of ASSEMBLY. ASSEMBLY has to be complete."
-  (let* ((fragments (map 'list #'rsb.protocol::notification-data
+  (let* ((fragments (map 'list #'notification-data
 			 (assembly-fragments assembly)))
 	 (size      (reduce #'+ fragments :key #'length))
 	 (result    (make-array size :element-type '(unsigned-byte 8))))
@@ -87,10 +87,9 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
     result))
 
 (defmethod add-fragment! ((assembly  assembly)
-			  (fragment  rsb.protocol:notification))
+			  (fragment  notification))
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
-	 ((:accessors-r/o
-	   (id rsb.protocol::notification-data-part)) fragment))
+	 ((:accessors-r/o (id notification-data-part)) fragment))
     (log1 :trace assembly "Processing fragment ~D" id)
     (cond
       ;; Bounds check for fragment id.
@@ -171,10 +170,9 @@ necessary when fragments are submitted by calls to
 (defmethod merge-fragment ((pool         assembly-pool)
 			   (notification t))
     (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
-	   ((:accessors-r/o
-	     (id        rsb.protocol::notification-sequence-number)
-	     (sender-id rsb.protocol::notification-sender-id)
-	     (size      rsb.protocol::notification-num-data-parts))
+	   ((:accessors-r/o (id        notification-sequence-number)
+			    (sender-id notification-sender-id)
+			    (size      notification-num-data-parts))
 	    notification)
 	   (id (%make-key id sender-id)))
       (let ((assembly (ensure-assembly pool id size)))
