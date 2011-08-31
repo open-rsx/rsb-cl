@@ -96,6 +96,8 @@ replies to method calls."
 		 &allow-other-keys)
   "Call the remote method of METHOD transmitting REQUEST as request
 data."
+  (check-type return return-style "either :payload or :event")
+
   (method-listener method) ;; force creation ;;; TODO(jmoringe): can we improve this?
 
   (bind (((:accessors-r/o (informer method-informer)

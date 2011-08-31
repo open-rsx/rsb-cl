@@ -78,14 +78,25 @@ string or a list of the form (CONDITION-CLASS-NAME KW1 VALUE1
 
 (defgeneric call (server method request
 		  &key
-		  block?)
+		  block?
+		  timeout
+		  return)
   (:documentation
    "Call METHOD of SERVER with argument REQUEST and return the result
 of the method call. If a remote call fails for some reason, an error
 of type `remote-call-failed' is signaled.
 If BLOCK? is non-nil, the call blocks until a result is available or
 an error occurs. Otherwise, an object implementing the future protocol
-is returned."))
+is returned.
+If BLOCK? is non-nil, the value of TIMEOUT, when non-nil, controls the
+amount of time to wait for a reply before the blocking call signals a
+timeout error. If TIMEOUT is not supplied or nil, blocking calls wait
+indefinitely.
+RETURN controls which kind of result is (ultimately, i.e. potentially
+after forcing the returned future) returned by the method call. Valid
+values are :event, which causes the whole reply event to be returned,
+and :payload, which causes the payload of the reply event to be
+returned. "))
 
 
 ;;; Server protocol

@@ -279,12 +279,14 @@
 		 :pathname   "src/patterns"
 		 :depends-on ("src")
 		 :components ((:file       "package")
+			      (:file       "types"
+			       :depends-on ("package"))
 			      (:file       "variables"
 			       :depends-on ("package"))
 			      (:file       "conditions"
 			       :depends-on ("package"))
 			      (:file       "protocol"
-			       :depends-on ("package"))
+			       :depends-on ("package" "types"))
 
 
 			      (:file       "future"
