@@ -78,21 +78,25 @@ identity."
 ;;
 
 (defclass uuid-mixin ()
-  ((id :initarg  :id
-       :type     uuid:uuid
-       :initform (uuid:make-v4-uuid)
+  ((id :type     uuid:uuid
        :documentation
-       ""))
+       "Stores the unique id of the object."))
   (:documentation
    "This class can be mixed into classes that need a uuid in there
 instances."))
 
-(defmethod initialize-instance :after ((instance uuid-mixin)
-				       &key
-				       (id nil id-supplied?))
-  (when id-supplied?
-    (setf (slot-value instance 'id)
-	  (if (stringp id) (uuid:make-uuid-from-string id) id))))
+(defmethod shared-initialize :after ((instance  uuid-mixin)
+				     (slot-name t)
+				     &key
+				     id)
+  (cond
+    ;; If ID has been supplied, set the slot value to it.
+    (id
+     (setf (slot-value instance 'id)
+	   (if (stringp id) (uuid:make-uuid-from-string id) id)))
+    ;; If ID has not been supplied and the slot is unbound, set it.
+    ((not (slot-boundp instance 'id))
+     (setf (slot-value instance 'id) (uuid:make-v4-uuid)))))
 
 
 ;;; Scope mixin
@@ -125,15 +129,17 @@ which have a mandatory associated scope."))
 (defclass uri-mixin ()
   ((uri :type     puri:uri
 	:documentation
-	""))
+	"Stores the URI of the object."))
   (:documentation
-   "DOC"))
+   "This mixin class is intended to be mixed into classes instance of
+which have an associated URI."))
 
-(defmethod initialize-instance :after ((instance uri-mixin)
-				       &key
-				       uri)
+(defmethod shared-initialize :after ((instance   uri-mixin)
+				     (slot-names t)
+				     &key
+				     uri)
   (when uri
-    (setf (slot-value instance 'uri) (puri:uri uri)))) ;; TODO intern the URI?
+    (setf (slot-value instance 'uri) (puri:uri uri))))
 
 
 ;;; Plist meta data mixin
