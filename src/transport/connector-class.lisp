@@ -35,9 +35,7 @@ class.")
 	      :documentation
 	      "Stores a list of schemas provided by the connector
 class.")
-   (options   :initarg  :options
-	      :type     list
-	      :initform nil
+   (options   :type     list
 	      :documentation
 	      ""))
   (:documentation
@@ -51,11 +49,17 @@ options."))
 				     (slot-names t)
 				     &key
 				     wire-type
-				     direction)
+				     direction
+				     options)
   (when wire-type
     (setf (slot-value instance 'wire-type) (first wire-type)))
   (when direction
-    (setf (slot-value instance 'direction) (first direction))))
+    (setf (slot-value instance 'direction) (first direction)))
+
+  ;; Process options.
+  (closer-mop:finalize-inheritance instance)
+  (setf (slot-value instance 'options)
+	(map 'list (curry #'%maybe-expand-option instance) options)))
 
 (defmethod connector-wire-type ((class connector-class))
   "Use wire-type stored in CLASS or retrieve from superclasses if
@@ -87,3 +91,23 @@ superclasses."
 (defmethod closer-mop:validate-superclass ((class      connector-class)
 					   (superclass standard-class))
   t)
+
+
+;;; Utility functions
+;;
+
+(defun %maybe-expand-option (class option)
+  "Potentially expand the options description OPTION using information
+from CLASS."
+  (bind (((name type &rest _) option))
+    (if (eq type '&slot)
+	(let ((slot (find name (closer-mop:class-slots class)
+			  :key (compose #'make-keyword
+					#'closer-mop:slot-definition-name))))
+	  (unless slot
+	    (error "~@<No slot named ~S in class ~S.~@:>" name class))
+	  (list name
+		(closer-mop:slot-definition-type slot)
+		:default (closer-mop:slot-definition-initform slot)
+		:description (documentation slot t)))
+	option)))

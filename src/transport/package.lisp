@@ -62,7 +62,9 @@
 
   ;; `connector-class' metaclass
   (:export
-   :connector-class)
+   :connector-class
+
+   &slot)
 
   ;; `connector' class
   (:export

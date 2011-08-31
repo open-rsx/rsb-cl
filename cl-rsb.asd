@@ -398,6 +398,8 @@
 		 :pathname   "test/transport"
 		 :depends-on ("test")
 		 :components ((:file       "package")
+			      (:file       "connector-class"
+			       :depends-on ("package"))
 			      (:file       "threaded-receiver-mixin"
 			       :depends-on ("package"))
 			      (:file       "error-handling-mixins"
