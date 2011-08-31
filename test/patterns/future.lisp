@@ -66,6 +66,7 @@ separate thread.")
 	      (:result (setf (future-result future) (second result)))
 	      (:error  (setf (future-error future)  (second result))))
 	    (sleep .08)
+	    (ensure-same done expected-done)
 	    (unless expected-error
 	      (ensure-same value expected-value)
 	      (ensure-same tag   expected-tag))
@@ -102,6 +103,8 @@ the same thread as everything else.")
 	    (case (first result)
 	      (:result (setf (future-result future) (second result)))
 	      (:error  (setf (future-error future)  (second result))))
+	    ;; Check done state.
+	    (ensure-same (future-done? future) expected-done)
 	    ;; Try retrieving the result.
 	    (ecase expected-error
 	      (:error
