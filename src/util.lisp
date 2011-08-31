@@ -52,9 +52,13 @@ START."
   "Print the UUID ID to STREAM. If COLON? is non-nil, all components
 of ID are printed. Otherwise, just a block of 8 digits is printed.  "
   (declare (ignore at?))
-  (if (or colon? (not (typep id 'uuid:uuid)))
-      (format stream "~A" id)
-      (format stream "~8,'0X" (slot-value id 'uuid::time-low))))
+  (cond
+    ((null id)
+     (format stream "    NOID"))
+    ((or colon? (not (typep id 'uuid:uuid)))
+     (format stream "~A" id))
+    (t
+     (format stream "~8,'0X" (slot-value id 'uuid::time-low)))))
 
 (defmacro print-unreadable-id-object ((object stream &key (type t))
 				      &body body)
