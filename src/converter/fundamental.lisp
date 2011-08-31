@@ -27,58 +27,61 @@
 				     (data-type-class data-type      data-type-class-supplied?))
 				    (&body wire->domain)
 				    (&body domain->wire))
-       `(progn
-	  (defmethod wire->domain? ((converter   (eql ,name))
-				    (wire-data   ,wire-type-class)
-				    (wire-schema (eql ,wire-schema)))
-	    (when (typep wire-data ',wire-type)
-	      (values converter ',data-type)))
+       (let ((specializer (typecase wire-schema
+			    (keyword `(eql ,wire-schema))
+			    (t        wire-schema))))
+	 `(progn
+	    (defmethod wire->domain? ((converter   (eql ,name))
+				      (wire-data   ,wire-type-class)
+				      (wire-schema ,specializer))
+	      (when (typep wire-data ',wire-type)
+		(values converter ',data-type)))
 
-	  (defmethod domain->wire? ((converter     (eql ,name))
-				    (domain-object ,data-type-class))
-	    ,(if data-type-class-supplied?
-		 `(when (typep domain-object ',data-type)
-		    (values converter 'octet-vector ,wire-schema))
-		 `(values converter 'octet-vector ,wire-schema)))
+	    (defmethod domain->wire? ((converter     (eql ,name))
+				      (domain-object ,data-type-class))
+	      ,(if data-type-class-supplied?
+		   `(when (typep domain-object ',data-type)
+		      (values converter 'octet-vector ,wire-schema))
+		   `(values converter 'octet-vector ,wire-schema)))
 
-	  (defmethod wire->domain ((converter   (eql ,name))
-				   (wire-data   ,wire-type-class)
-				   (wire-schema (eql ,wire-schema)))
-	    (check-type wire-data ,wire-type)
+	    (defmethod wire->domain ((converter   (eql ,name))
+				     (wire-data   ,wire-type-class)
+				     (wire-schema ,specializer))
+	      (check-type wire-data ,wire-type)
 
-	    ,@wire->domain)
+	      ,@wire->domain)
 
-	  (defmethod domain->wire ((converter     (eql ,name))
-				   (domain-object ,data-type-class))
-	    (check-type domain-object ,data-type)
+	    (defmethod domain->wire ((converter     (eql ,name))
+				     (domain-object ,data-type-class))
+	      (check-type domain-object ,data-type)
 
-	    (values (progn ,@domain->wire) ,wire-schema)))))
+	      (values (progn ,@domain->wire) ,wire-schema))))))
 
   ;; Special fundamental converters
   (define-fundamental-converter (:fundamental-void :void null
-				 :wire-type       (simple-array (unsigned-byte 8) (0))
-				 :data-type-class (eql nil))
-    (nil)
+						   :wire-type       (simple-array (unsigned-byte 8) (0))
+						   :data-type-class (eql nil))
+      (nil)
     ((make-array 0 :element-type '(unsigned-byte 8))))
   (define-fundamental-converter (:fundamental-null t t
-				 :wire-type       t
-				 :wire-type-class t)
-    (wire-data)
+						   :wire-type       t
+						   :wire-type-class t)
+      (wire-data)
     (domain-object))
 
   ;; Sequence-like fundamental types
   (define-fundamental-converter
       (:fundamental-ascii-string :ascii-string string)
-    ((sb-ext:octets-to-string wire-data :external-format :ascii))
+      ((sb-ext:octets-to-string wire-data :external-format :ascii))
     ((sb-ext:string-to-octets domain-object :external-format :ascii)))
   (define-fundamental-converter
       (:fundamental-utf-8-string :utf-8-string string)
-    ((sb-ext:octets-to-string wire-data :external-format :utf-8))
+      ((sb-ext:octets-to-string wire-data :external-format :utf-8))
     ((sb-ext:string-to-octets domain-object :external-format :utf-8)))
   (define-fundamental-converter
       (:fundamental-bytes :bytes (vector (unsigned-byte 8))
-       :data-type-class simple-array)
-    (wire-data)
+			  :data-type-class simple-array)
+      (wire-data)
     ((coerce domain-object 'octet-vector)))
 
   ;; Numeric fundamental types

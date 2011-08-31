@@ -50,10 +50,11 @@
    "Unit tests for the `fundamental-null' converter."))
 
 (define-basic-converter-test-cases (:fundamental-null)
-    `((nil                     t nil)
-      (:foo                    t :foo)
-      ("bar"                   t "bar")
-      (,(octetify #(65 65 65)) t ,(octetify #(65 65 65)))))
+    `((nil                     t    nil)
+      (:foo                    t    :foo)
+      ("bar"                   t    "bar")
+      (,(octetify #(65 65 65)) t    ,(octetify #(65 65 65)))
+      (,(octetify #(65 65 65)) :foo ,(octetify #(65 65 65)))))
 
 
 ;;; Converter fundamental-ascii-string
