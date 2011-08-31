@@ -37,8 +37,21 @@ classes."))
 	    arg))
       (with-remote-server (remote-server url)
 	(ensure-random-cases 100 ((s a-string))
+
+	  ;; Invoke with payload result using `call' method
 	  (ensure-same (call remote-server "echo" s) s
-		       :test #'string=))))))
+		       :test #'string=)
+
+	  ;; Invoke with event result using `call' method
+	  (call remote-server "echo" s :return :event)
+
+	  ;; Invoke using `funcall'
+	  (ensure-same (funcall (server-method remote-server "echo") s) s
+		       :test #'string=)
+
+	  ;; Invoke with event result using `funcall'
+	  (funcall (server-method remote-server "echo") s
+		   :return :event))))))
 
 (addtest (integration-root
           :documentation
@@ -51,8 +64,29 @@ execution.")
 	(("error" (arg string)
 	   (error "intentional error")))
       (with-remote-server (remote-server url)
+
+	;; Invoke using `call' method
 	(ensure-condition 'remote-method-execution-error
-	  (call remote-server "error" "foo"))))))
+	  (call remote-server "error" "foo"))
+
+	;; Invoke asynchronously using `call' method
+	(ensure-same (future-result
+		      (call remote-server "error" "foo"
+			    :block? nil)
+		      :error? nil)
+		     (values nil :failed))
+
+	;; Invoke using `funcall'
+	(ensure-condition 'remote-method-execution-error
+	  (funcall (server-method remote-server "error") "foo"))
+
+	;; Invoke asynchronously using `funcall'
+	(ensure-same (future-result
+		      (funcall (server-method remote-server "error")
+			       "foo"
+			       :block? nil)
+		      :error? nil)
+		     (values nil :failed))))))
 
 (addtest (integration-root
           :documentation
@@ -60,7 +94,14 @@ execution.")
   timeout
 
   (with-remote-server (remote-server url)
+    ;; Invoke using `call' method
     (ensure-condition 'bt:timeout
       (future-result (call remote-server "no-such-method" "does-not-matter"
 			   :block? nil)
+		     :timeout .1))
+    ;; Invoke using `funcall'
+    (ensure-condition 'bt:timeout
+      (future-result (funcall (server-method remote-server "no-such-method")
+			      "does-not-matter"
+			      :block? nil)
 		     :timeout .1))))
