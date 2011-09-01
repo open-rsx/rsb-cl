@@ -33,12 +33,12 @@ transform events. Methods on `dispatch' can be used to modify
 dispatching behavior."))
 
 (defmethod handle ((processor broadcast-processor)
-		   (event     event))
-  "Dispatch EVENT to handlers of PROCESSOR in a manner defined by
+		   (data      t))
+  "Dispatch DATA to handlers of PROCESSOR in a manner defined by
 methods on `dispatch'."
-  (dispatch processor event))
+  (dispatch processor data))
 
 (defmethod dispatch ((processor broadcast-processor)
-		     (event     event))
-  "Dispatch EVENT to handlers of PROCESSOR."
-  (handle (handlers processor) event))
+		     (data      t))
+  "Dispatch DATA to handlers of PROCESSOR."
+  (handle (handlers processor) data))

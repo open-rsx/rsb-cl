@@ -37,7 +37,13 @@
    :connector-construction-failed
    :connector-construction-failed-name
    :connector-construction-failed-direction
-   :connector-construction-failed-args)
+   :connector-construction-failed-args
+
+   :decoding-error
+   :decoding-error-encoded
+
+   :encoding-error
+   :encoding-error-event)
 
   ;; Connector protocol
   (:export

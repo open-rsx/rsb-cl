@@ -20,50 +20,6 @@
 (in-package :rsb.transport.spread)
 
 
-;;; Generic encoding and decoding errors
-;;
-
-(define-condition decoding-error (rsb-error
-				  simple-condition
-				  chainable-condition)
-  ((encoded :initarg  :encoded
-	    :type     octet-vector
-	    :reader   decoding-error-encoded
-	    :documentation
-	    "The encoded data, for which the decoding failed."))
-  (:report
-   (lambda (condition stream)
-     (bind (((:values data shortened?)
-	     (maybe-shorten-sequence (decoding-error-encoded condition))))
-       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
-~_could not be decoded ~
-~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
-	       (coerce data 'list) shortened?
-	       condition
-	       (chainable-condition-cause condition)))))
-  (:documentation
-   "This error is signaled when decoding one or more notifications
-into an `event' instance fails."))
-
-(define-condition encoding-error (rsb-error
-				  simple-condition
-				  chainable-condition)
-  ((event :initarg  :event
-	  :reader   encoding-error-event
-	  :documentation
-	  "The event for which the encoding failed."))
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<The event ~A could not be encoded into an ~
-octet-vector~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
-	     (encoding-error-event      condition)
-	     condition
-	     (chainable-condition-cause condition))))
-  (:documentation
-   "This error is signaled when encoding an `event' instance into one
-or more notifications fails."))
-
-
 ;;; Fragmentation-related conditions
 ;;
 

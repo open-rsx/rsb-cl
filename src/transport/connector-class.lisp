@@ -101,13 +101,17 @@ superclasses."
 from CLASS."
   (bind (((name type &rest _) option))
     (if (eq type '&slot)
-	(let ((slot (find name (closer-mop:class-slots class)
-			  :key (compose #'make-keyword
-					#'closer-mop:slot-definition-name))))
+	(let* ((slot        (find name (closer-mop:class-slots class)
+				  :key (compose #'make-keyword
+						#'closer-mop:slot-definition-name)))
+	       (initform    (closer-mop:slot-definition-initform slot))
+	       (description (documentation slot t)))
 	  (unless slot
 	    (error "~@<No slot named ~S in class ~S.~@:>" name class))
-	  (list name
-		(closer-mop:slot-definition-type slot)
-		:default (closer-mop:slot-definition-initform slot)
-		:description (documentation slot t)))
+	  `(,name
+	    ,(closer-mop:slot-definition-type slot)
+	    ,@(when initform
+	        `(:default ,initform))
+	    ,@(when description
+		`(:description ,description))))
 	option)))

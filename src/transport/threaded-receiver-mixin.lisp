@@ -49,13 +49,13 @@ class takes care of managing the starting and joining of the
 thread."))
 
 (defmethod notify :after ((connector threaded-receiver-mixin)
-			  (scope     scope)
+			  (scope     t)
 			  (action    (eql :attached)))
   "After attaching to SCOPE, start a receiver thread."
   (start-receiver connector))
 
 (defmethod notify :before ((connector threaded-receiver-mixin)
-			   (scope     scope)
+			   (scope     t)
 			   (action    (eql :detached)))
   "Before detaching from SCOPE, join the receiver thread."
   (stop-receiver connector))
