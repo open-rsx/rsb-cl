@@ -35,8 +35,6 @@
    :remote-call-failed-method
    :remote-call-failed-request
 
-   :remote-call-timeout
-
    :remote-method-execution-error)
 
   ;; Future protocol

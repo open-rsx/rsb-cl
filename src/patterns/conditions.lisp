@@ -56,12 +56,6 @@ in the failed call."))
    "This error is signaled when a remote method call fails for some
 reason."))
 
-(define-condition remote-call-timeout (remote-call-failed)
-  ()
-  (:documentation
-   "This error is signaled when a call to a remote method does not
-complete within a given amount of time."))
-
 (define-condition remote-method-execution-error (remote-call-failed)
   ()
   (:report
