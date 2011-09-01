@@ -26,7 +26,8 @@
 (defclass in-connector (connector
 			restart-message-receiver-mixin
 			broadcast-processor
-			assembly-mixin)
+			assembly-mixin
+			expose-wire-schema-mixin)
   ()
   (:metaclass connector-class)
   (:documentation
@@ -37,7 +38,6 @@ connector classes for Spread."))
 		   (scope     scope)
 		   (action    (eql :attached)))
   (ref-group (connector-connection connector) (scope->group scope)))
-;; TODO pass a private/thread-local scope cache?
 
 (defmethod notify ((connector in-connector)
 		   (scope     scope)
@@ -54,8 +54,10 @@ connector classes for Spread."))
 (defmethod message->event ((connector   in-connector)
 			   (message     simple-array)
 			   (wire-schema t))
-  (bind (((:accessors-r/o (pool      connector-assembly-pool)
-			  (converter connector-converter)) connector)
+  (bind (((:accessors-r/o
+	   (pool      connector-assembly-pool)
+	   (converter connector-converter)
+	   (expose-wire-schema? connector-expose-wire-schema?)) connector)
 	 notification)
 
     ;; Try to unpack MESSAGE into a `notification' instance. Signal
@@ -64,11 +66,11 @@ connector classes for Spread."))
 	((error #'(lambda (condition)
 		    (error 'decoding-error
 			   :encoded          message
-			   :format-control "~@<The data could not be ~
+			   :format-control   "~@<The data could not be ~
 unpacked as a protocol buffer of kind ~S.~:@>"
-			   :format-arguments '(rsb.protocol::notification)
+			   :format-arguments '(notification)
 			   :cause            condition))))
-      (setf notification (pb:unpack message 'rsb.protocol::notification)))
+      (setf notification (pb:unpack message 'notification)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -86,9 +88,10 @@ unpacked as a protocol buffer of kind ~S.~:@>"
 	((error #'(lambda (condition)
 		    (error 'decoding-error
 			   :encoded          message
-			   :format-control "~@<After unpacking, the ~
-notification~&~A~&could not be converted into an event.~:@>"
+			   :format-control   "~@<After unpacking, the ~
+notification~_~A~_could not be converted into an event.~:@>"
 			   :format-arguments `(,(with-output-to-string (stream)
 						  (describe notification stream)))
 			   :cause            condition))))
-      (notification->event pool converter notification))))
+      (notification->event pool converter notification
+			   :expose-wire-schema? expose-wire-schema?))))

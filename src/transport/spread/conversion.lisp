@@ -23,7 +23,9 @@
 ;;; Notification -> Event
 ;;
 
-(defun notification->event (pool converter notification)
+(defun notification->event (pool converter notification
+			    &key
+			    expose-wire-schema?)
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
@@ -31,7 +33,8 @@ been fragmented into multiple notifications."
 
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
-      (one-notification->event converter notification)
+      (one-notification->event converter notification
+			       :expose-wire-schema? expose-wire-schema?)
 
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
@@ -42,7 +45,8 @@ been fragmented into multiple notifications."
 	  (one-notification->event
 	   converter
 	   (aref (assembly-fragments assembly) 0)
-	   :data (assembly-concatenated-data assembly))))))
+	   :data                (assembly-concatenated-data assembly)
+	   :expose-wire-schema? expose-wire-schema?)))))
 
 (defun one-notification->event (converter notification
 				&key

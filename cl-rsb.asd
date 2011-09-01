@@ -236,7 +236,10 @@
 			      (:file       "restart-notification-sender-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "sometimes-interruptible-mixin"
-			       :depends-on ("package" "protocol"))))
+			       :depends-on ("package" "protocol"))
+			      (:file       "expose-wire-schema-mixin"
+			       :depends-on ("package" "protocol"
+					    "connector-class"))))
 
 		(:module      "src"
 		 :depends-on  ("src-early"

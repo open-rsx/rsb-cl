@@ -123,6 +123,11 @@
    :sometimes-interruptible-mixin
    :connector-interruptible?)
 
+  ;; `expose-wire-schema-mixin' class
+  (:export
+   :expose-wire-schema-mixin
+   :connector-expose-wire-schema?)
+
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp
 implementation.
