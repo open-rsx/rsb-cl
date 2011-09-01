@@ -77,15 +77,15 @@ can therefore be considered placeholders for the actual results which
 may or may not (when the producing operation fails) become available
 later.
 
-Interaction with `future' instances is one using methods on the
+Interaction with `future' instances is done using methods on the
 following protocol functions:
-+ `future-done?' :: check whether the associated operation finished or
++ `future-done?' :: Check whether the associated operation finished or
     failed.
-+ `future-result' :: obtained the result, potentially waiting for it
-    to become available
-+ `(setf future-result)' :: supply a result for the `future' instance
-+ `(setf future-error)' :: indicate that the operation associated to
-    the `future' instance failed
++ `future-result' :: Obtained the result, potentially waiting for it
+    to become available.
++ `(setf future-result)' :: Supply a result for the `future' instance.
++ `(setf future-error)' :: Indicate that the operation associated to
+    the `future' instance failed.
 
 It is possible to supply values for the result, lock and condition
 slots of new `future' instance using initargs. The former may be
