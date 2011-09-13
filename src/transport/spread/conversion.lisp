@@ -57,13 +57,15 @@ payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
   (bind (((:accessors-r/o
-	   (sequence-number notification-sequence-number)
 	   (scope           notification-scope)
-	   (sender-id       notification-sender-id)
+	   (event-id        notification-event-id)
 	   (method          notification-method)
 	   (wire-schema     notification-wire-schema)
 	   (payload         notification-data)
 	   (meta-data       notification-meta-data)) notification)
+	 ((:accessors-r/o
+	   (sender-id       event-id-sender-id)
+	   (sequence-number event-id-sequence-number)) event-id)
 	 (wire-schema (bytes->wire-schema wire-schema))
 	 (data        (rsb.converter:wire->domain
 		       converter (or data payload)
@@ -180,7 +182,11 @@ for most cases.")
 SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA. When
 NUM-DATA-PARTS and DATA-PART are not supplied, values that indicate a
 non-fragmented notification are chosen."
-  (bind ((meta-data1   (make-instance
+  (bind ((event-id     (make-instance
+			'event-id
+			:sender-id       (uuid:uuid-to-byte-array origin)
+			:sequence-number sequence-number))
+	 (meta-data1   (make-instance
 			'meta-data
 			:create-time (timestamp->unix-microseconds
 				      (getf timestamps :create))
@@ -188,8 +194,7 @@ non-fragmented notification are chosen."
 				      (getf timestamps :send))))
 	 (notification (make-instance
 			'notification
-			:sequence-number sequence-number
-			:sender-id       (uuid:uuid-to-byte-array origin)
+			:event-id        event-id
 			:scope           (string->bytes (scope-string scope))
 			:wire-schema     (wire-schema->bytes wire-schema)
 			:num-data-parts  num-data-parts

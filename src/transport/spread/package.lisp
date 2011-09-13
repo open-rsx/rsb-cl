@@ -23,6 +23,7 @@
   (:nicknames :rsb.tp.spread)
 
   (:shadowing-import-from :rsb.protocol
+   :event-id
    :meta-data)
 
   (:shadow
