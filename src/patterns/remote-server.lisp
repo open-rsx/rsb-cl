@@ -67,8 +67,9 @@ replies to method calls."
 	      ;; Check whether this is a direct call within a single
 	      ;; thread.
 	      (if *local-call*
-		  ;; If so, just store the result.
-		  (progn
+		  ;; If so, just store the result (unless that
+		  ;; happened already).
+		  (when (cdr *local-call*)
 		    (%call-result->future
 		     method (cadr *local-call*) event
 		     (cddr *local-call*) *local-call*)
@@ -78,14 +79,15 @@ replies to method calls."
 		  (let ((key  (meta-data event :|rsb:reply|))
 			(call))
 		    (when key
+		      ;; Remove the call.
 		      (bt:with-lock-held (lock)
 			(when (setf call (gethash key calls))
 			  (remhash key calls)))
-		      ;; Remove the call.
+		      ;; Store the received reply in the result
+		      ;; future.
 		      (when call
 			(%call-result->future
-			 method (cadr call) event
-			 (cddr call) (car call)))))))
+			 method (cadr call) event (cddr call) (car call)))))))
 	  (rsb.ep:handlers new-value))))
 
 (defmethod call ((server  t)
