@@ -170,11 +170,9 @@ necessary when fragments are submitted by calls to
 (defmethod merge-fragment ((pool         assembly-pool)
 			   (notification t))
     (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
-	   ((:accessors-r/o (id        notification-sequence-number)
-			    (sender-id notification-sender-id)
-			    (size      notification-num-data-parts))
-	    notification)
-	   (id (%make-key id sender-id)))
+	   ((:accessors-r/o (id   notification-event-id)
+			    (size notification-num-data-parts)) notification)
+	   (id (%make-key id)))
       (let ((assembly (ensure-assembly pool id size)))
 	(when (assembly-complete? (add-fragment! assembly notification))
 	  (remhash id assemblies)
@@ -274,9 +272,10 @@ list of the generated chunks."
 ;;; Utility functions
 ;;
 
-(defun %make-key (sequence-number sender-id)
+(defun %make-key (event-id)
   "Return a vector that can be used to identify the notification from
 which SEQUENCE-NUMBER and SENDER-ID have been extracted."
   (concatenate 'octet-vector
-	       (nth-value 1 (binio:encode-uint32-be sequence-number))
-	       sender-id))
+	       (nth-value 1 (binio:encode-uint32-be
+			     (event-id-sequence-number event-id)))
+	       (event-id-sender-id event-id)))
