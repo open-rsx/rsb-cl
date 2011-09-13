@@ -32,11 +32,15 @@
 	data))))
   (:function
    (make-notification (sequence-number length id data)
-     (make-instance 'rsb.protocol::notification
-		    :sequence-number sequence-number
-		    :num-data-parts  length
-		    :data-part       id
-		    :data            data)))
+     (let ((event-id (make-instance 'rsb.protocol:event-id
+				    :sender-id       (uuid:uuid-to-byte-array
+						      (uuid:make-null-uuid))
+				    :sequence-number sequence-number)))
+       (make-instance 'rsb.protocol:notification
+		      :event-id        event-id
+		      :num-data-parts  length
+		      :data-part       id
+		      :data            data))))
   (:documentation
    "Unit tests for the fragmentation and assembly of
 data/notifications."))
