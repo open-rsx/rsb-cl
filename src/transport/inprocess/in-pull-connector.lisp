@@ -36,10 +36,9 @@
 
 (defclass in-pull-connector (connector
 			     rsb.ep:broadcast-processor)
-  ((queue :initarg  :queue
-	  :type     #+sbcl sb-concurrency:mailbox
+  ((queue :type     #+sbcl sb-concurrency:mailbox
 	  #-sbcl list
-	  :accessor connector-queue
+	  :reader   connector-queue
 	  :initform #+sbcl (sb-concurrency:make-mailbox
 			    :name "event queue")
 	  #-sbcl nil
