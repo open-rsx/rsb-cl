@@ -64,7 +64,7 @@
 
   ;; Another way of calling methods makes use of the fact that
   ;; `remote-method' instances are funcallable:
-  (map 'list (rsb.patterns:server-method my-client "echo")
+  (map 'list (rsb.patterns:server-method my-remote-server "echo")
        '("a" "b" "c"))
 
   ;; This variant provides all the different behaviors of the `call'

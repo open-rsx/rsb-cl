@@ -24,7 +24,7 @@
 ;; scope "/example/clientserver".
 ;; The local server will use all transports which are enabled in the
 ;; global RSB configuration with their respective configured options.
-(defvar *my-local-server* (rsb.patterns:make-local-server "inprocess:/example/clientserver"))
+(defvar *my-local-server* (rsb.patterns:make-local-server "/example/clientserver"))
 
 ;; The new server instance initially does not have any methods. There
 ;; are several ways to add methods.
