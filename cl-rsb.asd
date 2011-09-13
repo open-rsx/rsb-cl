@@ -531,7 +531,7 @@ cl-rsb-and-cl-protobuf unless system cl-protobuf can be loaded~@:>"))
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
-  :description "This system connections provides methods to serialize/deserialize
+  :description "This system connection provides methods to serialize/deserialize
 RSB events to/from Google protocol buffers."
   :requires    (cl-rsb
 		cl-protobuf)
@@ -554,8 +554,8 @@ RSB events to/from Google protocol buffers."
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
-  :description "This system connections a regular expression filter
-for events with text content."
+  :description "This system connection provides a regular expression
+filter for events with text content."
   :requires    (cl-rsb
 		cl-ppcre)
   :components  ((:module     "filter"
