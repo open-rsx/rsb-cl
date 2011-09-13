@@ -51,5 +51,5 @@ not work properly."
 	  (notify receiver (make-scope "/") :detached)
 
 	  (notify receiver (make-scope "/") :attached)
-	  (sleep .1)
+	  (sleep .01)
 	  (notify receiver (make-scope "/") :detached))))
