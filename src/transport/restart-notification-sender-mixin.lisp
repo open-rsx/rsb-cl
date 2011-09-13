@@ -32,20 +32,20 @@ in a `event->notification' method."))
   "Call the next method with log and ignore restarts installed that
 will both retry sending NOTIFICATION, but with and without emitting a
 log message respectively. "
-  (iter (restart-case
-	    (return-from send-notification (call-next-method))
-	  (log (&optional condition)
-	    :report (lambda (stream)
-		      (format stream "~@<Log a message and ignore ~
-the failed sending attempt and continue with the next ~
-notification.~@:>"))
-	    (log1 :warn connector "Failed to send a notification~@[: ~_~A~]" condition)
-	    nil)
-	  (continue ()
-	    :report (lambda (stream)
-		      (format stream "~@<Ignore the failed sending ~
-attempt and continue with the next notification.~@:>"))
-	    nil))))
+  (restart-case
+      (return-from send-notification (call-next-method))
+    (log (&optional condition)
+      :report (lambda (stream)
+		(format stream "~@<Log a message and ignore the failed ~
+sending attempt and continue with the next notification.~@:>"))
+      (log1 :warn connector "Failed to send a notification~@[: ~_~A~]"
+	    condition)
+      nil)
+    (continue ()
+      :report (lambda (stream)
+		(format stream "~@<Ignore the failed sending attempt ~
+and continue with the next notification.~@:>"))
+      nil)))
 
 (defmethod event->notification :around ((connector    restart-notification-sender-mixin)
 					(notification t))
@@ -58,7 +58,8 @@ emitting a log message respectively."
       :report (lambda (stream)
 		(format stream "~@<Log a message and ignore the ~
 failed encoding and continue with the next event.~@:>"))
-      (log1 :warn connector "Failed to encode an event~@[: ~_~A~]" condition)
+      (log1 :warn connector "Failed to encode an event~@[: ~_~A~]"
+	    condition)
       nil)
     (continue ()
       :report (lambda (stream)
