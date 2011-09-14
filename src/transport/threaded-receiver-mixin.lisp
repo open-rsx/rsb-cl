@@ -67,7 +67,7 @@ thread."))
 	   (control-condition connector-control-condition)) connector))
     ;; Launch the thread.
     (bt:make-thread (curry #'receive-messages connector)
-		    :name (format nil "Message Receiver Thread for ~A"
+		    :name (format nil "Message Receiver for ~A"
 				  connector))
 
     ;; Wait until the thread has entered `receive-messages' and
