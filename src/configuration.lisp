@@ -46,8 +46,7 @@
    (iter (for  line     in-stream stream :using #'read-line)
 	 (for  line-num :from     1)
 	 (with section  =         nil)
-	 (bind ((content (subseq line 0 (or (position #\# line)
-					    (length line))))
+	 (bind ((content (subseq line 0 (position #\# line)))
 		((:flet trim (string))
 		 (string-trim '(#\Space) string)))
 	   (cond
