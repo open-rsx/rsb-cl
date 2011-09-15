@@ -50,23 +50,26 @@ of a control transfer."
 (defmacro with-methods ((var) methods &body body)
   "Execute body with the methods defined by METHODS added to the
 server that is the value of VAR. METHODS is a list of items of the form
-\(NAME (ARG TYPE) BODY)
+\(NAME (ARG REQUEST-TYPE) BODY)
 where NAME is the name of the method, ARG is a symbol which will be
 bound to the request data during the execution of the method body
-BODY. TYPE specifies the type of acceptable requests."
+BODY. REQUEST-TYPE specifies the type of acceptable requests."
   (check-type var symbol "a symbol")
 
-  (bind (((:flet add-one (spec))
-	  (bind (((name (arg type) &rest body) spec))
-	    (check-type name (or symbol string) "a symbol or a string")
-	    (check-type arg  symbol             "a symbol")
+  (bind (((:flet process-one (spec))
+	  (bind (((name (arg type) &rest body) spec)
+		 (name-as-string (string name)))
+	    (check-type name-as-string method-name "a valid method name")
+	    (check-type arg            symbol      "a symbol")
 
-	    `(setf (server-method ,var ,(string name))
-		   #'(lambda (,arg) ,@body))))
-	 ((:flet remove-one (spec))
-	  (bind (((name &rest _) spec))
-	    `(when (server-method ,var ,(string name) :error? nil)
-	       (setf (server-method ,var ,(string name)) nil)))))
+	    (list
+	     ;; add method
+	     `(setf (server-method ,var ,name-as-string)
+		    #'(lambda (,arg) ,@body))
+	     ;; remove method
+	     `(when (server-method ,var ,name-as-string :error? nil)
+		(setf (server-method ,var ,name-as-string) nil)))))
+	 (add-and-remove (map 'list #'process-one methods)))
     `(unwind-protect
-	  (progn ,@(map 'list #'add-one methods) ,@body)
-       ,@(map 'list #'remove-one methods))))
+	  (progn ,@(map 'list #'first add-and-remove) ,@body)
+       ,@(map 'list #'second add-and-remove))))
