@@ -422,6 +422,8 @@
 			       :depends-on ("package"))
 			      (:file       "server"
 			       :depends-on ("package"))
+			      (:file       "macros"
+			       :depends-on ("package"))
 
 			      (:file       "integration"
 			       :depends-on ("package"))))
