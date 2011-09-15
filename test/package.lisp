@@ -158,7 +158,7 @@ KIND."
 	   (when ,var-name (error "~@<~S failed.~@:>" ',method)))
 
 	 ;; Define the test case that invokes the method and fails if
-	 ;; the error is not by restarts.
+	 ;; the error is not handled by restarts.
 	 (addtest (,suite-name
 		   :documentation
 		   ,(format nil "Smoke test for the :around method on ~
