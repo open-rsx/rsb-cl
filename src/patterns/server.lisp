@@ -31,7 +31,7 @@
 	     :documentation
 	     "Stores the server object to which the method belongs.")
    (name     :initarg  :name
-	     :type     string
+	     :type     method-name
 	     :reader   method-name
 	     :documentation
 	     "Stores the name of the method.")
@@ -53,9 +53,18 @@ method. The instance is created lazily when first used.")
 	     :documentation
 	     "Stores the `listener' instance associated to the
 method. The instance is created lazily when first used."))
+  (:default-initargs
+   :name (missing-required-initarg 'method1 :name))
   (:documentation
    "This class serves as a superclass for local and remote method
 classes."))
+
+(defmethod shared-initialize :before ((instance   method1)
+				      (slot-names t)
+				      &key
+				      name)
+  (when name
+    (check-type name method-name "a legal method name")))
 
 (defmethod detach ((method method1))
   (bind (((:accessors-r/o (informer %method-informer)
@@ -125,6 +134,8 @@ generic support for retrieving, adding and removing methods."))
 			  (name   string)
 			  &key
 			  (error? t))
+  (check-type name method-name "a legal method name")
+
   (let ((method (gethash name (%server-methods server))))
     (or method
 	(when error?
@@ -134,6 +145,8 @@ generic support for retrieving, adding and removing methods."))
 (defmethod (setf server-method) ((new-value method1)
 				 (server    server)
 				 (name      string))
+  (check-type name method-name "a legal method name")
+
   (setf (%method-server new-value)              server
 	(gethash name (%server-methods server)) new-value))
 

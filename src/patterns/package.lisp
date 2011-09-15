@@ -26,6 +26,10 @@
 
    :rsb)
 
+  ;; Types
+  (:export
+   :method-name)
+
   ;; Conditions
   (:export
    :no-such-method

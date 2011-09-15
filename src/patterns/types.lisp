@@ -21,6 +21,11 @@
 
 (in-package :rsb.patterns)
 
+(deftype method-name ()
+  "Instances of this type are strings which are legal as method
+names."
+  'scope-component)
+
 (deftype return-style ()
   "Instances of this type describes styles in which a result can be
 returned from a method call."

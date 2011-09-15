@@ -132,6 +132,7 @@
   ;; Scope
   (:export
    :scope
+   :scope-component
    :scope-components
    :scope-string
    :scope-interned?

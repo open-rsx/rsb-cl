@@ -420,6 +420,8 @@
 		 :components ((:file       "package")
 			      (:file       "future"
 			       :depends-on ("package"))
+			      (:file       "server"
+			       :depends-on ("package"))
 
 			      (:file       "integration"
 			       :depends-on ("package"))))

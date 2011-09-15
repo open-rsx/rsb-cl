@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for unit tests of the patterns module.
+;;; server.lisp --- Unit tests for the method1 and server classes.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,28 +17,24 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:defpackage :rsb.patterns.test
-  (:use
-   :cl
-   :bind
-   :iterate
-   :lift
+(in-package :rsb.patterns.test)
 
-   :rsb
-   :rsb.patterns
-
-   :rsb.test)
-
-  (:import-from :rsb.patterns
-   :method1)
-
-  (:documentation
-   "This package contains unit tests for the patterns module of
-cl-rsb."))
-
-(cl:in-package :rsb.patterns.test)
-
-(deftestsuite patterns-root (root)
+(deftestsuite method1-root (patterns-root)
   ()
   (:documentation
-   "Root unit test suite for the patterns module of cl-rsb."))
+   "Test suite for `method1' class."))
+
+(addtest (method1-root
+          :documentation
+	  "Test constructing `method1' instances.")
+  construction
+
+  ;; Missing :name initarg
+  (ensure-condition 'missing-required-initarg
+    (make-instance 'method1))
+
+  ;; Some illegal method names
+  (ensure-cases (name)
+      '("illegal-name" "illegal/name" "illegal name" "i113g4l n4m3")
+    (ensure-condition 'type-error
+      (make-instance 'method1 :name name))))
