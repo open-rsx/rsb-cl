@@ -79,15 +79,17 @@
   (ensure-cases (scope1 data1 origin1?
 		 scope2 data2 origin2?
 		 =1? =2? =3? =4?)
-      '(("/"    "bar" nil "/" "bar" nil t   nil t   nil)
-	("/"    "bar" t   "/" "bar" nil t   nil nil nil)
-	("/"    "bar" t   "/" "bar" t   t   nil t   nil)
-	("/foo" "bar" nil "/" "bar" nil nil nil nil nil)
-	("/"    "baz" nil "/" "bar" nil nil nil nil nil))
+      '(("/"    "bar" nil     "/" "bar" nil     t   nil t   nil)
+	("/"    "bar" t       "/" "bar" nil     t   nil nil nil)
+	("/"    "bar" t       "/" "bar" t       t   nil t   nil)
+	("/foo" "bar" nil     "/" "bar" nil     nil nil nil nil)
+	("/"    "baz" nil     "/" "bar" nil     nil nil nil nil))
 
     (let* ((origin (uuid:make-v1-uuid))
 	   (left   (make-event scope1 data1))
-	   (right  (make-event scope2 data2)))
+	   (right  (progn
+		     (sleep .000001) ;; force different create times
+		     (make-event scope2 data2)) ))
 
       (setf (event-sequence-number left) 0)
       (when origin1?
@@ -108,7 +110,13 @@
 		     :compare-origins?          origins?
 		     :compare-timestamps        timestamps?
 		     :data-test                 #'equal)
-	     expected)))))
+	     expected
+	     :report "~@<When compared ~:[without~;with~] sequence ~
+numbers, ~:[without~;with~] origins and ~:[without~;with~] timestamps, ~
+events ~A and ~A were ~:[not ~;~]equal, but expected ~:[not ~;~]~
+to be.~@:>"
+	     :arguments (sequence-numbers? origins? timestamps?
+			 left right (not expected) expected))))))
 
 (addtest (event-root
           :documentation
