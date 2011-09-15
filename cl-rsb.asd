@@ -187,6 +187,8 @@
 			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))
+			      (:file       "macros"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "sequence"
 			       :depends-on ("package" "conditions"
@@ -542,7 +544,8 @@ RSB events to/from Google protocol buffers."
 
 		(:module     "converter-protocol-buffer"
 		 :pathname   "src/converter"
-		 :components ((:file       "protocol-buffers")))))
+		 :components ((:file       "fundamental-numbers")
+			      (:file       "protocol-buffers")))))
 
 
 ;;; System connection with cl-ppcre
