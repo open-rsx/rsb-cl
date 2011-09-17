@@ -216,7 +216,9 @@
    :make-options-for-connector-classes
    :make-options-for-connector-class
 
-   :&inherit)
+   :&inherit
+
+   :default-converters)
 
   ;; URI-related function
   (:export

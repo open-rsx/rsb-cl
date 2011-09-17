@@ -84,12 +84,7 @@
      (when stream (options-from-stream stream)))
    (with-input-from-file (stream "~/.config/rsb.conf"
 				 :if-does-not-exist nil)
-     (when stream (options-from-stream stream)))
-   '(((:transport :spread :converter)
-      . (:fundamental-utf-8-string :fundamental-bytes
-	 ;;; TODO(jmoringe): hack
-	 #+asdf-protocol-buffer-descriptors
-	 :fundamental-uint64)))))
+     (when stream (options-from-stream stream)))))
 
 
 ;;;
@@ -160,6 +155,24 @@ TRANSPORT. Otherwise return OPTIONS unmodified."
 		      (rest (find transport (transport-options)
 				  :key #'first)))
 	      transport-options))))
+
+(defun default-converters (&key
+			   (config *default-configuration*))
+  "Return an alist of default converters for particular wire-types
+with items of the form (WIRE-TYPE . CONVERTER).
+If supplied, CONFIG specified the configuration that should be used to
+determine the set of default converters. if CONFIG is not supplied,
+the value of `*default-configuration*' is used."
+  '((octet-vector . (:fundamental-void
+		     :fundamental-utf-8-string
+		     :fundamental-bytes
+		     :fundamental-double :fundamental-float
+		     :fundamental-int32  :fundamental-int64
+		     :fundamental-uint32 :fundamental-uint64
+
+		     ;; TODO(jmoringe): hack
+		     #+asdf-protocol-buffer-descriptors
+		     :fundamental-uint64))))
 
 
 ;;; Utility functions
