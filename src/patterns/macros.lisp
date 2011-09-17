@@ -67,9 +67,19 @@ BODY. REQUEST-TYPE specifies the type of acceptable requests."
 	     `(setf (server-method ,var ,name-as-string)
 		    #'(lambda (,arg) ,@body))
 	     ;; remove method
-	     `(when (server-method ,var ,name-as-string :error? nil)
-		(setf (server-method ,var ,name-as-string) nil)))))
+	     `(let ((method (server-method ,var ,name-as-string :error? nil)))
+		(when method
+		  (handler-bind
+		      (((or error bt:timeout)
+			#'(lambda (condition)
+			    (warn "~@<Error removing method ~S: ~A~@:>"
+				  method condition)
+			    (continue))))
+		    (%remove-method-with-restart-and-timeout
+		     ,var method)))))))
 	 (add-and-remove (map 'list #'process-one methods)))
     `(unwind-protect
-	  (progn ,@(map 'list #'first add-and-remove) ,@body)
+	  (progn
+	    ,@(map 'list #'first add-and-remove)
+	    ,@body)
        ,@(map 'list #'second add-and-remove))))

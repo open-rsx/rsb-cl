@@ -158,15 +158,8 @@ generic support for retrieving, adding and removing methods."))
   new-value)
 
 (defmethod detach ((server server))
-  (iter (for method in (server-methods server))
-	(restart-case
-	    ;; Give each method ten seconds to detach. If one takes
-	    ;; longer, allow skipping it.
-	    (bt:with-timeout (10)
-	      (setf (server-method server (method-name method)) nil))
-	  (continue ()
-	    :report "~@<Ignore the error and continue with the ~
-remaining methods.~@:>"))))
+  (map nil (curry #'%remove-method-with-restart-and-timeout server)
+       (server-methods server)))
 
 (defmethod print-object ((object server) stream)
   (print-unreadable-id-object (object stream :type t)
@@ -183,3 +176,17 @@ remaining methods.~@:>"))))
 COMPONENTS."
   (merge-scopes (format nil "~{/~A~}" components)
 		(participant-scope participant)))
+
+(defun %remove-method-with-restart-and-timeout (server method)
+  "Remove METHOD from SERVER with a CONTINUE restart in place to allow
+callers to ignore errors. Signal a `bordeaux-threads:timeout'
+condition, if the operation does not complete within ten seconds."
+  (restart-case
+      ;; Give METHOD TIMEOUT seconds to detach. If one takes longer,
+      ;; allow skipping it.
+      (bt:with-timeout (10)
+	(setf (server-method server (method-name method)) nil))
+    (continue ()
+      :report (lambda (stream)
+		(format stream "~@<Ignore the error and continue with ~
+the remaining methods.~@:>")))))
