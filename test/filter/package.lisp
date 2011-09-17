@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.filter.test
+(cl:defpackage :rsb.filter.test
   (:use
    :cl
    :alexandria
@@ -29,10 +27,14 @@
    :rsb.filter
 
    :rsb.test)
+
+  (:export
+   :define-basic-filter-test-cases)
+
   (:documentation
    "This package contains unit tests for the filter module"))
 
-(in-package :rsb.filter.test)
+(cl:in-package :rsb.filter.test)
 
 (deftestsuite filter-root (root)
   ()
@@ -82,7 +84,7 @@ tests for filters."))
 	     (map 'list #'list events ',matches)
 	   (let ((result (matches? simple-filter event)))
 	     (ensure-same result expected
-			  :report "~@<The filter ~S ~:[did not ~
+			  :report    "~@<The filter ~S ~:[did not ~
 match~;matched~] the event ~S, but should~:[ not~;~].~@:>"
 			  :arguments (simple-filter result event expected)))))
 
