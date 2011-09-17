@@ -90,6 +90,11 @@
    :regex-filter
    :filter-regex)
 
+  ;; `method-filter' class
+  (:export
+   :method-filter
+   :filter-method)
+
   ;; `xpath-filter' class
   (:export
    :xpath-filter

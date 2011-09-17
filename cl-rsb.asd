@@ -143,6 +143,9 @@
 					    "filter-mixin"))
 			      (:file       "origin-filter"
 			       :depends-on ("package" "protocol"
+					    "filter-mixin"))
+			      (:file       "method-filter"
+			       :depends-on ("package" "protocol"
 					    "filter-mixin"))))
 
 		(:module     "event-processing"
@@ -374,6 +377,8 @@
 			      (:file       "conjoin-filter"
 			       :depends-on ("package"))
 			      (:file       "scope-filter"
+			       :depends-on ("package"))
+			      (:file       "method-filter"
 			       :depends-on ("package"))))
 
 		(:module     "event-processing"
