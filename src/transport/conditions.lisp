@@ -52,6 +52,34 @@ direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~
    "This error is signaled when the construction of a connector
 instance fails."))
 
+(define-condition no-suitable-converter (connector-construction-failed)
+  ((wire-type  :initarg  :wire-type
+	       :reader   connector-construction-failed-wire-type
+	       :documentation
+	       "Stores the wire-type for which a converter could not
+be found.")
+   (candidates :initarg  :candidates
+	       :type     list
+	       :reader   connector-construction-failed-candidates
+	       :documentation
+	       "Stores an a list of converter candidates of the
+form (WIRE-TYPE . CONVERTER)."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Failed to construct ~A connector for direction ~
+~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~]~_because no converter ~
+for wire-type ~S could be found ~:[without any candidates (empty ~
+converter list)~;~:*in candidate list ~{~A~^, ~_~}~].~@:>"
+	     (connector-construction-failed-name       condition)
+	     (connector-construction-failed-direction  condition)
+	     (connector-construction-failed-args       condition)
+	     (connector-construction-failed-wire-type  condition)
+	     (connector-construction-failed-candidates condition))))
+  (:documentation
+   "This error is signaled when the construction of a connector
+instance fails because the list of available converters does not
+contain a suitable one for the requested connector."))
+
 
 ;;; Generic encoding and decoding errors
 ;;

@@ -169,27 +169,61 @@ the requested class cannot be found."
 		 (symbolicate name "-" direction))))
     (find-transport-class name1)))
 
-(defun make-connector (name direction &rest args)
+(defun make-connector (name direction converters &rest args)
   "Create a connector instance for the direction designated by
 DIRECTION of the kind the designated by NAME. Pass ARGS to the
-constructed instance."
+constructed instance.
+CONVERTERS is an alist of items of the form (WIRE-TYPE
+. CONVERTER). If the requested connector does not require a converter,
+CONVERTERS can be nil.
+An error of type `connector-constructor-failed' is signaled if the
+requested connector instance cannot be constructed. If the
+construction fails due to the lack of a suitable converter, an error
+of the subtype `no-suitable-converter' is signaled."
   (handler-bind
-      ((error #'(lambda (condition)
-		  (error 'connector-construction-failed
-			 :name      name
-			 :direction direction
-			 :args      args
-			 :cause     condition))))
-    (apply #'make-instance (find-connector-class name direction) args)))
+      (((and error (not no-suitable-converter))
+	#'(lambda (condition)
+	    (error 'connector-construction-failed
+		   :name      name
+		   :direction direction
+		   :args      args
+		   :cause     condition))))
+    (let* ((class     (find-connector-class name direction))
+	   (wire-type (connector-wire-type class))
+	   (converter (unless (eq wire-type t)
+			(or (getf args :converter)
+			    (cdr (find wire-type converters
+				       :key  #'car
+				       :test #'subtypep)))))
+	   (args      (remove-from-plist args :converter)))
+      (cond
+	;; The connector does not require a converter.
+	((eq wire-type t)
+	 (apply #'make-instance class args))
+	;; The connector requires a converter and we found a suitable
+	;; one.
+	(converter
+	 (apply #'make-instance class :converter converter args))
+	;; The connector requires a converter, but we did not find a
+	;; suitable one.
+	(t
+	 (error 'no-suitable-converter
+		:name       name
+		:direction  direction
+		:args       args
+		:wire-type  wire-type
+		:candidates converters))))))
 
-(defun make-connectors (specs direction)
-  "Create zero or more connector instances for the direction
-designated by DIRECTION according to SPECS. Each element of SPECS has
-to be of the form (NAME . ARGS) where NAME and ARGS have to acceptable
-for calls to `make-connector'."
+(defun make-connectors (specs direction &optional converters)
+  "Create and return zero or more connector instances for the
+direction designated by DIRECTION according to SPECS. Each element of
+SPECS has to be of the form (NAME . ARGS) where NAME and ARGS have to
+acceptable for calls to `make-connector'. For CONVERTERS, see
+`make-connector'."
   ;; Check direction here in order to signal a appropriate type error
   ;; even if SPECS is nil.
   (check-type direction direction "either :IN-PUSH, :IN-PULL or :OUT")
 
   (iter (for (name . args) in specs)
-	(collect (apply #'make-connector name direction args))))
+	(collect (apply #'make-connector
+			name direction converters args))))

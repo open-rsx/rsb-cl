@@ -39,6 +39,10 @@
    :connector-construction-failed-direction
    :connector-construction-failed-args
 
+   :no-suitable-converter
+   :connector-construction-failed-wire-type
+   :connector-construction-failed-candidates
+
    :decoding-error
    :decoding-error-encoded
 
