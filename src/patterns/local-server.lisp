@@ -100,11 +100,13 @@ these methods are exposed for remote clients."))
 
 (defmethod make-local-server ((scope scope)
 			      &key
-			      (transports (rsb::transport-options)))
+			      (transports (rsb::transport-options)) ;;; TODO(jmoringe): package
+			      (converters (default-converters)))
   "Make and return a `local-server' instance that provides a service
 at the scope SCOPE."
   (make-instance 'local-server
 		 :scope             scope
+		 :converters        converters
 		 :transport-options transports))
 
 (define-participant-creation-uri-methods local-server (scope puri:uri))

@@ -100,7 +100,8 @@ created participant."
 				 (name   method-name)) method))
 	   (setf (,writer-name method)
 		 (,make-name (%make-scope server ,scope name) ,@args
-			     :transports (server-transport-options server))))))))
+			     :transports (server-transport-options server)
+			     :converters (participant-converters server))))))))
 ;;; TODO(jmoringe): override configured error policy
 
 

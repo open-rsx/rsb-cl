@@ -64,11 +64,16 @@ of PARTICIPANT."
 ;;
 
 ;;; TODO(jmoringe): infer direction?
-(defun make-participant (class scope direction transports &rest args)
+
+(defun make-participant (class scope direction transports converters
+			 &rest args)
   "Make and return a participant instance of CLASS that participates
-in the channel designated by SCOPE. DIRECTION is one
-of :in-push, :in-pull and :out. TRANSPORTS is a list of connector
-classes. ARGS are arguments for the created CLASS instance.
+in the channel designated by SCOPE.
+DIRECTION is one of :in-push, :in-pull and :out.
+TRANSPORTS is a list of connector classes. ARGS are arguments for the
+created CLASS instance.
+CONVERTERS is an alist of converters for particular wire-types with
+items of the form (WIRE-TYPE . CONVERTER).
 
 Return three values:
 + the `participant' instance
@@ -83,15 +88,22 @@ Return three values:
   ;; options for respective transports.
   (setf transports (map 'list #'process-transport-options transports))
 
+  ;; Ensure that CONVERTERS is an alist of items of the form
+  ;; (WIRE-TYPE . CONVERTER).
+  (unless (and (listp converters) (consp (first converters)))
+    (setf converters (list (cons t converters))))
+
   (let* ((configurator (make-instance
 			(ecase direction
 			  ((:in-push :in-pull) 'rsb.ep:in-route-configurator)
 			  (:out                'rsb.ep:out-route-configurator))
 			:scope     scope
 			:direction direction))
-	 (connectors   (rsb.transport::make-connectors transports direction))
+	 (connectors   (rsb.transport:make-connectors
+			transports direction converters))
 	 (participant  (apply #'make-instance class
 			      :scope        scope
+			      :converters   converters
 			      :configurator configurator
 			      args)))
 
@@ -119,23 +131,30 @@ should be ~S.~@:>"
 	    &key
 	    (transports (transport-options
 			 :exclude-disabled?
-			 (not (uri-transport ,designator-arg)))))
+			 (not (uri-transport ,designator-arg))))
+	    (converters (default-converters)))
 	 (bind (((:values scope options)
 		 (uri->scope-and-options ,designator-arg transports)))
-	   (,make-name scope ,@(rest arg-names) :transports options)))
+	   (,make-name scope ,@(rest arg-names)
+		       :transports options
+		       :converters converters)))
 
        ;; This method operates on strings which it turns into either
        ;; URIs (if the string contains a colon) or scopes.
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
 			      &key
-			      (transports nil transports-supplied?))
+			      (transports nil transports-supplied?)
+			      (converters nil converters-supplied?))
 	 (apply #',make-name
 		(if (find #\: ,designator-arg)
 		    (puri:parse-uri ,designator-arg)
 		    (make-scope ,designator-arg))
 		,@(rest arg-names)
-		(when transports-supplied?
-		  (list :transports transports)))))))
+		(append
+		 (when transports-supplied?
+		   (list :transports transports))
+		 (when converters-supplied?
+		   (list :converters converters))))))))
 
 (defmacro define-participant-creation-restart-method (kind &rest args)
   "Emit an :around method on `make-KIND' that establishes restarts.

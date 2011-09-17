@@ -38,7 +38,8 @@ receiving events."))
 
 (defmethod make-reader ((scope scope)
 			&key
-			(transports (transport-options)))
+			(transports (transport-options))
+			(converters (default-converters)))
   (handler-bind
       ;; Translate different kinds of errors into
       ;; `reader-creation-failed' errors.
@@ -47,7 +48,7 @@ receiving events."))
 			 :scope      scope
 			 :transports transports
 			 :cause      condition))))
-    (make-participant 'reader scope :in-pull transports)))
+    (make-participant 'reader scope :in-pull transports converters)))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))
 

@@ -95,7 +95,8 @@ channel."))
 (defmethod make-informer ((scope t)
 			  (type  t)
 			  &key
-			  (transports (transport-options)))
+			  (transports (transport-options))
+			  (converters (default-converters)))
   (handler-bind
       ;; Translate different kinds of errors into
       ;; `informer-creation-failed' errors.
@@ -106,7 +107,7 @@ channel."))
 			 :type       type
 			 :cause      condition))))
     (bind (((:values informer configurator)
-	    (make-participant 'informer scope :out transports
+	    (make-participant 'informer scope :out transports converters
 			      :type type)))
       ;; Connect the processor of CONFIGURATOR to INFORMER as an event
       ;; handler.
