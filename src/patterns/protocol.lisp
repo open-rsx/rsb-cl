@@ -126,14 +126,24 @@ removed from SERVER."))
 
 (defgeneric make-remote-server (scope-or-uri
 				&key
-				transports)
+				transports
+				converters)
   (:documentation
    "Make and return a `remote-server' instance that calls methods
-provided by servers on the scope SCOPE-OR-URI. TRANSPORTS determines
-the transport configuration that should be used to contact the
-servers. See `rsb.transport::make-connectors' for details regarding
-acceptable values of TRANSPORTS. If the server cannot be created, an
-error of type `remote-server-creation-failed' is signaled."))
+provided by servers on the scope SCOPE-OR-URI.
+
+TRANSPORTS determines the transport configuration that should be used
+to contact the servers. See `rsb.transport:make-connectors' for
+details regarding acceptable values of TRANSPORTS.
+
+CONVERTERS, if supplied, is an list that specifies a set of converters
+for particular wire-types from which the converters that are used in
+transports should be chosen. Items are of the form (WIRE-TYPE
+. CONVERTER). If CONVERTERS is not supplied, a default set of
+converters is derived from the default configuration.
+
+If the server cannot be created, an error of type
+`remote-server-creation-failed' is signaled."))
 
 
 ;;; Local server protocol
@@ -141,12 +151,22 @@ error of type `remote-server-creation-failed' is signaled."))
 
 (defgeneric make-local-server (scope-or-uri
 			       &key
-			       transports)
+			       transports
+			       converters)
   (:documentation
    "Make and return a `local-server' instance that provides methods on
-the scope SCOPE-OR-URI for other participants to call. TRANSPORTS
-determines the transport configuration that should be used to make the
-provided methods available to other participants. See
-`rsb.transport::make-connectors' for details regarding acceptable
-values of TRANSPORTS. If the server cannot be created, an error of
-type `local-server-creation-failed' is signaled."))
+the scope SCOPE-OR-URI for other participants to call.
+
+TRANSPORTS determines the transport configuration that should be used
+to make the provided methods available to other participants. See
+`rsb.transport:make-connectors' for details regarding acceptable
+values of TRANSPORTS.
+
+CONVERTERS, if supplied, is an list that specifies a set of converters
+for particular wire-types from which the converters that are used in
+transports should be chosen. Items are of the form (WIRE-TYPE
+. CONVERTER). If CONVERTERS is not supplied, a default set of
+converters is derived from the default configuration.
+
+If the server cannot be created, an error of type
+`local-server-creation-failed' is signaled."))
