@@ -201,7 +201,7 @@
 
 			      (:file       "fundamental"
 			       :depends-on ("package" "conditions"
-					    "protocol"))
+					    "protocol" "macros"))
 
 			      (:file       "reader"
 			       :depends-on ("package" "conditions"
