@@ -166,11 +166,17 @@ the value of `*default-configuration*' is used."
   '((octet-vector . (:fundamental-void
 		     :fundamental-utf-8-string
 		     :fundamental-bytes
-		     :fundamental-double :fundamental-float
-		     :fundamental-int32  :fundamental-int64
-		     :fundamental-uint32 :fundamental-uint64
-
 		     ;; TODO(jmoringe): hack
+		     #+asdf-protocol-buffer-descriptors
+		     :fundamental-double
+		     #+asdf-protocol-buffer-descriptors
+		     :fundamental-float
+		     #+asdf-protocol-buffer-descriptors
+		     :fundamental-int32
+		     #+asdf-protocol-buffer-descriptors
+		     :fundamental-int64
+		     #+asdf-protocol-buffer-descriptors
+		     :fundamental-uint32
 		     #+asdf-protocol-buffer-descriptors
 		     :fundamental-uint64))))
 
