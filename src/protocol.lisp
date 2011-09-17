@@ -161,14 +161,22 @@ RECEIVER to NEW-VALUE."))
 
 (defgeneric make-listener (scope-or-uri
 			   &key
-			   transports)
+			   transports
+			   converters)
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
-`listener-creation-failed' is signaled. TRANSPORTS determines the
-transport configuration that is used to participate in the
-channel. See `rsb.transport::make-connectors' for details regarding
-acceptable values of TRANSPORTS."))
+`listener-creation-failed' is signaled.
+
+TRANSPORTS determines the transport configuration that is used to
+participate in the channel. See `rsb.transport:make-connectors' for
+details regarding acceptable values of TRANSPORTS.
+
+CONVERTERS, if supplied, is an list that specifies a set of converters
+for particular wire-types from which the converters that are used in
+transports should be chosen. Items are of the form (WIRE-TYPE
+. CONVERTER). If CONVERTERS is not supplied, a default set of
+converters is derived from the default configuration."))
 
 
 ;;; Reader protocol
@@ -176,16 +184,25 @@ acceptable values of TRANSPORTS."))
 
 (defgeneric make-reader (scope-or-uri
 			 &key
-			 transports)
+			 transports
+			 converters)
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
-`reader-creation-failed' is signaled. TRANSPORTS determines the
-transport configuration that is used to participate in the
-channel. See `rsb.transport::make-connectors' for details regarding
-acceptable values of TRANSPORTS. The resulting `reader' instance can
-be used to receive data in \"pull\" manner using the `receive'
-function."))
+`reader-creation-failed' is signaled.
+
+TRANSPORTS determines the transport configuration that is used to
+participate in the channel. See `rsb.transport:make-connectors' for
+details regarding acceptable values of TRANSPORTS.
+
+CONVERTERS, if supplied, is an list that specifies a set of converters
+for particular wire-types from which the converters that are used in
+transports should be chosen. Items are of the form (WIRE-TYPE
+. CONVERTER). If CONVERTERS is not supplied, a default set of
+converters is derived from the default configuration.
+
+The resulting `reader' instance can be used to receive data in
+\"pull\" manner using the `receive' function."))
 
 (defgeneric receive (reader
 		     &key
@@ -203,14 +220,22 @@ nil is returned."))
 
 (defgeneric make-informer (scope-or-uri type
 			   &key
-			   transports)
+			   transports
+			   converters)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
-an error of type `informer-creation-failed' is signaled. TRANSPORTS
-determines the transport configuration that is used to participate in
-the channel. See `rsb.transport::make-connectors' for details
-regarding acceptable values of TRANSPORTS."))
+an error of type `informer-creation-failed' is signaled.
+
+TRANSPORTS determines the transport configuration that is used to
+participate in the channel. See `rsb.transport:make-connectors' for
+details regarding acceptable values of TRANSPORTS.
+
+CONVERTERS, if supplied, is an list that specifies a set of converters
+for particular wire-types from which the converters that are used in
+transports should be chosen. Items are of the form (WIRE-TYPE
+. CONVERTER). If CONVERTERS is not supplied, a default set of
+converters is derived from the default configuration."))
 
 (defgeneric send (informer data
 		  &rest meta-data
