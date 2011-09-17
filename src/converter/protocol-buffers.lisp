@@ -47,5 +47,6 @@
 (defmethod domain->wire ((converter     (eql :protocol-buffer))
 			 (domain-object standard-object))
   (let* ((descriptor  (pb:message-descriptor domain-object))
-	 (wire-schema (pb:descriptor-qualified-name descriptor)))
+	 (wire-schema (intern (pb:descriptor-qualified-name descriptor)
+			      :keyword)))
    (values (pb:pack* domain-object) wire-schema)))
