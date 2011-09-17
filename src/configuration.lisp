@@ -172,13 +172,15 @@ the value of `*default-configuration*' is used."
 		     #+asdf-protocol-buffer-descriptors
 		     :fundamental-float
 		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-int32
+		     :fundamental-uint64
 		     #+asdf-protocol-buffer-descriptors
 		     :fundamental-int64
 		     #+asdf-protocol-buffer-descriptors
 		     :fundamental-uint32
 		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-uint64))))
+		     :fundamental-int32
+		     #+asdf-protocol-buffer-descriptors
+		     :protocol-buffer))))
 
 
 ;;; Utility functions
