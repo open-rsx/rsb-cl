@@ -67,7 +67,7 @@ PARTICIPANT."
   "Make and return a participant instance of CLASS that participates
 in the channel designated by SCOPE. DIRECTION is one
 of :in-push, :in-pull and :out. TRANSPORTS is a list of connector
-classes. ARGS are arguments for the created transport instances.
+classes. ARGS are arguments for the created CLASS instance.
 
 Return three values:
 + the `participant' instance
