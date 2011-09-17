@@ -21,27 +21,28 @@
 
 (defclass participant (uuid-mixin
 		       scope-mixin)
-  ((id    :reader participant-id)
-   (scope :reader participant-scope))
+  ((id         :reader   participant-id)
+   (scope      :reader   participant-scope)
+   (converters :initarg  :converters
+	       :type     list
+	       :initform nil
+	       :reader   participant-converters
+	       :documentation
+	       "Stores the converters available for use in connectors
+of the participant."))
   (:documentation
    "Instances of this class participate in the exchange of
 notifications on one channel of the bus."))
 
-(defmethod participant-converter ((participant t) (wire-type t)
+(defmethod participant-converter ((participant participant)
+				  (wire-type   t)
 				  &key &allow-other-keys)
-  "Try to obtain the requested converter from the connectors of
-PARTICIPANT."
-  (let* ((configurator (rsb.ep:client-configurator participant))
-	 (connectors   (remove wire-type (rsb.ep:configurator-connectors
-					  configurator)
-			       :test-not #'subtypep
-			       :key      #'rsb.transport:connector-wire-type)))
-    (some #'(lambda (connector)
-	      (when (compute-applicable-methods
-		     (fdefinition 'rsb.transport:connector-converter)
-		     (list connector))
-		(rsb.transport:connector-converter connector)))
-	  connectors)))
+  "Return the converter for WIRE-TYPE that is used by the connectors
+of PARTICIPANT."
+  (map 'list #'cdr
+       (remove wire-type (participant-converters participant)
+	       :key      #'car
+	       :test-not #'subtypep)))
 
 (defmethod relative-url ((participant participant))
   (puri:merge-uris

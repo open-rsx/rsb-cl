@@ -174,6 +174,7 @@
    :participant
    :participant-id
    :participant-scope
+   :participant-converters
    :participant-converter)
 
   ;; Protocol for receiving participants
