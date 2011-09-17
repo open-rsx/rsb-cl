@@ -34,7 +34,7 @@
    "Unit tests for the `fundamental-void' converter."))
 
 (define-basic-converter-test-cases (:fundamental-void)
-    `((,(octetify #())  :void nil)
+    `((,(octetify #())  :void ,+no-value+)
       (,(octetify #(1)) :void :not-applicable)
       (:not-applicable  :void t)
       (:not-applicable  :void ,(octetify #()))

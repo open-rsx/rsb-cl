@@ -56,6 +56,12 @@
    :find-converter-class
    :converter-classes)
 
+  ;; void converter
+  (:export
+   :+no-value+ ;; marker value
+   :no-value   ;; type
+   )
+
   ;; `force-wire-schema' converter class
   (:export
    :force-wire-schema

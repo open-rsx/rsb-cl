@@ -23,10 +23,17 @@
 ;;; Special fundamental converters
 ;;
 
-(define-simple-converter (:fundamental-void :void null
-			  :wire-type       (simple-array (unsigned-byte 8) (0))
-			  :data-type-class (eql nil))
-    (nil)
+(defconstant +no-value+ '%no-value
+  "This object is used to represent the absence of a value.")
+
+(deftype no-value ()
+  "Instances of this type represent the absence of a value."
+  '(eql %no-value))
+
+(define-simple-converter (:fundamental-void :void no-value
+					    :wire-type       (simple-array (unsigned-byte 8) (0))
+					    :data-type-class (eql +no-value+))
+    (+no-value+)
   ((make-array 0 :element-type '(unsigned-byte 8))))
 
 (define-simple-converter (:fundamental-null t t
@@ -51,6 +58,6 @@
 
 (define-simple-converter
     (:fundamental-bytes :bytes (vector (unsigned-byte 8))
-			:data-type-class simple-array)
+     :data-type-class simple-array)
     (wire-data)
   ((coerce domain-object 'octet-vector)))
