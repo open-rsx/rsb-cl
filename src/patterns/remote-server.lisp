@@ -142,8 +142,11 @@ BLOCK? is non-nil."
   (iter (restart-case
 	    (return-from call
 	      (if block?
-		  (nth-value 0 (future-result (call-next-method)
-					      :timeout timeout))
+		  (let ((result (future-result (call-next-method)
+					       :timeout timeout)))
+		    (if (eq result rsb.converter:+no-value+)
+			(values)
+			result))
 		  (call-next-method)))
 	  (retry ()
 	    :report (lambda (stream)
