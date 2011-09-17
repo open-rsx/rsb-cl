@@ -21,11 +21,15 @@
 
 (defmacro with-remote-server ((var scope
 			       &rest args
-			       &key &allow-other-keys)
+			       &key
+			       transports
+			       converters
+			       &allow-other-keys)
 			      &body body)
   "Execute BODY with VAR bound to a RSB publisher for name NAME. The
 publisher is destroyed when executed of BODY ends normally or because
 of a control transfer."
+  (declare (ignore transports converters))
   (check-type var symbol "a symbol")
 
   `(let ((,var (make-remote-server ,scope ,@args)))
@@ -35,11 +39,15 @@ of a control transfer."
 
 (defmacro with-local-server ((var scope
 			      &rest args
-			      &key &allow-other-keys)
+			      &key
+			      transports
+			      converters
+			      &allow-other-keys)
 			     &body body)
   "Execute BODY with VAR bound to a RSB publisher for name NAME. The
 publisher is destroyed when executed of BODY ends normally or because
 of a control transfer."
+  (declare (ignore transports converters))
   (check-type var symbol "a symbol")
 
   `(let ((,var (make-local-server ,scope ,@args)))

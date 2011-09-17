@@ -21,11 +21,15 @@
 
 (defmacro with-listener ((var scope-or-uri
 			  &rest args
-			  &key &allow-other-keys)
+			  &key
+			  transports
+			  converters
+			  &allow-other-keys)
 			 &body body)
   "Execute BODY with VAR bound to an RSB listener for topic TOPIC on
 channel CHANNEL. The listener is destroyed when the execution of BODY
 ends normally or because of a control transfer."
+  (declare (ignore transports converters))
   (check-type var symbol "a symbol")
 
   `(let ((,var (make-listener ,scope-or-uri ,@args)))
@@ -35,11 +39,15 @@ ends normally or because of a control transfer."
 
 (defmacro with-reader ((var scope-or-uri
 			&rest args
-			&key &allow-other-keys)
+			&key
+			transports
+			converters
+			&allow-other-keys)
 		       &body body)
   "Execute BODY with VAR bound to an RSB listener for topic TOPIC on
 channel CHANNEL. The listener is destroyed when the execution of BODY
 ends normally or because of a control transfer."
+  (declare (ignore transports converters))
   (check-type var symbol "a symbol")
 
   `(let ((,var (make-reader ,scope-or-uri ,@args)))
@@ -65,11 +73,15 @@ ends normally or because of a control transfer."
 
 (defmacro with-informer ((var scope type
 			  &rest args
-			  &key &allow-other-keys)
+			  &key
+			  transports
+			  converters
+			  &allow-other-keys)
 			 &body body)
   "Execute BODY with VAR bound to a RSB publisher for name NAME. The
 publisher is destroyed when executed of BODY ends normally or because
 of a control transfer."
+  (declare (ignore transports converters))
   (check-type var symbol "a symbol")
 
   `(let ((,var (make-informer ,scope ,type ,@args)))
