@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.transport.test
+(cl:defpackage :rsb.transport.test
   (:use
    :cl
    :alexandria
@@ -46,7 +44,7 @@
   (:documentation
    "This package contains unit tests for the transport module."))
 
-(in-package :rsb.transport.test)
+(cl:in-package :rsb.transport.test)
 
 (deftestsuite transport-root (root)
   ()
