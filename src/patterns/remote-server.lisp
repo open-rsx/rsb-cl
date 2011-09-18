@@ -199,7 +199,7 @@ call it."
 
 (defmethod make-remote-server ((scope scope)
 			       &key
-			       (transports (rsb::transport-options))  ;;; TODO(jmoringe): package
+			       (transports (transport-options))
 			       (converters (default-converters)))
   (make-instance 'remote-server
 		 :scope             scope

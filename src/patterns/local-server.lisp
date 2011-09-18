@@ -100,7 +100,7 @@ these methods are exposed for remote clients."))
 
 (defmethod make-local-server ((scope scope)
 			      &key
-			      (transports (rsb::transport-options)) ;;; TODO(jmoringe): package
+			      (transports (transport-options))
 			      (converters (default-converters)))
   "Make and return a `local-server' instance that provides a service
 at the scope SCOPE."

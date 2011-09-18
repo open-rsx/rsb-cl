@@ -218,6 +218,7 @@
 
    :&inherit
 
+   :transport-options
    :default-converters)
 
   ;; URI-related function
