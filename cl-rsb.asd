@@ -30,7 +30,7 @@
 
 #+sbcl (asdf:load-system :sb-posix)
 
-(when (find-system :asdf-system-connections)
+(when (find-system :asdf-system-connections nil)
   (load-system :asdf-system-connections))
 
 (when (find-symbol "DOC-OP" :asdf)
