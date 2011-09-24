@@ -82,7 +82,7 @@
 		:iterate
 		:metabang-bind
 
-		#+sbcl sb-concurrency
+		#+sbcl :sb-concurrency
 		:bordeaux-threads ;; or eager-future
 		:trivial-garbage
 		:closer-mop
