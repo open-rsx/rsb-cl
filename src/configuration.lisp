@@ -119,8 +119,8 @@
 ;;
 
 (defun transport-options (&key
-			  (config *default-configuration*)
-			  exclude-disabled?)
+			  (config            *default-configuration*)
+			  (exclude-disabled? t))
   "Collect and interpret options in CONFIG that apply to
 transports. Options for transports which are disabled in CONFIG are
 not returned."
