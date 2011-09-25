@@ -62,7 +62,7 @@ participant."))
     ;; CONNECTOR's handlers.
     (notify processor connector action)
 
-    (log1 :info configurator "Connecting ~S -> ~S" connector processor)
+    (log1 :trace configurator "Connecting ~S -> ~S" connector processor)
     (push processor (handlers connector))))
 
 (defmethod notify ((configurator in-route-configurator)
@@ -73,7 +73,7 @@ participant."))
 	   (processor configurator-processor)) configurator))
     ;; Remove processor from connectors handlers and notify regarding
     ;; removed connector.
-    (log1 :info configurator "Disconnecting ~S -> ~S" connector processor)
+    (log1 :trace configurator "Disconnecting ~S -> ~S" connector processor)
     (removef (handlers connector) processor)
 
     (notify processor connector action)
@@ -140,12 +140,12 @@ connectors and processor."
 		   (handler      t)
 		   (action       (eql :handler-added)))
   (bind ((processor (configurator-processor configurator)))
-    (log1 :info configurator "Adding handler ~S to ~S" handler processor)
+    (log1 :trace configurator "Adding handler ~S to ~S" handler processor)
     (push handler (handlers processor))))
 
 (defmethod notify ((configurator in-route-configurator)
 		   (handler      t)
 		   (action       (eql :handler-removed)))
   (bind ((processor (configurator-processor configurator)))
-    (log1 :info configurator "Removing handler ~S from ~S" handler processor)
+    (log1 :trace configurator "Removing handler ~S from ~S" handler processor)
     (removef (handlers processor) handler)))
