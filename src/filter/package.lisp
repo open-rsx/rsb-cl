@@ -88,7 +88,10 @@
   ;; `regex-filter' class
   (:export
    :regex-filter
-   :filter-regex)
+   :filter-regex
+   :filter-case-sensitive?
+
+   :compile-regex)
 
   ;; `method-filter' class
   (:export
