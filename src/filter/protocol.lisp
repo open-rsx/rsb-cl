@@ -51,8 +51,8 @@ ARGS as initargs."
 		    &key &allow-other-keys)
   (:documentation
    "Construct and return a filter instance according to SPEC and
-ARGS. where SPEC is either a keyword designating a filter class or a
-list of the form
+ARGS. SPEC is either a keyword designating a filter class or a list of
+the form
 
   (CLASS (CHILDSPEC1) (CHILDSPEC2) ...)
 
