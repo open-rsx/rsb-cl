@@ -43,6 +43,24 @@ function."))
 
 (addtest (informer-root
           :documentation
+	  "Test sending data.")
+  send/event
+
+  (with-informer (informer "/informer/send/event" t)
+    (ensure-cases (scope data args expected-method expected-meta-data)
+	'(("/informer/send/event" "foo" ()              nil  nil)
+	  ("/informer/send/event" "foo" (:method :bar)  :bar nil)
+	  ("/informer/send/event" "foo" (:foo    "baz") nil  ((:foo . "baz"))))
+
+      (let* ((event  (make-event scope data))
+	     (result (apply #'send informer event args)))
+	(ensure-same (event-method result) expected-method
+		     :test #'eq)
+	(ensure-same (meta-data-alist result) expected-meta-data
+		     :test (rcurry #'set-equal :test #'equal))))))
+
+(addtest (informer-root
+          :documentation
 	  "Test the type check employed by the `send' method.")
   send/check-type
 

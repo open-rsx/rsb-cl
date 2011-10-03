@@ -65,25 +65,37 @@ channel."))
 	     :expected-scope scope))))
 
 (defmethod send ((informer informer) (event event)
-		 &key)
+		 &rest meta-data
+		 &key
+		 method)
   ;; Set EVENT's sequence number to our next sequence number and
   ;; origin to our id.
   (setf (event-sequence-number event)
 	(funcall (%informer-sequence-number-generator informer))
 	(event-origin event)
 	(participant-id informer))
+
+  (when method
+    (setf (event-method event) method))
+
+  ;; Additional meta-data.
+  (iter (for (key value) on meta-data :by #'cddr)
+	(unless (or (eq key :method) (eq key :unchecked?))
+	  (setf (meta-data event key) value)))
+
   ;; Send EVENT.
   (rsb.ep:handle informer event)
+
   ;; Return event to the client in case we created it on the fly.
   event)
 
 (defmethod send ((informer informer) (data t)
-		 &rest meta-data
+		 &rest args
 		 &key)
-  (send informer (apply #'make-event/typed
-			(participant-scope informer)
-			data (informer-type informer)
-			meta-data)))
+  (apply #'send informer (make-event/typed
+			  (participant-scope informer)
+			  data (informer-type informer))
+	 args))
 ;; TODO type: (type-of data) ? or let event decide?
 
 (defmethod print-object ((object informer) stream)
