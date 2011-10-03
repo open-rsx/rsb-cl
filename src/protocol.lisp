@@ -240,8 +240,15 @@ converters is derived from the default configuration."))
 
 (defgeneric send (informer data
 		  &rest meta-data
-		  &key &allow-other-keys)
+		  &key
+		  unchecked?
+		  &allow-other-keys)
   (:documentation
    "Send DATA to participants of the channel in which INFORMER
 participates. Add key-value pairs in META-DATA to the meta-data of the
-event created from DATA."))
+event created from DATA.
+
+UNCHECKED? controls whether the compatibility of INFORMER and DATA
+should be validated. This mainly applies if data is an `event'
+instance since properties like the scope of the event may conflict
+with properties of INFORMER."))

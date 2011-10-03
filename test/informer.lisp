@@ -23,16 +23,18 @@
 			     participant-suite)
   ()
   (:documentation
-   "Unit tests for the `informer' class and `make-informer' function."))
+   "Unit tests for the `informer' class and `make-informer'
+function."))
 
 (define-basic-participant-test-cases :informer
   '("/informer/construction" (t)                 "/informer/construction")
+  ;; No transports => error
   '("/"                      (t :transports nil) :error))
 
 (addtest (informer-root
           :documentation
 	  "Test sending data.")
-  send
+  send/data
 
   (with-informer (informer "/informer/send" t)
     (iter (repeat 100)
@@ -42,9 +44,9 @@
 (addtest (informer-root
           :documentation
 	  "Test the type check employed by the `send' method.")
-  check-type
+  send/check-type
 
-  (with-informer (informer "/informer/check-type" 'sequence)
+  (with-informer (informer "/informer/send/check-type" 'sequence)
     ;; In this case, the event cannot be constructed from the payload.
     (ensure-condition 'type-error
       (send informer 5))
@@ -52,37 +54,45 @@
     ;; type.
     (ensure-condition 'invalid-event-type
       (send informer (make-event/typed
-		      "/informer/check-type" 5 'integer)))
+		      "/informer/send/check-type" 5 'integer)))
 
     ;; The following are compatible.
     (send informer '(1 2))
-    (send informer (make-event/typed "/informer/check-type" "bla" 'string))
-    (send informer (make-event/typed "/informer/check-type" "bla" 'sequence))))
+    (send informer (make-event/typed "/informer/send/check-type" "bla" 'string))
+    (send informer (make-event/typed "/informer/send/check-type" "bla" 'sequence))))
 
 (addtest (informer-root
           :documentation
 	  "Test the scope check employed by the `send' method.")
-  check-scope
+  send/check-scope
 
-  (with-informer (informer "/informer/check-scope" t)
+  (with-informer (informer "/informer/send/check-scope" t)
     ;; Identical scope and subscopes are allowed
-    (send informer (make-event "/informer/check-scope" "foo"))
-    (send informer (make-event "/informer/check-scope/subscope" "foo"))
+    (send informer (make-event "/informer/send/check-scope" "foo"))
+    (send informer (make-event "/informer/send/check-scope/subscope" "foo"))
 
     ;; Scope is not identical to or a subscope of the informer's
     ;; scope.
     (ensure-condition 'invalid-event-scope
-      (send informer (make-event "/informer/wrong-scope" "foo")))))
+      (send informer (make-event "/informer/send/wrong-scope" "foo")))))
 
-;; (addtest (informer-root
-;;           :documentation
-;;	  "Test binding *informer-stream*.")
-;;   informer-stream
-;;
-;;   (with-informer (pub "stream")
-;;     (ensure-same
-;;      (with-output-to-string (stream)
-;;        (let ((*informer-stream* stream))
-;;	 (send pub "<bla/>")))
-;;      "<bla/>"
-;;      :test #'string=)))
+(addtest (informer-root
+          :documentation
+	  "Test the \"unckecked\" mode of operation of the `send'
+method.")
+  send/unckecked
+
+  (with-informer (informer "/informer/send/unckecked" 'string)
+    ;; Arbitrary scopes should be accepted.
+    (send informer (make-event "/informer/send/unchecked" "foo")
+	  :unchecked? t)
+    (send informer (make-event "/informer/send/unchecked/subscope" "foo")
+	  :unchecked? t)
+    (send informer (make-event "/informer/send/wrong-scope" "foo")
+	  :unchecked? t)
+
+    ;; Arbitrary data types should accepted.
+    (send informer (make-event/typed "/informer/send/unchecked" "foo" 'string)
+	  :unchecked? t)
+    (send informer (make-event/typed "/informer/send/unchecked" 1 'integer)
+	  :unchecked? t)))

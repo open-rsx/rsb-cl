@@ -43,7 +43,11 @@ possible for multiple informers to send events for the same
 channel."))
 
 (defmethod send :before ((informer informer) (data event)
-			 &key)
+			 &key
+			 unchecked?)
+  (when unchecked?
+    (return-from send))
+
   (bind (((:accessors-r/o (scope participant-scope)
 			  (type  informer-type)) informer))
     ;; Ensure that the type of DATA is a subtype of INFORMER's type
