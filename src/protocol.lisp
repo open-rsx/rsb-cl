@@ -39,7 +39,7 @@
 	    (let ((restart (find-restart ',name)))
 	      (if restart
 		  (invoke-restart restart ,@args)
-		(warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name)))))))
+		  (warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name)))))))
 
   (define-restart retry ()
     "Retry the failed operation.")
@@ -122,7 +122,8 @@ continuing in a best effort manner instead of signaling."
   (handler-bind
       (((or error bt:timeout)
 	#'(lambda (condition)
-	    (warn "~@<Error during detaching: ~A~@:>" condition)
+	    (warn "~@<Error during detaching of ~A: ~A~@:>"
+		  participant condition)
 	    (continue))))
     (detach participant)))
 
