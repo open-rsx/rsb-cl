@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :cl-user)
-
-(defpackage :rsb.test
+(cl:defpackage :rsb.test
   (:use
    :cl
    :alexandria
@@ -53,7 +51,7 @@
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
 
-(in-package :rsb.test)
+(cl:in-package :rsb.test)
 
 (deftestsuite root ()
   ((spread-port (asdf:component-property
