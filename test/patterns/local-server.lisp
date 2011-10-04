@@ -71,3 +71,38 @@
 	      (progn
 		(ensure-same result-1 expected)
 		(ensure-same result-2 expected)))))))
+
+(addtest (local-server-root
+          :documentation
+	  "Test methods on `call' for the `local-server' class.")
+  call
+
+  (let ((argument))
+    (setf (server-method simple-server "echopayload")
+	  #'(lambda (x) (setf argument x))
+	  (server-method simple-server "echoevent"
+			 :argument :event)
+	  #'(lambda (x) (setf argument x) (event-data x))
+	  (server-method simple-server "error")
+	  #'(lambda (x) (error "intentional error")))
+
+    (ensure-cases (method arg expected-argument expected-result)
+	'(("echopayload" "foo" "foo"  "foo")
+	  ("echoevent"   "foo" event  "foo")
+	  ("error"       "foo" :none  string))
+
+      (setf argument :none)
+      (let* ((result      (call simple-server
+				(server-method simple-server method)
+				(make-event "/localserver" arg)))
+	     (result-data (event-data result)))
+	(if (typep expected-argument '(and symbol (not keyword)))
+	    (ensure (typep argument expected-argument))
+	    (ensure-same argument expected-argument
+			 :test #'equal))
+
+	(ensure (typep result 'event))
+	(if (symbolp expected-result)
+	    (ensure (typep result-data expected-result))
+	    (ensure-same result-data expected-result
+			 :test #'equal))))))
