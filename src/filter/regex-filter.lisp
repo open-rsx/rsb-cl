@@ -61,8 +61,10 @@ regular expression is matched in case insensitive mode."))
   (:default-initargs
    :regex (missing-required-initarg 'regex-filter :regex))
   (:documentation
-   "Instances of the filter class discriminate events by matching
-event payloads that are strings against a given regular expression."))
+   "This filter discriminate events by matching event payloads that
+are strings against a given regular expression. For payloads of other
+types, the fallback policy is applied. Matching is case sensitive
+unless otherwise requested using the :case-sensitive? initarg."))
 
 (defmethod shared-initialize :after ((instance   regex-filter)
                                      (slot-names t)
