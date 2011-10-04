@@ -146,7 +146,11 @@ generic support for retrieving, adding and removing methods."))
 
 (defmethod (setf server-method) ((new-value method1)
 				 (server    server)
-				 (name      string))
+				 (name      string)
+				 &key
+				 argument)
+  (declare (ignore argument))
+
   (check-type name method-name "a legal method name")
 
   (bind (((:accessors-r/o (methods %server-methods)) server))
@@ -162,7 +166,11 @@ generic support for retrieving, adding and removing methods."))
 
 (defmethod (setf server-method) ((new-value (eql nil))
 				 (server    server)
-				 (name      string))
+				 (name      string)
+				 &key
+				 argument)
+  (declare (ignore argument))
+
   (detach (server-method server name))
   (remhash name (%server-methods server))
   new-value)

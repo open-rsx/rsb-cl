@@ -26,6 +26,9 @@
 names."
   'scope-component)
 
+(deftype argument-style ()
+  `(member :payload :event))
+
 (deftype return-style ()
   "Instances of this type describes styles in which a result can be
 returned from a method call."

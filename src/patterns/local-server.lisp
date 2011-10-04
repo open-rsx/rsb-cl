@@ -29,7 +29,14 @@
 	     :reader   method-callback
 	     :documentation
 	     "Stores the function that is called to perform the actual
-processing of the method."))
+processing of the method.")
+   (argument :initarg  :argument
+	     :type     argument-style
+	     :reader   method-argument
+	     :initform :payload
+	     :documentation
+	     "Stores the kind of argument (event vs. payload) that
+should be passed to the callback function."))
   (:default-initargs
    :callback (missing-required-initarg 'local-method :callback))
   (:documentation
@@ -55,7 +62,8 @@ and send the reply using the informer."
   "Invoke the call back function of METHOD with the payload of
 REQUEST. Send the result or an error notification back to the caller."
   (bind (((:accessors-r/o (informer method-informer)
-			  (callback method-callback)) method)
+			  (callback method-callback)
+			  (argument method-argument)) method)
 	 ;; If we got here via direct function calls within a single
 	 ;; thread, the event id-based mechanism is not required.
 	 (id (if *local-call*
@@ -63,7 +71,11 @@ REQUEST. Send the result or an error notification back to the caller."
 		 (format nil "~(~A~)" (event-id request))))) ;;; TODO(jmoringe): make a function
     (handler-case
 	(bind ((maybe-result (multiple-value-list
-			      (funcall callback (event-data request))))
+			      (cond
+				((eq argument :event)
+				 (funcall callback request))
+				(t
+				 (funcall callback (event-data request))))))
 	       (result       (if maybe-result
 				 (first maybe-result)
 				 rsb.converter:+no-value+)))
@@ -89,12 +101,17 @@ these methods are exposed for remote clients."))
 
 (defmethod (setf server-method) ((new-value function)
 				 (server    local-server)
-				 (name      string))
+				 (name      string)
+				 &key
+				 (argument :payload))
+  (check-type argument argument-style "either :payload or :event")
+
   (setf (server-method server name)
 	(make-instance 'local-method
 		       :server   server
 		       :name     name
-		       :callback new-value)))
+		       :callback new-value
+		       :argument argument)))
 
 
 ;;; `local-server' creation

@@ -45,18 +45,23 @@
 	  "Test adding methods to a `local-server' instance.")
   set-method
 
-  (ensure-cases (name method expected)
-      `(("foo"          ,#'(lambda ()) t)
-	("foo"          ,#'(lambda ()) t)
-	("foo"          nil            nil)
+  (ensure-cases (name method args expected)
+      `(("foo"          ,#'(lambda ()) ()                   t)
+	("foo"          ,#'(lambda ()) ()                   t)
+	("foo"          nil            ()                   nil)
+
+	("bar"          ,#'(lambda ()) (:argument :event)   t)
+	("bar"          ,#'(lambda ()) (:argument :payload) t)
 
 	;; invalid method name => error
-	("%invalidname" ,#'(lambda ()) :error))
+	("%invalidname" ,#'(lambda ()) ()                   :error)
+	;; invalid argument style => error
+	("bar"          ,#'(lambda ()) (:argument :foo)     :error))
 
     (if (eq expected :error)
 	(ensure-condition 'type-error
-	  (setf (server-method simple-server name) method))
-	(let ((result-1 (setf (server-method simple-server name) method))
+	  (setf (apply #'server-method simple-server name args) method))
+	(let ((result-1 (setf (apply #'server-method simple-server name args) method))
 	      (result-2 (server-method simple-server name
 				       :error? nil)))
 	  (if (eq expected t)

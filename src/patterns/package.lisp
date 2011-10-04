@@ -28,7 +28,9 @@
 
   ;; Types
   (:export
-   :method-name)
+   :method-name
+
+   :argument-style)
 
   ;; Conditions
   (:export

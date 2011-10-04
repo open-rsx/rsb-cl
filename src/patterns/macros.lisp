@@ -34,7 +34,7 @@ of a control transfer."
 
   `(let ((,var (make-remote-server ,scope ,@args)))
      (unwind-protect
-	 (progn ,@body)
+	  (progn ,@body)
        (detach/ignore-errors ,var))))
 
 (defmacro with-local-server ((var scope
@@ -52,7 +52,7 @@ of a control transfer."
 
   `(let ((,var (make-local-server ,scope ,@args)))
      (unwind-protect
-	 (progn ,@body)
+	  (progn ,@body)
        (detach/ignore-errors ,var))))
 
 (defmacro with-methods ((var) methods &body body)
@@ -61,7 +61,9 @@ server that is the value of VAR. METHODS is a list of items of the form
 \(NAME (ARG REQUEST-TYPE) BODY)
 where NAME is the name of the method, ARG is a symbol which will be
 bound to the request data during the execution of the method body
-BODY. REQUEST-TYPE specifies the type of acceptable requests."
+BODY. REQUEST-TYPE specifies the type of acceptable requests. If
+REQUEST-TYPE is the keyword :event, BODY is called with ARG bound to
+the request event (instead of just the payload)."
   (check-type var symbol "a symbol")
 
   (bind (((:flet process-one (spec))
@@ -72,7 +74,9 @@ BODY. REQUEST-TYPE specifies the type of acceptable requests."
 
 	    (list
 	     ;; add method
-	     `(setf (server-method ,var ,name-as-string)
+	     `(setf (server-method ,var ,name-as-string
+				   ,@(when (eq type :event)
+				       '(:argument :event)))
 		    #'(lambda (,arg) ,@body))
 	     ;; remove method
 	     `(let ((method (server-method ,var ,name-as-string :error? nil)))

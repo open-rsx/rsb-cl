@@ -113,12 +113,17 @@ returned. "))
    "Return the method named NAME of SERVER. If no such method exists
 and ERROR? is non-nil signal an error. Otherwise return nil."))
 
-(defgeneric (setf server-method) (new-value server name)
+(defgeneric (setf server-method) (new-value server name
+				  &key
+				  argument)
   (:documentation
    "Store NEW-VALUE as the method named NAME of SERVER. NEW-VALUE can
 be a method instance a thing like a function based on which a method
 can be made. If NEW-VALUE is nil, the method stored for NAME is
-removed from SERVER."))
+removed from SERVER.
+When supplied, ARGUMENT has to be either :event or :payload causing
+the associated callback function of NEW-VALUE to receive the request
+event or just its payload respectively."))
 
 
 ;;; Remote server protocol
