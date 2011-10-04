@@ -30,6 +30,8 @@
 	     :documentation
 	     "Stores the function that is called to perform the actual
 processing of the method."))
+  (:default-initargs
+   :callback (missing-required-initarg 'local-method :callback))
   (:documentation
    "Instances of this class implement and make available methods of a
 local server. The actual behavior of methods is implemented by

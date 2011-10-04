@@ -429,6 +429,8 @@
 			       :depends-on ("package"))
 			      (:file       "server"
 			       :depends-on ("package"))
+			      (:file       "local-server"
+			       :depends-on ("package"))
 			      (:file       "macros"
 			       :depends-on ("package"))
 

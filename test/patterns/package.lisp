@@ -30,7 +30,8 @@
    :rsb.test)
 
   (:import-from :rsb.patterns
-   :method1)
+   :method1
+   :local-method)
 
   (:documentation
    "This package contains unit tests for the patterns module of
