@@ -149,8 +149,16 @@ generic support for retrieving, adding and removing methods."))
 				 (name      string))
   (check-type name method-name "a legal method name")
 
-  (setf (%method-server new-value)              server
-	(gethash name (%server-methods server)) new-value))
+  (bind (((:accessors-r/o (methods %server-methods)) server))
+    ;; If SERVER already has a method named NAME, detach it cleanly
+    ;; before replacing it.
+    (when-let ((old (gethash name methods)))
+      (detach old))
+
+    ;; Install NEW-VALUE as new implementation of the method named
+    ;; NAME.
+    (setf (%method-server new-value) server
+	  (gethash name methods)     new-value)))
 
 (defmethod (setf server-method) ((new-value (eql nil))
 				 (server    server)
