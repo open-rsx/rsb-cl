@@ -26,8 +26,23 @@
    "Unit tests for the `reader' class and `make-reader' function."))
 
 (define-basic-participant-test-cases :reader
-  '("/reader/construction" nil               "/reader/construction")
-  '("/                   " (:transports nil) :error))
+  '("/reader/construction"
+    nil
+    "/reader/construction")
+  '("/reader/construction"
+    (:transports ((:inprocess &inherit)))
+    "/reader/construction")
+  '("/reader/construction"
+    (:converters ((t . :foo)))
+    "/reader/construction")
+  '("inprocess:/reader/construction"
+    nil
+    "/reader/construction")
+
+  ;; No transports => error
+  '("/reader/construction"
+    (:transports nil)
+    :error))
 
 (addtest (reader-root
           :documentation

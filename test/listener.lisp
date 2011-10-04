@@ -32,10 +32,23 @@
 function."))
 
 (define-basic-participant-test-cases :listener
-  '("/listener/construction" nil "/listener/construction")
-  '("inprocess://localhost/listener/construction" nil
+  '("/listener/construction"
+    nil
     "/listener/construction")
-  '("/" (:transports nil)  :error))
+  '("/listener/construction"
+    (:transports ((:inprocess &inherit)))
+    "/listener/construction")
+  '("/listener/construction"
+    (:converters ((t . :foo)))
+    "/listener/construction")
+  '("inprocess://localhost/listener/construction"
+    nil
+    "/listener/construction")
+
+  ;; No transports => error
+  '("/informer/construction"
+    (:transports nil)
+    :error))
 
 (addtest (listener-root
           :documentation

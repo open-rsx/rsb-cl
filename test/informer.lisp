@@ -27,9 +27,23 @@
 function."))
 
 (define-basic-participant-test-cases :informer
-  '("/informer/construction" (t)                 "/informer/construction")
+  '("/informer/construction"
+    (t)
+    "/informer/construction")
+  '("/informer/construction"
+    (t :transports ((:inprocess &inherit)))
+    "/informer/construction")
+  '("/informer/construction"
+    (t :converters ((t . :foo)))
+    "/informer/construction")
+  '("inprocess:/informer/construction"
+    (t)
+    "/informer/construction")
+
   ;; No transports => error
-  '("/"                      (t :transports nil) :error))
+  '("/informer/construction"
+    (t :transports nil)
+    :error))
 
 (addtest (informer-root
           :documentation
