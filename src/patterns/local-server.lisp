@@ -74,6 +74,8 @@ REQUEST. Send the result or an error notification back to the caller."
 			      (cond
 				((eq argument :event)
 				 (funcall callback request))
+				((eq (event-data request) rsb.converter:+no-value+)
+				 (funcall callback))
 				(t
 				 (funcall callback (event-data request))))))
 	       (result       (if maybe-result
