@@ -28,6 +28,13 @@
    "Return non-nil if EVENT matches the criteria of FILTER."))
 
 
+;;; Default behavior
+;;
+
+(defmethod matches? ((filter function) (event t))
+  "Apply FILTER to EVENT."
+  (funcall filter event))
+
 ;;; Filter class family
 ;;
 
