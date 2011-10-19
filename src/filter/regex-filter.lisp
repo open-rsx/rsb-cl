@@ -93,7 +93,8 @@ unless otherwise requested using the :case-sensitive? initarg."))
 	(ppcre:create-scanner
 	 regex :case-insensitive-mode (not case-sensitive?))))
 
-(defmethod payload-matches? ((filter regex-filter) (payload string))
+(defmethod payload-matches? ((filter regex-filter) (payload string)
+			     &key &allow-other-keys)
   (bind (((:accessors-r/o (scanner filter-scanner)) filter))
     (ppcre:scan scanner payload)))
 

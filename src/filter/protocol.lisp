@@ -35,6 +35,16 @@
   "Apply FILTER to EVENT."
   (funcall filter event))
 
+
+;;; Payload matching protocol
+;;
+
+(defgeneric payload-matches? (filter payload
+			      &key &allow-other-keys)
+  (:documentation
+   "Return non-nil if PAYLOAD matches the criteria of FILTER."))
+
+
 ;;; Filter class family
 ;;
 

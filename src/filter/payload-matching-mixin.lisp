@@ -19,18 +19,6 @@
 
 (in-package :rsb.filter)
 
-
-;;; Payload matching protocol
-;;
-
-(defgeneric payload-matches? (filter payload)
-  (:documentation
-   "Return non-nil if PAYLOAD matches the criteria of FILTER."))
-
-
-;;;
-;;
-
 (defclass payload-matching-mixin ()
   ()
   (:metaclass closer-mop:funcallable-standard-class)
@@ -46,6 +34,7 @@ on the payload of EVENT."
     (:cannot-tell (call-next-method))
     (t            t)))
 
-(defmethod payload-matches? ((filter payload-matching-mixin) (payload t))
+(defmethod payload-matches? ((filter payload-matching-mixin) (payload t)
+			     &key &allow-other-keys)
   "The default behavior is not to decide based on the payload."
   :cannot-tell)
