@@ -26,8 +26,9 @@
 		 plist-meta-data-mixin
 		 plist-timestamp-mixin)
   ((sequence-number :initarg  :sequence-number
-		    :type     sequence-number
+		    :type     (or null sequence-number)
 		    :accessor event-sequence-number
+		    :initform nil
 		    :documentation
 		    "Stores a sequence number of the event \"within\"
 the participant sending the event.")
@@ -151,8 +152,8 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 `eq'."
   (or (eq left right)
       (and (or (not compare-sequence-numbers?)
-	       (= (event-sequence-number left)
-		  (event-sequence-number right)))
+	       (eql (event-sequence-number left)
+		    (event-sequence-number right)))
 	   ;; Scope and origin
 	   (scope= (event-scope left) (event-scope right))
 	   ;; Origin
