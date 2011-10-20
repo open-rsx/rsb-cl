@@ -201,15 +201,18 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 		   &rest meta-data
 		   &key
 		   method
+		   causes
 		   &allow-other-keys)
   "Construct an event addressed at SCOPE with payload DATA and,
 optionally, meta-data consisting of the keys and values in the plist
-META-DATA."
+META-DATA.
+CAUSES can be used to supply a list of causes."
   (make-instance 'event
 		 :scope     (make-scope scope)
 		 :method    method
 		 :data      data
-		 :meta-data (remove-from-plist meta-data :method)))
+		 :meta-data (remove-from-plist meta-data :method :causes)
+		 :causes    causes))
 
 (defun make-event/typed (scope data type
 			 &rest meta-data
