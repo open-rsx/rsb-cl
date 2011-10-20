@@ -75,7 +75,7 @@ common use case probably is forcing a more general type.")
 		    :accessor event-causes
 		    :initform nil
 		    :documentation
-		    "Stores a list of objects that identify events
+		    "Stores a list of `event-id's that identify events
 which somehow caused the event."))
   (:default-initargs
    :intern-scope? nil)
@@ -233,6 +233,14 @@ plist META-DATA."
 ;;; Utility functions
 ;;
 
+(declaim (ftype (function (event-id) uuid:uuid) event-id->uuid)
+	 (inline event-id->uuid))
+
+(defun event-id->uuid (event-id)
+  "Derive a UUID from EVENT-ID."
+  (uuid:make-v5-uuid
+   (car event-id) (format nil "~(~8,'0X~)" (cdr event-id))))
+
 (declaim (inline %maybe-set-event-id))
 
 (defun %maybe-set-event-id (event)
@@ -241,9 +249,8 @@ origin id of EVENT and the sequence number of EVENT. If EVENT does not
 have an origin, do nothing."
   (when (and (not (slot-value event 'id)) (event-origin event))
     (setf (%event-id event)
-	  (uuid:make-v5-uuid
-	   (event-origin event)
-	   (format nil "~(~8,'0X~)" (event-sequence-number event))))))
+	  (event-id->uuid (cons (event-origin event)
+				(event-sequence-number event))))))
 
 (defun print-event-data (stream data colon? at?)
   "Print the event payload DATA to stream in a type-dependent manner.

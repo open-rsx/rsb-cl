@@ -166,6 +166,8 @@
 
    :event=
 
+   :event-id->uuid
+
    :print-event-data)
 
   ;; Participant protocol and `participant' class
