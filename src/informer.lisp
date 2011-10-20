@@ -67,7 +67,8 @@ channel."))
 (defmethod send ((informer informer) (event event)
 		 &rest meta-data
 		 &key
-		 method)
+		 method
+		 causes)
   ;; Set EVENT's sequence number to our next sequence number and
   ;; origin to our id.
   (setf (event-sequence-number event)
@@ -80,8 +81,12 @@ channel."))
 
   ;; Additional meta-data.
   (iter (for (key value) on meta-data :by #'cddr)
-	(unless (or (eq key :method) (eq key :unchecked?))
+	(unless (member key '(:method :causes :unchecked?))
 	  (setf (meta-data event key) value)))
+
+  ;; Additional causes.
+  (when causes
+    (appendf (event-causes event) causes))
 
   ;; Send EVENT.
   (rsb.ep:handle informer event)
