@@ -76,7 +76,8 @@ replies to method calls."
 		    (setf (cdr *local-call*) nil))
 		  ;; Otherwise extract the call id, look up the call,
 		  ;; store the result and notify the caller.
-		  (let ((key  (meta-data event :|rsb:reply|))
+		  (let ((key  (%event-id->key
+			       (first (event-causes event))))
 			(call))
 		    (when key
 		      ;; Remove the call.
@@ -120,8 +121,9 @@ data."
 	  ;; call.
 	  (if (null (cdr *local-call*))
 	      *local-call*
-	      (let ((future (make-instance 'future)))
-		(setf (gethash (format nil "~(~A~)" (event-id request)) calls)
+	      (let ((future (make-instance 'future))
+		    (key    (%event-id->key(event-id/opaque request))))
+		(setf (gethash key calls)
 		      (cons future (cons request return)))
 		future)))
       (error (condition)
@@ -214,6 +216,13 @@ call it."
 
 ;;; Utility functions
 ;;
+
+(declaim (ftype (function (event-id) (cons sequence-number string)) %event-id->key)
+	 (inline %event-id->key))
+
+(defun %event-id->key (event-id)
+  "Return an `equall'-comparable object representing EVENT-ID."
+  (cons (cdr event-id) (princ-to-string (car event-id))))
 
 (defun %call-result->future (method request event return future)
   "Store data from METHOD, REQUEST and EVENT in FUTURE taking into

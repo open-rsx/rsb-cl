@@ -66,9 +66,8 @@ REQUEST. Send the result or an error notification back to the caller."
 			  (argument method-argument)) method)
 	 ;; If we got here via direct function calls within a single
 	 ;; thread, the event id-based mechanism is not required.
-	 (id (if *local-call*
-		 ""
-		 (format nil "~(~A~)" (event-id request))))) ;;; TODO(jmoringe): make a function
+	 (causes (unless *local-call*
+		   (list (event-id/opaque request)))))
     (handler-case
 	(bind ((maybe-result (multiple-value-list
 			      (cond
@@ -82,12 +81,12 @@ REQUEST. Send the result or an error notification back to the caller."
 				 (first maybe-result)
 				 rsb.converter:+no-value+)))
 	  (send informer result
-		:method      :|reply|
-		:|rsb:reply| id))
+		:method :|reply|
+		:causes causes))
       (error (condition)
 	(send informer (format nil "~A" condition)
 	      :method       :|reply|
-	      :|rsb:reply|  id
+	      :causes       causes
 	      :|rsb:error?| "1")))))
 
 
