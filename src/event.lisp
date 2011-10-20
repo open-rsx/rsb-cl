@@ -178,7 +178,7 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 	   ;; Causes
 	   (or (not compare-causes?)
 	       (set-equal (event-causes left) (event-causes right)
-			  :test #'equalp))
+			  :test #'event-id=))
 	   ;; Data and type
 	   (type= (event-type left) (event-type right))
 	   (or (null data-test)
@@ -232,6 +232,14 @@ plist META-DATA."
 
 ;;; Utility functions
 ;;
+
+(declaim (ftype (function (event-id event-id) t) event-id=))
+
+(defun event-id= (left right)
+  "Return non-nil if the event ids LEFT and RIGHT refer to the same
+event."
+  (and (= (cdr left) (cdr right))
+       (uuid:uuid= (car left) (car right))))
 
 (declaim (ftype (function (event-id) uuid:uuid) event-id->uuid)
 	 (inline event-id->uuid))

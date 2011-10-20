@@ -166,6 +166,7 @@
 
    :event=
 
+   :event-id=
    :event-id->uuid
 
    :print-event-data)
