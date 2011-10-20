@@ -117,6 +117,11 @@ listeners. An event is a composite structure consisting of
   (when create-timestamp?
     (setf (timestamp instance :create) (local-time:now))))
 
+(defmethod event-id/opaque ((event event))
+  (when-let* ((origin          (event-origin event))
+	      (sequence-number (event-sequence-number event)))
+    (cons origin sequence-number)))
+
 (defmethod event-id :before ((event event))
   (%maybe-set-event-id event))
 
@@ -256,10 +261,9 @@ event."
   "When the id slot of EVENT is nil compute a unique id based on the
 origin id of EVENT and the sequence number of EVENT. If EVENT does not
 have an origin, do nothing."
-  (when (and (not (slot-value event 'id)) (event-origin event))
-    (setf (%event-id event)
-	  (event-id->uuid (cons (event-origin event)
-				(event-sequence-number event))))))
+  (unless (slot-value event 'id)
+    (when-let ((id (event-id/opaque event)))
+      (setf (%event-id event) (event-id->uuid id)))))
 
 (defun print-event-data (stream data colon? at?)
   "Print the event payload DATA to stream in a type-dependent manner.

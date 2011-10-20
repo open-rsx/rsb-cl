@@ -58,6 +58,14 @@ processing."
     :function-name signal-warning))
 
 
+;;; Event protocol
+;;
+
+(defgeneric event-id/opaque (event)
+  (:documentation
+   "Return an object that uniquely identifies EVENT."))
+
+
 ;;; Component URL protocol
 ;;
 

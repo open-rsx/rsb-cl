@@ -147,13 +147,21 @@
 
    :intern-scope)
 
+  ;; Event id
+  (:export
+   :event-id
+
+   :event-id=
+   :event-id->uuid)
+
   ;; Event
   (:export
    :event
-   :event-sequence-number
    :event-id
+   :event-id/opaque
    :event-scope
    :event-origin
+   :event-sequence-number
    :event-method
    :event-type
    :event-data
@@ -165,9 +173,6 @@
    :make-event/typed
 
    :event=
-
-   :event-id=
-   :event-id->uuid
 
    :print-event-data)
 
