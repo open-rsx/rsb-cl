@@ -146,40 +146,43 @@ compared (currently :create, :send, :receive and :deliver).
 If COMPARE-CAUSES? is non-nil, return nil unless LEFT and RIGHT have
 identical sets of causes.
 DATA-TEST has to be a function of two arguments or nil. In the latter
-case, the payloads of LEFT and RIGHT are not considered."
-  (and (or (not compare-sequence-numbers?)
-	   (= (event-sequence-number left)
-	      (event-sequence-number right)))
-       ;; Scope and origin
-       (scope= (event-scope left) (event-scope right))
-       ;; Origin
-       (or (not compare-origins?)
-	   (let ((left-origin  (event-origin left))
-		 (right-origin (event-origin right)))
-	     (or (and (not left-origin) (not right-origin))
-		 (and left-origin right-origin
-		      (uuid= left-origin right-origin)))))
-       ;; Method
-       (or (not compare-methods?)
-	   (eq (event-method left) (event-method right)))
-       ;; Timestamps
-       (or (null compare-timestamps)
-	   (iter (for key in (if (eq compare-timestamps t)
-				 '(:create :send :receive :deliver)
-				 compare-timestamps))
-		 (let ((value-left  (timestamp left key))
-		       (value-right (timestamp right key)))
-		   (always (or (and (null value-left) (null value-right))
-			       (local-time:timestamp=
-				value-left value-right))))))
-       ;; Causes
-       (or (not compare-causes?)
-	   (set-equal (event-causes left) (event-causes right)
-		      :test #'equalp))
-       ;; Data and type
-       (type= (event-type left) (event-type right))
-       (or (null data-test)
-	   (funcall data-test (event-data left) (event-data right)))))
+case, the payloads of LEFT and RIGHT are not considered. It is assumed
+that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
+`eq'."
+  (or (eq left right)
+      (and (or (not compare-sequence-numbers?)
+	       (= (event-sequence-number left)
+		  (event-sequence-number right)))
+	   ;; Scope and origin
+	   (scope= (event-scope left) (event-scope right))
+	   ;; Origin
+	   (or (not compare-origins?)
+	       (let ((left-origin  (event-origin left))
+		     (right-origin (event-origin right)))
+		 (or (and (not left-origin) (not right-origin))
+		     (and left-origin right-origin
+			  (uuid= left-origin right-origin)))))
+	   ;; Method
+	   (or (not compare-methods?)
+	       (eq (event-method left) (event-method right)))
+	   ;; Timestamps
+	   (or (null compare-timestamps)
+	       (iter (for key in (if (eq compare-timestamps t)
+				     '(:create :send :receive :deliver)
+				     compare-timestamps))
+		     (let ((value-left  (timestamp left key))
+			   (value-right (timestamp right key)))
+		       (always (or (and (null value-left) (null value-right))
+				   (local-time:timestamp=
+				    value-left value-right))))))
+	   ;; Causes
+	   (or (not compare-causes?)
+	       (set-equal (event-causes left) (event-causes right)
+			  :test #'equalp))
+	   ;; Data and type
+	   (type= (event-type left) (event-type right))
+	   (or (null data-test)
+	       (funcall data-test (event-data left) (event-data right))))))
 
 (defmethod print-object ((object event) stream)
   (%maybe-set-event-id object) ;; force id computation
