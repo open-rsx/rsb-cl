@@ -159,6 +159,7 @@
    :event-data
    :event-meta-data
    :event-timestamps
+   :event-causes
 
    :make-event
    :make-event/typed

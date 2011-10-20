@@ -78,12 +78,12 @@
 
   (ensure-cases (scope1 data1 origin1?
 		 scope2 data2 origin2?
-		 =1? =2? =3? =4?)
-      '(("/"    "bar" nil     "/" "bar" nil     t   nil t   nil)
-	("/"    "bar" t       "/" "bar" nil     t   nil nil nil)
-	("/"    "bar" t       "/" "bar" t       t   nil t   nil)
-	("/foo" "bar" nil     "/" "bar" nil     nil nil nil nil)
-	("/"    "baz" nil     "/" "bar" nil     nil nil nil nil))
+		 =1? =2? =3? =4? =5?)
+      '(("/"    "bar" nil     "/" "bar" nil     t   nil t   nil t)
+	("/"    "bar" t       "/" "bar" nil     t   nil nil nil t)
+	("/"    "bar" t       "/" "bar" t       t   nil t   nil t)
+	("/foo" "bar" nil     "/" "bar" nil     nil nil nil nil nil)
+	("/"    "baz" nil     "/" "bar" nil     nil nil nil nil nil))
 
     (let* ((origin (uuid:make-v1-uuid))
 	   (left   (make-event scope1 data1))
@@ -99,23 +99,25 @@
       (when origin2?
 	(setf (event-origin right) origin))
 
-      (iter (for (sequence-numbers? origins? timestamps? expected)
-		 in `((nil nil nil ,=1?)
-		      (t   nil nil ,=2?)
-		      (nil t   nil ,=3?)
-		      (nil nil t   ,=4?)))
+      (iter (for (sequence-numbers? origins? timestamps? causes? expected)
+		 in `((nil nil nil nil ,=1?)
+		      (t   nil nil nil ,=2?)
+		      (nil t   nil nil ,=3?)
+		      (nil nil t   nil ,=4?)
+		      (nil nil nil t   ,=5?)))
 	    (ensure-same
 	     (event= left right
 		     :compare-sequence-numbers? sequence-numbers?
 		     :compare-origins?          origins?
 		     :compare-timestamps        timestamps?
+		     :compare-causes?           causes?
 		     :data-test                 #'equal)
 	     expected
 	     :report "~@<When compared ~:[without~;with~] sequence ~
-numbers, ~:[without~;with~] origins and ~:[without~;with~] timestamps, ~
-events ~A and ~A were ~:[not ~;~]equal, but expected ~:[not ~;~]~
-to be.~@:>"
-	     :arguments (sequence-numbers? origins? timestamps?
+numbers, ~:[without~;with~] origins, ~:[without~;with~] timestamps and ~
+~:[without~;with~] causes, events ~A and ~A were ~:[not ~;~]equal, but ~
+expected ~:[not ~;~]to be.~@:>"
+	     :arguments (sequence-numbers? origins? timestamps? causes?
 			 left right (not expected) expected))))))
 
 (addtest (event-root

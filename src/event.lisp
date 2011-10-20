@@ -69,7 +69,14 @@ common use case probably is forcing a more general type.")
 		    :documentation
 		    "")
    (meta-data       :accessor event-meta-data)
-   (timestamp       :accessor event-timestamps))
+   (timestamp       :accessor event-timestamps)
+   (causes          :initarg  :causes
+		    :type     list
+		    :accessor event-causes
+		    :initform nil
+		    :documentation
+		    "Stores a list of objects that identify events
+which somehow caused the event."))
   (:default-initargs
    :intern-scope? nil)
   (:documentation
@@ -84,7 +91,8 @@ listeners. An event is a composite structure consisting of
 + a payload
 + a type describing the payload
 + various timestamps
-+ optional metadata"))
++ optional metadata
++ an optional list of events that caused the event"))
 
 (defmethod shared-initialize :before ((instance   event)
 				      (slot-names t)
@@ -123,17 +131,20 @@ listeners. An event is a composite structure consisting of
 	       (compare-origins?          t)
 	       (compare-methods?          t)
 	       (compare-timestamps        t)
+	       (compare-causes?           t)
 	       (data-test                 #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
 If COMPARE-SEQUENCE-NUMBERS? is non-nil, return nil unless LEFT and
 RIGHT have identical sequence numbers.
 If COMPARE-ORIGINS? is non-nil, return nil unless LEFT and RIGHT have
 identical origins.
-if COMPARE-METHODS? is non-nil, return nil unless LEFT and RIGHT have
+If COMPARE-METHODS? is non-nil, return nil unless LEFT and RIGHT have
 identical methods.
 COMPARE-TIMESTAMPS can be nil, t or a list of timestamp keys to
 compare. If it is t, all RSB timestamps are
 compared (currently :create, :send, :receive and :deliver).
+If COMPARE-CAUSES? is non-nil, return nil unless LEFT and RIGHT have
+identical sets of causes.
 DATA-TEST has to be a function of two arguments or nil. In the latter
 case, the payloads of LEFT and RIGHT are not considered."
   (and (or (not compare-sequence-numbers?)
@@ -161,6 +172,10 @@ case, the payloads of LEFT and RIGHT are not considered."
 		   (always (or (and (null value-left) (null value-right))
 			       (local-time:timestamp=
 				value-left value-right))))))
+       ;; Causes
+       (or (not compare-causes?)
+	   (set-equal (event-causes left) (event-causes right)
+		      :test #'equalp))
        ;; Data and type
        (type= (event-type left) (event-type right))
        (or (null data-test)

@@ -56,13 +56,17 @@ been fragmented into multiple notifications."
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
-  (bind (((:accessors-r/o
+  (bind (((:flet event-id->cons (event-id))
+	  (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
+		(event-id-sequence-number event-id)))
+	 ((:accessors-r/o
 	   (scope           notification-scope)
 	   (event-id        notification-event-id)
 	   (method          notification-method)
 	   (wire-schema     notification-wire-schema)
 	   (payload         notification-data)
-	   (meta-data       notification-meta-data)) notification)
+	   (meta-data       notification-meta-data)
+	   (causes          notification-causes)) notification)
 	 ((:accessors-r/o
 	   (sender-id       event-id-sender-id)
 	   (sequence-number event-id-sequence-number)) event-id)
@@ -77,6 +81,7 @@ contained in NOTIFICATION."
 		       :scope             (make-scope (bytes->string scope))
 		       :method            (unless (emptyp method)
 					    (bytes->keyword method))
+		       :causes            (map 'list #'event-id->cons causes)
 		       :type              t
 		       :data              data
 		       :create-timestamp? nil)))
@@ -134,7 +139,8 @@ into one notification."
 	   (method          event-method)
 	   (data            event-data)
 	   (meta-data       event-meta-data)
-	   (timestamps      event-timestamps)) event)
+	   (timestamps      event-timestamps)
+	   (causes          event-causes)) event)
 	 ((:values wire-data wire-schema)
 	  (rsb.converter:domain->wire converter data)))
     (if (> (length wire-data) max-fragment-size)
@@ -150,6 +156,7 @@ into one notification."
 				       wire-schema fragment
 				       :meta-data      meta-data
 				       :timestamps     timestamps
+				       :causes         causes
 				       :data-part      i
 				       :num-data-parts num-fragments))))
 
@@ -157,7 +164,8 @@ into one notification."
 	(list (make-notification sequence-number scope origin method
 				 wire-schema wire-data
 				 :meta-data  meta-data
-				 :timestamps timestamps)))))
+				 :timestamps timestamps
+				 :causes     causes)))))
 
 
 ;;; Utility functions
@@ -176,6 +184,7 @@ for most cases.")
 			  &key
 			  meta-data
 			  timestamps
+			  causes
 			  (num-data-parts 1)
 			  (data-part      0))
   "Make a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
@@ -225,6 +234,15 @@ non-fragmented notification are chosen."
 			    :key       (keyword->bytes key)
 			    :timestamp (timestamp->unix-microseconds value))
 	     (meta-data-user-times meta-data1))))
+
+    ;; Add CAUSES.
+    (iter (for (origin-id . sequence-number) in causes)
+	  (vector-push-extend
+	   (make-instance 'event-id
+			  :sender-id       (uuid:uuid-to-byte-array
+					    origin-id)
+			  :sequence-number sequence-number)
+	   (notification-causes notification)))
 
     ;; Return the complete notification instance.
     notification))
