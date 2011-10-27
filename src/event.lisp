@@ -193,7 +193,7 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 (defmethod print-object ((object event) stream)
   (%maybe-set-event-id object) ;; force id computation
   (print-unreadable-id-object (object stream :type t)
-    (format stream "~@<~@[~A ~]~A ~S ~/rsb::print-event-data/~@:>"
+    (format stream "~@<~@[~A ~]~A ~S ~:/rsb::print-event-data/~@:>"
 	    (event-method object)
 	    (scope-string (event-scope object))
 	    (event-type object)
@@ -267,15 +267,17 @@ have an origin, do nothing."
 
 (defun print-event-data (stream data colon? at?)
   "Print the event payload DATA to stream in a type-dependent manner.
-This function is intended for use with the / `format' control. COLON?
-and AT? are ignored."
-  (declare (ignore colon? at?))
+This function is intended for use with the / `format' control.
+COLON? controls whether an indication of the size of DATA should be
+printed.
+AT? is ignored."
+  (declare (ignore at?))
   (let ((*print-length* (or *print-length* 5)))
     (format stream "~S~@[ (~D)~]"
 	    (etypecase data
 	      (string (%maybe-shorten-string data *print-length*))
 	      (t      data))
-	    (when (typep data 'sequence)
+	    (when (and colon? (typep data 'sequence))
 	      (length data)))))
 
 (defun %maybe-shorten-string (string max)
