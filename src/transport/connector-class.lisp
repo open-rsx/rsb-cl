@@ -100,18 +100,19 @@ superclasses."
   "Potentially expand the options description OPTION using information
 from CLASS."
   (bind (((name type &rest _) option))
-    (if (eq type '&slot)
-	(let* ((slot        (find name (closer-mop:class-slots class)
-				  :key (compose #'make-keyword
-						#'closer-mop:slot-definition-name)))
-	       (initform    (closer-mop:slot-definition-initform slot))
-	       (description (documentation slot t)))
-	  (unless slot
-	    (error "~@<No slot named ~S in class ~S.~@:>" name class))
+    (or (unless (eq type '&slot)
+	  option)
+
+	(when-let ((slot (find name (closer-mop:class-slots class)
+			       :test #'member
+			       :key  #'closer-mop:slot-definition-initargs)))
 	  `(,name
 	    ,(closer-mop:slot-definition-type slot)
-	    ,@(when initform
+	    ,@(when-let ((initform (closer-mop:slot-definition-initform slot)))
 	        `(:default ,initform))
-	    ,@(when description
-		`(:description ,description))))
-	option)))
+	    ,@(when-let ((description (documentation slot t)))
+	        `(:description ,description))))
+
+	(error "~@<~S specified for option ~S, but no slot with ~
+initarg ~:*~S in class ~S.~@:>"
+	       '&slot name class))))

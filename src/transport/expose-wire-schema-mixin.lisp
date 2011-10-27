@@ -21,6 +21,7 @@
 
 (defclass expose-wire-schema-mixin ()
   ((expose-wire-schema? :initarg  :expose-wire-schema?
+			:initarg  :expose-wire-schema ;; for option
 			:type     boolean
 			:reader   connector-expose-wire-schema?
 			:initform nil
@@ -30,7 +31,7 @@ the wire-schemas of received notifications in events constructed form
 these notifications."))
   (:metaclass connector-class)
   (:options
-   (:expose-wire-schema? &slot))
+   (:expose-wire-schema &slot))
   (:documentation
    "This class is intended to be mixed into connector classes that
 should be able to store the wire-schema of received notifications in
