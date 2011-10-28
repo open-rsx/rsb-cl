@@ -33,8 +33,10 @@ been fragmented into multiple notifications."
 
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
-      (one-notification->event converter notification
-			       :expose-wire-schema? expose-wire-schema?)
+      (one-notification->event
+       converter
+       (fragmented-notification-notification notification)
+       :expose-wire-schema? expose-wire-schema?)
 
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
@@ -43,7 +45,8 @@ been fragmented into multiple notifications."
       (when-let ((assembly (merge-fragment pool notification)))
 	(one-notification->event
 	 converter
-	 (aref (assembly-fragments assembly) 0)
+	 (fragmented-notification-notification
+	  (aref (assembly-fragments assembly) 0))
 	 :data                (assembly-concatenated-data assembly)
 	 :expose-wire-schema? expose-wire-schema?))))
 
@@ -133,18 +136,14 @@ into one notification."
   (setf (timestamp event :send) (local-time:now))
 
   ;; Put EVENT into one or more notifications.
-  (bind (((:accessors-r/o
-	   (origin          event-origin)
-	   (sequence-number event-sequence-number)
-
-	   (scope           event-scope)
-	   (method          event-method)
-
-	   (data            event-data)
-
-	   (meta-data       rsb:event-meta-data)
-	   (timestamps      event-timestamps)
-	   (causes          event-causes)) event)
+  (bind (((:accessors-r/o (origin          event-origin)
+			  (sequence-number event-sequence-number)
+			  (scope           event-scope)
+			  (method          event-method)
+			  (data            event-data)
+			  (meta-data       rsb:event-meta-data)
+			  (timestamps      event-timestamps)
+			  (causes          event-causes)) event)
 	 ((:values wire-data wire-schema)
 	  (rsb.converter:domain->wire converter data))
 	 (data-size (length wire-data)))

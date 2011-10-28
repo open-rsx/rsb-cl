@@ -70,7 +70,7 @@ connector classes for Spread."))
 unpacked as a protocol buffer of kind ~S.~:@>"
 			   :format-arguments '(notification)
 			   :cause            condition))))
-      (setf notification (pb:unpack message 'notification)))
+      (setf notification (pb:unpack message 'fragmented-notification)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
