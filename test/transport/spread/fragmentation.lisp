@@ -31,16 +31,27 @@
        (t
 	data))))
   (:function
-   (make-notification (sequence-number length id data)
-     (let ((event-id (make-instance 'rsb.protocol:event-id
-				    :sender-id       (uuid:uuid-to-byte-array
-						      (uuid:make-null-uuid))
-				    :sequence-number sequence-number)))
-       (make-instance 'rsb.protocol:notification
-		      :event-id        event-id
-		      :num-data-parts  length
-		      :data-part       id
-		      :data            data))))
+   (make-fragment (sequence-number length id data)
+     (let* ((event-id     (make-instance
+			   'rsb.protocol:event-id
+			   :sender-id       (uuid:uuid-to-byte-array
+					     (uuid:make-null-uuid))
+			   :sequence-number sequence-number))
+	    (notification (make-instance 'rsb.protocol:notification
+					 :event-id event-id
+					 :data     data)))
+       (make-instance 'rsb.protocol:fragmented-notification
+		      :notification   notification
+		      :num-data-parts length
+		      :data-part      id))))
+  (:function
+   (make-event* (data)
+     (let ((event (make-event "/foo" (octetify data))))
+       (setf (event-origin event)
+	     (uuid:make-null-uuid)
+	     (event-sequence-number event)
+	     0)
+       event)))
   (:documentation
    "Unit tests for the fragmentation and assembly of
 data/notifications."))
@@ -63,10 +74,10 @@ instance.")
 	 (0     5     0     2   1)
 	 "foobar"))
     ;; We repeat the assembly for all permutation of the fragments.
-    (let* ((fragments (iter (for part in parts)
-			    (for i    in part-ids)
-			    (collect (make-notification
-				      sequence-number num-parts i (octetify part))))))
+    (let ((fragments (iter (for part in parts)
+			   (for i    in part-ids)
+			   (collect (make-fragment
+				     sequence-number num-parts i (octetify part))))))
       (map-permutations
        (lambda (permutation)
 	 (let* ((pool      (make-instance 'assembly-pool))
@@ -74,51 +85,52 @@ instance.")
 				permutation))
 		(assembly  (find-if (complement #'null) returns))
 		(result    (assembly-concatenated-data assembly)))
-	   (ensure (assembly-complete? assembly))
-	   (ensure-same
-	    result (octetify expected)
-	    :test #'equalp)))
+	   (ensure      (assembly-complete? assembly))
+	   (ensure-same result (octetify expected)
+			:test #'equalp)))
        fragments))))
 
 (addtest (fragmentation-root
           :documentation
-	  "Smoke test for the `fragment-data' function.")
+	  "Smoke test for the `event->notifications' function.")
   fragment-smoke
 
-  (ensure-cases (data expected chunk-size)
-    `(("foobarbazb"
-       (,(octetify '(102 111 111))
-	,(octetify '(98 97 114))
-	,(octetify '(98 97 122))
-	,(octetify '(98)))
-       3)
-      ("fooobaar"
-       (,(octetify "fooo")
-	,(octetify "baar"))
-       4))
+  (ensure-cases (data chunk-size error?)
+      `((""                   90 nil)
+	("foobarbazfezwhoop"  85 nil)
+	("foobarbazb"         88 nil)
+	("fooobaar"           89 nil)
+	(,(make-string 1000) 100 nil)
 
-    (let ((result (fragment-data (octetify data) chunk-size)))
-      (ensure-same
-       result expected
-       :test #'equalp))))
+	(""                   20 t)
+	("bla"                20 t))
+
+    (let ((event (make-event* data)))
+      (if error?
+	  (ensure-condition 'insufficient-room
+	    (event->notifications :fundamental-null event chunk-size))
+	  (let ((result (event->notifications
+			 :fundamental-null event chunk-size)))
+	    (ensure (every (compose (rcurry #'<= chunk-size)
+				    #'pb:packed-size)
+			   result)))))))
 
 (addtest (fragmentation-root
           :documentation
 	  "Do full roundtrips of fragmenting data using
-`fragment-data' and then re-assemble the fragments using
-`merge-fragments'")
+`event->notifications' and then re-assemble the fragments using
+`merge-fragments'.")
   roundtrip
 
   (ensure-cases (data chunk-size)
-      '(("foobarbazb" 3)
-	("fooobaar"   4))
+      `((""                   90)
+	("foobarbazfezwhoop"  85)
+	("foobarbazb"         88)
+	("fooobaar"           89)
+	(,(make-string 1000) 100))
 
-    (let* ((fragments     (fragment-data (octetify data) chunk-size))
-	   (notifications (iter (for fragment in    fragments)
-				  (for i        :from 0)
-				  (collect
-				      (make-notification
-				       0 (length fragments) i (octetify fragment)))))
+    (let* ((event         (make-event* (octetify data)))
+	   (notifications (event->notifications :fundamental-null event chunk-size))
 	   (pool          (make-instance 'assembly-pool))
 	   (result        (assembly-concatenated-data
 			   (lastcar (map 'list (curry #'merge-fragment pool)
@@ -134,15 +146,15 @@ are added to an assembly.")
 
   (let ((sequence-number 0)
 	(pool            (make-instance 'assembly-pool)))
-    (merge-fragment pool (make-notification
+    (merge-fragment pool (make-fragment
 			  sequence-number 3 0 (octetify "foo")))
 
     (ensure-condition 'invalid-fragment-id
-      (merge-fragment pool (make-notification
+      (merge-fragment pool (make-fragment
 			    sequence-number 3 5 (octetify "foo"))))
 
     (ensure-condition 'duplicate-fragment
-      (merge-fragment pool (make-notification
+      (merge-fragment pool (make-fragment
 			    sequence-number 3 0 (octetify "foo"))))))
 
 (addtest (fragmentation-root
@@ -166,7 +178,7 @@ are added to an assembly.")
 
   (let ((pool (make-instance 'pruning-assembly-pool
 			     :age-limit 1)))
-    (merge-fragment pool (make-notification 0 2 0 (octetify "bla")))
+    (merge-fragment pool (make-fragment 0 2 0 (octetify "bla")))
     (let ((count (assembly-pool-count pool)))
       (ensure-same
        count 1

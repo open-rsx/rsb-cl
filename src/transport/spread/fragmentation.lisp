@@ -76,7 +76,8 @@ ASSEMBLY."
 (defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
 fragments of ASSEMBLY. ASSEMBLY has to be complete."
-  (let* ((fragments (map 'list #'notification-data
+  (let* ((fragments (map 'list (compose #'notification-data
+					#'fragmented-notification-notification)
 			 (assembly-fragments assembly)))
 	 (size      (reduce #'+ fragments :key #'length))
 	 (result    (make-array size :element-type '(unsigned-byte 8))))
@@ -87,9 +88,9 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
     result))
 
 (defmethod add-fragment! ((assembly  assembly)
-			  (fragment  notification))
+			  (fragment  fragmented-notification))
   (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
-	 ((:accessors-r/o (id notification-data-part)) fragment))
+	 ((:accessors-r/o (id fragmented-notification-data-part)) fragment))
     (log1 :trace assembly "Processing fragment ~D" id)
     (cond
       ;; Bounds check for fragment id.
@@ -167,16 +168,17 @@ necessary when fragments are submitted by calls to
 			     :id            id
 			     :num-fragments size)))))
 
-(defmethod merge-fragment ((pool         assembly-pool)
-			   (notification t))
+(defmethod merge-fragment ((pool     assembly-pool)
+			   (fragment fragmented-notification))
     (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
-	   ((:accessors-r/o (id   notification-event-id)
-			    (size notification-num-data-parts)) notification)
-	   (id (%make-key id)))
-      (let ((assembly (ensure-assembly pool id size)))
-	(when (assembly-complete? (add-fragment! assembly notification))
-	  (remhash id assemblies)
-	  assembly))))
+	   ((:accessors-r/o (notification fragmented-notification-notification)
+			    (size         fragmented-notification-num-data-parts)) fragment)
+	   ((:accessors-r/o (id notification-event-id)) notification)
+	   (id       (%make-key id))
+	   (assembly (ensure-assembly pool id size)))
+      (when (assembly-complete? (add-fragment! assembly fragment))
+	(remhash id assemblies)
+	assembly)))
 
 (defmethod print-object ((object assembly-pool) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -246,27 +248,25 @@ delete them."
   (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)
 			  (lock       %assembly-pool-lock)) pool))
     (bt:with-lock-held (lock)
-      (let ((old (remove min-age (hash-table-values assemblies)
-			 :test #'>=
-			 :key  #'assembly-age)))
-	(when old
-	  (log1 :info pool "Removing partial assemblies ~_~{~S~^, ~}" old)
-	  (iter (for assembly in old)
-		(remhash (assembly-id assembly) assemblies)))))))
+      (when-let ((old (remove min-age (hash-table-values assemblies)
+			      :test #'>=
+			      :key  #'assembly-age)))
+	(log1 :info pool "Removing partial assemblies ~_~{~S~^, ~}" old)
+	(iter (for assembly in old)
+	      (remhash (assembly-id assembly) assemblies))))))
 
 
 ;;; Fragmentation
 ;;
 
-(defun fragment-data (data chunk-size)
-  "Partition DATA into chunks of at most CHUNK-SIZE bytes. Return a
-list of the generated chunks."
-  (check-type data octet-vector "An octet-vector")
+(declaim (ftype (function (octet-vector non-negative-fixnum non-negative-fixnum)
+			  octet-vector)
+		make-data-fragment)
+	 (inline make-data-fragment))
 
-  (iter (for offset :from 0 :by chunk-size)
-	(while (< offset (length data)))
-	(for size next (min chunk-size (- (length data) offset)))
-	(collect (subseq data offset (+ offset size)))))
+(defun make-data-fragment (data offset chunk-size)
+  "Return a chunk of length CHUNK-SIZE from DATA starting at OFFSET."
+  (subseq data offset (+ offset chunk-size)))
 
 
 ;;; Utility functions

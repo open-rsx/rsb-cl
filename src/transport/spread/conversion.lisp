@@ -29,7 +29,7 @@
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
-  (if (<= (notification-num-data-parts notification) 1)
+  (if (<= (fragmented-notification-num-data-parts notification) 1)
 
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
@@ -40,13 +40,12 @@ been fragmented into multiple notifications."
       ;; notifications, try to assemble for each
       ;; notification. `merge-fragment' returns nil until all
       ;; fragments have arrived.
-      (let ((assembly (merge-fragment pool notification)))
-	(when assembly
-	  (one-notification->event
-	   converter
-	   (aref (assembly-fragments assembly) 0)
-	   :data                (assembly-concatenated-data assembly)
-	   :expose-wire-schema? expose-wire-schema?)))))
+      (when-let ((assembly (merge-fragment pool notification)))
+	(one-notification->event
+	 converter
+	 (aref (assembly-fragments assembly) 0)
+	 :data                (assembly-concatenated-data assembly)
+	 :expose-wire-schema? expose-wire-schema?))))
 
 (defun one-notification->event (converter notification
 				&key
@@ -76,8 +75,8 @@ contained in NOTIFICATION."
 		       wire-schema))
 	 (event       (make-instance
 		       'rsb:event
-		       :sequence-number   sequence-number
 		       :origin            (uuid:byte-array-to-uuid sender-id)
+		       :sequence-number   sequence-number
 		       :scope             (make-scope (bytes->string scope))
 		       :method            (unless (emptyp method)
 					    (bytes->keyword method))
@@ -89,25 +88,25 @@ contained in NOTIFICATION."
     ;; "User infos" and timestamps
     (when meta-data
       ;; "User infos"
-      (iter (for user-info in-vector (meta-data-user-infos meta-data))
+      (iter (for user-info in-vector (event-meta-data-user-infos meta-data))
 	    (setf (rsb:meta-data event (bytes->keyword
 					(user-info-key user-info)))
 		  (bytes->string (user-info-value user-info))))
 
       ;; Set :create timestamp, if present
-      (unless (zerop (meta-data-create-time meta-data))
+      (unless (zerop (event-meta-data-create-time meta-data))
 	(setf (timestamp event :create)
 	      (unix-microseconds->timestamp
-	       (meta-data-create-time meta-data))))
+	       (event-meta-data-create-time meta-data))))
       ;; Set :send timestamp, if present
-      (unless (zerop (meta-data-send-time meta-data))
+      (unless (zerop (event-meta-data-send-time meta-data))
 	(setf (timestamp event :send)
 	      (unix-microseconds->timestamp
-	       (meta-data-send-time meta-data))))
+	       (event-meta-data-send-time meta-data))))
       ;; Set :receive timestamp
       (setf (timestamp event :receive) (local-time:now))
 
-      (iter (for user-time in-vector (meta-data-user-times meta-data))
+      (iter (for user-time in-vector (event-meta-data-user-times meta-data))
 	    (setf (timestamp event (bytes->keyword
 				    (user-time-key user-time)))
 		  (unix-microseconds->timestamp
@@ -124,6 +123,8 @@ contained in NOTIFICATION."
 ;;; Event -> Notification
 ;;
 
+(declaim (ftype (function (t event positive-fixnum) list) event->notifications))
+
 (defun event->notifications (converter event max-fragment-size)
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
@@ -133,118 +134,124 @@ into one notification."
 
   ;; Put EVENT into one or more notifications.
   (bind (((:accessors-r/o
-	   (sequence-number event-sequence-number)
-	   (scope           event-scope)
 	   (origin          event-origin)
+	   (sequence-number event-sequence-number)
+
+	   (scope           event-scope)
 	   (method          event-method)
+
 	   (data            event-data)
-	   (meta-data       event-meta-data)
+
+	   (meta-data       rsb:event-meta-data)
 	   (timestamps      event-timestamps)
 	   (causes          event-causes)) event)
 	 ((:values wire-data wire-schema)
-	  (rsb.converter:domain->wire converter data)))
-    (if (> (length wire-data) max-fragment-size)
+	  (rsb.converter:domain->wire converter data))
+	 (data-size (length wire-data)))
+    (declare (type octet-vector wire-data))
 
-	;; Split WIRE-DATA into multiple fragment and make a
-	;; notification for each fragment.
-	(bind ((fragments     (fragment-data wire-data max-fragment-size))
-	       (num-fragments (length fragments)))
-	  (iter (for fragment in    fragments)
-		(for i        :from 0)
-		(collect
-		    (make-notification sequence-number scope origin method
-				       wire-schema fragment
-				       :meta-data      meta-data
-				       :timestamps     timestamps
-				       :causes         causes
-				       :data-part      i
-				       :num-data-parts num-fragments))))
+    (iter (with remaining     =     data-size)
+	  (with offset        =     0)
+	  (for  i             :from 0)
+	  (let* ((notification  (apply #'make-notification
+				      sequence-number origin
+				      (when (first-iteration-p)
+					(list scope method wire-schema
+					      meta-data timestamps causes))))
+		 (fragment      (make-instance 'fragmented-notification
+					       :notification   notification
+					       :num-data-parts 1
+					       :data-part      i))
+		 (packed-size   (pb:packed-size fragment))
+		 (room          (- max-fragment-size packed-size))
+		 (fragment-size (if (< room 5) ;; conservative
+				               ;; estimate of required
+				               ;; number of bytes to
+				               ;; encode a bit of
+				               ;; payload
+				  (error 'insufficient-room
+					 :required  (+ packed-size 5)
+					 :available max-fragment-size)
+				  (min (- room 4) remaining))))
 
-	;; WIRE-DATA fits into a single notification.
-	(list (make-notification sequence-number scope origin method
-				 wire-schema wire-data
-				 :meta-data  meta-data
-				 :timestamps timestamps
-				 :causes     causes)))))
+	    (setf (notification-data notification)
+		  (make-data-fragment wire-data offset fragment-size))
+	    (incf offset    fragment-size)
+	    (decf remaining fragment-size)
+
+	    (collect fragment :into fragments)
+	    (while (plusp remaining))
+	    (finally
+	     (unless (length= 1 fragments)
+	       (iter (for fragment in fragments)
+		     (setf (fragmented-notification-num-data-parts fragment)
+			   (1+ i))))
+	     (return fragments))))))
 
 
 ;;; Utility functions
 ;;
 
-(defvar *keyword-readtable*
-  (let ((readtable (copy-readtable nil)))
-    (setf (readtable-case readtable) :invert)
-    readtable)
-  "This readtable is used to print and read keywords. The goal is to
-get a natural mapping between Lisp keywords and corresponding strings
-for most cases.")
-
-(defun make-notification (sequence-number scope origin method
-			  wire-schema data
-			  &key
-			  meta-data
-			  timestamps
-			  causes
-			  (num-data-parts 1)
-			  (data-part      0))
-  "Make a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
-SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA. When
-NUM-DATA-PARTS and DATA-PART are not supplied, values that indicate a
-non-fragmented notification are chosen."
-  (bind ((event-id     (make-instance
+(defun make-notification (sequence-number origin
+			  &optional
+			  scope method wire-schema
+			  meta-data timestamps causes)
+  "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
+ORIGIN and optionally SCOPE, METHOD, WIRE-SCHEMA, META-DATA and
+causes."
+  (bind ((full?        scope)
+	 (event-id     (make-instance
 			'event-id
 			:sender-id       (uuid:uuid-to-byte-array origin)
 			:sequence-number sequence-number))
-	 (meta-data1   (make-instance
-			'meta-data
-			:create-time (timestamp->unix-microseconds
-				      (getf timestamps :create))
-			:send-time   (timestamp->unix-microseconds
-				      (getf timestamps :send))))
-	 (notification (make-instance
-			'notification
-			:event-id        event-id
-			:scope           (string->bytes (scope-string scope))
-			:wire-schema     (wire-schema->bytes wire-schema)
-			:num-data-parts  num-data-parts
-			:data-part       data-part
-			:data            data
-			:meta-data       meta-data1)))
+	 (meta-data1   (when full?
+			 (make-instance
+			  'event-meta-data
+			  :create-time (timestamp->unix-microseconds
+					(getf timestamps :create))
+			  :send-time   (timestamp->unix-microseconds
+					(getf timestamps :send)))))
+	 (notification (apply #'make-instance 'notification
+			      :event-id event-id
+			      (when full?
+				(list
+				 :scope       (string->bytes (scope-string scope))
+				 :wire-schema (wire-schema->bytes wire-schema)
+				 :meta-data   meta-data1)))))
+    (when full?
+      ;; Store the method of the event in the new notification if the
+      ;; event has one.
+      (when method
+	(setf (notification-method notification) (keyword->bytes method)))
 
-    ;; Store the method of the event in the new notification if the
-    ;; event has one.
-    (when method
-      (setf (notification-method notification) (keyword->bytes method)))
-
-    ;; Add META-DATA.
-    (iter (for (key value) on meta-data :by #'cddr)
-	  (vector-push-extend
-	   (make-instance 'user-info
-			  :key   (keyword->bytes key)
-			  :value (string->bytes value))
-	   (meta-data-user-infos meta-data1)))
-
-    ;; Add TIMESTAMPS.
-    (iter (for (key value) on timestamps :by #'cddr)
-	  (unless (eq key :create) ;; the event should not have :send,
-				   ;; :receive or :deliver at this
-				   ;; point
+      ;; Add META-DATA.
+      (iter (for (key value) on meta-data :by #'cddr)
 	    (vector-push-extend
-	     (make-instance 'user-time
-			    :key       (keyword->bytes key)
-			    :timestamp (timestamp->unix-microseconds value))
-	     (meta-data-user-times meta-data1))))
+	     (make-instance 'user-info
+			    :key   (keyword->bytes key)
+			    :value (string->bytes value))
+	     (event-meta-data-user-infos meta-data1)))
 
-    ;; Add CAUSES.
-    (iter (for (origin-id . sequence-number) in causes)
-	  (vector-push-extend
-	   (make-instance 'event-id
-			  :sender-id       (uuid:uuid-to-byte-array
-					    origin-id)
-			  :sequence-number sequence-number)
-	   (notification-causes notification)))
+      ;; Add TIMESTAMPS.
+      (iter (for (key value) on timestamps :by #'cddr)
+	    ;; the event should not have :receive or :deliver at this
+	    ;; point
+	    (unless (member key '(:create :send))
+	      (vector-push-extend
+	       (make-instance 'user-time
+			      :key       (keyword->bytes key)
+			      :timestamp (timestamp->unix-microseconds value))
+	       (event-meta-data-user-times meta-data1))))
 
-    ;; Return the complete notification instance.
+      ;; Add CAUSES.
+      (iter (for (origin-id . sequence-number) in causes)
+	    (vector-push-extend
+	     (make-instance 'event-id
+			    :sender-id       (uuid:uuid-to-byte-array
+					      origin-id)
+			    :sequence-number sequence-number)
+	     (notification-causes notification))))
+
     notification))
 
 (defun timestamp->unix-microseconds (timestamp)
@@ -260,6 +267,14 @@ integer which counts the number of microseconds since UNIX epoch."
 	  (floor unix-microseconds 1000000)))
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))
+
+(defvar *keyword-readtable*
+  (let ((readtable (copy-readtable nil)))
+    (setf (readtable-case readtable) :invert)
+    readtable)
+  "This readtable is used to print and read keywords. The goal is to
+get a natural mapping between Lisp keywords and corresponding strings
+for most cases.")
 
 (declaim (inline string->bytes bytes->string))
 

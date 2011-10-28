@@ -511,7 +511,7 @@ on the spread group communication system."
 			      (:file       "fragmentation"
 			       :depends-on ("package" "conditions" "util"))
 			      (:file       "conversion"
-			       :depends-on ("package" "fragmentation"))
+			       :depends-on ("package" "conditions" "fragmentation"))
 
 			      (:file       "connection"
 			       :depends-on ("package" "util"))
@@ -550,10 +550,19 @@ cl-rsb-and-cl-protobuf unless system cl-protobuf can be loaded~@:>"))
 RSB events to/from Google protocol buffers."
   :requires    (cl-rsb
 		cl-protobuf)
-  :components  ((:module     "protocol"
+  :components  ((:protocol-buffer-descriptor-directory "protocol"
 		 :pathname   "data"
-		 :default-component-class asdf::protocol-buffer-descriptor
-		 :components ((:file       "Protocol")))
+		 :components ((:file       "EventId"
+			       :pathname   "rsb/protocol/EventId")
+			      (:file       "EventMetaData"
+			       :pathname   "rsb/protocol/EventMetaData"
+			       :depends-on ("EventId"))
+			      (:file       "Notification"
+			       :pathname   "rsb/protocol/Notification"
+			       :depends-on ("EventId" "EventMetaData"))
+			      (:file       "FragmentedNotification"
+			       :pathname   "rsb/protocol/FragmentedNotification"
+			       :depends-on ("EventId" "EventMetaData" "Notification"))))
 
 		(:module     "converter-protocol-buffer"
 		 :pathname   "src/converter"

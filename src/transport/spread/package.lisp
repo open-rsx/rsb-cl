@@ -22,7 +22,7 @@
 
   (:shadowing-import-from :rsb.protocol
    :event-id
-   :meta-data)
+   :event-meta-data)
 
   (:shadow
    :connector)
@@ -48,7 +48,13 @@
 
    :invalid-fragment-id
 
-   :duplicate-fragment)
+   :duplicate-fragment
+
+   :fragmentation-problem
+
+   :insufficient-room
+   :fragmentation-problem-required
+   :fragmentation-problem-available)
 
   (:documentation
    "This package contains a transport implementation based on the

@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.transport.spread.test
+(cl:defpackage :rsb.transport.spread.test
   (:use
    :cl
    :alexandria
@@ -43,7 +41,7 @@
    :assembly-pool
    :pruning-assembly-pool
 
-   :fragment-data
+   :event->notifications
 
    :*scope->groups-cache*
    :*scope->groups-cache-max-size*

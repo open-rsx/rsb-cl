@@ -20,9 +20,8 @@
 (in-package :rsb.transport.spread)
 
 
-;;; Fragmentation-related conditions
+;;; Assembly-related conditions
 ;;
-
 
 (define-condition assembly-problem (condition)
   ((assembly :initarg  :assembly
@@ -50,7 +49,7 @@ the problem."))
 	      (fragment assembly-problem-fragment)) condition))
       (format stream "~@<The fragment ~D of event ~/rsb::print-id/ ~
 caused a problem in assembly ~A.~@:>"
-	      (rsb.protocol::notification-data-part fragment)
+	      (rsb.protocol::fragmented-notification-data-part fragment)
 	      (assembly-id assembly)
 	      assembly))))
   (:documentation
@@ -67,7 +66,7 @@ fragment causes a problem in an assembly."))
 	      (fragment assembly-problem-fragment)) condition))
        (format stream "~@<Received illegal fragment ~D of event ~
 ~/rsb::print-id/ with ~D parts in assembly ~A.~@:>"
-	       (rsb.protocol::notification-data-part fragment)
+	       (rsb.protocol::fragmented-notification-data-part fragment)
 	       (assembly-id assembly)
 	       (length (assembly-fragments assembly))
 	       assembly))))
@@ -85,9 +84,47 @@ with an invalid part id to an assembly."))
 	      (fragment assembly-problem-fragment)) condition))
        (format stream "~@<Received fragment ~D of event ~
 ~/rsb::print-id/ more than once in assembly ~A.~@:>"
-	       (rsb.protocol::notification-data-part fragment)
+	       (rsb.protocol::fragmented-notification-data-part fragment)
 	       (assembly-id assembly)
 	       assembly))))
   (:documentation
    "This warning is signaled when an attempt is made to add a fragment
 to an assembly that has already been added."))
+
+
+;;; Fragmentation-related conditions
+;;
+
+(define-condition fragmentation-problem (condition)
+  ()
+  (:report
+   (lambda (condition stream)
+     (declare (ignore condition))
+     (format stream "~@<A fragmentation operation failed~@:>")))
+  (:documentation
+   "Conditions of this class and subclasses are signaled when problems
+related to fragmenting events into multiple notifications are
+encountered."))
+
+(define-condition insufficient-room (fragmentation-problem
+				     error)
+  ((required  :initarg  :required
+	      :type     positive-integer
+	      :reader   fragmentation-problem-required
+	      :documentation
+	      "")
+   (available :initarg  :available
+	      :type     non-negative-integer
+	      :reader   fragmentation-problem-available
+	      :documentation
+	      ""))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Insufficient room (~:D byte~:P) for fragment ~
+requiring ~:D byte~:P.~@:>"
+	     (fragmentation-problem-available condition)
+	     (fragmentation-problem-required  condition))))
+  (:documentation
+   "This error is signaled when a notification fragment of an event
+cannot be created because it would exceed the maximum allowed fragment
+size."))
