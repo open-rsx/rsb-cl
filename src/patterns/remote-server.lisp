@@ -26,7 +26,7 @@
 (defclass remote-method (method1
 			 closer-mop:funcallable-standard-object)
   ((lock  :initarg  :lock
-	  :initform (bt:make-lock)
+	  :initform (bt:make-lock "Remote Method Lock")
 	  :reader   %method-lock
 	  :documentation
 	  "Stores a lock which protects the table of in-progress calls
@@ -122,7 +122,7 @@ data."
 	  (if (null (cdr *local-call*))
 	      *local-call*
 	      (let ((future (make-instance 'future))
-		    (key    (%event-id->key(event-id/opaque request))))
+		    (key    (%event-id->key (event-id/opaque request))))
 		(setf (gethash key calls)
 		      (cons future (cons request return)))
 		future)))
