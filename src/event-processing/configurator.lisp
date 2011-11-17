@@ -64,11 +64,13 @@ participant instance as its \"client\"."))
 						   (configurator configurator))
   (bind (((:accessors-r/o (processor  configurator-processor)
 			  (connectors configurator-connectors)) configurator))
-    (log1 :trace configurator "Installing new error policy ~S in processor ~S" new-value processor)
+    (log1 :trace configurator "Installing new error policy ~S in processor ~S"
+	  new-value processor)
     (setf (processor-error-policy processor) new-value)
 
     (iter (for connector in connectors)
-	  (log1 :trace configurator "Installing new error policy ~S in connector ~S" new-value connector)
+	  (log1 :trace configurator "Installing new error policy ~S in connector ~S"
+		new-value connector)
 	  (setf (processor-error-policy connector) new-value))
 
     (call-next-method)))
@@ -100,16 +102,17 @@ participant instance as its \"client\"."))
 
 (defmethod detach ((configurator configurator))
   "Detach all connectors from the scope of CONFIGURATOR."
-  (log1 :trace configurator "Detaching ~D connector~:P" (length (configurator-connectors configurator)))
+  (log1 :trace configurator "Detaching ~D connector~:P"
+	(length (configurator-connectors configurator)))
   (iter (for connector in (configurator-connectors configurator))
 	(restart-case
 	    ;; Give each connector ten seconds to detach. If one takes
 	    ;; longer, skip it.
 	    (bt:with-timeout (10)
 	      (notify configurator connector :connector-removed))
-	    (continue ()
-	      :report (lambda (stream)
-			(format stream "~@<Ignore the error and ~
+	  (continue ()
+	    :report (lambda (stream)
+		      (format stream "~@<Ignore the error and ~
 continue with the remaining connectors.~@:>"))))))
 
 
