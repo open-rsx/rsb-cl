@@ -68,7 +68,7 @@ connector classes for Spread."))
 			   :encoded          message
 			   :format-control   "~@<The data could not be ~
 unpacked as a protocol buffer of kind ~S.~:@>"
-			   :format-arguments '(notification)
+			   :format-arguments '(fragmented-notification)
 			   :cause            condition))))
       (setf notification (pb:unpack message 'fragmented-notification)))
 
