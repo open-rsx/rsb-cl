@@ -19,41 +19,35 @@
 
 (in-package :rsb)
 
-(defmacro with-listener ((var scope-or-uri
-			  &rest args
-			  &key
-			  transports
-			  converters
-			  &allow-other-keys)
-			 &body body)
-  "Execute BODY with VAR bound to an RSB listener for topic TOPIC on
-channel CHANNEL. The listener is destroyed when the execution of BODY
-ends normally or because of a control transfer."
-  (declare (ignore transports converters))
-  (check-type var symbol "a symbol")
+(defmacro define-with-participant-macro (kind &rest extra-args)
+  (let ((name      (symbolicate "WITH-" kind))
+	(make-name (symbolicate "MAKE-" kind)))
+    `(defmacro ,name ((var scope-or-uri ,@extra-args
+		       &rest args
+		       &key
+		       transports
+		       converters
+		       &allow-other-keys)
+		      &body body)
 
-  `(let ((,var (make-listener ,scope-or-uri ,@args)))
-     (unwind-protect
-	  (progn ,@body)
-       (detach/ignore-errors ,var))))
+       ,(format nil "Execute BODY with VAR bound to a `~(~A~)' for ~
+the channel designated by SCOPE-OR-URI. The ~:*~(~A~) is destroyed ~
+when the execution of BODY ends normally or because of a control ~
+transfer."  kind)
+       (declare (ignore transports converters))
+       (check-type var symbol "a symbol")
 
-(defmacro with-reader ((var scope-or-uri
-			&rest args
-			&key
-			transports
-			converters
-			&allow-other-keys)
-		       &body body)
-  "Execute BODY with VAR bound to an RSB listener for topic TOPIC on
-channel CHANNEL. The listener is destroyed when the execution of BODY
-ends normally or because of a control transfer."
-  (declare (ignore transports converters))
-  (check-type var symbol "a symbol")
+       `(let ((,`,var (,',make-name ,`,scope-or-uri
+				    ,,@(mapcar #'(lambda (arg) `,arg)
+					       extra-args)
+				    ,@`,args)))
+	  (unwind-protect
+	       (progn ,@`,body)
+	    (detach/ignore-errors ,`,var))))))
 
-  `(let ((,var (make-reader ,scope-or-uri ,@args)))
-     (unwind-protect
-	  (progn ,@body)
-       (detach/ignore-errors ,var))))
+(define-with-participant-macro listener)
+(define-with-participant-macro reader)
+(define-with-participant-macro informer type)
 
 (defmacro with-handler (listener
 			((event-var) &body handler-body)
@@ -70,21 +64,3 @@ ends normally or because of a control transfer."
 		(push ,handler-var (rsb.ep:handlers ,listener))
 		,@body)
 	   (removef (rsb.ep:handlers ,listener) ,handler-var))))))
-
-(defmacro with-informer ((var scope type
-			  &rest args
-			  &key
-			  transports
-			  converters
-			  &allow-other-keys)
-			 &body body)
-  "Execute BODY with VAR bound to a RSB publisher for name NAME. The
-publisher is destroyed when executed of BODY ends normally or because
-of a control transfer."
-  (declare (ignore transports converters))
-  (check-type var symbol "a symbol")
-
-  `(let ((,var (make-informer ,scope ,type ,@args)))
-     (unwind-protect
-	  (progn ,@body)
-       (detach/ignore-errors ,var))))

@@ -19,41 +19,8 @@
 
 (in-package :rsb.patterns)
 
-(defmacro with-remote-server ((var scope
-			       &rest args
-			       &key
-			       transports
-			       converters
-			       &allow-other-keys)
-			      &body body)
-  "Execute BODY with VAR bound to a RSB publisher for name NAME. The
-publisher is destroyed when executed of BODY ends normally or because
-of a control transfer."
-  (declare (ignore transports converters))
-  (check-type var symbol "a symbol")
-
-  `(let ((,var (make-remote-server ,scope ,@args)))
-     (unwind-protect
-	  (progn ,@body)
-       (detach/ignore-errors ,var))))
-
-(defmacro with-local-server ((var scope
-			      &rest args
-			      &key
-			      transports
-			      converters
-			      &allow-other-keys)
-			     &body body)
-  "Execute BODY with VAR bound to a RSB publisher for name NAME. The
-publisher is destroyed when executed of BODY ends normally or because
-of a control transfer."
-  (declare (ignore transports converters))
-  (check-type var symbol "a symbol")
-
-  `(let ((,var (make-local-server ,scope ,@args)))
-     (unwind-protect
-	  (progn ,@body)
-       (detach/ignore-errors ,var))))
+(define-with-participant-macro remote-server)
+(define-with-participant-macro local-server)
 
 (defmacro with-methods ((var) methods &body body)
   "Execute body with the methods defined by METHODS added to the

@@ -238,6 +238,8 @@
 
   ;; Macros
   (:export
+   :define-with-participant-macro
+
    :with-reader
 
    :with-listener
