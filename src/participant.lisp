@@ -29,7 +29,12 @@
 	       :reader   participant-converters
 	       :documentation
 	       "Stores the converters available for use in connectors
-of the participant."))
+of the participant.")
+   (error-hook :type     list
+	       :initform nil
+	       :documentation
+	       "Stores a list of functions to call in case of
+errors."))
   (:documentation
    "Instances of this class participate in the exchange of
 notifications on one channel of the bus."))
@@ -43,6 +48,9 @@ of PARTICIPANT."
        (remove wire-type (participant-converters participant)
 	       :key      #'car
 	       :test-not #'subtypep)))
+
+(defmethod participant-error-hook ((participant participant))
+  (hooks:object-hook participant 'error-hook))
 
 (defmethod relative-url ((participant participant))
   (puri:merge-uris
@@ -109,6 +117,15 @@ Return three values:
 
     ;; Associate constructed CONNECTORS to CONFIGURATOR instance.
     (setf (rsb.ep:configurator-connectors configurator) connectors)
+
+    ;; Setup the error hook of PARTICIPANT to be run for all errors
+    ;; intercepted by CONFIGURATOR.
+    (setf (rsb.ep:processor-error-policy configurator)
+	  #'(lambda (condition)
+	      (hooks:run-hook
+	       (hooks:object-hook participant 'error-hook) condition)
+	       ;;; TODO(jmoringe): maybe (ignore-error) here?
+	      ))
 
     (values participant configurator connectors)))
 

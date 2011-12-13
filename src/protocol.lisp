@@ -119,6 +119,12 @@ participates."))
 If PARTICIPANT does not have a converter for WIRE-TYPE, signal an
 error if ERROR? is non-nil, otherwise return nil."))
 
+(defgeneric participant-error-hook (participant)
+  (:documentation
+   "Return the error hook of PARTICIPANT. Handlers attached to the
+returned hook are called when errors are signaled in PARTICIPANT or an
+associated object."))
+
 (defgeneric detach (participant)
   (:documentation
    "Detach PARTICIPANT from the channel in which it participates and

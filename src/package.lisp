@@ -184,7 +184,8 @@
    :participant-id
    :participant-scope
    :participant-converters
-   :participant-converter)
+   :participant-converter
+   :participant-error-hook)
 
   ;; Protocol for receiving participants
   (:export

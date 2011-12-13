@@ -20,19 +20,13 @@
 (in-package :rsb)
 
 (defclass listener (receiving-client)
-  ((handlers   :initarg  :handlers
-	       :type     list
-	       :accessor rsb.ep:handlers
-	       :initform nil
-	       :documentation
-	       "Stores the list of handlers two which events received
-by this listener should be dispatched.")
-   (error-hook :initarg  :error-hook
-	       :type     list
-	       :initform nil
-	       :documentation
-	       "Stores a list of functions to call in case of
-errors."))
+  ((handlers :initarg  :handlers
+	     :type     list
+	     :accessor rsb.ep:handlers
+	     :initform nil
+	     :documentation
+	     "Stores the list of handlers two which events received by
+this listener should be dispatched."))
   (:documentation
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
