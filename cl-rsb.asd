@@ -225,19 +225,16 @@
 
 			      (:file       "conversion-mixin"
 			       :depends-on ("package"))
-			      (:file       "message-receiver-mixin"
+			      (:file       "timestamping-receiver-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "threaded-receiver-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
 			      (:file       "restart-message-receiver-mixin"
-			       :depends-on ("package" "protocol"
-					    "message-receiver-mixin"))
+			       :depends-on ("package" "protocol"))
 			      (:file       "threaded-message-receiver-mixin"
-			       :depends-on ("package"
-					    "message-receiver-mixin"
-					    "threaded-receiver-mixin"))
+			       :depends-on ("package" "threaded-receiver-mixin"))
 			      (:file       "restart-notification-sender-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "sometimes-interruptible-mixin"
@@ -343,6 +340,7 @@
   :depends-on  (:lift
 		:cl-protobuf
 		:cl-spread
+		:usocket
 		:cl-rsb)
   :properties  ((:spread-port  . #.(or #+sbcl (let ((value (sb-posix:getenv "SPREAD_PORT")))
 						(when value (read-from-string value)))
@@ -444,6 +442,21 @@
 			      (:file       "in-pull-connector"
 			       :depends-on ("package"))
 			      (:file       "in-push-connector"
+			       :depends-on ("package"))
+			      (:file       "out-connector"
+			       :depends-on ("package"))))
+
+		(:module     "socket"
+		 :pathname   "test/transport/socket"
+		 :depends-on ("test" "transport")
+		 :components ((:file       "package")
+
+			      (:file       "bus"
+			       :depends-on ("package"))
+
+			      (:file       "in-push-connector"
+			       :depends-on ("package"))
+			      (:file       "in-pull-connector"
 			       :depends-on ("package"))
 			      (:file       "out-connector"
 			       :depends-on ("package"))))
@@ -570,7 +583,54 @@ RSB events to/from Google protocol buffers."
 			      (:file       "protocol-buffers")))))
 
 
-;;; System connection with cl-ppcre
+;;; System connection with usocket
+;;
+
+#+asdf-system-connections
+(defsystem-connection :cl-rsb-and-usocket
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     #.(version/string)
+  :license     "GPL3; see COPYING file for details."
+  :description "This system connection provides a simple socket-based connector."
+  :requires    (cl-rsb
+		cl-rsb-and-cl-protobuf
+		usocket)
+  :components  ((:module     "socket"
+		 :pathname   "src/transport/socket"
+		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
+
+			      (:file       "util"
+			       :depends-on ("package"))
+			      (:file       "conversion"
+			       :depends-on ("package"))
+
+			      (:file       "bus-connection"
+			       :depends-on ("package" "util" "conversion"))
+			      (:file       "bus"
+			       :depends-on ("package" "bus-connection"))
+			      (:file       "bus-client"
+			       :depends-on ("package" "bus"))
+			      (:file       "bus-server"
+			       :depends-on ("package" "util" "bus"))
+
+			      (:file       "connector"
+			       :depends-on ("package"
+					    "bus-client" "bus-server"
+					    "conversion"))
+			      (:file       "in-connector"
+			       :depends-on ("package" "connector"))
+			      (:file       "in-pull-connector"
+			       :depends-on ("package" "in-connector"))
+			      (:file       "in-push-connector"
+			       :depends-on ("package" "in-connector"))
+			      (:file       "out-connector"
+			       :depends-on ("package" "connector"))))))
+
+
+;;; connection with cl-ppcre
 ;;
 
 #+asdf-system-connections

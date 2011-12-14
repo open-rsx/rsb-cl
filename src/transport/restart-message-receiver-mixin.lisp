@@ -19,7 +19,7 @@
 
 (in-package :rsb.transport)
 
-(defclass restart-message-receiver-mixin (message-receiver-mixin)
+(defclass restart-message-receiver-mixin ()
   ()
   (:documentation
    "This class is intended to be mixed into connector classes that
