@@ -35,17 +35,17 @@ threads simultaneously."))
    "This class is intended to be mixed into classes that need to
 handle conditions according to a client-supplied policy."))
 
+(defmethod apply-error-policy ((processor error-policy-mixin)
+			       (condition t))
+  (if-let ((policy (processor-error-policy processor)))
+    (funcall policy condition)
+    (log1 :warn processor "Do not have a error handling policy installed; unwinding")))
+
 (defun invoke-with-error-policy (processor thunk)
   "Invoke THUNK with a handler that applies the error policy of
 PROCESSOR."
   (handler-bind
-      ((error #'(lambda (condition)
-		  (bind (((:accessors-r/o
-			   (policy processor-error-policy)) processor))
-		    (unless policy
-		      (log1 :warn processor "Do not have a error handling policy installed; unwinding"))
-		    (when policy
-		      (funcall policy condition))))))
+      ((error (curry #'apply-error-policy processor)))
     (funcall thunk)))
 
 (defmacro with-error-policy ((processor) &body body)

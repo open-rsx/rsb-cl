@@ -112,6 +112,14 @@ the fact."
   :not-implemented)
 
 
+;;; Error policy protocol
+;;
+
+(defgeneric apply-error-policy (processor condition)
+  (:documentation
+   "Apply the error handling policy of PROCESSOR to CONDITION."))
+
+
 ;;; Configurator protocol
 ;;
 

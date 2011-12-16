@@ -97,8 +97,9 @@
   (:export
    :error-policy-mixin
    :processor-error-policy
-
+   :apply-error-policy
    :invoke-with-error-policy
+
    :with-error-policy)
 
   ;; `error-handling-dispatcher-mixin' class
