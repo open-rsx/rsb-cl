@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.converter.test
+(cl:defpackage :rsb.converter.test
   (:use
    :cl
    :alexandria
@@ -40,7 +38,7 @@
   (:documentation
    "This package contains unit tests for the converter module."))
 
-(in-package :rsb.converter.test)
+(cl:in-package :rsb.converter.test)
 
 (deftestsuite converter-root (root)
   ()

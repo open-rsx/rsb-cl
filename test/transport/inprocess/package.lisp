@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.transport.inprocess.test
+(cl:defpackage :rsb.transport.inprocess.test
   (:use
    :cl
    :lift
@@ -32,7 +30,7 @@
    "This package contains unit tests for the transport.inprocess
 module."))
 
-(in-package :rsb.transport.inprocess.test)
+(cl:in-package :rsb.transport.inprocess.test)
 
 (deftestsuite transport-inprocess-root (transport-root)
   ()

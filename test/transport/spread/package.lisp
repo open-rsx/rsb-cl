@@ -62,7 +62,7 @@
    "This package contains unit tests for the transport.spread
 module"))
 
-(in-package :rsb.transport.spread.test)
+(cl:in-package :rsb.transport.spread.test)
 
 (deftestsuite transport-spread-root (transport-root)
   ()

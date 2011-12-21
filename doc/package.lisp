@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :cl-user)
-
-(defpackage :rsb.doc
+(cl:defpackage :rsb.doc
   (:use
    :cl)
 
@@ -30,7 +28,7 @@
    "This package contains some functions that are used to generate
 documentation for the cl-rsb system."))
 
-(in-package :rsb.doc)
+(cl:in-package :rsb.doc)
 
 
 ;;; Client Interface

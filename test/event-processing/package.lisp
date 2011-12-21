@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.event-processing.test
+(cl:defpackage :rsb.event-processing.test
   (:use
    :cl
    :lift
@@ -33,7 +31,7 @@
    "This package contains unit tests for the event-processing
 module"))
 
-(in-package :rsb.event-processing.test)
+(cl:in-package :rsb.event-processing.test)
 
 (deftestsuite event-processing-root (root)
   ()
