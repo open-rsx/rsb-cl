@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 
 ;;; Sequence number functions
@@ -160,7 +160,7 @@ slot. Define the following accessors along with the class:
 + `NAME-values' :: Return item values.
 + `NAME-plist' :: Return items as plist.
 + `NAME-alist' :: Return items as alist."
-  (bind ((class-name (symbolicate "PLIST-" name "-MIXIN"))
+  (let+ ((class-name (symbolicate "PLIST-" name "-MIXIN"))
 	 (initarg    (make-keyword slot-name))
 	 ((count-name keys-name values-name plist-name alist-name)
 	  (map 'list (curry #'symbolicate name)
@@ -280,7 +280,7 @@ of ARGS is assumed to be the message string and the remaining
 arguments are assumed to be format arguments."
   (check-type category keyword)
 
-  (bind ((category (intern (string category) :log5))
+  (let+ ((category (intern (string category) :log5))
 	 (package  (iter (for name in (cons (package-name *package*)
 					    (package-nicknames *package*)))
 			 (finding name minimizing (length name))))

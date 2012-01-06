@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.converter)
+(cl:in-package :rsb.converter)
 
 (define-condition conversion-error (rsb-error
 				    chainable-condition)
@@ -57,7 +57,7 @@ domain object.")
 been produced by a successful conversion."))
   (:report
    (lambda (condition stream)
-     (bind (((:values data shortened?)
+     (let+ (((&values data shortened?)
 	     (maybe-shorten-sequence
 	      (conversion-error-encoded condition))))
        (format stream "~@<The wire data ~S~:[~; ...~] (in ~S ~

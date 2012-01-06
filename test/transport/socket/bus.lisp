@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket.test)
+(cl:in-package :rsb.transport.socket.test)
 
 (deftestsuite transport-socket-bus-root (transport-socket-root)
   (deadlock-detector)

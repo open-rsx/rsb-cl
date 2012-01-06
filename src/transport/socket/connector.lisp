@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 (defclass connector (rsb.transport:connector
 		     conversion-mixin)
@@ -73,7 +73,7 @@ employ socked-based bus access."))
 (defmethod notify ((connector connector)
 		   (scope     scope)
 		   (action    (eql :attached)))
-  (bind (((:accessors (host    connector-host)
+  (let+ (((&accessors (host    connector-host)
 		      (port    connector-port)
 		      (server? connector-server?)
 		      (bus     connector-bus)) connector))

@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns.test)
+(cl:in-package :rsb.patterns.test)
 
 (deftestsuite future-root (patterns-root)
   ()
@@ -54,17 +54,17 @@ separate thread.")
 	((:timeout .04 :error? nil) (:none)         nil     nil nil  :timeout))
 
     (iter (repeat 10)
-	  (bind ((future (make-instance 'future))
+	  (let+ ((future (make-instance 'future))
 		 done error value tag
-		 ((:flet make-receiver (args))
-		  (bt:make-thread
-		   (lambda ()
-		     (handler-case
-			 (multiple-value-setq (value tag)
-			   (apply #'future-result future args))
-		       (condition (condition)
-			 (setf error condition)))
-		     (setf done (future-done? future))))))
+		 ((&flet make-receiver (args)
+		    (bt:make-thread
+		     (lambda ()
+		       (handler-case
+			   (multiple-value-setq (value tag)
+			     (apply #'future-result future args))
+			 (condition (condition)
+			   (setf error condition)))
+		       (setf done (future-done? future)))))))
 	    (make-receiver result-args)
 	    (sleep (random .01))
 	    (case (first result)

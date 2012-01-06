@@ -36,7 +36,7 @@
    :cl
    :alexandria
    :iterate
-   :bind
+   :let-plus
 
    :rsb
    :rsb.event-processing

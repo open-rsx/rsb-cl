@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.inprocess)
+(cl:in-package :rsb.transport.inprocess)
 
 (defmethod find-transport-class ((spec (eql :inprocess-in-push)))
   (find-class 'in-push-connector))

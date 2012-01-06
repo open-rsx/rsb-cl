@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.event-processing)
+(cl:in-package :rsb.event-processing)
 
 (defclass configurator (scope-mixin
 			error-policy-mixin)
@@ -67,7 +67,7 @@ participant instance as its \"client\"."))
 
 (defmethod (setf processor-error-policy) :around  ((new-value    t)
 						   (configurator configurator))
-  (bind (((:accessors-r/o (processor  configurator-processor)
+  (let+ (((&accessors-r/o (processor  configurator-processor)
 			  (connectors configurator-connectors)) configurator))
     (log1 :trace configurator "Installing new error policy ~S in processor ~S"
 	  new-value processor)
@@ -82,7 +82,7 @@ participant instance as its \"client\"."))
 
 (defmethod (setf configurator-connectors) :around ((new-value    list)
 						   (configurator configurator))
-  (bind ((old-value (configurator-connectors configurator)))
+  (let ((old-value (configurator-connectors configurator)))
     (prog1
 	(call-next-method)
       (let ((added   (set-difference new-value old-value))
@@ -127,7 +127,7 @@ continue with the remaining connectors.~@:>"))))))
 (defmethod notify ((configurator configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (scope        configurator-scope)
 	   (error-policy processor-error-policy)) configurator))
     (log1 :trace configurator "Installing new error policy ~S in connector ~S" error-policy connector)
@@ -139,6 +139,6 @@ continue with the remaining connectors.~@:>"))))))
 (defmethod notify ((configurator configurator)
 		   (connector    t)
 		   (action       (eql :connector-removed)))
-  (bind (((:accessors-r/o (scope configurator-scope)) configurator))
+  (let+ (((&accessors-r/o (scope configurator-scope)) configurator))
     (log1 :trace configurator "Detaching connector ~S from ~S" connector scope)
     (notify connector scope :detached)))

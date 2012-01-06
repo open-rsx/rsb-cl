@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defclass receiving-client (participant
 			    rsb.ep:client)
@@ -40,7 +40,7 @@ processing configuration clients that receive and filter events."))
 					    (participant receiving-client))
   "Notify interested parties of the change in the set of
 listeners."
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (old-value    receiver-filters)
 	   (configurator rsb.ep:client-configurator)) participant))
     (prog1

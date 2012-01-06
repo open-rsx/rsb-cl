@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.converter)
+(cl:in-package :rsb.converter)
 
 (defmethod find-converter-class ((spec (eql :force-wire-schema)))
   (find-class 'force-wire-schema))
@@ -49,7 +49,7 @@ producing wire-data, wire-schema pairs."))
 (defmethod domain->wire? ((converter     force-wire-schema)
 			  (domain-object t))
   "The converter can handle arbitrary domain objects."
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (wire-schema converter-wire-schema)) converter))
     (values converter t wire-schema)))
 
@@ -63,7 +63,7 @@ producing wire-data, wire-schema pairs."))
 			 (domain-object t))
   "The domain object is not modified, but the configured wire-schema
 is set."
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (wire-schema converter-wire-schema)) converter))
     (values domain-object wire-schema)))
 

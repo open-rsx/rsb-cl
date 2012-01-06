@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns.test)
+(cl:in-package :rsb.patterns.test)
 
 (deftestsuite local-method-root (patterns-root)
   ()

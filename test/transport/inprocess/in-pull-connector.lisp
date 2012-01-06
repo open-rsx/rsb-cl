@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.inprocess.test)
+(cl:in-package :rsb.transport.inprocess.test)
 
 (deftestsuite in-pull-connector-root (transport-inprocess-root
 				      connector-suite)

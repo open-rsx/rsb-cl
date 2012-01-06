@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.filter)
+(cl:in-package :rsb.filter)
 
 (deftype fallback-policy ()
   "Designators for fallback filter behaviors."

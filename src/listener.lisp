@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defclass listener (receiving-client)
   ((handlers :initarg  :handlers

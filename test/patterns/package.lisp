@@ -25,7 +25,7 @@
 (cl:defpackage :rsb.patterns.test
   (:use
    :cl
-   :bind
+   :let-plus
    :iterate
    :lift
 

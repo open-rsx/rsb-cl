@@ -85,7 +85,7 @@
   :depends-on  (:alexandria
 		:split-sequence
 		:iterate
-		:metabang-bind
+		:let-plus
 
 		#+sbcl :sb-concurrency
 		:bordeaux-threads ;; or eager-future

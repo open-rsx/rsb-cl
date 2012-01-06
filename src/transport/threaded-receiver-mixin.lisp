@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport)
+(cl:in-package :rsb.transport)
 
 
 ;;; Mixin class `threaded-receiver-mixin'
@@ -54,7 +54,7 @@ class takes care of managing the starting and joining of the
 thread."))
 
 (defmethod start-receiver ((connector threaded-receiver-mixin))
-  (bind (((:accessors
+  (let+ (((&accessors
 	   (control-mutex     connector-control-mutex)
 	   (control-condition connector-control-condition)) connector))
     ;; Launch the thread.
@@ -71,7 +71,7 @@ thread."))
 	    (bt:condition-wait control-condition control-mutex)))))
 
 (defmethod stop-receiver ((connector threaded-receiver-mixin))
-  (bind (((:accessors (thread connector-thread)) connector))
+  (let+ (((&accessors (thread connector-thread)) connector))
     ;; Interrupt the receiver thread and throw our `terminate-thread'
     ;; tag.
     (log1 :info connector "Interrupting receiver thread")
@@ -88,7 +88,7 @@ requests."
   (catch 'terminate-thread
     ;; Notify the thread which is waiting in `start-receiver' that we
     ;; can catch the 'terminate-thread tag now.
-    (bind (((:accessors
+    (let+ (((&accessors
 	     (thread            connector-thread)
 	     (control-mutex     connector-control-mutex)
 	     (control-condition connector-control-condition)) connector))

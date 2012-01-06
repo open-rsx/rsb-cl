@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.test)
+(cl:in-package :rsb.test)
 
 (deftestsuite uris-root (root)
   ()
@@ -75,8 +75,8 @@
 	 ((:spread :foo "5" :bar "whoop" :port 10 :bar "baz")
 	  (:inprocess :foo "5" :bar "whoop" :bla 5))))
 
-    (bind ((uri (puri:parse-uri uri-string))
-	   ((:values scope options)
+    (let+ ((uri (puri:parse-uri uri-string))
+	   ((&values scope options)
 	    (uri->scope-and-options uri defaults)))
       (ensure-same scope expected-scope
 		   :test      #'scope=

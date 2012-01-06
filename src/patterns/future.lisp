@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 
 ;;; Representation of errors
@@ -141,7 +141,7 @@ or for performance reasons."))
 			  &key
 			  (error? t)
 			  &allow-other-keys)
-  (bind (((:accessors-r/o (lock      %future-lock)
+  (let+ (((&accessors-r/o (lock      %future-lock)
 			  (condition %future-condition)) future)
 	 (value (progn
 		  (bt:with-lock-held (lock)

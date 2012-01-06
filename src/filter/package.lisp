@@ -22,13 +22,11 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :cl-user)
-
-(defpackage :rsb.filter
+(cl:defpackage :rsb.filter
   (:use
    :cl
    :alexandria
-   :bind
+   :let-plus
 
    :rsb)
 

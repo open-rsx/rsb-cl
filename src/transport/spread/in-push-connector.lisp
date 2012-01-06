@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 
 ;;; `in-push-connector' class

@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 (define-condition no-such-method (rsb-error)
   ((name :initarg  :name

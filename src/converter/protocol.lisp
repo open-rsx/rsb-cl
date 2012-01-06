@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.converter)
+(cl:in-package :rsb.converter)
 
 
 ;;; Converter protocol

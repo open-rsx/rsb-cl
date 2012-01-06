@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.event-processing)
+(cl:in-package :rsb.event-processing)
 
 (defclass out-route-configurator (configurator)
   ()
@@ -42,7 +42,7 @@ event processor for sending of events."))
 (defmethod notify ((configurator out-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o (processor configurator-processor)) configurator))
+  (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
     (call-next-method)
     (log1 :trace configurator "Connecting ~S -> ~S" processor connector)
     (push connector (handlers processor))))
@@ -50,7 +50,7 @@ event processor for sending of events."))
 (defmethod notify ((configurator out-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-removed)))
-  (bind (((:accessors-r/o (processor configurator-processor)) configurator))
+  (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
     (log1 :trace configurator "Disconnecting ~S -> ~S" processor connector)
     (removef (handlers processor) connector)
     (call-next-method)))

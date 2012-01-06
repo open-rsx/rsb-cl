@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.converter)
+(cl:in-package :rsb.converter)
 
 (define-simple-converter (:fundamental-double :double double-float)
     ((binio:decode-double-le wire-data))

@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 (deftype method-name ()
   "Instances of this type are strings which are legal as method

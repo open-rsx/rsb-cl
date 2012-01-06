@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 
 ;;; Assembly-related conditions
@@ -49,7 +49,7 @@ occurs during the assembly of fragments into complete events."))
 the problem."))
   (:report
    (lambda (condition stream)
-     (bind (((:accessors-r/o
+     (let+ (((&accessors-r/o
 	      (assembly assembly-problem-assembly)
 	      (fragment assembly-problem-fragment)) condition))
       (format stream "~@<The fragment ~D of event ~/rsb::print-id/ ~
@@ -66,7 +66,7 @@ fragment causes a problem in an assembly."))
   ()
   (:report
    (lambda (condition stream)
-     (bind (((:accessors-r/o
+     (let+ (((&accessors-r/o
 	      (assembly assembly-problem-assembly)
 	      (fragment assembly-problem-fragment)) condition))
        (format stream "~@<Received illegal fragment ~D of event ~
@@ -84,7 +84,7 @@ with an invalid part id to an assembly."))
   ()
   (:report
    (lambda (condition stream)
-     (bind (((:accessors-r/o
+     (let+ (((&accessors-r/o
 	      (assembly assembly-problem-assembly)
 	      (fragment assembly-problem-fragment)) condition))
        (format stream "~@<Received fragment ~D of event ~

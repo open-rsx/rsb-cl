@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (deftype octet-vector ()
   '(simple-array (unsigned-byte 8) (*)))
@@ -40,10 +40,10 @@
 
 (defun scope-component? (string)
   "Non-nil when STRING is a valid scope component."
-  (bind (((:flet valid-char? (char))
-	  (or (<= (char-code #\a) (char-code char) (char-code #\z))
-	      (<= (char-code #\A) (char-code char) (char-code #\Z))
-	      (<= (char-code #\0) (char-code char) (char-code #\9)))))
+  (let+ (((&flet valid-char? (char)
+	    (or (<= (char-code #\a) (char-code char) (char-code #\z))
+		(<= (char-code #\A) (char-code char) (char-code #\Z))
+		(<= (char-code #\0) (char-code char) (char-code #\9))))))
     (and (not (emptyp string))
 	 (every #'valid-char? string))))
 

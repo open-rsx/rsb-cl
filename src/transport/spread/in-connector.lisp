@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 
 ;;; `in-connector' class
@@ -60,7 +60,7 @@ connector classes for Spread."))
 (defmethod message->event ((connector   in-connector)
 			   (message     simple-array)
 			   (wire-schema t))
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (pool      connector-assembly-pool)
 	   (converter connector-converter)
 	   (expose-wire-schema? connector-expose-wire-schema?)) connector)

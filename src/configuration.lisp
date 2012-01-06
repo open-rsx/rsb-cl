@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 
 ;;; Environment variables
@@ -30,14 +30,14 @@
 
 (defun options-from-environment ()
   "Obtain configuration options from environment variables."
-  (bind (((:flet name->option-name (name))
-	  (when (starts-with-subseq "RSB_" name)
-	    (string->option-name (subseq name 4) #\_)))
-	 ((:flet variable->option (string))
-	  (bind (((name value) (split-sequence #\= string :count 2))
-		 (name (name->option-name name)))
-	    (when name
-	      (cons name value)))))
+  (let+ (((&flet name->option-name (name)
+	    (when (starts-with-subseq "RSB_" name)
+	      (string->option-name (subseq name 4) #\_))))
+	 ((&flet variable->option (string)
+	    (let+ (((name value) (split-sequence #\= string :count 2))
+		   (name (name->option-name name)))
+	      (when name
+		(cons name value))))))
     (remove-if #'null (map 'list #'variable->option
 			   (sb-impl::posix-environ)))))
 
@@ -51,9 +51,9 @@
    (iter (for  line     in-stream stream :using #'read-line)
 	 (for  line-num :from     1)
 	 (with section  =         nil)
-	 (bind ((content (subseq line 0 (position #\# line)))
-		((:flet trim (string))
-		 (string-trim '(#\Space) string)))
+	 (let+ ((content (subseq line 0 (position #\# line)))
+		((&flet trim (string)
+		   (string-trim '(#\Space) string))))
 	   (cond
 	     ;; Empty/comment-only line
 	     ((emptyp content))
@@ -64,7 +64,7 @@
 			     (subseq content 1 (1- (length content))))))
 	     ;; Value
 	     ((= (funcall #'count #\= content) 1) ;; iterate :(
-	      (bind (((name value)
+	      (let+ (((name value)
 		      (map 'list #'trim (split-sequence #\= content)))
 		     (name (string->option-name name)))
 		(collect (cons (append section name) value))))
@@ -102,10 +102,10 @@
 
 (defun section-options (section &optional
 			(config *default-configuration*))
-  (bind ((section (ensure-list section))
-	 ((:flet strip-key (option))
-	  (cons (nthcdr (length section) (car option))
-		(cdr option))))
+  (let+ ((section (ensure-list section))
+	 ((&flet strip-key (option)
+	    (cons (nthcdr (length section) (car option))
+		  (cdr option)))))
     (map 'list #'strip-key
 	 (remove section config
 		 :test-not #'starts-with-subseq
@@ -129,18 +129,18 @@
   "Collect and interpret options in CONFIG that apply to
 transports. Options for transports which are disabled in CONFIG are
 not returned."
-  (bind (((:flet options->plist (options))
-	  (iter (for (key . value) in options)
-		(when (and (length= 1 key)
-			   (not (eq (first key) :enabled)))
-		  (collect (first key)) (collect value))))
+  (let+ (((&flet options->plist (options)
+	    (iter (for (key . value) in options)
+		  (when (and (length= 1 key)
+			     (not (eq (first key) :enabled)))
+		    (collect (first key)) (collect value)))))
 	 (options    (section-options :transport config))
 	 (transports (remove-duplicates
 		      (map 'list (compose #'first #'car) options))))
     ;; Collect options for all individual transport. Skip disabled
     ;; transports.
     (iter (for transport in transports)
-	  (bind ((options (section-options transport options)))
+	  (let ((options (section-options transport options)))
 	    (when (or (not exclude-disabled?)
 		      (eq (option-value '(:enabled) nil options) t)
 		      (string= (option-value '(:enabled) "0" options) "1")) ;;; TODO(jmoringe):
@@ -153,7 +153,7 @@ not returned."
 
 replace &inherit with the default configuration options for
 TRANSPORT. Otherwise return OPTIONS unmodified."
-  (bind (((transport &rest transport-options) options))
+  (let+ (((transport &rest transport-options) options))
     (cons transport
 	  (if (ends-with '&inherit transport-options)
 	      (append (butlast transport-options)

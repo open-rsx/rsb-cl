@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 
 ;;; Assembly protocol
@@ -94,8 +94,8 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 
 (defmethod add-fragment! ((assembly  assembly)
 			  (fragment  fragmented-notification))
-  (bind (((:accessors-r/o (fragments assembly-fragments)) assembly)
-	 ((:accessors-r/o (id fragmented-notification-data-part)) fragment))
+  (let+ (((&accessors-r/o (fragments assembly-fragments)) assembly)
+	 ((&accessors-r/o (id fragmented-notification-data-part)) fragment))
     (log1 :trace assembly "Processing fragment ~D" id)
     (cond
       ;; Bounds check for fragment id.
@@ -166,7 +166,7 @@ necessary when fragments are submitted by calls to
 (defmethod ensure-assembly ((pool assembly-pool)
 			    (id   simple-array)
 			    (size integer))
-  (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool))
+  (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)) pool))
     (or (gethash id assemblies)
 	(setf (gethash id assemblies)
 	      (make-instance 'assembly
@@ -175,10 +175,10 @@ necessary when fragments are submitted by calls to
 
 (defmethod merge-fragment ((pool     assembly-pool)
 			   (fragment fragmented-notification))
-    (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
-	   ((:accessors-r/o (notification fragmented-notification-notification)
+    (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
+	   ((&accessors-r/o (notification fragmented-notification-notification)
 			    (size         fragmented-notification-num-data-parts)) fragment)
-	   ((:accessors-r/o (id notification-event-id)) notification)
+	   ((&accessors-r/o (id notification-event-id)) notification)
 	   (id       (%make-key id))
 	   (assembly (ensure-assembly pool id size)))
       (when (assembly-complete? (add-fragment! assembly fragment))
@@ -250,7 +250,7 @@ MIN-AGE."))
 (defun delete-partial-assemblies (pool min-age)
   "Find `assembly' instance in POOL whose age is at least MIN-AGE and
 delete them."
-  (bind (((:accessors-r/o (assemblies %assembly-pool-assemblies)
+  (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)
 			  (lock       %assembly-pool-lock)) pool))
     (bt:with-lock-held (lock)
       (when-let ((old (remove min-age (hash-table-values assemblies)

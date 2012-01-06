@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defclass participant (uuid-mixin
 		       scope-mixin)
@@ -155,7 +155,7 @@ should be ~S.~@:>"
 			 :exclude-disabled?
 			 (not (uri-transport ,designator-arg))))
 	    (converters (default-converters)))
-	 (bind (((:values scope options)
+	 (let+ (((&values scope options)
 		 (uri->scope-and-options ,designator-arg transports)))
 	   (,make-name scope ,@(rest arg-names)
 		       :transports options

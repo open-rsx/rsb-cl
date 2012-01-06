@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.test)
+(cl:in-package :rsb.test)
 
 (deftestsuite informer-root (root
 			     participant-suite)

@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 
 ;;; Notification -> Event
@@ -35,14 +35,14 @@
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (event-id    notification-event-id)
 	   (scope       notification-scope)
 	   (method      notification-method)
 	   (wire-schema notification-wire-schema)
 	   (payload     notification-data)
 	   (meta-data   notification-meta-data)) notification)
-	 ((:accessors-r/o
+	 ((&accessors-r/o
 	   (sequence-number event-id-sequence-number)
 	   (sender-id       event-id-sender-id)) event-id)
 	 (wire-schema (bytes->wire-schema wire-schema))
@@ -105,7 +105,7 @@ into one notification."
   (setf (timestamp event :send) (local-time:now))
 
   ;; Put EVENT into one or more notifications.
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (sequence-number event-sequence-number)
 	   (scope           event-scope)
 	   (origin          event-origin)
@@ -113,7 +113,7 @@ into one notification."
 	   (data            event-data)
 	   (meta-data       event-meta-data)
 	   (timestamps      event-timestamps)) event)
-	 ((:values wire-data wire-schema)
+	 ((&values wire-data wire-schema)
 	  (rsb.converter:domain->wire converter data)))
     (make-notification sequence-number scope origin method
 		       wire-schema wire-data
@@ -139,7 +139,7 @@ for most cases.")
 			  timestamps)
   "Make a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
 SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA."
-  (bind ((event-id     (make-instance
+  (let* ((event-id     (make-instance
 			'rsb.protocol:event-id
 			:sender-id       (uuid:uuid-to-byte-array origin)
 			:sequence-number sequence-number))
@@ -193,7 +193,7 @@ integer which counts the number of microseconds since UNIX epoch."
 (defun unix-microseconds->timestamp (unix-microseconds)
   "Convert UNIX-MICROSECONDS to an instance of
 `local-time:timestamp'."
-  (bind (((:values unix-seconds microseconds)
+  (let+ (((&values unix-seconds microseconds)
 	  (floor unix-microseconds 1000000)))
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))

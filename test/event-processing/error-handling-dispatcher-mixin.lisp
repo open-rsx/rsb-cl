@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.event-processing.test)
+(cl:in-package :rsb.event-processing.test)
 
 (deftestsuite error-handling-dispatcher-mixin-root (event-processing-root)
   ((simple-processor (make-instance (ensure-processor-class

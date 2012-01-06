@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 (defmethod find-transport-class ((spec (eql :spread-out)))
   (find-class 'out-connector))
@@ -48,8 +48,8 @@ should use."))
    "A connector for sending data over spread."))
 
 (defmethod handle ((connector out-connector) (event event))
-  (bind ((group-names   (scope->groups (event-scope event)))
-	 (notifications (event->notification connector event))) ;; TODO only if group is populated?
+  (let ((group-names   (scope->groups (event-scope event)))
+	(notifications (event->notification connector event))) ;; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (send-notification connector (cons group-names notifications))))
@@ -65,7 +65,7 @@ of this method is performing the conversion with restarts installed."
 			      (groups-and-notifications cons))
   "Send each notification using `send-message'. The primary purpose of
 this method is sending the notifications with restarts installed."
-  (bind (((:accessors-r/o (connection connector-connection)) connector)
+  (let+ (((&accessors-r/o (connection connector-connection)) connector)
 	 ((group-names . notifications) groups-and-notifications))
     (iter (for notification in notifications)
 	  (send-message connection group-names (pb:pack* notification)))))

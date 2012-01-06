@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 (defclass in-connector (connector
 			restart-message-receiver-mixin
@@ -54,7 +54,7 @@ queue received events for delivery."))
 (defmethod message->event ((connector    in-connector)
 			   (notification notification)
 			   (wire-schema  t))
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (converter           connector-converter)
 	   (expose-wire-schema? connector-expose-wire-schema?)) connector))
 

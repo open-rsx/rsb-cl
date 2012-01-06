@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport)
+(cl:in-package :rsb.transport)
 
 (defclass expose-wire-schema-mixin ()
   ((expose-wire-schema? :initarg  :expose-wire-schema?

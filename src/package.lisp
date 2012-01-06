@@ -28,7 +28,7 @@
    :alexandria
    :split-sequence
    :iterate
-   :bind
+   :let-plus
    :hooks)
 
   ;; Types

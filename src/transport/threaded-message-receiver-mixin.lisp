@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport)
+(cl:in-package :rsb.transport)
 
 (defclass threaded-message-receiver-mixin (threaded-receiver-mixin)
   ()
@@ -35,7 +35,7 @@ thread."))
 (defmethod receive-messages ((connector threaded-message-receiver-mixin))
   "Receive a message that can be decoded into an event. Return the
 event."
-  (iter (bind (((:values notification wire-schema)
+  (iter (let+ (((&values notification wire-schema)
 		(receive-message connector t))
 	       ;; Try to convert NOTIFICATION into one or zero events
 	       ;; (in the latter case, EVENT is nil).

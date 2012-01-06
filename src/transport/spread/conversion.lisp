@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 
 ;;; Notification -> Event
@@ -63,10 +63,10 @@ been fragmented into multiple notifications."
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
-  (bind (((:flet event-id->cons (event-id))
-	  (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
-		(event-id-sequence-number event-id)))
-	 ((:accessors-r/o
+  (let+ (((&flet event-id->cons (event-id)
+	    (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
+		  (event-id-sequence-number event-id))))
+	 ((&accessors-r/o
 	   (scope           notification-scope)
 	   (event-id        notification-event-id)
 	   (method          notification-method)
@@ -74,7 +74,7 @@ contained in NOTIFICATION."
 	   (payload         notification-data)
 	   (meta-data       notification-meta-data)
 	   (causes          notification-causes)) notification)
-	 ((:accessors-r/o
+	 ((&accessors-r/o
 	   (sender-id       event-id-sender-id)
 	   (sequence-number event-id-sequence-number)) event-id)
 	 (wire-schema (bytes->wire-schema wire-schema))
@@ -141,7 +141,7 @@ into one notification."
   (setf (timestamp event :send) (local-time:now))
 
   ;; Put EVENT into one or more notifications.
-  (bind (((:accessors-r/o (origin          event-origin)
+  (let+ (((&accessors-r/o (origin          event-origin)
 			  (sequence-number event-sequence-number)
 			  (scope           event-scope)
 			  (method          event-method)
@@ -149,7 +149,7 @@ into one notification."
 			  (meta-data       rsb:event-meta-data)
 			  (timestamps      event-timestamps)
 			  (causes          event-causes)) event)
-	 ((:values wire-data wire-schema)
+	 ((&values wire-data wire-schema)
 	  (rsb.converter:domain->wire converter data))
 	 (data-size (length wire-data)))
     (declare (type octet-vector wire-data))
@@ -203,7 +203,7 @@ into one notification."
   "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
 ORIGIN and optionally SCOPE, METHOD, WIRE-SCHEMA, META-DATA and
 causes."
-  (bind ((full?        scope)
+  (let* ((full?        scope)
 	 (event-id     (make-instance
 			'event-id
 			:sender-id       (uuid:uuid-to-byte-array origin)
@@ -267,7 +267,7 @@ integer which counts the number of microseconds since UNIX epoch."
 (defun unix-microseconds->timestamp (unix-microseconds)
   "Convert UNIX-MICROSECONDS to an instance of
 `local-time:timestamp'."
-  (bind (((:values unix-seconds microseconds)
+  (let+ (((&values unix-seconds microseconds)
 	  (floor unix-microseconds 1000000)))
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))

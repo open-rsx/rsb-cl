@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defun make-options (&key
 		     show?)
@@ -113,7 +113,7 @@ initargs as multiple values."
   "Make and return an option object based on the data CLASS, NAME,
 TYPE, DEFAULT and description. The kind of commandline option is
 determined based on TYPE by calling `option-type->class-and-args'."
-  (bind (((constructor &rest args)
+  (let+ (((constructor &rest args)
 	  (multiple-value-list (option-type->class-and-args type))))
     (apply constructor
 	   :long-name (commandline-option-name
@@ -189,13 +189,13 @@ option~P which ~:[have~;has~] been described above: ~{~(~A~)~^, ~}."
 (defun make-options-for-connector-class (class)
   "Return a `clon:group' instances which contains configuration
 options for connector class CLASS."
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (schemas   rsb.transport:connector-schemas)
 	   (direction rsb.transport:connector-direction)) class)
 	 (name        (first schemas))
 	 (pretty-name (format nil "~:(~A~) ~:(~A~) Connector"
 			      name direction))
-	 ((:values items repeated)
+	 ((&values items repeated)
 	  (make-connector-options name class)))
     (apply #'com.dvlsoft.clon:make-group
 	   :header pretty-name

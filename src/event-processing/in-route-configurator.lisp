@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.event-processing)
+(cl:in-package :rsb.event-processing)
 
 (defclass in-route-configurator (configurator)
   ((filters :type     list
@@ -53,7 +53,7 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-added)))
-  (bind (((:accessors-r/o (filters   configurator-filters)
+  (let+ (((&accessors-r/o (filters   configurator-filters)
 			  (processor configurator-processor)) configurator))
     (call-next-method)
 
@@ -73,7 +73,7 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
 		   (connector    t)
 		   (action       (eql :connector-removed)))
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (filters   configurator-filters)
 	   (processor configurator-processor)) configurator))
     ;; Remove processor from connectors handlers and notify regarding
@@ -99,7 +99,7 @@ participant."))
 		   (action       (eql :filter-added)))
   "Add FILTER from CONFIGURATOR's filter list and notify its
 connectors and processor."
-  (bind (((:accessors
+  (let+ (((&accessors
 	   (connectors configurator-connectors)
 	   (processor  configurator-processor)
 	   (filters    configurator-filters)) configurator))
@@ -121,7 +121,7 @@ connectors and processor."
 		   (action       (eql :filter-removed)))
   "Remove FILTER from CONFIGURATOR's filter list and notify its
 connectors and processor."
-  (bind (((:accessors
+  (let+ (((&accessors
 	   (connectors configurator-connectors)
 	   (processor  configurator-processor)
 	   (filters    configurator-filters)) configurator))
@@ -144,13 +144,13 @@ connectors and processor."
 (defmethod notify ((configurator in-route-configurator)
 		   (handler      t)
 		   (action       (eql :handler-added)))
-  (bind ((processor (configurator-processor configurator)))
+  (let ((processor (configurator-processor configurator)))
     (log1 :trace configurator "Adding handler ~S to ~S" handler processor)
     (push handler (handlers processor))))
 
 (defmethod notify ((configurator in-route-configurator)
 		   (handler      t)
 		   (action       (eql :handler-removed)))
-  (bind ((processor (configurator-processor configurator)))
+  (let ((processor (configurator-processor configurator)))
     (log1 :trace configurator "Removing handler ~S from ~S" handler processor)
     (removef (handlers processor) handler)))

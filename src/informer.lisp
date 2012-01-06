@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defclass informer (participant
 		    rsb.ep:client
@@ -53,7 +53,7 @@ channel."))
   (when unchecked?
     (return-from send))
 
-  (bind (((:accessors-r/o (scope participant-scope)
+  (let+ (((&accessors-r/o (scope participant-scope)
 			  (type  informer-type)) informer))
     ;; Ensure that the type of DATA is a subtype of INFORMER's type
     (unless (subtypep (event-type data) type)
@@ -132,7 +132,7 @@ channel."))
 			 :transports transports
 			 :type       type
 			 :cause      condition))))
-    (bind (((:values informer configurator)
+    (let+ (((&values informer configurator)
 	    (make-participant 'informer scope :out transports converters
 			      :type type)))
       ;; Connect the processor of CONFIGURATOR to INFORMER as an event

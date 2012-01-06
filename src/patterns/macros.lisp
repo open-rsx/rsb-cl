@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 (define-with-participant-macro remote-server)
 (define-with-participant-macro local-server)
@@ -38,29 +38,28 @@ REQUEST-TYPE is the keyword :event, BODY is called with ARG bound to
 the request event (instead of just the payload)."
   (check-type var symbol "a symbol")
 
-  (bind (((:flet process-one (spec))
-	  (bind (((name (arg type) &rest body) spec)
-		 (name-as-string (string name)))
-	    (check-type name-as-string method-name "a valid method name")
-	    (check-type arg            symbol      "a symbol")
+  (let+ (((&flet+ process-one ((name (arg type) &rest body))
+	    (let ((name-as-string (string name)))
+	      (check-type name-as-string method-name "a valid method name")
+	      (check-type arg            symbol      "a symbol")
 
-	    (list
-	     ;; add method
-	     `(setf (server-method ,var ,name-as-string
-				   ,@(when (eq type :event)
-				       '(:argument :event)))
-		    #'(lambda (,arg) ,@body))
-	     ;; remove method
-	     `(let ((method (server-method ,var ,name-as-string :error? nil)))
-		(when method
-		  (handler-bind
-		      (((or error bt:timeout)
-			#'(lambda (condition)
-			    (warn "~@<Error removing method ~S: ~A~@:>"
-				  method condition)
-			    (continue))))
-		    (%remove-method-with-restart-and-timeout
-		     ,var method)))))))
+	      (list
+	       ;; add method
+	       `(setf (server-method ,var ,name-as-string
+				     ,@(when (eq type :event)
+					     '(:argument :event)))
+		      #'(lambda (,arg) ,@body))
+	       ;; remove method
+	       `(let ((method (server-method ,var ,name-as-string :error? nil)))
+		  (when method
+		    (handler-bind
+			(((or error bt:timeout)
+			  #'(lambda (condition)
+			      (warn "~@<Error removing method ~S: ~A~@:>"
+				    method condition)
+			      (continue))))
+		      (%remove-method-with-restart-and-timeout
+		       ,var method))))))))
 	 (add-and-remove (map 'list #'process-one methods)))
     `(unwind-protect
 	  (progn

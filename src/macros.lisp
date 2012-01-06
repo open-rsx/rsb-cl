@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defmacro define-with-participant-macro (kind &rest extra-args)
   (let ((name      (symbolicate "WITH-" kind))

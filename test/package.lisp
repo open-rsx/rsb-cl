@@ -26,7 +26,7 @@
   (:use
    :cl
    :alexandria
-   :bind
+   :let-plus
    :iterate
 
    :lift
@@ -169,13 +169,13 @@ KIND."
 			    method class))
 	   ,case-name
 
-	   (bind (((:flet do-one (restart))
-		   (setf ,var-name t)
-		   (handler-bind
-		       ((error #'(lambda (condition)
-				   (declare (ignore condition))
-				   (setf ,var-name nil)
-				   (invoke-restart (find-restart restart)))))
-		     ,@body)))
+	   (let+ (((&flet do-one (restart)
+		     (setf ,var-name t)
+		     (handler-bind
+			 ((error #'(lambda (condition)
+				     (declare (ignore condition))
+				     (setf ,var-name nil)
+				     (invoke-restart (find-restart restart)))))
+		       ,@body))))
 	     ,@(iter (for restart in restarts)
 		     (collect `(do-one ',restart))))))))

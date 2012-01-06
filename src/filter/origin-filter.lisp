@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.filter)
+(cl:in-package :rsb.filter)
 
 (defmethod find-filter-class ((spec (eql :origin)))
   (find-class 'origin-filter))

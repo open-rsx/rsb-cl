@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 
 ;;; Scope protocol
@@ -170,7 +170,7 @@ components of THING1 and THING2."
 if it becomes or already is the canonical instance."
   (if (scope-interned? scope)
       scope
-      (bind (((:values interned found?)
+      (let+ (((&values interned found?)
 	      (bt:with-lock-held (*scopes-lock*)
 		(ensure-gethash
 		 (scope-components scope) *scopes* scope))))

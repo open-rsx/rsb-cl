@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb)
+(cl:in-package :rsb)
 
 (defun uri-transport (uri)
   "If URI specifies a transport configuration, return three values:
@@ -33,8 +33,8 @@ nil. If URI does not specify a transport, return nil."
 
 (defun uri-options (uri)
   "Translate the query part of URI into a plist of options."
-  (bind (((:flet separator? (char))
-	  (or (eq char #\;) (eq char #\&)))
+  (let+ (((&flet separator? (char)
+	    (or (eq char #\;) (eq char #\&))))
 	 (queries (split-sequence-if
 		   #'separator? (puri:uri-query uri)
 		   :remove-empty-subseqs t))
@@ -75,8 +75,8 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
 RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
 => (make-scope \"/\") '((:spread :port 4811))
 :test #'equal"
-  (bind (((:values transport host port) (uri-transport uri))
-	 ((:accessors-r/o (path        puri:uri-path)
+  (let+ (((&values transport host port) (uri-transport uri))
+	 ((&accessors-r/o (path        puri:uri-path)
 			  (fragment    puri:uri-fragment)
 			  (uri-options uri-options)) uri)
 	 (transport-options
@@ -110,5 +110,5 @@ in the extracted transport options. Return the resulting options."
 (defun %merge-options (options transport-options)
   "Merge OPTIONS into TRANSPORT-OPTIONS such that options in OPTIONS
 take precedence."
-  (bind (((transport &rest transport-options) transport-options))
+  (let+ (((transport &rest transport-options) transport-options))
     (cons transport (append options transport-options))))

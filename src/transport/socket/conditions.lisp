@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 (define-condition socket-bus-auto-connection-error (rsb-error
 						    simple-error)

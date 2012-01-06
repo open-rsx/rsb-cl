@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.filter)
+(cl:in-package :rsb.filter)
 
 (defmethod find-filter-class ((spec (eql :constant)))
   (find-class 'fallback-policy-mixin))
@@ -48,7 +48,7 @@ and thus need a fallback policy."))
   "Decide whether EVENT should match FILTER based on FILTER's fallback
 policy. This method is only called, if no more specific method on
 `matches?' made a decision."
-  (bind (((:accessors-r/o
+  (let+ (((&accessors-r/o
 	   (fallback-policy filter-fallback-policy)) filter))
     (ecase fallback-policy
       (:match        t)

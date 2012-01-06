@@ -26,7 +26,7 @@
   (:use
    :cl
    :alexandria
-   :bind
+   :let-plus
    :lift
 
    :rsb
@@ -142,7 +142,7 @@
 	     ,cases
 	   (unless (or (member wire-data '(:error :not-applicable))
 		       (member domain-object '(:error :not-applicable)))
-	     (bind (((:values encoded encoded-wire-schema)
+	     (let+ (((&values encoded encoded-wire-schema)
 		     (domain->wire ,converter domain-object))
 		    (decoded (wire->domain ,converter encoded encoded-wire-schema)))
 	       (ensure-same domain-object decoded

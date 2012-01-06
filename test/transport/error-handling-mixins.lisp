@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.test)
+(cl:in-package :rsb.transport.test)
 
 (macrolet
     ((define-error-handling-mixin-tests (class

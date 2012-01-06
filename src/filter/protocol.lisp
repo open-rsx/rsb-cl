@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.filter)
+(cl:in-package :rsb.filter)
 
 
 ;;; Filter protocol
@@ -98,6 +98,6 @@ initarg. The value of this initarg is computed by recursively applying
 (defmethod filter ((spec list)
 		   &rest args
 		   &key)
-  (bind (((class &rest child-specs) spec)
+  (let+ (((class &rest child-specs) spec)
 	 (children (map 'list (curry  #'apply #'filter) child-specs)))
     (apply #'filter class :children children args)))

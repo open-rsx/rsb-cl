@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 
 ;;; `local-method' class
@@ -66,7 +66,7 @@ and send the reply using the informer."
 		 &key &allow-other-keys)
   "Invoke the call back function of METHOD with the payload of
 REQUEST. Send the result or an error notification back to the caller."
-  (bind (((:accessors-r/o (informer method-informer)
+  (let+ (((&accessors-r/o (informer method-informer)
 			  (callback method-callback)
 			  (argument method-argument)) method)
 	 ;; If we got here via direct function calls within a single
@@ -74,7 +74,7 @@ REQUEST. Send the result or an error notification back to the caller."
 	 (causes (unless *local-call*
 		   (list (event-id/opaque request)))))
     (handler-case
-	(bind ((maybe-result (multiple-value-list
+	(let* ((maybe-result (multiple-value-list
 			      (cond
 				((eq argument :event)
 				 (funcall callback request))

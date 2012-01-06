@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.converter.test)
+(cl:in-package :rsb.converter.test)
 
 (deftestsuite fundamental-root (converter-root)
   ()

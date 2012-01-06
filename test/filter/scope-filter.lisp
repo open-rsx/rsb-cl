@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.filter.test)
+(cl:in-package :rsb.filter.test)
 
 (deftestsuite scope-filter-root (filter-root
 				 filter-suite)

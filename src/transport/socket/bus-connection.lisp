@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 (defclass bus-connection (broadcast-processor
 			  threaded-message-receiver-mixin
@@ -194,7 +194,7 @@ be packed using protocol buffer serialization.~@:>"
 
 (defmethod close ((connection bus-connection)
 		  &key &allow-other-keys)
-  (bind (((:accessors (lock     connection-lock)
+  (let+ (((&accessors (lock     connection-lock)
 		      (closing? %connection-closing?)
 		      (socket   connection-socket)) connection))
     ;; Ensure that CONNECTION is not already closing or being closed.
@@ -216,7 +216,7 @@ be packed using protocol buffer serialization.~@:>"
 ;;
 
 (defmethod print-object ((object bus-connection) stream)
-  (bind (((:accessors-r/o (socket   connection-socket)
+  (let+ (((&accessors-r/o (socket   connection-socket)
 			  (closing? connection-closing?)) object))
     (print-unreadable-object (object stream :type t)
       (format stream "~:[open~;closing~] ~/rsb.transport.socket::print-socket/"

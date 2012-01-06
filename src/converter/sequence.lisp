@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.converter)
+(cl:in-package :rsb.converter)
 
 
 ;;; Sequence "converter"
@@ -36,7 +36,7 @@
 			  (wire-schema t))
   "Check whether any child can handle the requested conversion."
   (iter (for child in converter)
-	(bind (((:values use? domain-type)
+	(let+ (((&values use? domain-type)
 		(wire->domain? child wire-data wire-schema)))
 	  (when use?
 	    (return (values use? domain-type))))))
@@ -45,7 +45,7 @@
 			  (domain-object t))
   "Check whether any child can handle the requested conversion."
   (iter (for child in converter)
-	(bind (((:values use? wire-type wire-schema)
+	(let+ (((&values use? wire-type wire-schema)
 		(domain->wire? child domain-object)))
 	  (when use?
 	    (return (values use? wire-type wire-schema))))))

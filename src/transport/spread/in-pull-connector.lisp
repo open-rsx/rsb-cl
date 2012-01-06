@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 (defmethod find-transport-class ((spec (eql :spread-in-pull)))
   (find-class 'in-pull-connector))
@@ -40,10 +40,10 @@ transport."))
   (iter ;; Maybe block until a notification is received. Try to
         ;; convert into an event and return the event in case of
         ;; success. In blocking mode, wait for the next notification.
-    (bind (((:values payload _ _)
-	    (receive-message connector block?))
-	   (event (when payload
-		    (message->event connector payload :undetermined))))
+    (let* ((payload (receive-message connector block?))
+	   (event   (when payload
+		      (message->event
+		       connector payload :undetermined))))
 
       ;; Due to fragmentation of large events into multiple
       ;; notifications, non-blocking receive mode and error

@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport)
+(cl:in-package :rsb.transport)
 
 (define-condition connector-construction-failed (rsb-error
 						 chainable-condition)
@@ -99,7 +99,7 @@ contain a suitable one for the requested connector."))
 	    "The encoded data, for which the decoding failed."))
   (:report
    (lambda (condition stream)
-     (bind (((:values data shortened?)
+     (let+ (((&values data shortened?)
 	     (maybe-shorten-sequence (decoding-error-encoded condition))))
        (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
 ~_could not be decoded ~

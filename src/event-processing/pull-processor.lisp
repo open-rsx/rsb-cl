@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.event-processing)
+(cl:in-package :rsb.event-processing)
 
 (defclass pull-processor ()
   ((connectors    :initarg  :connectors
@@ -74,7 +74,7 @@ does not work properly, yet.~@:>")))
 		 (block?    t))
   "Ask connectors associated to PROCESSOR to emit an event. Return the
 event or maybe nil when BLOCK? is nil."
-  (bind (((:accessors (connectors    processor-connectors)
+  (let+ (((&accessors (connectors    processor-connectors)
 		      (current-event processor-current-event)) processor))
     (setf current-event nil)
     ;; Round-robin for multiple connectors in non-blocking mode.

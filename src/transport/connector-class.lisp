@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport)
+(cl:in-package :rsb.transport)
 
 (defclass connector-class (standard-class)
   ((direction :type     direction
@@ -104,7 +104,7 @@ superclasses."
 (defun %maybe-expand-option (class option)
   "Potentially expand the options description OPTION using information
 from CLASS."
-  (bind (((name type &rest _) option))
+  (let+ (((name type &rest nil) option))
     (or (unless (eq type '&slot)
 	  option)
 

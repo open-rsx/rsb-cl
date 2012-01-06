@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 (defmacro with-locked-bus ((bus
 			    &rest args
@@ -102,7 +102,7 @@ connected to the bus."))
 
 (defmethod (setf bus-connections) :around ((new-value   list)
 					   (bus         bus))
-  (bind (((:accessors-r/o (old-value bus-connections)
+  (let+ (((&accessors-r/o (old-value bus-connections)
 			  (proxy     %bus-proxy)) bus))
     (declare (type function proxy))
     (prog1
@@ -186,7 +186,7 @@ connected to the bus."))
 (defmethod dispatch ((bus  bus)
 		     (data notification))
   "Dispatch DATA to interested connectors."
-  (bind ((scope    (make-scope
+  (let* ((scope    (make-scope
 		    (bytes->string (notification-scope data))))
 	 (handlers (with-locked-bus (bus :connectors? t)
 		     (copy-list (handlers bus))))
@@ -211,7 +211,7 @@ connected to the bus."))
 (defmethod handle ((bus  bus)
 		   (data cons))
   "This method is used for incoming notifications."
-  (bind (((received-via . notification) data))
+  (let+ (((received-via . notification) data))
     ;; Dispatched to all connections except the one from which we
     ;; received the notification.
     (with-locked-bus (bus :connectors? t)

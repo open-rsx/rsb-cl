@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 
 ;;; `remote-method' class
@@ -66,7 +66,7 @@ server."))
 					   (method    remote-method))
   "After instantiating the listener for METHOD, install a handler for
 replies to method calls."
-  (bind (((:accessors-r/o (lock  %method-lock)
+  (let+ (((&accessors-r/o (lock  %method-lock)
 			  (calls %method-calls)) method))
     (push #'(lambda (event)
 	      ;; Check whether this is a direct call within a single
@@ -108,7 +108,7 @@ data."
 
   (method-listener method) ;; force creation ;;; TODO(jmoringe): can we improve this?
 
-  (bind (((:accessors-r/o (informer method-informer)
+  (let+ (((&accessors-r/o (informer method-informer)
 			  (lock     %method-lock)
 			  (calls    %method-calls)) method)
 	 (*local-call* (cons nil (cons request return))))

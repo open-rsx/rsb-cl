@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.patterns)
+(cl:in-package :rsb.patterns)
 
 
 ;;; `method1' class
@@ -72,7 +72,7 @@ classes."))
     (check-type name method-name "a legal method name")))
 
 (defmethod detach ((method method1))
-  (bind (((:accessors-r/o (informer %method-informer)
+  (let+ (((&accessors-r/o (informer %method-informer)
 			  (listener %method-listener)) method))
     ;; For the sake of the `local-method' subclass: shutdown the
     ;; listener first. This will prevent new method calls from being
@@ -101,7 +101,7 @@ created participant."
        ,(format nil "Lazily create the ~(~A~) when it is first requested."
 		slot)
        (unless (slot-value method ',slot)
-	 (bind (((:accessors-r/o (server method-server)
+	 (let+ (((&accessors-r/o (server method-server)
 				 (name   method-name)) method))
 	   (setf (,writer-name method)
 		 (,make-name (%make-scope server ,scope name) ,@args
@@ -158,7 +158,7 @@ generic support for retrieving, adding and removing methods."))
 
   (check-type name method-name "a legal method name")
 
-  (bind (((:accessors-r/o (methods %server-methods)) server))
+  (let+ (((&accessors-r/o (methods %server-methods)) server))
     ;; If SERVER already has a method named NAME, detach it cleanly
     ;; before replacing it.
     (when-let ((old (gethash name methods)))

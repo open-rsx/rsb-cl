@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.event-processing)
+(cl:in-package :rsb.event-processing)
 
 (defclass error-policy-mixin ()
   ((error-policy :initarg  :error-policy

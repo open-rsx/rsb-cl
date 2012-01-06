@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport)
+(cl:in-package :rsb.transport)
 
 (defclass conversion-mixin ()
   ((converter :initarg  :converter
@@ -52,7 +52,7 @@ stored in CONNECTOR."
   (wire->domain (connector-converter connector) wire-data wire-schema))
 
 (defmethod print-object ((object conversion-mixin) stream)
-  (bind (((:accessors-r/o (converter connector-converter)) object)
+  (let+ (((&accessors-r/o (converter connector-converter)) object)
 	 (sequence? (typep converter 'sequence)))
     (print-unreadable-object (object stream :type t :identity t)
       (format stream "~:[~S~;(~D)~]"

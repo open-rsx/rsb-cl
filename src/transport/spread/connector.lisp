@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread)
+(cl:in-package :rsb.transport.spread)
 
 (defclass connector (rsb.transport:connector
 		     conversion-mixin)
@@ -72,13 +72,13 @@ supplied."
 				     name
 				     host
 				     port)
-  (bind (((:values host port)
+  (let+ (((&values host port)
 	  (cond
 	    ((and host port) (values host port))
 	    (port            (values nil  port))
 	    (name            (spread:parse-daemon-name name))))
 	 (name (format nil "~D~@[@~A~]" port host))
-	 ((:accessors-r/o (uri connector-url)) instance))
+	 ((&accessors-r/o (uri connector-url)) instance))
     (when host
       (setf (puri:uri-host uri) host))
     (setf (puri:uri-port uri) port)

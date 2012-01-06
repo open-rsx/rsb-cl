@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.spread.test)
+(cl:in-package :rsb.transport.spread.test)
 
 (deftestsuite fragmentation-root (transport-spread-root)
   ()

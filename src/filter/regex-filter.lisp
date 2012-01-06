@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.filter)
+(cl:in-package :rsb.filter)
 
 
 ;;; Protocol
@@ -100,11 +100,11 @@ unless otherwise requested using the :case-sensitive? initarg."))
 
 (defmethod payload-matches? ((filter regex-filter) (payload string)
 			     &key &allow-other-keys)
-  (bind (((:accessors-r/o (scanner filter-scanner)) filter))
+  (let+ (((&accessors-r/o (scanner filter-scanner)) filter))
     (ppcre:scan scanner payload)))
 
 (defmethod print-object ((object regex-filter) stream)
-  (bind (((:accessors-r/o (regex           filter-regex)
+  (let+ (((&accessors-r/o (regex           filter-regex)
 			  (case-sensitive? filter-case-sensitive?)
 			  (fallback-policy filter-fallback-policy)) object))
    (print-unreadable-object (object stream :type t :identity t)

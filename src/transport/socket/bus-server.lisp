@@ -23,7 +23,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(in-package :rsb.transport.socket)
+(cl:in-package :rsb.transport.socket)
 
 
 ;;; Global map of bus servers
@@ -108,7 +108,7 @@ closed."))
 ;;
 
 (defmethod receive-messages ((bus bus-server))
-  (bind (((:accessors (server-socket bus-socket)
+  (let+ (((&accessors (server-socket bus-socket)
 		      (connections   bus-connections)
 		      (options       bus-options)) bus))
     ;; Main processing loop. Wait for activity on the server socket.
