@@ -4,9 +4,9 @@
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 ;;
-;; This file may be licensed under the terms of of the GNU Lesser
-;; General Public License Version 3 (the ``LGPL''), or (at your
-;; option) any later version.
+;; This file may be licensed under the terms of the GNU Lesser General
+;; Public License Version 3 (the ``LGPL''), or (at your option) any
+;; later version.
 ;;
 ;; Software distributed under the License is distributed on an ``AS
 ;; IS'' basis, WITHOUT WARRANTY OF ANY KIND, either express or
