@@ -33,12 +33,16 @@
 	   :reader   filter-method
 	   :documentation
 	   "Stores the method name to which the filter should restrict
-events."))
+events. Valid values are either strings which match events with
+identical method strings or NIL which matches events without
+methods."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :method (missing-required-initarg 'method-filter :method))
   (:documentation
-   "This filter discriminates based on the method of events."))
+   "This filter discriminates based on the method of events. Valid
+method values are either strings which match events with identical
+method strings or NIL which matches events without methods."))
 
 (defmethod matches? ((filter method-filter) (event event))
   (let ((filter-method (filter-method filter))
