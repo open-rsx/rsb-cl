@@ -96,8 +96,10 @@
    :use-scope
    :use-uri)
 
-  ;; Special Variables
+  ;; (Special) Variables
   (:export
+   :*framework-timestamps*
+
    :*default-configuration*)
 
   ;; Hooks

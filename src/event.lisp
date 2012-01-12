@@ -179,7 +179,7 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 	   ;; Timestamps
 	   (or (null compare-timestamps)
 	       (iter (for key in (if (eq compare-timestamps t)
-				     '(:create :send :receive :deliver)
+				     *framework-timestamps*
 				     compare-timestamps))
 		     (let ((value-left  (timestamp left key))
 			   (value-right (timestamp right key)))
