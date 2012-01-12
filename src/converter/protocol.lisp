@@ -101,12 +101,13 @@ next `wire->domain' method."
   (iter
     (restart-case
 	(handler-bind
-	    ((error #'(lambda (condition)
-			(error 'wire->domain-conversion-error
-			       :wire-schema wire-schema
-			       :encoded     wire-data
-			       :domain-type :undetermined
-			       :cause       condition))))
+	    (((and error (not wire->domain-conversion-error))
+	      #'(lambda (condition)
+		  (error 'wire->domain-conversion-error
+			 :wire-schema wire-schema
+			 :encoded     wire-data
+			 :domain-type :undetermined
+			 :cause       condition))))
 	  (return (call-next-method)))
       (retry ()
 	:report (lambda (stream)
@@ -131,12 +132,13 @@ next `domain->wire' method."
   (iter
     (restart-case
 	(handler-bind
-	    ((error #'(lambda (condition)
-			(error 'domain->wire-conversion-error
-			       :wire-schema   :undetermined
-			       :domain-object domain-object
-			       :wire-type     :undetermined
-			       :cause         condition))))
+	    (((and error (not domain->wire-conversion-error))
+	      #'(lambda (condition)
+		  (error 'domain->wire-conversion-error
+			 :wire-schema   :undetermined
+			 :domain-object domain-object
+			 :wire-type     :undetermined
+			 :cause         condition))))
 	  (return (call-next-method)))
       (retry ()
 	:report (lambda (stream)
