@@ -88,7 +88,7 @@
 		:let-plus
 
 		#+sbcl :sb-concurrency
-		:bordeaux-threads ;; or eager-future
+		:bordeaux-threads
 		:trivial-garbage
 		:closer-mop
 		:cl-hooks
@@ -297,7 +297,6 @@
 			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package" "types"))
-
 
 			      (:file       "future"
 			       :depends-on ("package" "protocol"))
@@ -580,7 +579,11 @@ RSB events to/from Google protocol buffers."
 			       :depends-on ("EventId" "EventMetaData"))
 			      (:file       "FragmentedNotification"
 			       :pathname   "rsb/protocol/FragmentedNotification"
-			       :depends-on ("EventId" "EventMetaData" "Notification"))))
+			       :depends-on ("EventId" "EventMetaData" "Notification"))
+
+			      (:file       "EventsByScopeMap"
+			       :pathname   "rsb/protocol/collections/EventsByScopeMap"
+			       :depends-on ("Notification"))))
 
 		(:module     "converter-protocol-buffer"
 		 :pathname   "src/converter"
@@ -635,7 +638,7 @@ RSB events to/from Google protocol buffers."
 			       :depends-on ("package" "connector"))))))
 
 
-;;; connection with cl-ppcre
+;;; System connection with cl-ppcre
 ;;
 
 #+asdf-system-connections
