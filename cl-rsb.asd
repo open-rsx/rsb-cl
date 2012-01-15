@@ -654,3 +654,21 @@ filter for events with text content."
   :components  ((:module     "filter"
 		 :pathname   "src/filter"
 		 :components ((:file       "regex-filter")))))
+
+
+;;; System connection with xpath
+;;
+
+#+asdf-system-connections
+(defsystem-connection :cl-rsb-and-xpath
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     #.(version/string)
+  :license     "LGPLv3; see COPYING file for details."
+  :description "This system connection provides a filter classs that
+uses XPath expressions to discriminate events."
+  :requires    (cl-rsb
+		xpath)
+  :components  ((:module     "filter"
+		 :pathname   "src/filter"
+		 :components ((:file       "xpath-filter")))))
