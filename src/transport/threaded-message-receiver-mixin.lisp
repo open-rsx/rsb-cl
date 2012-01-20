@@ -19,8 +19,7 @@
 
 (in-package :rsb.transport)
 
-(defclass threaded-message-receiver-mixin (message-receiver-mixin
-					   threaded-receiver-mixin)
+(defclass threaded-message-receiver-mixin (threaded-receiver-mixin)
   ()
   (:documentation
    "This mixin class combines receiving of messages and management of
@@ -40,4 +39,4 @@ event."
 	  ;; notifications and error handling policies, we may not
 	  ;; obtain an `event' instance from the notification.
 	  (when event
-	    (handle connector event)))))
+	    (dispatch connector event)))))

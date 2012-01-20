@@ -85,17 +85,21 @@
    :conversion-mixin
    :connector-converter)
 
-  ;; Message receiver protocol and `message-receiver-mixin' class
+  ;; Message receiver protocol
   (:export
    :receive-message
-   :message->event
+   :message->event)
 
-   :message-receiver-mixin)
+  ;; Notification sender protocol
+  (:export
+   :send-notification
+   :event->notification)
 
   ;; Threaded receiver protocol and `threaded-receiver-mixin' class
   (:export
    :start-receiver
    :stop-receiver
+   :exit-receiver
 
    :receive-messages
 
@@ -103,10 +107,9 @@
    :connector-started?
    :connector-thread)
 
-  ;; Notification sender protocol
+  ;; `timestamping-receiver-mixin' class
   (:export
-   :send-notification
-   :event->notification)
+   :timestamping-receiver-mixin)
 
   ;; Error handling mixin classes
   (:export

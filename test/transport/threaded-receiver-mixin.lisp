@@ -25,7 +25,7 @@
 (defmethod receive-messages ((receiver mock-receiver))
   "This causes a timeout of the test case, if the interruption does
 not work properly."
-  (iter (sleep 100)))
+  (sleep most-positive-fixnum))
 
 (deftestsuite threaded-receiver-mixin-root (transport-root)
   ()
@@ -47,9 +47,9 @@ not work properly."
   ;; We try attaching and detaching with different timing behaviors.
   (let ((receiver (make-instance 'mock-receiver)))
     (iter (repeat 100)
-	  (notify receiver (make-scope "/") :attached)
-	  (notify receiver (make-scope "/") :detached)
+	  (start-receiver receiver)
+	  (stop-receiver receiver)
 
-	  (notify receiver (make-scope "/") :attached)
-	  (sleep .01)
-	  (notify receiver (make-scope "/") :detached))))
+	  (start-receiver receiver)
+	  (sleep .001)
+	  (stop-receiver receiver))))

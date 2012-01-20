@@ -1,4 +1,4 @@
-;;; message-receiver-mixin.lisp --- A protocol for receiving and decoding messages.
+;;; conditions.lisp --- Conditions used in the socket transport.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,27 +17,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsb.transport)
+(in-package :rsb.transport.socket)
 
-
-;;; Mixin class `message-receiver-mixin'
-;;
-
-(defclass message-receiver-mixin ()
+(define-condition socket-bus-auto-connection-error (rsb-error
+						    simple-error)
   ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Failed to connect to socket-based bus as ~
+automatically determined client or server~@:>")
+     (maybe-print-explanation stream condition)))
   (:documentation
-   "This mixin class is intended to be mixed into connector classes
-that perform two tasks:
-+ receive messages
-+ decode received messages
-The associated protocol is designed to be
-direction-agnostic (i.e. should work for both push and pull)."))
-
-(defmethod message->event :around ((connector   message-receiver-mixin)
-				   (message     t)
-				   (wire-schema t))
-  "Add a :receive timestamp to the generated event, if any."
-  (let ((event (call-next-method)))
-    (when event
-      (setf (timestamp event :receive) (local-time:now)))
-    event))
+   "This error is signaled when a an attempt to obtain a bus
+provider in automatic client vs. server selection mode."))

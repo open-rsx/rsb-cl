@@ -48,24 +48,12 @@ connector classes which want do so in a dedicated thread. This mixin
 class takes care of managing the starting and joining of the
 thread."))
 
-(defmethod notify :after ((connector threaded-receiver-mixin)
-			  (scope     t)
-			  (action    (eql :attached)))
-  "After attaching to SCOPE, start a receiver thread."
-  (start-receiver connector))
-
-(defmethod notify :before ((connector threaded-receiver-mixin)
-			   (scope     t)
-			   (action    (eql :detached)))
-  "Before detaching from SCOPE, join the receiver thread."
-  (stop-receiver connector))
-
 (defmethod start-receiver ((connector threaded-receiver-mixin))
-  (log1 :info connector "Starting receiver thread")
   (bind (((:accessors
 	   (control-mutex     connector-control-mutex)
 	   (control-condition connector-control-condition)) connector))
     ;; Launch the thread.
+    (log1 :info connector "Starting receiver thread")
     (bt:make-thread (curry #'receive-messages connector)
 		    :name (format nil "Message Receiver for ~A"
 				  connector))
@@ -82,7 +70,7 @@ thread."))
     ;; Interrupt the receiver thread and throw our `terminate-thread'
     ;; tag.
     (log1 :info connector "Interrupting receiver thread")
-    (bt:interrupt-thread thread #'(lambda () (throw 'terminate-thread nil)))
+    (bt:interrupt-thread thread #'exit-receiver)
 
     ;; The thread should be terminating or already have terminated.
     (log1 :info connector "Joining receiver thread")
@@ -105,3 +93,8 @@ requests."
     (log1 :info connector "Entering receive loop")
     (call-next-method))
   (log1 :info connector "Left receive loop"))
+
+(defun exit-receiver ()
+  "Cause a receiver thread to exit. Has to be called from the receiver
+thread."
+  (throw 'terminate-thread nil))

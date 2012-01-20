@@ -37,6 +37,18 @@
    "This connector class implements push-style event receiving for the
 Spread transport."))
 
+(defmethod notify :after ((connector in-push-connector)
+			  (scope     scope)
+			  (action    (eql :attached)))
+  "After attaching to SCOPE, start a receiver thread."
+  (start-receiver connector))
+
+(defmethod notify :before ((connector in-push-connector)
+			   (scope     scope)
+			   (action    (eql :detached)))
+  "Before detaching from SCOPE, join the receiver thread."
+  (stop-receiver connector))
+
 (defmethod receive-messages :around ((connector in-push-connector))
   "Create a thread-local scope->groups cache for this connector."
   (let ((*scope->groups-cache* (make-scope->groups-cache)))

@@ -1,4 +1,4 @@
-;;; in-connector.lisp --- Superclass for in-direction connector classes.
+;;; in-connector.lisp ---
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,61 +17,41 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsb.transport.spread)
-
-
-;;; `in-connector' class
-;;
+(in-package :rsb.transport.socket)
 
 (defclass in-connector (connector
-			timestamping-receiver-mixin
 			restart-message-receiver-mixin
 			broadcast-processor
-			assembly-mixin
 			expose-wire-schema-mixin)
-  ()
+  ((scope :type     scope
+	  :accessor connector-scope
+	  :documentation
+	  "Stores the scope to which the connector is attached."))
   (:metaclass connector-class)
   (:documentation
-   "This class is intended to be used as a superclass of in-direction
-connector classes for Spread."))
+   "Superclass for in-direction socket connectors. Instances of this
+class observe a bus (which owns the actual socket) when attached and
+queue received events for delivery."))
 
 (defmethod notify ((connector in-connector)
 		   (scope     scope)
 		   (action    (eql :attached)))
-  (ref-group (connector-connection connector) (scope->group scope)))
+  (setf (connector-scope connector) scope)
+  (call-next-method)
+  (push connector (handlers (connector-bus connector))))
 
 (defmethod notify ((connector in-connector)
 		   (scope     scope)
 		   (action    (eql :detached)))
-  (unref-group (connector-connection connector) (scope->group scope)))
+  (removef (handlers (connector-bus connector)) connector)
+  (call-next-method))
 
-(defmethod receive-message ((connector in-connector)
-			    (block?    t))
-  "Delegate receiving a message to the connection of CONNECTOR."
-  (values
-   (receive-message (connector-connection connector) block?)
-   :undetermined))
-
-(defmethod message->event ((connector   in-connector)
-			   (message     simple-array)
-			   (wire-schema t))
+(defmethod message->event ((connector    in-connector)
+			   (notification notification)
+			   (wire-schema  t))
   (bind (((:accessors-r/o
-	   (pool      connector-assembly-pool)
-	   (converter connector-converter)
-	   (expose-wire-schema? connector-expose-wire-schema?)) connector)
-	 notification)
-
-    ;; Try to unpack MESSAGE into a `notification' instance. Signal
-    ;; `decoding-error' if that fails.
-    (handler-bind
-	((error #'(lambda (condition)
-		    (error 'decoding-error
-			   :encoded          message
-			   :format-control   "~@<The data could not be ~
-unpacked as a protocol buffer of kind ~S.~:@>"
-			   :format-arguments '(notification)
-			   :cause            condition))))
-      (setf notification (pb:unpack message 'notification)))
+	   (converter           connector-converter)
+	   (expose-wire-schema? connector-expose-wire-schema?)) connector))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -88,11 +68,11 @@ unpacked as a protocol buffer of kind ~S.~:@>"
     (handler-bind
 	((error #'(lambda (condition)
 		    (error 'decoding-error
-			   :encoded          message
+			   :encoded          (list notification) ;;; TODO(jmoringe): hack
 			   :format-control   "~@<After unpacking, the ~
 notification~_~A~_could not be converted into an event.~:@>"
 			   :format-arguments `(,(with-output-to-string (stream)
-						  (describe notification stream)))
+								       (describe notification stream)))
 			   :cause            condition))))
-      (notification->event pool converter notification
+      (notification->event converter notification
 			   :expose-wire-schema? expose-wire-schema?))))
