@@ -82,14 +82,15 @@
 + ~/.config/rsb.conf
 + $(PWD)/rsb.conf
 + Environment Variables"
-  (merge-options
-   (options-from-environment)
-   (with-input-from-file (stream "rsb.conf"
-				 :if-does-not-exist nil)
-     (when stream (options-from-stream stream)))
-   (with-input-from-file (stream "~/.config/rsb.conf"
-				 :if-does-not-exist nil)
-     (when stream (options-from-stream stream)))))
+  (apply #'merge-options
+	 (options-from-environment)
+	 (iter (for file in '("rsb.conf"
+			      "~/.config/rsb.conf"
+			      "/etc/rsb.conf"))
+	       (with-input-from-file (stream file
+				      :if-does-not-exist nil)
+		 (when stream
+		   (collect (options-from-stream stream)))))))
 
 
 ;;;
