@@ -166,7 +166,8 @@ TRANSPORT. Otherwise return OPTIONS unmodified."
 			   (config *default-configuration*))
   "Return an alist of default converters for particular wire-types
 with items of the form (WIRE-TYPE . CONVERTER).
-If supplied, CONFIG specified the configuration that should be used to
+
+If supplied, CONFIG specifies the configuration that should be used to
 determine the set of default converters. if CONFIG is not supplied,
 the value of `*default-configuration*' is used."
   '((octet-vector . (:fundamental-void
