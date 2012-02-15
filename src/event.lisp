@@ -24,6 +24,9 @@
 
 (cl:in-package :rsb)
 
+;; forward declaration
+(declaim (special *framework-timestamps*))
+
 (define-plist-data-mixin meta-data)
 (define-plist-data-mixin timestamp)
 

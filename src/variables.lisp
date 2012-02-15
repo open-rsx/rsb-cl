@@ -28,6 +28,8 @@
 ;;; Framework timestamps
 ;;
 
+(declaim (special *framework-timestamps*))
+
 (defvar *framework-timestamps* '(:create :send :receive :deliver)
   "Names of timestamps which are associated to certain points in the
 life of RSB events.")
