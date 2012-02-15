@@ -73,7 +73,8 @@ common use case probably is forcing a more general type.")
 		    :type     t
 		    :accessor event-data
 		    :documentation
-		    "")
+		    "Stores the payload of the event as a \"domain
+object\" (can be any Lisp object).")
    (meta-data       :accessor event-meta-data)
    (timestamp       :accessor event-timestamps)
    (causes          :initarg  :causes
