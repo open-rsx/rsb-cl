@@ -174,7 +174,6 @@
    :event-causes
 
    :make-event
-   :make-event/typed
 
    :event=
 

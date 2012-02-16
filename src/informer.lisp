@@ -102,11 +102,9 @@ channel."))
 (defmethod send ((informer informer) (data t)
 		 &rest args
 		 &key)
-  (apply #'send informer (make-event/typed
-			  (participant-scope informer)
-			  data (informer-type informer))
+  (apply #'send informer
+	 (make-event (participant-scope informer) data)
 	 args))
-;; TODO type: (type-of data) ? or let event decide?
 
 (defmethod print-object ((object informer) stream)
   (print-unreadable-id-object (object stream :type t)

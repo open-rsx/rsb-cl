@@ -217,21 +217,6 @@ CAUSES can be used to supply a list of causes."
 		 :meta-data (remove-from-plist meta-data :method :causes)
 		 :causes    causes))
 
-(defun make-event/typed (scope data type
-			 &rest meta-data
-			 &key
-			 method
-			 &allow-other-keys)
-  "Construct an event addressed at SCOPE with payload DATA and type TYPE.
-Optionally, add meta-data consisting of the keys and values in the
-plist META-DATA."
-  (make-instance 'event
-		 :scope     (make-scope scope)
-		 :method    method
-		 :data      data
-		 :type      type
-		 :meta-data (remove-from-plist meta-data :method)))
-
 
 ;;; Utility functions
 ;;

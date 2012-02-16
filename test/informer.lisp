@@ -90,13 +90,11 @@ function."))
     ;; In this case, the event is not compatible with the informer's
     ;; type.
     (ensure-condition 'invalid-event-type
-      (send informer (make-event/typed
-		      "/informer/send/check-type" 5 'integer)))
+      (send informer (make-event "/informer/send/check-type" 5)))
 
     ;; The following are compatible.
     (send informer '(1 2))
-    (send informer (make-event/typed "/informer/send/check-type" "bla" 'string))
-    (send informer (make-event/typed "/informer/send/check-type" "bla" 'sequence))))
+    (send informer (make-event "/informer/send/check-type" "bla"))))
 
 (addtest (informer-root
           :documentation
@@ -129,7 +127,7 @@ method.")
 	  :unchecked? t)
 
     ;; Arbitrary data types should accepted.
-    (send informer (make-event/typed "/informer/send/unchecked" "foo" 'string)
+    (send informer (make-event "/informer/send/unchecked" "foo")
 	  :unchecked? t)
-    (send informer (make-event/typed "/informer/send/unchecked" 1 'integer)
+    (send informer (make-event "/informer/send/unchecked" 1)
 	  :unchecked? t)))
