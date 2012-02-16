@@ -239,7 +239,7 @@ not valid."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The type ~S of event ~S is not ~S.~@:>"
-	     (event-type (type-error-datum condition))
+	     (type-of (event-data (type-error-datum condition)))
 	     (type-error-datum condition)
 	     (type-error-expected-type condition))))
   (:documentation
