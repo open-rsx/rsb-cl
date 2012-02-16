@@ -168,7 +168,6 @@
    :event-origin
    :event-sequence-number
    :event-method
-   :event-type
    :event-data
    :event-meta-data
    :event-timestamps

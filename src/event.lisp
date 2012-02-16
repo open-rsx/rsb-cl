@@ -63,15 +63,6 @@ event was published onto the bus.")
 		    "Stores the name of a \"method category\" which
 characterizes the role of the event in a communication
 pattern (examples include \"request\", \"reply\", \"update\").")
-   (type            :initarg  :type
-		    :type     (or symbol list)
-		    :accessor event-type
-		    :initform t ;; TODO could also use (type-of data)
-		    :documentation
-		    "Note: in most cases, the type can be inferred
-from the contents of the data slot. This slot allows the data to
-treated under the assumption of it being of a certain type. The most
-common use case probably is forcing a more general type.")
    (data            :initarg  :data
 		    :type     t
 		    :accessor event-data
@@ -99,7 +90,6 @@ listeners. An event is a composite structure consisting of
 + the id of the participant that sent the event
 + an optional \"method category\"
 + a payload
-+ a type describing the payload
 + various timestamps
 + optional metadata
 + an optional list of events that caused the event"))
@@ -194,18 +184,16 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 	   (or (not compare-causes?)
 	       (set-equal (event-causes left) (event-causes right)
 			  :test #'event-id=))
-	   ;; Data and type
-	   (type= (event-type left) (event-type right))
+	   ;; Payload
 	   (or (null data-test)
 	       (funcall data-test (event-data left) (event-data right))))))
 
 (defmethod print-object ((object event) stream)
   (%maybe-set-event-id object) ;; force id computation
   (print-unreadable-id-object (object stream :type t)
-    (format stream "~@<~@[~A ~]~A ~S ~:/rsb::print-event-data/~@:>"
+    (format stream "~@<~@[~A ~]~A ~:/rsb::print-event-data/~@:>"
 	    (event-method object)
 	    (scope-string (event-scope object))
-	    (event-type object)
 	    (event-data object))))
 
 

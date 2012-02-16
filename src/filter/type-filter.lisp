@@ -39,7 +39,7 @@
 RSB events."))
 
 (defmethod matches? ((filter type-filter) (event event))
-  (nth-value 0 (subtypep (event-type event) (filter-type filter))))
+  (typep (event-data event) (filter-type filter)))
 
 (defmethod print-object ((object type-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)

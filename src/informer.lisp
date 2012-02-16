@@ -55,8 +55,8 @@ channel."))
 
   (let+ (((&accessors-r/o (scope participant-scope)
 			  (type  informer-type)) informer))
-    ;; Ensure that the type of DATA is a subtype of INFORMER's type
-    (unless (subtypep (event-type data) type)
+    ;; Ensure that the type of DATA is a subtype of INFORMER's type.
+    (unless (typep (event-data data) type)
       (error 'invalid-event-type
 	     :event         data
 	     :datum         data
@@ -96,7 +96,7 @@ channel."))
   ;; Send EVENT.
   (rsb.ep:handle informer event)
 
-  ;; Return event to the client in case we created it on the fly.
+  ;; Return EVENT to the client in case we created it on the fly.
   event)
 
 (defmethod send ((informer informer) (data t)
