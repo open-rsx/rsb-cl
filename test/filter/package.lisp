@@ -49,11 +49,8 @@
 (deftestsuite filter-suite ()
   ((events (list (make-event "/"        "bar")
 		 (make-event "/foo/bar" "baz")
-		 (make-event "/foo/bar" "baz")
-		 (make-event/typed "/foo/bar" "1" 'string)
-		 (make-event/typed "/foo/bar" 1   'integer)
-		 (make-event/typed "/foo/bar" 1   'fixnum)
-		 (make-event/typed "/foo"     1   'fixnum))))
+		 (make-event "/foo/bar" 1)
+		 (make-event "/foo"     1))))
   (:documentation
    "This class can be mixed into test suite classes which contain
 tests for filters."))

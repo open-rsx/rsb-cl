@@ -41,4 +41,4 @@
       ((:method "method") t))
 
   ;; Expected matching results
-  nil nil nil nil nil nil nil)
+  nil nil nil nil)

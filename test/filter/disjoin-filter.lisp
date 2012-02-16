@@ -26,7 +26,7 @@
 
 (deftestsuite disjoin-filter-root (filter-root
 				   filter-suite)
-  ((simple-filter (rsb.filter::filter
+  ((simple-filter (filter
 		   '(:or
 		     (:scope :scope "/foo/bar")
 		     (:type :type string)))))
@@ -36,7 +36,8 @@
 (define-basic-filter-test-cases (disjoin-filter :or)
     ;; Construction
     '(;; these are ok
-      (()              :on)
-      ((:children nil) :ok))
+      (()              t)
+      ((:children nil) t))
+
   ;; Matching results
-  nil t t t t t nil)
+  t t t nil)

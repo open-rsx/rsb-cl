@@ -26,7 +26,7 @@
 
 (deftestsuite conjoin-filter-root (filter-root
 				   filter-suite)
-  ((simple-filter (rsb.filter::filter
+  ((simple-filter (filter
 		   '((:and
 		      (:type :type string)
 		      (:scope :scope "/foo"))))))
@@ -35,7 +35,8 @@
 
 (define-basic-filter-test-cases (conjoin-filter :and)
     ;; construct cases
-    '((() :ok))
+    '(;; these are ok
+      (() t))
 
   ;; expected matching results
-  nil nil nil t nil nil nil)
+  nil t nil nil)
