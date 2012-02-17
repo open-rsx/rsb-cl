@@ -22,9 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:in-package :cl-user)
-
-(defpackage :rsb.transport.inprocess
+(cl:defpackage :rsb.transport.inprocess
   (:nicknames
    :rsb.tp.inprocess
    :rsb.tp.inproc)
