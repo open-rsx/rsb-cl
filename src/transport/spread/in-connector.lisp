@@ -33,7 +33,7 @@
 			restart-message-receiver-mixin
 			broadcast-processor
 			assembly-mixin
-			expose-wire-schema-mixin)
+			expose-transport-metrics-mixin)
   ()
   (:metaclass connector-class)
   (:documentation
@@ -60,10 +60,10 @@ connector classes for Spread."))
 (defmethod message->event ((connector   in-connector)
 			   (message     simple-array)
 			   (wire-schema t))
-  (let+ (((&accessors-r/o
-	   (pool      connector-assembly-pool)
-	   (converter connector-converter)
-	   (expose-wire-schema? connector-expose-wire-schema?)) connector)
+  (let+ (((&accessors-r/o (pool      connector-assembly-pool)
+			  (converter connector-converter)) connector)
+	 (expose-wire-schema?  (connector-expose? connector :rsb.transport.wire-schema))
+	 (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
 	 notification)
 
     ;; Try to unpack MESSAGE into a `notification' instance. Signal
@@ -100,4 +100,5 @@ notification~_~A~_could not be converted into an event.~:@>"
 						  (describe notification stream)))
 			   :cause            condition))))
       (notification->event pool converter notification
-			   :expose-wire-schema? expose-wire-schema?))))
+			   :expose-wire-schema?  expose-wire-schema?
+			   :expose-payload-size? expose-payload-size?))))

@@ -30,7 +30,8 @@
 
 (defun notification->event (pool converter notification
 			    &key
-			    expose-wire-schema?)
+			    expose-wire-schema?
+			    expose-payload-size?)
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
@@ -41,7 +42,8 @@ been fragmented into multiple notifications."
       (one-notification->event
        converter
        (fragmented-notification-notification notification)
-       :expose-wire-schema? expose-wire-schema?)
+       :expose-wire-schema?  expose-wire-schema?
+       :expose-payload-size? expose-payload-size?)
 
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
@@ -53,12 +55,14 @@ been fragmented into multiple notifications."
 	 (fragmented-notification-notification
 	  (aref (assembly-fragments assembly) 0))
 	 :data                (assembly-concatenated-data assembly)
-	 :expose-wire-schema? expose-wire-schema?))))
+	 :expose-wire-schema?  expose-wire-schema?
+	 :expose-payload-size? expose-payload-size?))))
 
 (defun one-notification->event (converter notification
 				&key
 				data
-				expose-wire-schema?)
+				expose-wire-schema?
+				expose-payload-size?)
   "Convert NOTIFICATION to an `event' instance using CONVERTER for the
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
@@ -78,7 +82,7 @@ contained in NOTIFICATION."
 	   (sender-id       event-id-sender-id)
 	   (sequence-number event-id-sequence-number)) event-id)
 	 (wire-schema (bytes->wire-schema wire-schema))
-	 (data        (rsb.converter:wire->domain
+	 (data*       (rsb.converter:wire->domain
 		       converter (or data payload)
 		       wire-schema))
 	 (event       (make-instance
@@ -89,7 +93,7 @@ contained in NOTIFICATION."
 		       :method            (unless (emptyp method)
 					    (bytes->keyword method))
 		       :causes            (map 'list #'event-id->cons causes)
-		       :data              data
+		       :data              data*
 		       :create-timestamp? nil)))
 
     ;; "User infos" and timestamps
@@ -119,10 +123,13 @@ contained in NOTIFICATION."
 		  (unix-microseconds->timestamp
 		   (user-time-timestamp user-time)))))
 
-    ;; When requested, store the wire-schema in the as a meta-data
-    ;; item.
+    ;; When requested, store transport metrics as meta-data items.
     (when expose-wire-schema?
-      (setf (rsb:meta-data event :rsb.wire-schema) (string wire-schema)))
+      (setf (rsb:meta-data event :rsb.transport.wire-schema)
+	    wire-schema))
+    (when expose-payload-size?
+      (setf (rsb:meta-data event :rsb.transport.payload-size)
+	    (length (or data payload))))
 
     event))
 

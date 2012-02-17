@@ -86,13 +86,12 @@ contained in NOTIFICATION."
 		  (unix-microseconds->timestamp
 		   (user-time-timestamp user-time)))))
 
-    ;; When requested, store the wire-schema in the as a meta-data
-    ;; item.
+    ;; When requested, store transport metrics as meta-data items.
     (when expose-wire-schema?
-      (setf (rsb:meta-data event :rsb.wire-schema)
-	    (string wire-schema)))
+      (setf (rsb:meta-data event :rsb.transport.wire-schema)
+	    wire-schema))
     (when expose-payload-size?
-      (setf (rsb:meta-data event :rsb.payload-size)
+      (setf (rsb:meta-data event :rsb.transport.payload-size)
 	    (length payload)))
 
     event))

@@ -139,10 +139,11 @@
    :sometimes-interruptible-mixin
    :connector-interruptible?)
 
-  ;; `expose-wire-schema-mixin' class
+  ;; `expose-transport-metrics-mixin' class
   (:export
-   :expose-wire-schema-mixin
-   :connector-expose-wire-schema?)
+   :expose-transport-metrics-mixin
+   :connector-expose
+   :connector-expose?)
 
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp

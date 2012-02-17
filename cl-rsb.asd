@@ -244,7 +244,7 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "sometimes-interruptible-mixin"
 			       :depends-on ("package" "protocol"))
-			      (:file       "expose-wire-schema-mixin"
+			      (:file       "expose-transport-metrics-mixin"
 			       :depends-on ("package" "protocol"
 					    "connector-class"))))
 

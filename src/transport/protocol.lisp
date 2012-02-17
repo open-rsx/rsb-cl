@@ -153,6 +153,29 @@ policy. Maybe signal an `encoding-error' if something goes wrong."))
    "CONNECTOR receives and processes messages until interrupted."))
 
 
+;;; Transport metric exposing protocol
+;;
+
+(defgeneric connector-expose (connector)
+  (:documentation
+   "Return the list of transport metrics exposed by CONNECTOR."))
+
+(defgeneric (setf connector-expose) (new-value connector)
+  (:documentation
+   "Install NEW-VALUE as the list of transport metrics exposed by
+CONNECTOR."))
+
+(defgeneric connector-expose? (connector metric)
+  (:documentation
+   "Return non-nil when CONNECTOR exposes METRIC."))
+
+(defgeneric (setf connector-expose?) (new-value connector metric)
+  (:documentation
+   "If NEW-VALUE is non-nil, add METRIC to the list of transport
+metrics exposed by CONNECTOR. Otherwise remove METRIC from the
+list."))
+
+
 ;;; Transport implementations
 ;;
 

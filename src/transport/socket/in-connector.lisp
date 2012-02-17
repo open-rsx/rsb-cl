@@ -27,7 +27,7 @@
 (defclass in-connector (connector
 			restart-message-receiver-mixin
 			broadcast-processor
-			expose-wire-schema-mixin)
+			expose-transport-metrics-mixin)
   ((scope :type     scope
 	  :accessor connector-scope
 	  :documentation
@@ -54,9 +54,11 @@ queue received events for delivery."))
 (defmethod message->event ((connector    in-connector)
 			   (notification notification)
 			   (wire-schema  t))
-  (let+ (((&accessors-r/o
-	   (converter           connector-converter)
-	   (expose-wire-schema? connector-expose-wire-schema?)) connector))
+  (let+ (((&accessors-r/o (converter connector-converter)) connector)
+	 (expose-wire-schema?  (connector-expose?
+				connector :rsb.transport.wire-schema))
+	 (expose-payload-size? (connector-expose?
+				connector :rsb.transport.payload-size)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -80,4 +82,5 @@ notification~_~A~_could not be converted into an event.~:@>"
 								       (describe notification stream)))
 			   :cause            condition))))
       (notification->event converter notification
-			   :expose-wire-schema? expose-wire-schema?))))
+			   :expose-wire-schema?  expose-wire-schema?
+			   :expose-payload-size? expose-payload-size?))))
