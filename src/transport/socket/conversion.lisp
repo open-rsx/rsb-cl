@@ -201,7 +201,9 @@ integer which counts the number of microseconds since UNIX epoch."
 
 (defun string->bytes (string)
   "Converter STRING into an octet-vector."
-  (sb-ext:string-to-octets string :external-format :ascii))
+  (if (stringp string)
+      (sb-ext:string-to-octets string :external-format :ascii)
+      (string->bytes (princ-to-string string))))
 
 (defun bytes->string (bytes)
   "Convert BYTES into a string."
