@@ -231,4 +231,6 @@ octet-vector."
 
 (defun bytes->wire-schema (bytes)
   "Return a keyword representing the wire-schema encoded in bytes."
+  (when (emptyp bytes)
+    (error "~@<Empty wire-schema.~:@>"))
   (bytes->keyword bytes))
