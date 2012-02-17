@@ -89,7 +89,6 @@ contained in NOTIFICATION."
 		       :method            (unless (emptyp method)
 					    (bytes->keyword method))
 		       :causes            (map 'list #'event-id->cons causes)
-		       :type              t
 		       :data              data
 		       :create-timestamp? nil)))
 

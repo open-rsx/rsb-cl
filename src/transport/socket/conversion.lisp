@@ -55,7 +55,6 @@ contained in NOTIFICATION."
 		       :scope             (make-scope (bytes->string scope))
 		       :method            (unless (emptyp method)
 					    (bytes->keyword method))
-		       :type              t
 		       :data              data
 		       :create-timestamp? nil)))
 
