@@ -30,7 +30,8 @@
 
 (defun notification->event (converter notification
 			    &key
-			    expose-wire-schema?)
+			    expose-wire-schema?
+			    expose-payload-size?)
   "Convert NOTIFICATION to an `event' instance using CONVERTER for the
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
@@ -88,7 +89,11 @@ contained in NOTIFICATION."
     ;; When requested, store the wire-schema in the as a meta-data
     ;; item.
     (when expose-wire-schema?
-      (setf (rsb:meta-data event :rsb.wire-schema) (string wire-schema)))
+      (setf (rsb:meta-data event :rsb.wire-schema)
+	    (string wire-schema)))
+    (when expose-payload-size?
+      (setf (rsb:meta-data event :rsb.payload-size)
+	    (length payload)))
 
     event))
 
@@ -201,6 +206,7 @@ integer which counts the number of microseconds since UNIX epoch."
 
 (defun string->bytes (string)
   "Converter STRING into an octet-vector."
+  (declare (notinline string->bytes))
   (if (stringp string)
       (sb-ext:string-to-octets string :external-format :ascii)
       (string->bytes (princ-to-string string))))
