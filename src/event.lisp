@@ -94,17 +94,6 @@ listeners. An event is a composite structure consisting of
 + optional metadata
 + an optional list of events that caused the event"))
 
-(defmethod shared-initialize :before ((instance   event)
-				      (slot-names t)
-				      &key
-				      (type nil type-supplied?)
-				      (data nil data-supplied?)) ;; fail when these are missing?
-  (when (and type-supplied? data-supplied?
-	     (not (typep data type)))
-    (error 'type-error
-	   :datum         data
-	   :expected-type type)))
-
 (defmethod shared-initialize :after ((instance   event)
                                      (slot-names t)
                                      &key
