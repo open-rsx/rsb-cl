@@ -82,11 +82,15 @@ of PARTICIPANT."
 			 &rest args)
   "Make and return a participant instance of CLASS that participates
 in the channel designated by SCOPE.
+
 DIRECTION is one of :in-push, :in-pull and :out.
-TRANSPORTS is a list of connector classes. ARGS are arguments for the
-created CLASS instance.
+
+TRANSPORTS is a list of connector classes.
+
 CONVERTERS is an alist of converters for particular wire-types with
 items of the form (WIRE-TYPE . CONVERTER).
+
+ARGS are arguments for the created CLASS instance.
 
 Return three values:
 + the `participant' instance
