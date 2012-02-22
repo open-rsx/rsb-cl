@@ -102,8 +102,9 @@ in the extracted transport options. Return the resulting options."
   (if (and transport (not (eq transport :rsb)))
       (list (%merge-options
 	     (append (when host (list :host host))
-		     (when port (list :port port)))
-	     (or (find transport defaults :key #'first)
+		     (when port (list :port port))
+		     (cdr (find t defaults :test #'eq :key #'car)))
+	     (or (find transport defaults :test #'eq :key #'car)
 		 (list transport))))
       defaults))
 
