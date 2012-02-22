@@ -189,6 +189,16 @@ the value of `*default-configuration*' is used."
 		     #+asdf-protocol-buffer-descriptors
 		     :protocol-buffer))))
 
+(defun default-converter (wire-type
+			  &key
+			  (config *default-configuration*))
+  "Return the default converter for WIRE-TYPE.
+
+If supplied, CONFIG specifies the configuration that should be used to
+determine the set of default converters. if CONFIG is not supplied,
+the value of `*default-configuration*' is used."
+  (cdr (assoc wire-type (default-converters :config config))))
+
 
 ;;; Utility functions
 ;;

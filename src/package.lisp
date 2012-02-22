@@ -232,7 +232,9 @@
    :&inherit
 
    :transport-options
-   :default-converters)
+
+   :default-converters
+   :default-converter)
 
   ;; URI-related function
   (:export
