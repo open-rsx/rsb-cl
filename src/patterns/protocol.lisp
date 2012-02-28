@@ -39,13 +39,15 @@ which is represented by FUTURE did finish and nil otherwise."))
 			   error?)
   (:documentation
    "Obtain and return the result represented by FUTURE. If the
-operation producing the result i not done, block until it finishes or
+operation producing the result is not done, block until it finishes or
 the specified waiting time is exceeded. Return two values: the result
 of the operation and one of :DONE, :FAILED and :TIMEOUT indicating how
 the associated operation finished. The values :FAILED and :TIMEOUT can
 only be returned if ERROR? is nil (see below).
+
 TIMEOUT specifies the maximum amount of time in seconds to wait for
 the operation to finish. If timeout is nil, wait indefinitely.
+
 If ERROR? is non-nil (the default), signal an error or a condition of
 type `bordeaux-threads:timeout' if the operation producing the result
 fails or a timeout occurs respectively."))
