@@ -118,18 +118,18 @@ names."))
 	(scope2 (make-scope thing2)))
     (equal (scope-components scope1) (scope-components scope2))))
 
-(defun sub-scope? (thing1 thing2)
-  "Return non-nil if THING1 is a sub-scope of THING2."
-  (let ((scope1 (make-scope thing1))
-	(scope2 (make-scope thing2)))
+(defun sub-scope? (sub super)
+  "Return non-nil if SUB is a sub-scope of SUPER."
+  (let ((scope1 (make-scope sub))
+	(scope2 (make-scope super)))
     (nth-value
      0 (starts-with-subseq (scope-components scope2)
 			   (scope-components scope1)
 			   :test 'string=))))
 
-(defun super-scope? (thing1 thing2)
-  "Return non-nil if THING1 is a super-scope of THING2."
-  (sub-scope? thing2 thing1))
+(defun super-scope? (super sub)
+  "Return non-nil if SUPER is a super-scope of SUB."
+  (sub-scope? sub super))
 
 (defun super-scopes (scope
 		     &key
