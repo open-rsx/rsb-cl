@@ -116,7 +116,7 @@ or for performance reasons."))
   (cond
     ;; If TIMEOUT has not been supplied, avoid the overhead and just
     ;; call the next method.
-    ((null timeout)
+    ((not timeout)
      (call-next-method))
 
     ;; If TIMEOUT has been supplied and errors should be signaled,
@@ -194,13 +194,17 @@ or for performance reasons."))
 (defun %dispatch-result (value error?)
   "Return the result stored in VALUE or signal an error, depending on
 ERROR?"
-  (if (typep value 'future-failure-value)
-      ;; When the stored value indicates an error, signal the error or
-      ;; return the tag, depending on ERROR?.
-      (if error?
-	  (apply #'error (future-failure-condition value))
-	  (values nil (future-failure-tag value)))
-      (values value :done)))
+  (cond
+    ((not (typep value 'future-failure-value))
+     (values value :done))
+
+    ;; When the stored value indicates an error, signal the error or
+    ;; return the tag, depending on ERROR?.
+    (error?
+     (apply #'error (future-failure-condition value)))
+
+    (t
+     (values nil (future-failure-tag value)))))
 
 (defun %make-failure-value (condition-data)
   "Return an object that can be used to indicate a failed operation
