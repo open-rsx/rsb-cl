@@ -36,7 +36,7 @@
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Instances of this filter class discriminate based on the type of
-RSB events."))
+events."))
 
 (defmethod matches? ((filter type-filter) (event event))
   (typep (event-data event) (filter-type filter)))
