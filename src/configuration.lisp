@@ -77,16 +77,22 @@
 ;;;
 ;;
 
-(defun options-from-default-sources ()
-  "Combine options from the following configuration sources:
-+ ~/.config/rsb.conf
+;; Forward declaration of `*default-configuration-files*'
+(declaim (special *default-configuration-files*))
+
+(defvar *default-configuration-files*)
+
+(defun options-from-default-sources (&key
+				     (config-files *default-configuration-files*))
+  "Combine options from the configuration sources mentioned in
+CONFIG-FILES. Default:
++ System-wide rsb.conf file (e.g. /etc/rsb.conf on UNIX)
++ User-wide rsb.conf file (e.g. ~/.config/rsb.conf on UNIX)
 + $(PWD)/rsb.conf
 + Environment Variables"
   (apply #'merge-options
 	 (options-from-environment)
-	 (iter (for file in '("rsb.conf"
-			      "~/.config/rsb.conf"
-			      "/etc/rsb.conf"))
+	 (iter (for file in config-files)
 	       (with-input-from-file (stream file
 				      :if-does-not-exist nil)
 		 (when stream

@@ -38,6 +38,24 @@ life of RSB events.")
 ;;; Configuration
 ;;
 
+(declaim (special *default-configuration-files*))
+
+(defvar *default-configuration-files*
+  '(;; Current directory
+    "rsb.conf"
+
+    ;; User-specific configuration
+    #+(and unix (not darwin)) "~/.config/rsb.conf"
+    ;;#+darwin                ?
+    #+windows                 "~/rsb.conf"
+
+    ;; System-wide configuration
+    #+(and unix (not darwin)) "/etc/rsb.conf"
+    #+windows                 "c/rsb.conf"
+    ;;#+darwin                ?
+    )
+  "List of configuration file names in order of decreasing priority.")
+
 (declaim (special *default-configuration*))
 
 (defvar *default-configuration* (options-from-default-sources)

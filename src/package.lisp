@@ -100,7 +100,8 @@
   (:export
    :*framework-timestamps*
 
-   :*default-configuration*)
+   :*default-configuration*
+   :*default-configuration-files*)
 
   ;; Hooks
   (:export
