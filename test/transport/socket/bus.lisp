@@ -79,7 +79,7 @@ port. This helps ensuring proper cleanup.")
 	(ensure-bus-client host port connector-1))
 
       ;; Create a bus server.
-      (with-reader (dummy (make-socket-url t) :transports '((:socket :converter :fundamental-null)))
+      (with-reader (dummy (make-socket-url t) :converters '((t . :fundamental-null)))
 	;; We should be able to create a bus clients now. We create
 	;; two connectors and request a bus client for each of
 	;; them. The first request should cause the bus client to be
