@@ -38,10 +38,13 @@
   (:setup
    ;; As a workaround for https://bugs.launchpad.net/asdf/+bug/507378,
    ;; force `receive-messages' to be updated.
-   (handler-case
-       (sb-ext:with-timeout .1
-	 (receive-messages (make-instance 'rsb.transport.test::mock-receiver)))
-     (sb-ext:timeout (condition) (declare (ignore condition))))
+   (ignore-some-conditions (sb-ext:timeout)
+     (sb-ext:with-timeout .1
+       (receive-messages (make-instance 'rsb.transport.test::mock-receiver))))
+   (usocket:with-socket-listener (socket "localhost" *next-port*)
+     (map nil #'usocket:socket-close
+	  (list (usocket:socket-connect "localhost" *next-port*)
+		(usocket:socket-accept socket))))
    ;; Disable deadlock detection since it seems to produce bogus
    ;; detections when interrupt-thread is used.
    (format *lift-debug-output* "~&;; Disabling SBCL deadlock detector~&")
