@@ -64,13 +64,10 @@ module."))
 socket. Should be incremented after each use.")
 
 (defun port-usable? (port &optional (host "localhost"))
-  "TODO(jmoringe): document"
-  (handler-case
-      (usocket:with-socket-listener
-	  (usocket:socket-listen host port)
-	t)
-    (error (condition)
-      (declare (ignore condition)))))
+  "Return non-nil, if a listen socket can be bound to HOST and PORT."
+  (ignore-some-conditions (usocket:address-in-use-error)
+    (usocket:with-socket-listener (socket host port)
+      t)))
 
 (deftestsuite transport-socket-root (transport-root)
   ()

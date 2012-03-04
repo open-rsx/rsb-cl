@@ -54,8 +54,9 @@
   #+sbcl
   (:teardown
    (format *lift-debug-output* "~&;; Restoring SBCL deadlock detector~&")
-   (sb-ext:without-package-locks
-     (setf (fdefinition 'sb-thread::check-deadlock) deadlock-detector)))
+   (when deadlock-detector
+     (sb-ext:without-package-locks
+       (setf (fdefinition 'sb-thread::check-deadlock) deadlock-detector))))
   (:documentation
    "Unit tests for the `bus', `bus-client' and `bus-server'
 classes."))
