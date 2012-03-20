@@ -87,7 +87,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 set -e\n                                                   \\
                 if [ \"$1\" = \"configure\" ] &&                           \\
                      which register-common-lisp-source > /dev/null; then\n \\
-                  register-common-lisp-source \"cl-rsb\"\n                 \\
+                  register-common-lisp-source \"${SYSTEM_NAME}\"\n         \\
                 fi\n\n")
     FILE(WRITE "${PRERM_SCRIPT}"
                "#!/bin/sh\n\n                                                \\
@@ -96,7 +96,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                      || [ \"$1\" = \"upgrade\" ]                             \\
                      || [ \"$1\" = \"deconfigure\" ]; then\n                 \\
                   if which unregister-common-lisp-source > /dev/null; then\n \\
-                    unregister-common-lisp-source \"cl-alexandria\"\n        \\
+                    unregister-common-lisp-source \"${SYSTEM_NAME}\"\n       \\
                   fi\n                                                       \\
                 fi\n\n")
     EXECUTE_PROCESS(COMMAND chmod +x "${POSTINST_SCRIPT}" "${PRERM_SCRIPT}")
