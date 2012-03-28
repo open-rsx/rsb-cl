@@ -272,9 +272,7 @@
    :define-participant-creation-uri-methods
    :define-participant-creation-restart-method
 
-   :maybe-shorten-sequence
-
-   :hostname)
+   :maybe-shorten-sequence)
 
   (:documentation
    "This package contains most of the basic, client-facing

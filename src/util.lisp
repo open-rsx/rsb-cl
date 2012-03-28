@@ -260,14 +260,6 @@ similar."
 		   bytes-left bytes-right))
     (equalp bytes-left bytes-right)))
 
-(defun hostname ()
-  (remove #\Newline
-	  (with-output-to-string (stream)
-	    (sb-ext:run-program "hostname" '()
-				:search t
-				:output stream))
-	  :count 1 :from-end t))
-
 (defmacro log1 (category object-or-message &rest args)
   "Log a message consisting of OBJECT-OR-MESSAGE and ARGS to the
 category designated by the keyword CATEGORY.

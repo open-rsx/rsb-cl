@@ -53,7 +53,7 @@ scopes.")
   (:metaclass connector-class)
   (:default-initargs
    :schema :inprocess
-   :host   (load-time-value (hostname) t)
+   :host   (load-time-value (machine-instance) t)
    :port   (load-time-value (sb-posix:getpid) t))
   (:wire-type t) ;; The Lisp process is the medium, so t (any Lisp
 		 ;; object) should be a reasonable wire-type
