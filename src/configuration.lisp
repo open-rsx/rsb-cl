@@ -30,6 +30,7 @@
 
 (defun options-from-environment ()
   "Obtain configuration options from environment variables."
+  #+(and sbcl (not win32))
   (let+ (((&flet name->option-name (name)
 	    (when (starts-with-subseq "RSB_" name)
 	      (string->option-name (subseq name 4) #\_))))
@@ -39,7 +40,9 @@
 	      (when name
 		(cons name value))))))
     (remove-if #'null (map 'list #'variable->option
-			   (sb-impl::posix-environ)))))
+			   (sb-impl::posix-environ))))
+  #-(and sbcl (not win32))
+  nil)
 
 
 ;;; Configuration file
