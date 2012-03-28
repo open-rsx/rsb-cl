@@ -155,7 +155,7 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 		     (right-origin (event-origin right)))
 		 (or (and (not left-origin) (not right-origin))
 		     (and left-origin right-origin
-			  (uuid= left-origin right-origin)))))
+			  (uuid:uuid= left-origin right-origin)))))
 	   ;; Method
 	   (or (not compare-methods?)
 	       (eq (event-method left) (event-method right)))

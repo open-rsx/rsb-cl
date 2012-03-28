@@ -49,7 +49,7 @@
 	  (octet-vector (uuid:byte-array-to-uuid origin)))))
 
 (defmethod matches? ((filter origin-filter) (event event))
-  (rsb::uuid= (filter-origin filter) (event-origin event)))
+  (uuid:uuid= (filter-origin filter) (event-origin event)))
 
 (defmethod print-object ((object origin-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)

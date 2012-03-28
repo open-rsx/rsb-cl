@@ -73,7 +73,7 @@
 			  (list :origin origin)))))
       (if expected
 	  (ensure-same (event-id event) expected
-		       :test #'rsb::uuid=)
+		       :test #'uuid:uuid=)
 	  (ensure-null (event-id event))))))
 
 (addtest (event-root

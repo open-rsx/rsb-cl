@@ -250,16 +250,6 @@ item identified by KEY."
 	(values (subseq thing 0 (min length 200)) (> length 200)))
       (values thing nil)))
 
-(defun uuid= (left right)
-  "Return non-nil if LEFT and RIGHT are equal UUIDs.
-This function can be removed once the UUID system gets something
-similar."
-  (let ((bytes-left  (uuid:uuid-to-byte-array left))
-	(bytes-right (uuid:uuid-to-byte-array right)))
-    (declare (type (simple-array (unsigned-byte 8) (16))
-		   bytes-left bytes-right))
-    (equalp bytes-left bytes-right)))
-
 (defmacro log1 (category object-or-message &rest args)
   "Log a message consisting of OBJECT-OR-MESSAGE and ARGS to the
 category designated by the keyword CATEGORY.
