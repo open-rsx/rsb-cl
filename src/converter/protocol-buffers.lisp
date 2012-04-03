@@ -27,12 +27,10 @@
 (defmethod wire->domain? ((converter   (eql :protocol-buffer))
 			  (wire-data   simple-array)
 			  (wire-schema symbol))
-  (let* ((descriptor (pb:find-descriptor wire-schema
-					 :error? nil))
-	 (class      (when descriptor
-		       (pb:descriptor-class descriptor))))
-    (when class
-      (values converter (class-name class)))))
+  (when-let* ((descriptor (pb:find-descriptor wire-schema
+					      :error? nil))
+	      (class      (pb:descriptor-class descriptor)))
+    (values converter (class-name class))))
 
 (defmethod domain->wire? ((converter     (eql :protocol-buffer))
 			  (domain-object standard-object))
