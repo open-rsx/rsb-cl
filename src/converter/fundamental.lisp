@@ -36,8 +36,8 @@
   '(eql %no-value))
 
 (define-simple-converter (:fundamental-void :void no-value
-					    :wire-type       (simple-array (unsigned-byte 8) (0))
-					    :data-type-class (eql +no-value+))
+			  :wire-type       (simple-array (unsigned-byte 8) (0))
+			  :data-type-class (eql +no-value+))
     (+no-value+)
   ((make-array 0 :element-type '(unsigned-byte 8))))
 
