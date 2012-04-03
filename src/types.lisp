@@ -43,7 +43,8 @@
   (let+ (((&flet valid-char? (char)
 	    (or (<= (char-code #\a) (char-code char) (char-code #\z))
 		(<= (char-code #\A) (char-code char) (char-code #\Z))
-		(<= (char-code #\0) (char-code char) (char-code #\9))))))
+		(<= (char-code #\0) (char-code char) (char-code #\9))
+		(char= char #\_)))))
     (and (not (emptyp string))
 	 (every #'valid-char? string))))
 
