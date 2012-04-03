@@ -245,9 +245,12 @@ of the subtype `no-suitable-converter' is signaled."
 (defun make-connectors (specs direction &optional converters)
   "Create and return zero or more connector instances for the
 direction designated by DIRECTION according to SPECS. Each element of
-SPECS has to be of the form (NAME . ARGS) where NAME and ARGS have to
-acceptable for calls to `make-connector'. For CONVERTERS, see
-`make-connector'."
+SPECS has to be of the form
+
+  (NAME . ARGS)
+
+where NAME and ARGS have to acceptable for calls to
+`make-connector'. For CONVERTERS, see `make-connector'."
   ;; Check direction here in order to signal a appropriate type error
   ;; even if SPECS is nil.
   (check-type direction direction "either :IN-PUSH, :IN-PULL or :OUT")
