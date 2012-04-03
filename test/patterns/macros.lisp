@@ -43,9 +43,11 @@
     (with-methods (server)
 	(("mymethod"     (foo string) foo)
 	 (:myothermethod (bar integer)
-	  (declare (ignore bar))))
+	  (declare (ignore bar)))
+	 ("noarg"        ()))
       (ensure (server-method server "mymethod"))
-      (ensure (server-method server "MYOTHERMETHOD")))
+      (ensure (server-method server "MYOTHERMETHOD"))
+      (ensure (server-method server "noarg")))
     (ensure-null (server-methods server))))
 
 (addtest (with-methods-root
@@ -54,13 +56,16 @@
   macroexpand
 
   (ensure-cases (method expected)
-      '((("validname"    (foo string) foo)  t)
-	((:validname     (foo string) foo)  t)
-	((validname      (foo string) foo)  t)
+      '((("validname"    (foo string) foo) t)
+	((:validname     (foo string) foo) t)
+	((validname      (foo string) foo) t)
+	(("v41id_n4m3"   (foo string) foo) t)
+	(("eventarg"     (foo :event) foo) t)
+	(("noarg"        ()        :const) t)
 
 	(("%invalidname" (foo string) foo) :error)
 	(("invalid-name" (foo string) foo) :error)
-	(("inv41id-n4m3" (foo string) foo) :error))
+	(("invalidtype"  (foo 5)      foo) :error))
 
     (if (eq expected :error)
 	(ensure-condition 'type-error
