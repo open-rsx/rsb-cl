@@ -106,7 +106,7 @@ RETURN controls which kind of result is (ultimately, i.e. potentially
 after forcing the returned future) returned by the method call. Valid
 values are :event, which causes the whole reply event to be returned,
 and :payload, which causes the payload of the reply event to be
-returned. "))
+returned."))
 
 
 ;;; Server protocol
@@ -131,6 +131,7 @@ and ERROR? is non-nil signal an error. Otherwise return nil."))
 be a method instance a thing like a function based on which a method
 can be made. If NEW-VALUE is nil, the method stored for NAME is
 removed from SERVER.
+
 When supplied, ARGUMENT has to be either :event or :payload causing
 the associated callback function of NEW-VALUE to receive the request
 event or just its payload respectively."))
