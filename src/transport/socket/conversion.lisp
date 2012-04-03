@@ -1,4 +1,4 @@
-;;; conversion.lisp --- Event <-> notification conversion
+;;; conversion.lisp --- Event <-> notification conversion for socket transport.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -36,26 +36,31 @@
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
-  (let+ (((&accessors-r/o
-	   (event-id    notification-event-id)
+  (let+ (((&flet event-id->cons (event-id)
+	    (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
+		  (event-id-sequence-number event-id))))
+	 ((&accessors-r/o
 	   (scope       notification-scope)
+	   (event-id    notification-event-id)
 	   (method      notification-method)
 	   (wire-schema notification-wire-schema)
 	   (payload     notification-data)
-	   (meta-data   notification-meta-data)) notification)
+	   (meta-data   notification-meta-data)
+	   (causes      notification-causes)) notification)
 	 ((&accessors-r/o
-	   (sequence-number event-id-sequence-number)
-	   (sender-id       event-id-sender-id)) event-id)
+	   (sender-id       event-id-sender-id)
+	   (sequence-number event-id-sequence-number)) event-id)
 	 (wire-schema (bytes->wire-schema wire-schema))
 	 (data        (rsb.converter:wire->domain
 		       converter payload wire-schema))
 	 (event       (make-instance
 		       'rsb:event
-		       :sequence-number   sequence-number
 		       :origin            (uuid:byte-array-to-uuid sender-id)
+		       :sequence-number   sequence-number
 		       :scope             (make-scope (bytes->string scope))
 		       :method            (unless (emptyp method)
 					    (bytes->keyword method))
+		       :causes            (map 'list #'event-id->cons causes)
 		       :data              data
 		       :create-timestamp? nil)))
 
@@ -108,20 +113,19 @@ into one notification."
   (setf (timestamp event :send) (local-time:now))
 
   ;; Put EVENT into one or more notifications.
-  (let+ (((&accessors-r/o
-	   (sequence-number event-sequence-number)
-	   (scope           event-scope)
-	   (origin          event-origin)
-	   (method          event-method)
-	   (data            event-data)
-	   (meta-data       event-meta-data)
-	   (timestamps      event-timestamps)) event)
+  (let+ (((&accessors-r/o (origin          event-origin)
+			  (sequence-number event-sequence-number)
+			  (scope           event-scope)
+			  (method          event-method)
+			  (data            event-data)
+			  (meta-data       rsb:event-meta-data)
+			  (timestamps      event-timestamps)
+			  (causes          event-causes)) event)
 	 ((&values wire-data wire-schema)
 	  (rsb.converter:domain->wire converter data)))
-    (make-notification sequence-number scope origin method
+    (make-notification sequence-number origin scope method
 		       wire-schema wire-data
-		       :meta-data  meta-data
-		       :timestamps timestamps)))
+		       meta-data timestamps causes)))
 
 
 ;;; Utility functions
@@ -135,13 +139,12 @@ into one notification."
 get a natural mapping between Lisp keywords and corresponding strings
 for most cases.")
 
-(defun make-notification (sequence-number scope origin method
+(defun make-notification (sequence-number origin scope method
 			  wire-schema data
-			  &key
-			  meta-data
-			  timestamps)
-  "Make a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
-SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA."
+			  meta-data timestamps causes)
+  "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
+SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA, TIMESTAMPS
+and CAUSES."
   (let* ((event-id     (make-instance
 			'rsb.protocol:event-id
 			:sender-id       (uuid:uuid-to-byte-array origin)
@@ -183,6 +186,15 @@ SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA."
 			    :key       (keyword->bytes key)
 			    :timestamp (timestamp->unix-microseconds value))
 	     (event-meta-data-user-times meta-data1))))
+
+    ;; Add CAUSES.
+    (iter (for (origin-id . sequence-number) in causes)
+	  (vector-push-extend
+	   (make-instance 'rsb.protocol:event-id
+			  :sender-id       (uuid:uuid-to-byte-array
+					    origin-id)
+			  :sequence-number sequence-number)
+	   (notification-causes notification)))
 
     ;; Return the complete notification instance.
     notification))
