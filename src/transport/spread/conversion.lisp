@@ -4,9 +4,9 @@
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
-;; This file may be licensed under the terms of of the GNU Lesser
-;; General Public License Version 3 (the ``LGPL''), or (at your
-;; option) any later version.
+;; This file may be licensed under the terms of the GNU Lesser General
+;; Public License Version 3 (the ``LGPL''), or (at your option) any
+;; later version.
 ;;
 ;; Software distributed under the License is distributed on an ``AS
 ;; IS'' basis, WITHOUT WARRANTY OF ANY KIND, either express or
@@ -71,13 +71,13 @@ contained in NOTIFICATION."
 	    (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
 		  (event-id-sequence-number event-id))))
 	 ((&accessors-r/o
-	   (scope           notification-scope)
-	   (event-id        notification-event-id)
-	   (method          notification-method)
-	   (wire-schema     notification-wire-schema)
-	   (payload         notification-data)
-	   (meta-data       notification-meta-data)
-	   (causes          notification-causes)) notification)
+	   (scope       notification-scope)
+	   (event-id    notification-event-id)
+	   (method      notification-method)
+	   (wire-schema notification-wire-schema)
+	   (payload     notification-data)
+	   (meta-data   notification-meta-data)
+	   (causes      notification-causes)) notification)
 	 ((&accessors-r/o
 	   (sender-id       event-id-sender-id)
 	   (sequence-number event-id-sequence-number)) event-id)
@@ -208,7 +208,7 @@ into one notification."
 			  meta-data timestamps causes)
   "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
 ORIGIN and optionally SCOPE, METHOD, WIRE-SCHEMA, META-DATA and
-causes."
+CAUSES."
   (let* ((full?        scope)
 	 (event-id     (make-instance
 			'event-id
