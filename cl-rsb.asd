@@ -218,6 +218,8 @@
 			      "event-processing" ;; for error-policy-mixin
 			      "converter")       ;; for conversion-mixin
 		 :components ((:file       "package")
+			      (:file       "variables"
+			       :depends-on ("package"))
 			      (:file       "conditions"
 			       :depends-on ("package"))
 			      (:file       "protocol"

@@ -52,6 +52,10 @@
    :encoding-error
    :encoding-error-event)
 
+  ;; Variables
+  (:export
+   :*transport-metrics*)
+
   ;; Connector protocol
   (:export
    :connector-direction ;; work on connector classes and instances
