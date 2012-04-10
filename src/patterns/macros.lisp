@@ -49,7 +49,9 @@ variable."
 
   (let+ (((&flet+ process-one ((name (&optional arg (request-type t))
 				&rest body))
-	    (let ((name/string (string name)))
+	    (let+ ((name/string (string name))
+		   ((&values body declarations) (parse-body body))
+		   ((&with-gensyms arg-var)))
 	      (check-type name/string  method-name "a valid method name")
 	      (check-type arg          symbol      "a symbol")
 	      (check-type request-type symbol      ":EVENT or a symbol naming a type")
@@ -59,10 +61,12 @@ variable."
 	       `(setf (server-method ,var ,name/string
 				     ,@(when (eq request-type :event)
 				         `(:argument :event)))
-		      #'(lambda (,@(when arg `(,arg)))
-			  ,@(when (and arg (not (eq request-type :event)))
-			      `((check-type ,arg ,request-type)))
-			  ,@body))
+		      #'(lambda (,@(when arg `(,arg-var)))
+			  (let (,@(when arg `((,arg ,arg-var))))
+			   ,@declarations
+			   ,@(when (and arg (not (eq request-type :event)))
+				   `((check-type ,arg-var ,request-type)))
+			   ,@body)))
 	       ;; Remove from server.
 	       `(when-let ((method (server-method ,var ,name/string :error? nil)))
 		  (handler-bind
