@@ -63,6 +63,34 @@
    :fragmentation-problem-required
    :fragmentation-problem-available)
 
+  ;; Variables and constants
+  (:export
+   :+protocol-version+)
+  
   (:documentation
    "This package contains a transport implementation based on the
 spread group communication system."))
+
+(cl:in-package :rsb.transport.spread)
+
+(defconstant +protocol-version-base+ 100
+  "Constant that has to be subtracted from the field number of the
+
+  .rsb.protocol.Notification.event_id
+
+field to obtain the wire protocol version.")
+
+(defconstant +protocol-version+
+  (let ((field-number (pb::field-desc-number
+		       (pb:find-descriptor
+			".rsb.protocol.Notification.event_id"))))
+    (- field-number +protocol-version-base+))
+  "Spread wire protocol version. Determined by subtracting the value
+of `+protocol-version-base+' from the field number of the
+
+  .rsb.protocol.Notification.event_id
+
+field.")
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (pushnew :rsb.transport.spread.num-fragments *transport-metrics*))
