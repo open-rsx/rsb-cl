@@ -37,6 +37,53 @@ EXTRACT_COMPONENT(major    MAJOR)
 EXTRACT_COMPONENT(minor    MINOR)
 EXTRACT_COMPONENT(revision PATCH)
 
+# Find and check SBCL installation.
+SET(SBCL_HOME $ENV{SBCL_HOME})
+IF(NOT SBCL_HOME)
+    MESSAGE(STATUS "SBCL_HOME is not set. Trying to find SBCL on default path.")
+    FIND_PROGRAM(SBCL_EXECUTABLE sbcl)
+ELSE()
+    MESSAGE(STATUS "SBCL_HOME is set to ${SBCL_HOME}. Trying to find SBCL there.")
+    FIND_PROGRAM(SBCL_EXECUTABLE sbcl
+                 PATHS "${SBCL_HOME}/../../bin" ${SBCL_HOME}
+                 NO_DEFAULT_PATH)
+ENDIF()
+MESSAGE(STATUS "SBCL executable: ${SBCL_EXECUTABLE}")
+
+# Configure Lisp environment.
+SET(LISP_RUNTIME_OPTIONS "" CACHE STRING
+    "Runtime options to pass to the Lisp system.")
+SET(LISP_INIT_FILE       "" CACHE FILEPATH
+    "File to load as Lisp init file.")
+SET(LISP_INIT_CODE       "" CACHE STRING
+    "Lisp code to be evaulated during initialization.")
+SET(LISP_INIT "")
+IF(LISP_INIT_FILE)
+    SET(LISP_INIT "${LISP_INIT} --userinit ${LISP_INIT_FILE}")
+ENDIF()
+IF(LISP_INIT_CODE)
+    SET(LISP_INIT "${LISP_INIT} --eval \"${LISP_INIT_CODE}\"")
+ENDIF()
+
+SET(CL_SOURCE_REGISTRY       "(:source-registry (:tree \\\"${CMAKE_CURRENT_SOURCE_DIR}\\\") :inherit-configuration)")
+SET(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
+
+# Tests
+ENABLE_TESTING()
+
+SET(DO "--eval \"(proclaim (quote (optimize (debug 3) (safety 3) (speed 0))))\"
+        --eval \"(asdf:test-system :${SYSTEM_NAME})\"
+        --quit")
+IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    SET(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/test.log\"
+                      ERROR_FILE  \"${CMAKE_CURRENT_BINARY_DIR}/test.log\"")
+ENDIF()
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/sbcl.test.cmake"
+               @ONLY)
+ADD_TEST(NAME    "rsb"
+         COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.test.cmake")
+
 # Installation
 FILE(GLOB ASD_FILES
      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"

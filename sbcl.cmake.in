@@ -1,0 +1,22 @@
+SET(ENV{CC}                       "@CMAKE_C_COMPILER@")
+SET(ENV{SBCL_HOME}                "@SBCL_HOME@")
+SET(ENV{CL_SOURCE_REGISTRY}       "@CL_SOURCE_REGISTRY@")
+SET(ENV{ASDF_OUTPUT_TRANSLATIONS} "@ASDF_OUTPUT_TRANSLATIONS@")
+
+MESSAGE("Executing Lisp process @NAME@")
+EXECUTE_PROCESS(COMMAND           "@SBCL_EXECUTABLE@"
+                                  @LISP_RUNTIME_OPTIONS@
+                                  --disable-debugger
+                                  --no-sysinit
+                                  @LISP_INIT@
+                                  --eval "(setf *terminal-io*
+                                                (make-two-way-stream
+                                                  (make-synonym-stream (quote *standard-input*))
+		                                  (make-synonym-stream (quote *standard-output*))))"
+                                  @DO@
+                WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@"
+                @REDIRECTIONS@
+                RESULT_VARIABLE   RESULT)
+IF(NOT ${RESULT} EQUAL 0)
+    MESSAGE(FATAL_ERROR "Failed to execute Lisp process @NAME@")
+ENDIF()
