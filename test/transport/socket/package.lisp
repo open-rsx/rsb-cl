@@ -27,6 +27,7 @@
    :cl
    :alexandria
    :iterate
+   :more-conditions
    :lift
 
    :nibbles

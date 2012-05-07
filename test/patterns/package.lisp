@@ -27,6 +27,7 @@
    :cl
    :let-plus
    :iterate
+   :more-conditions
    :lift
 
    :rsb

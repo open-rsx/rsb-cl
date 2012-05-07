@@ -28,6 +28,7 @@
    :alexandria
    :let-plus
    :iterate
+   :more-conditions
 
    :lift
 
