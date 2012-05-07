@@ -42,6 +42,8 @@
   (:documentation
    "Parse string and return a `scope' instance."))
 
+(declaim (ftype (function (scope) scope) intern-scope))
+
 
 ;;;
 ;;
@@ -162,8 +164,6 @@ components of THING1 and THING2."
 
 (defvar *scopes-lock* (bt:make-lock "scopes lock")
   "Protects accesses to `*scopes*' during interning.")
-
-(declaim (ftype (function (scope) scope) intern-scope))
 
 (defun intern-scope (scope)
   "Return the canonical `scope' instance for SCOPE. May return SCOPE,
