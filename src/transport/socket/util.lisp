@@ -46,30 +46,6 @@ bus uses value ~S; requested value is ~S.~@:>"
 		     key bus-value value))))))
 
 
-;;; Length reading and writing
-;;
-
-(declaim (ftype (function (stream) (unsigned-byte 32)) read-uint32-le)
-	 (inline read-uint32-le))
-
-(defun read-uint32-le (stream)
-  "Read and return a number encoded as little endian uint32 from STREAM."
-  (let ((buffer (binio:make-octet-vector 4)))
-    (unless (= (read-sequence buffer stream) 4)
-      (error "Short read when receiving notification length."))
-    (binio:decode-uint32-le buffer)))
-
-(declaim (ftype (function ((unsigned-byte 32) stream) (values)) write-uint32-le)
-	 (inline write-uint32-le))
-
-(defun write-uint32-le (value stream)
-  "Write VALUE to STREAM encoded as little endian uint32."
-  (let ((buffer (binio:make-octet-vector 4)))
-    (binio:encode-uint32-le value buffer)
-    (write-sequence buffer stream))
-  (values))
-
-
 ;;; Printing utility functions
 ;;
 

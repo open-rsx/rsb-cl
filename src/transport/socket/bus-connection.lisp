@@ -101,10 +101,10 @@ but shares these among participants in the process."))
   (let ((stream (usocket:socket-stream (connection-socket instance))))
     (case handshake
       (:send
-       (write-uint32-le 0 stream)
+       (write-ub32/le 0 stream)
        (force-output stream))
       (:receive
-       (read-uint32-le stream)))))
+       (read-ub32/le stream)))))
 
 (defmethod (setf processor-error-policy) ((new-value  function)
 					  (connection bus-connection))
@@ -119,7 +119,7 @@ after calling NEW-VALUE."
 (defmethod receive-message ((connection bus-connection)
 			    (block?     t))
   (let* ((stream   (usocket:socket-stream (connection-socket connection)))
-	 (length   (read-uint32-le stream))
+	 (length   (read-ub32/le stream))
 	 (buffer   (%ensure-receive-buffer connection length))
 	 (received (read-sequence buffer stream :end length)))
     (unless (= received length)
@@ -163,7 +163,7 @@ not be unpacked as a protocol buffer of kind ~S.~:@>"
   (declare (type (cons octet-vector (unsigned-byte 32)) notification))
 
   (let ((stream (usocket:socket-stream (connection-socket connection))))
-    (write-uint32-le (cdr notification) stream)
+    (write-ub32/le (cdr notification) stream)
     (write-sequence (car notification) stream :end (cdr notification))
     (force-output stream)))
 
