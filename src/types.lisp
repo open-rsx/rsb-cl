@@ -45,6 +45,11 @@
     (and (not (emptyp string))
 	 (every #'valid-char? string))))
 
+(deftype scope-designator ()
+  "A scope can be designated by a string, a list of scope components
+or a `scope' instance."
+  '(or string scope-components scope))
+
 
 ;;; Event-related types
 ;;

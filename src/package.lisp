@@ -33,6 +33,8 @@
 
   ;; Types
   (:export
+   :scope-designator
+   
    :sequence-number
 
    :error-policy
