@@ -128,17 +128,24 @@ listeners. An event is a composite structure consisting of
 	       (compare-causes?           t)
 	       (data-test                 #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
+
 If COMPARE-SEQUENCE-NUMBERS? is non-nil, return nil unless LEFT and
 RIGHT have identical sequence numbers.
+
 If COMPARE-ORIGINS? is non-nil, return nil unless LEFT and RIGHT have
 identical origins.
+
 If COMPARE-METHODS? is non-nil, return nil unless LEFT and RIGHT have
 identical methods.
+
 COMPARE-TIMESTAMPS can be nil, t or a list of timestamp keys to
-compare. If it is t, all RSB timestamps are
+compare. If it is t, all timestamps whose keys appear in
+`rsb:*framework-timestamps*' are
 compared (currently :create, :send, :receive and :deliver).
+
 If COMPARE-CAUSES? is non-nil, return nil unless LEFT and RIGHT have
 identical sets of causes.
+
 DATA-TEST has to be a function of two arguments or nil. In the latter
 case, the payloads of LEFT and RIGHT are not considered. It is assumed
 that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
