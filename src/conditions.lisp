@@ -65,10 +65,10 @@ to connect to the bus."))
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
 designated by ~
-~S~/rsb::maybe-print-transport-configuration/~/rsb::maybe-print-cause/~@:>"
-	     (participation-failed-scope condition)
+~S~/rsb::maybe-print-transport-configuration/~/more-conditions::maybe-print-cause/~@:>"
+	     (participation-failed-scope      condition)
 	     (participation-failed-transports condition)
-	     (chainable-condition-cause condition))))
+	     (cause                           condition))))
   (:documentation
    "This error is signaled when the creation of a participant (which
 implies participation in a channel) fails."))
@@ -103,11 +103,11 @@ fails."))
    (lambda (condition stream)
      (format stream "~@<Failed to create RSB informer in the channel ~
 designated by ~S and type ~
-~S~/rsb::maybe-print-transport-configuration/~/rsb::maybe-print-cause/~@:>"
+~S~/rsb::maybe-print-transport-configuration/~/more-conditions::maybe-print-cause/~@:>"
 	     (participation-failed-scope      condition)
 	     (informer-creation-failed-type   condition)
 	     (participation-failed-transports condition)
-	     (chainable-condition-cause       condition))))
+	     (cause                           condition))))
   (:documentation
    "This error is signaled when an attempt to create an informer
 fails."))

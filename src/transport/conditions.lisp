@@ -48,11 +48,11 @@ been constructed."))
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for ~
 direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~
-~/rsb::maybe-print-cause/~@:>"
+~/more-conditions::maybe-print-cause/~@:>"
 	     (connector-construction-failed-name      condition)
 	     (connector-construction-failed-direction condition)
 	     (connector-construction-failed-args      condition)
-	     (chainable-condition-cause               condition))))
+	     (cause                                   condition))))
   (:documentation
    "This error is signaled when the construction of a connector
 instance fails."))
@@ -103,10 +103,10 @@ contain a suitable one for the requested connector."))
 	     (maybe-shorten-sequence (decoding-error-encoded condition))))
        (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
 ~_could not be decoded ~
-~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
+~/rsb::maybe-print-explanation/~/more-conditions::maybe-print-cause/~@:>"
 	       (coerce data 'list) shortened?
 	       condition
-	       (chainable-condition-cause condition)))))
+	       (cause condition)))))
   (:documentation
    "This error is signaled when decoding one or more notifications
 into an `event' instance fails."))
@@ -121,10 +121,10 @@ into an `event' instance fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The event ~A could not be encoded into an ~
-octet-vector~/rsb::maybe-print-explanation/~/rsb::maybe-print-cause/~@:>"
+octet-vector~/rsb::maybe-print-explanation/~/more-conditions::maybe-print-cause/~@:>"
 	     (encoding-error-event      condition)
 	     condition
-	     (chainable-condition-cause condition))))
+	     (cause condition))))
   (:documentation
    "This error is signaled when encoding an `event' instance into one
 or more notifications fails."))
