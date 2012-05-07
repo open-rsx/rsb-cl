@@ -25,91 +25,6 @@
 (cl:in-package :rsb)
 
 
-;;; Generic condition utilities
-;;
-
-(define-condition chainable-condition (condition)
-  ((cause :initarg  :cause
-	  :type     (or null condition)
-	  :reader   chainable-condition-cause
-	  :initform nil
-	  :documentation
-	  "The condition which originally caused the condition to be
-signaled."))
-  (:documentation
-   "Instances of this class can contain another condition instance
-which originally caused the condition to be signaled. This structure
-can continue recursively thus forming a chain of causing
-conditions."))
-
-(defun maybe-print-cause (stream cause &optional colon? at?)
-  "Print the condition CAUSE that caused an outer condition to be
-signaled onto STREAM."
-  (declare (ignore colon? at?))
-  (format stream "~@[~_Caused by:~&~@<> ~@;~A~@:>~]"
-	  cause))
-
-(defun maybe-print-explanation (stream condition &optional colon? at?)
-  "Format the message contained in the `simple-condition' CONDITION on
-STREAM."
-  (declare (ignore colon? at?))
-  (if (simple-condition-format-control condition)
-      (progn
-	(format stream ":~_")
-	(pprint-logical-block (stream nil :per-line-prefix "  ")
-	  (apply #'format stream
-		 (simple-condition-format-control   condition)
-		 (simple-condition-format-arguments condition))))
-      (write-char #\. stream)))
-
-
-;;; Program error conditions
-;;
-
-(define-condition missing-required-argument (program-error)
-  ((parameter :initarg  :parameter
-	      :type     symbol
-	      :accessor missing-required-argument-parameter
-	      :documentation
-	      "The parameter for which a value should have been
-supplied."))
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<No value has been supplied for the required ~
-parameter ~S.~@:>"
-	     (missing-required-argument-parameter condition))))
-  (:documentation
-   "This error is signaled when no value is supplied for a required
-parameter."))
-
-(defun missing-required-argument (parameter)
-  "Signal a `missing-required-argument' error for PARAMETER."
-  (error 'missing-required-argument
-	 :parameter parameter))
-
-(define-condition missing-required-initarg (missing-required-argument)
-  ((class   :initarg  :class
-	    :type     symbol
-	    :accessor missing-required-initarg-class
-	    :documentation
-	    "The class which requires the missing initarg."))
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<The initarg ~S is required by class ~S, but ~
-has not been supplied.~@:>"
-	     (missing-required-argument-parameter condition)
-	     (missing-required-initarg-class      condition))))
-  (:documentation
-   "This error is signaled when an initarg that is required by a class
-is not supplied."))
-
-(defun missing-required-initarg (class initarg)
-  "Signal a `missing-required-initarg' error for CLASS and INITARG."
-  (error 'missing-required-initarg
-	 :parameter initarg
-	 :class     class))
-
-
 ;;; RSB-specific errors
 ;;
 

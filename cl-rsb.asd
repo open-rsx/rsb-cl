@@ -86,8 +86,9 @@
 		:split-sequence
 		:iterate
 		:let-plus
+		:more-conditions
 
-		:nibbles
+
 		#+sbcl :sb-concurrency
 		:bordeaux-threads
 		:trivial-garbage
@@ -96,6 +97,7 @@
 		:cl-dynamic-classes
 		:log5
 		
+		:nibbles
 		:puri
 		:uuid
 		:local-time)

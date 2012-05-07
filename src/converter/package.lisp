@@ -29,6 +29,7 @@
    :alexandria
    :let-plus
    :iterate
+   :more-conditions
 
    :nibbles
    
