@@ -72,7 +72,7 @@ would produce.
 
 Example:
 RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
-=> :fundamental-string 'rsb:octet-vector :string"))
+=> :fundamental-string 'octet-vector :string"))
 
 
 ;;; Default behavior
