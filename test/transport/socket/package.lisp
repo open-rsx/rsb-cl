@@ -29,6 +29,8 @@
    :iterate
    :lift
 
+   :nibbles
+   
    :rsb
    :rsb.event-processing
    :rsb.transport

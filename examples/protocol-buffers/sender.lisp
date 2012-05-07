@@ -44,4 +44,4 @@
   (rsb:send informer (make-instance 'tutorial.protobuf-converter:simple-image
 				    :width  100
 				    :height 100
-				    :data   (binio:octet-vector 1 2 3))))
+				    :data   (nibbles:octet-vector 1 2 3))))

@@ -44,9 +44,9 @@
 				     origin)
   (setf (slot-value instance 'origin)
 	(etypecase origin
-	  (uuid:uuid    origin)
-	  (string       (uuid:make-uuid-from-string origin))
-	  (octet-vector (uuid:byte-array-to-uuid origin)))))
+	  (uuid:uuid            origin)
+	  (string               (uuid:make-uuid-from-string origin))
+	  (nibbles:octet-vector (uuid:byte-array-to-uuid origin)))))
 
 (defmethod matches? ((filter origin-filter) (event event))
   (uuid:uuid= (filter-origin filter) (event-origin event)))

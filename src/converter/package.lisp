@@ -30,6 +30,8 @@
    :let-plus
    :iterate
 
+   :nibbles
+   
    :rsb)
 
   ;; Conditions

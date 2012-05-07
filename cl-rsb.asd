@@ -87,6 +87,7 @@
 		:iterate
 		:let-plus
 
+		:nibbles
 		#+sbcl :sb-concurrency
 		:bordeaux-threads
 		:trivial-garbage
@@ -94,7 +95,7 @@
 		:cl-hooks
 		:cl-dynamic-classes
 		:log5
-
+		
 		:puri
 		:uuid
 		:local-time)
@@ -519,7 +520,8 @@ on the spread group communication system."
 		cl-spread
 		cl-protobuf
 		cl-rsb-and-cl-protobuf)
-  :depends-on  (:ironclad)
+  :depends-on  (:nibbles
+		:ironclad)
   :components  ((:module     "spread"
 		 :pathname   "src/transport/spread"
 		 :components ((:file       "package")

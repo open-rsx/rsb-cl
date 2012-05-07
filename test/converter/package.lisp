@@ -29,6 +29,8 @@
    :let-plus
    :lift
 
+   :nibbles
+   
    :rsb
    :rsb.converter
 

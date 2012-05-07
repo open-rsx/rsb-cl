@@ -24,9 +24,6 @@
 
 (cl:in-package :rsb)
 
-(deftype octet-vector ()
-  '(simple-array (unsigned-byte 8) (*)))
-
 
 ;;; Scope-related types
 ;;

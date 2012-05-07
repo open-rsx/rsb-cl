@@ -29,6 +29,8 @@
    :iterate
    :lift
 
+   :nibbles
+   
    :rsb
    :rsb.transport
    :rsb.transport.spread

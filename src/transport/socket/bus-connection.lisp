@@ -252,7 +252,7 @@ it first, if necessary."
 		    (when (>= (length buffer) size)
 		      buffer)))
 		(setf (,accessor connection)
-		      (binio:make-octet-vector size)))))))
+		      (make-octet-vector size)))))))
 
   (define-ensure-buffer %ensure-receive-buffer %connection-receiver-buffer)
   (define-ensure-buffer %ensure-send-buffer    %connection-send-buffer))

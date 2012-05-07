@@ -38,6 +38,8 @@
    :iterate
    :let-plus
 
+   :nibbles
+   
    :rsb
    :rsb.event-processing
    :rsb.transport
