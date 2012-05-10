@@ -30,7 +30,7 @@
    :lift
 
    :nibbles
-   
+
    :rsb
    :rsb.converter
 
@@ -51,7 +51,7 @@
   ()
   (:function
    (octetify (value)
-     (coerce value 'octet-vector)))
+     (coerce value 'simple-octet-vector)))
   (:documentation
    "Root unit test suite for the converter module."))
 
