@@ -37,7 +37,7 @@ a filter instance failed."))
      (format stream "~@<Failed to construct filter based on ~
 specification ~S~/more-conditions::maybe-print-cause/~@:>"
 	     (filter-construction-error-spec condition)
-	     (cause                          condition))))
+	     condition)))
   (:documentation
    "This error is signaled when an attempt to construct a filter
 instance based on a filter specification fails."))

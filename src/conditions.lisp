@@ -68,7 +68,7 @@ designated by ~
 ~S~/rsb::maybe-print-transport-configuration/~/more-conditions::maybe-print-cause/~@:>"
 	     (participation-failed-scope      condition)
 	     (participation-failed-transports condition)
-	     (cause                           condition))))
+	     condition)))
   (:documentation
    "This error is signaled when the creation of a participant (which
 implies participation in a channel) fails."))
@@ -107,7 +107,7 @@ designated by ~S and type ~
 	     (participation-failed-scope      condition)
 	     (informer-creation-failed-type   condition)
 	     (participation-failed-transports condition)
-	     (cause                           condition))))
+	     condition)))
   (:documentation
    "This error is signaled when an attempt to create an informer
 fails."))

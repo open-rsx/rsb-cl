@@ -37,7 +37,7 @@ conversion would have converted."))
      (format stream "~@<A conversion to or from wire-schema ~S~
 failed~/more-conditions::maybe-print-cause/~@:>"
 	     (conversion-error-wire-schema condition)
-	     (cause                        condition))))
+	     condition)))
   (:documentation
    "This condition class can be used as a superclass for
 conversion-related condition classes."))
@@ -66,7 +66,7 @@ wire-schema) could not be converted to domain type ~
 	       data shortened?
 	       (conversion-error-wire-schema condition)
 	       (conversion-error-domain-type condition)
-	       (cause                        condition)))))
+	       condition))))
   (:documentation
    "This error is signaled when wire data cannot be converted to a
 domain object."))
@@ -92,7 +92,7 @@ a wire-type ~S representation using the wire-schema ~
 	     (conversion-error-domain-object condition)
 	     (conversion-error-wire-type     condition)
 	     (conversion-error-wire-schema   condition)
-	     (cause                          condition))))
+	     condition)))
   (:documentation
    "This error is signaled when a domain object cannot be converted to
 a wire-type representation."))

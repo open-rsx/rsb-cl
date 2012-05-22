@@ -56,7 +56,7 @@ in the failed call."))
 ~A~/more-conditions::maybe-print-cause/~:@>"
 	     (remote-call-failed-method  condition)
 	     (remote-call-failed-request condition)
-	     (cause                      condition))))
+	     condition)))
   (:documentation
    "This error is signaled when a remote method call fails for some
 reason."))
@@ -69,7 +69,7 @@ reason."))
 request ~A~/more-conditions::maybe-print-cause/~:@>"
 	     (remote-call-failed-method  condition)
 	     (remote-call-failed-request condition)
-	     (cause                      condition))))
+	     condition)))
   (:documentation
    "Error of this class are raised when a call to a remote method
 succeeds in calling the method on the remote side but fails in the

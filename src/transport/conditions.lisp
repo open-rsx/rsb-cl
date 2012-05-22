@@ -52,7 +52,7 @@ direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~
 	     (connector-construction-failed-name      condition)
 	     (connector-construction-failed-direction condition)
 	     (connector-construction-failed-args      condition)
-	     (cause                                   condition))))
+	     condition)))
   (:documentation
    "This error is signaled when the construction of a connector
 instance fails."))
@@ -106,7 +106,7 @@ contain a suitable one for the requested connector."))
 ~/rsb::maybe-print-explanation/~/more-conditions::maybe-print-cause/~@:>"
 	       (coerce data 'list) shortened?
 	       condition
-	       (cause condition)))))
+	       condition))))
   (:documentation
    "This error is signaled when decoding one or more notifications
 into an `event' instance fails."))
@@ -124,7 +124,7 @@ into an `event' instance fails."))
 octet-vector~/rsb::maybe-print-explanation/~/more-conditions::maybe-print-cause/~@:>"
 	     (encoding-error-event      condition)
 	     condition
-	     (cause condition))))
+	     condition)))
   (:documentation
    "This error is signaled when encoding an `event' instance into one
 or more notifications fails."))
