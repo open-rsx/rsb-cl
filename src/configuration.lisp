@@ -179,24 +179,24 @@ with items of the form (WIRE-TYPE . CONVERTER).
 If supplied, CONFIG specifies the configuration that should be used to
 determine the set of default converters. if CONFIG is not supplied,
 the value of `*default-configuration*' is used."
-  '((octet-vector . (:fundamental-void
-		     :fundamental-utf-8-string
-		     :fundamental-bytes
-		     ;; TODO(jmoringe): hack
-		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-double
-		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-float
-		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-uint64
-		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-int64
-		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-uint32
-		     #+asdf-protocol-buffer-descriptors
-		     :fundamental-int32
-		     #+asdf-protocol-buffer-descriptors
-		     :protocol-buffer))))
+  '((nibbles:octet-vector . (:fundamental-void
+			     :fundamental-utf-8-string
+			     :fundamental-bytes
+			     ;; TODO(jmoringe): hack
+			     #+asdf-protocol-buffer-descriptors
+			     :fundamental-double
+			     #+asdf-protocol-buffer-descriptors
+			     :fundamental-float
+			     #+asdf-protocol-buffer-descriptors
+			     :fundamental-uint64
+			     #+asdf-protocol-buffer-descriptors
+			     :fundamental-int64
+			     #+asdf-protocol-buffer-descriptors
+			     :fundamental-uint32
+			     #+asdf-protocol-buffer-descriptors
+			     :fundamental-int32
+			     #+asdf-protocol-buffer-descriptors
+			     :protocol-buffer))))
 
 (defun default-converter (wire-type
 			  &key
