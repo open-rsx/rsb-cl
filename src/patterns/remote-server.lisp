@@ -146,6 +146,8 @@ data."
 			 &allow-other-keys)
   "Establish restarts and take care retrieving future results if
 BLOCK? is non-nil."
+  (check-type timeout (or null timeout))
+
   (iter (restart-case
 	    (return-from call
 	      (if block?

@@ -113,6 +113,8 @@ or for performance reasons."))
 				  &key
 				  timeout
 				  (error? t))
+  (check-type timeout (or null timeout))
+
   (cond
     ;; If TIMEOUT has not been supplied, avoid the overhead and just
     ;; call the next method.

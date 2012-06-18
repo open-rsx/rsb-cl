@@ -63,6 +63,14 @@ or a `scope' instance."
 event."
   '(cons uuid:uuid sequence-number))
 
+(deftype timestamp-designator ()
+  "Name of a timestamp."
+  'keyword)
+
+(deftype meta-data-designator ()
+  "Name of a meta-data item."
+  'keyword)
+
 
 ;;; Event-processing-related types
 ;;
@@ -70,6 +78,10 @@ event."
 (deftype error-policy ()
   "Objects of this type designate behaviors in case of errors."
   '(or null function))
+
+(deftype timeout ()
+  "Amount of seconds to wait before a timeout should occur."
+  'non-negative-real)
 
 (deftype implementation-feedback ()
   '(member :implemented :not-implemented))

@@ -35,10 +35,13 @@
   ;; Types
   (:export
    :scope-designator
-   
+
    :sequence-number
+   :timestamp-designator
+   :meta-data-designator
 
    :error-policy
+   :timeout
 
    :implementation-feedback
    :direction
