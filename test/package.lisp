@@ -146,6 +146,40 @@ KIND."
 		  (with-output-to-string (stream)
 		    (format stream "~A" participant))))))))))
 
+(defmacro define-error-hook-test-case ((class
+					&key
+					(participant? t))
+				       &body body)
+  "Generate a test case around BODY for the error-hook mechanism of
+CLASS.
+
+PARTICIPANT? controls whether a participant of class CLASS is created
+and bound to a variable named like the value of CLASS."
+  (let+ ((suite-name (format-symbol *package* "~A-ROOT" class))
+	 (with-macro (format-symbol :rsb "WITH-~A" class))
+	 (scope      (format nil "/~(~A~)/errorhook" class))
+	 ((&flet maybe-wrap (body)
+	    (if participant?
+		`((,with-macro (,class ,scope) ,@body))
+		body))))
+    `(addtest (,suite-name
+	      :documentation
+	      ,(format nil "Test the error-hook mechanism for the `~(~A~)' class."
+		       class))
+       error-hook
+
+       (let ((expected-errors)
+	     (seen-errors))
+	 (with-informer (informer ,scope t)
+	   ,@(maybe-wrap
+	      `(;; Install collecting error handler.
+		(push #'(lambda (condition) (push condition seen-errors) (continue))
+		      (hooks:hook-handlers (participant-error-hook ,class)))
+		,@body))
+	   ;; Make sure the expected errors match the actually seen
+	   ;; errors.
+	   (ensure-same seen-errors expected-errors :test #'equal))))))
+
 (defmacro define-restart-method-test-case ((class method (instance-var &rest args)
 				            &key
 					    (restarts '(log continue)))

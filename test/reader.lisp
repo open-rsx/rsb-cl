@@ -38,6 +38,9 @@
     (:transports ((:inprocess &inherit)))
     "/reader/construction")
   '("/reader/construction"
+    (:transports ((t) (:inprocess &inherit)))
+    "/reader/construction")
+  '("/reader/construction"
     (:converters ((t . :foo)))
     "/reader/construction")
   '("inprocess:/reader/construction"
@@ -78,3 +81,18 @@ mode.")
 		       (return received)))))
 	  (check-event received
 		       "/reader/receive/non-blocking" data))))))
+
+(define-error-hook-test-case (reader)
+  ;; Force an error during dispatch by injecting a signaling
+  ;; pseudo-filter.
+  (push (lambda (event)
+	  (let ((error (make-condition 'simple-error
+				       :format-control   "I hate ~A"
+				       :format-arguments (list event))))
+	    (push error expected-errors)
+	    (error error)))
+	(receiver-filters reader))
+
+  ;; Try to send and receive an event to trigger the error.
+  (send informer "foo")
+  (print (receive reader :block? nil)))

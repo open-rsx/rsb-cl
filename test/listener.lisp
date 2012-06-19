@@ -93,3 +93,17 @@ instance.")
       (push #'(lambda (event) (declare (ignore event)))
 	    (rsb.ep:handlers listener))
       (send-some informer))))
+
+(define-error-hook-test-case (listener)
+  ;; Force an error during dispatch by injecting a signaling
+  ;; pseudo-filter.
+  (push (lambda (event)
+	  (let ((error (make-condition 'simple-error
+				       :format-control   "I hate ~A"
+				       :format-arguments (list event))))
+	    (push error expected-errors)
+	    (error error)))
+	(receiver-filters listener))
+
+  ;; Try to send and receive an event to trigger the error.
+  (send informer "foo"))

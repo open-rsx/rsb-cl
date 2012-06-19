@@ -28,7 +28,9 @@
   (find-class 'in-push-connector))
 
 (defclass in-push-connector (connector
-			     broadcast-processor)
+			     broadcast-processor
+			     error-handling-dispatcher-mixin
+			     error-handling-push-receiver-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)

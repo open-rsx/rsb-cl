@@ -40,7 +40,9 @@
   (find-class 'in-pull-connector))
 
 (defclass in-pull-connector (connector
-			     rsb.ep:broadcast-processor)
+			     broadcast-processor
+			     error-handling-dispatcher-mixin
+			     error-handling-pull-receiver-mixin)
   ((queue :type     #+sbcl sb-concurrency:mailbox
 	            #-sbcl list
 	  :reader   connector-queue
@@ -100,33 +102,36 @@ process."))
       (appendf (%connector-queue connector) (list event))
       (bt:condition-notify condition))))
 
-(defmethod emit ((connector in-pull-connector) (block? (eql nil)))
+(defmethod receive-message ((connector in-pull-connector)
+			    (block?    (eql nil)))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, return
 nil."
-  (when-let ((event #+sbcl (sb-concurrency:receive-message-no-hang
-			    (connector-queue connector))
-		    #-sbcl
-		    (bt:with-lock-held ((%connector-queue-lock connector))
-		      (when (connector-queue connector)
-			(pop (%connector-queue connector))))))
-    (dispatch connector event)
-    t))
+  #+sbcl (sb-concurrency:receive-message-no-hang
+	  (connector-queue connector))
+  #-sbcl
+  (bt:with-lock-held ((%connector-queue-lock connector))
+    (when (connector-queue connector)
+      (pop (%connector-queue connector)))))
 
-(defmethod emit ((connector in-pull-connector) (block? t))
+(defmethod receive-message ((connector in-pull-connector)
+			    (block?    t))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, block."
-  (dispatch connector
-	    #+sbcl (sb-concurrency:receive-message (connector-queue connector))
-	    #-sbcl
-	    (let+ (((&accessors-r/o
-		     (lock      %connector-queue-lock)
-		     (condition %connector-queue-condition)) connector))
-	      (bt:with-lock-held (lock)
-		(iter (until (connector-queue connector))
-		      (bt:condition-wait condition lock))
-		(pop (%connector-queue connector)))))
-  t)
+  #+sbcl (sb-concurrency:receive-message (connector-queue connector))
+  #-sbcl
+  (let+ (((&accessors-r/o
+	   (lock      %connector-queue-lock)
+	   (condition %connector-queue-condition)) connector))
+    (bt:with-lock-held (lock)
+      (iter (until (connector-queue connector))
+	    (bt:condition-wait condition lock))
+      (pop (%connector-queue connector)))))
+
+(defmethod emit ((connector in-pull-connector) (block? t))
+  (when-let ((event (receive-message connector block?)))
+    (dispatch connector event)
+    t))
 
 (defmethod print-object ((object in-pull-connector) stream)
   (print-unreadable-object (object stream :identity t)

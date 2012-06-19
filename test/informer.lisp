@@ -131,3 +131,9 @@ method.")
 	  :unchecked? t)
     (send informer (make-event "/informer/send/unchecked" 1)
 	  :unchecked? t)))
+
+(define-error-hook-test-case (informer :participant? nil)
+  ;; We cannot currently cause the informer case to fail when using
+  ;; inprocess transport. So we just add the error handler without
+  ;; exercising it.
+  (send informer "foo"))
