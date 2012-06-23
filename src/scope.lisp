@@ -42,7 +42,7 @@
   (:documentation
    "Parse string and return a `scope' instance."))
 
-(declaim (ftype (function (scope) scope) intern-scope))
+(declaim (ftype (function (scope) (values scope &optional)) intern-scope))
 
 
 ;;;
