@@ -1,4 +1,3 @@
-
 ;;; bus-server.lisp --- A class that accepts connections from bus clients.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
@@ -118,11 +117,11 @@ closed."))
 				server-socket
 				:element-type '(unsigned-byte 8))))
 	    ;; Since we create and add the new connection with the bus
-	    ;; lock held, all events published on BUS the handshake of
-	    ;; the new connection completes are guaranteed to be
-	    ;; delivered to the new connection. Also note that the
-	    ;; server role of the handshake, sending 4 bytes, usually
-	    ;; does not involve blocking.
+	    ;; lock held, all events published on BUS after the
+	    ;; handshake of the new connection completes are
+	    ;; guaranteed to be delivered to the new connection. Also
+	    ;; note that the server role of the handshake, sending 4
+	    ;; bytes, usually does not involve blocking.
 	    (with-locked-bus (bus)
 	      (push (apply #'make-instance 'bus-connection
 			   :socket    client-socket
