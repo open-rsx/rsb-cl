@@ -100,14 +100,11 @@ converter and data, the converter cannot handle the data."
 next `wire->domain' method."
   (iter
     (restart-case
-	(handler-bind
-	    (((and error (not wire->domain-conversion-error))
-	      #'(lambda (condition)
-		  (error 'wire->domain-conversion-error
-			 :wire-schema wire-schema
-			 :encoded     wire-data
-			 :domain-type :undetermined
-			 :cause       condition))))
+	(with-condition-translation
+	    (((error wire->domain-conversion-error)
+	      :wire-schema wire-schema
+	      :encoded     wire-data
+	      :domain-type :undetermined))
 	  (return (call-next-method)))
       (retry ()
 	:report (lambda (stream)
@@ -131,14 +128,11 @@ to use instead of converting ~S (in ~S schema) using converter ~
 next `domain->wire' method."
   (iter
     (restart-case
-	(handler-bind
-	    (((and error (not domain->wire-conversion-error))
-	      #'(lambda (condition)
-		  (error 'domain->wire-conversion-error
-			 :wire-schema   :undetermined
-			 :domain-object domain-object
-			 :wire-type     :undetermined
-			 :cause         condition))))
+	(with-condition-translation
+	    (((error domain->wire-conversion-error)
+	      :wire-schema   :undetermined
+	      :domain-object domain-object
+	      :wire-type     :undetermined))
 	  (return (call-next-method)))
       (retry ()
 	:report (lambda (stream)
