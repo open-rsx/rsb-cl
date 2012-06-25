@@ -104,7 +104,9 @@ but shares these among participants in the process."))
        (write-ub32/le 0 stream)
        (force-output stream))
       (:receive
-       (read-ub32/le stream)))))
+       (unless (zerop (read-ub32/le stream))
+	 (error "~@<Protocol error during handshake; expected four 0 ~
+bytes.~@:>"))))))
 
 (defmethod (setf processor-error-policy) ((new-value  function)
 					  (connection bus-connection))
