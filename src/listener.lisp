@@ -59,14 +59,12 @@ a mechanism for dispatching matching events to these handlers."))
 			  &key
 			  (transports (transport-options))
 			  (converters (default-converters)))
-  (handler-bind
-      ;; Translate different kinds of errors into
-      ;; `listener-creation-failed' errors.
-      ((error #'(lambda (condition)
-		  (error 'listener-creation-failed
-			 :scope      scope
-			 :transports transports
-			 :cause      condition))))
+  ;; Translate different kinds of errors into
+  ;; `listener-creation-failed' errors.
+  (with-condition-translation
+      (((error listener-creation-failed)
+	:scope      scope
+	:transports transports))
     (make-participant 'listener scope :in-push transports converters)))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))

@@ -45,14 +45,12 @@ receiving events."))
 			&key
 			(transports (transport-options))
 			(converters (default-converters)))
-  (handler-bind
-      ;; Translate different kinds of errors into
-      ;; `reader-creation-failed' errors.
-      ((error #'(lambda (condition)
-		  (error 'reader-creation-failed
-			 :scope      scope
-			 :transports transports
-			 :cause      condition))))
+  ;; Translate different kinds of errors into `reader-creation-failed'
+  ;; errors.
+  (with-condition-translation
+      (((error reader-creation-failed)
+	:scope      scope
+	:transports transports))
     (make-participant 'reader scope :in-pull transports converters)))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))

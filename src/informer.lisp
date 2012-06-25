@@ -121,15 +121,13 @@ channel."))
 			  &key
 			  (transports (transport-options))
 			  (converters (default-converters)))
-  (handler-bind
-      ;; Translate different kinds of errors into
-      ;; `informer-creation-failed' errors.
-      ((error #'(lambda (condition)
-		  (error 'informer-creation-failed
-			 :scope      scope
-			 :transports transports
-			 :type       type
-			 :cause      condition))))
+  ;; Translate different kinds of errors into
+  ;; `informer-creation-failed' errors.
+  (with-condition-translation
+      (((error informer-creation-failed)
+	:scope      scope
+	:transports transports
+	:type       type))
     (let+ (((&values informer configurator)
 	    (make-participant 'informer scope :out transports converters
 			      :type type)))
