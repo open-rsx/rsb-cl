@@ -77,8 +77,10 @@ groups in which they are members."))
 				      connection
 				      name)
   (when (and name connection)
-    (error "~@<The initargs ~{~S~^, ~} are mutually exclusive.~@:>"
-	   '(:name :connection))))
+    (error 'incompatible-initargs
+	   :class      'connection
+	   :parameters '(:name :connection)
+	   :values     (list name connection))))
 
 (defmethod shared-initialize :after ((instance   connection)
                                      (slot-names t)
