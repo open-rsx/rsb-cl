@@ -39,7 +39,8 @@ event."
 		(receive-message connector t))
 	       ;; Try to convert NOTIFICATION into one or zero events
 	       ;; (in the latter case, EVENT is nil).
-	       (event (message->event connector notification wire-schema)))
+	       (event (when notification
+			(message->event connector notification wire-schema))))
 	  ;; Due to fragmentation of large events into multiple
 	  ;; notifications and error handling policies, we may not
 	  ;; obtain an `event' instance from the notification.
