@@ -43,7 +43,7 @@
        ,@(maybe-with-lock
 	  'bus-connections-lock (or (not args) connections?)
 	  (maybe-with-lock 'bus-connectors-lock (or (not args) connectors?)
-			   body)))))
+	   body)))))
 
 (defclass bus (broadcast-processor)
   ((connections      :type     list
@@ -214,7 +214,7 @@ connected to the bus."))
   (let+ (((received-via . notification) data))
     ;; Dispatched to all connections except the one from which we
     ;; received the notification.
-    (with-locked-bus (bus :connectors? t)
+    (with-locked-bus (bus :connections? t)
       (iter (for connection in (bus-connections bus))
 	    (unless (eq received-via connection)
 	      ;; We can ignore errors here since we installed an error
