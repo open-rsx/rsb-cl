@@ -66,8 +66,11 @@ of `connector-class'.")
   ;; slot of the same name. Since there is no such slot, an error has
   ;; to be signaled.
   (ensure-condition 'error
-    (eval '(defclass bar ()
-	    ()
-	    (:metaclass connector-class)
-	    (:options
-	     (:no-such-option &slot))))))
+    (eval '(progn
+	    (defclass bar ()
+	      ()
+	      (:metaclass connector-class)
+	      (:options
+	       (:no-such-option &slot)))
+	    (closer-mop:finalize-inheritance
+	     (find-class 'bar))))))
