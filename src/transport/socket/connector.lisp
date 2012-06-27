@@ -24,6 +24,12 @@
 
 (cl:in-package :rsb.transport.socket)
 
+(defvar *default-host* "localhost"
+  "Default host used by the socket-based transport.")
+
+(defvar *default-port* 55555
+  "Default port used by the socket-based transport.")
+
 (defclass connector (rsb.transport:connector
 		     conversion-mixin)
   ((bus      :accessor connector-bus
@@ -34,18 +40,20 @@ bus to which the connector provides access.")
    (host     :initarg  :host
 	     :type     string
 	     :reader   connector-host
+	     :initform *default-host*
 	     :documentation
 	     "The name of the host on which the server is listener in case of clients and the bind address in case of the server.")
    (port     :initarg  :port
 	     :type     (unsigned-byte 16)
 	     :reader   connector-port
+	     :initform *default-port*
 	     :documentation
 	     "The port on which the server is listening in case of clients and the port on which connections should be accepted in case of the server.")
    (server?  :initarg  :server
 	     :initarg  :server?
 	     :type     t ;;; TODO(jmoringe): was boolean; we can change this back when we get proper configuration
 	     :reader   connector-server?
-	     :initform nil
+	     :initform :auto
 	     :documentation
 	     "Controls whether the connector takes the server or client role for the bus.")
    (nodelay? :initarg  :nodelay
@@ -83,7 +91,8 @@ employ socked-based bus access."))
     ;;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
     (setf bus (%get-bus host port
 			(etypecase server?
-			  ((member t nil :auto) )
+			  ((member t nil :auto)
+			   server?)
 			  (string
 			   (cond
 			     ((string= server? "0")    nil)
