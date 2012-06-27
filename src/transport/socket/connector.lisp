@@ -44,14 +44,14 @@ bus to which the connector provides access.")
 	     :documentation
 	     "The name of the host on which the server is listener in case of clients and the bind address in case of the server.")
    (port     :initarg  :port
-	     :type     (unsigned-byte 16)
+	     :type     t  ;; TODO (unsigned-byte 16)
 	     :reader   connector-port
 	     :initform *default-port*
 	     :documentation
 	     "The port on which the server is listening in case of clients and the port on which connections should be accepted in case of the server.")
    (server?  :initarg  :server
 	     :initarg  :server?
-	     :type     t ;;; TODO(jmoringe): was boolean; we can change this back when we get proper configuration
+	     :type     t ;; TODO (or boolean (eql :auto))
 	     :reader   connector-server?
 	     :initform :auto
 	     :documentation
@@ -78,6 +78,30 @@ bus to which the connector provides access.")
    "This class serves as a superclass for connector classes that
 employ socked-based bus access."))
 
+;;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
+(defmethod shared-initialize :after ((instance   connector)
+                                     (slot-names t)
+                                     &key
+				     port
+				     server?
+				     server)
+  (setf (slot-value instance 'port)
+	(etypecase port
+	  (string
+	   (read-from-string port))
+	  (non-negative-integer
+	   port))
+	(slot-value instance 'server?)
+	(let ((value (or server? server)))
+	 (etypecase value
+	   ((member t nil :auto)
+	    value)
+	   (string
+	    (cond
+	      ((string= value "0")    nil)
+	      ((string= value "1")    t)
+	      ((string= value "auto") :auto)))))))
+
 (defmethod notify ((connector connector)
 		   (scope     scope)
 		   (action    (eql :attached)))
@@ -88,17 +112,7 @@ employ socked-based bus access."))
     ;; Depending on whether connecting to the socket-based bus as a
     ;; client or server has been requested, request a suitable bus
     ;; access provider.
-    ;;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
-    (setf bus (%get-bus host port
-			(etypecase server?
-			  ((member t nil :auto)
-			   server?)
-			  (string
-			   (cond
-			     ((string= server? "0")    nil)
-			     ((string= server? "1")    t)
-			     ((string= server? "auto") :auto))))
-			connector))
+    (setf bus (%get-bus host port server? connector))
 
     ;; Notify the bus access provider of the added connector.
     ;; ensure-bus-* already attached CONNECTOR.
