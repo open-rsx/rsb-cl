@@ -211,7 +211,7 @@ be packed using protocol buffer serialization.~@:>"
     (unwind-protect
 	 (stop-receiver connection)
       (log1 :info connection "Closing socket")
-      (usocket:socket-close socket))))
+      (ignore-errors (usocket:socket-close socket)))))
 
 
 ;;;
