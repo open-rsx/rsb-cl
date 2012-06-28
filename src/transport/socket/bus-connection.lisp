@@ -179,7 +179,7 @@ not be unpacked as a protocol buffer of kind ~S.~:@>"
 			 :format-control   "~@<The event ~S could not ~
 be packed using protocol buffer serialization.~@:>"
 			 :format-arguments (list event)
-			 :case             condition))))
+			 :cause            condition))))
     (let* ((length (pb:packed-size event))
 	   (buffer (%ensure-send-buffer connection length)))
       (declare (type fixnum length))
