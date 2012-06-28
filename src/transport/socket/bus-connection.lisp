@@ -145,16 +145,14 @@ after calling NEW-VALUE."
 
   ;; Try to unpack MESSAGE into a `notification' instance. Signal
   ;; `decoding-error' if that fails.
-  (handler-bind
-      ((error #'(lambda (condition)
-		  (let ((encoded (subseq (car message) 0 (cdr message))))
-		    (error 'decoding-error
-			   :encoded          encoded
-			   :format-control "~@<The wire-data ~S could ~
-not be unpacked as a protocol buffer of kind ~S.~:@>"
-			   :format-arguments (list encoded 'notification)
-			   :cause            condition)))))
-    (pb:unpack (car message) 'notification 0 (cdr message))))
+  (let+ (((data . offset) message))
+    (with-condition-translation
+	(((error decoding-error)
+	  :encoded          (subseq data 0 offset)
+	  :format-control   "~@<The wire-data ~S could not be unpacked ~
+as a protocol buffer of kind ~S.~:@>"
+	  :format-arguments (list (subseq data 0 offset) 'notification)))
+      (pb:unpack data 'notification 0 offset))))
 
 
 ;;; Sending
@@ -172,14 +170,12 @@ not be unpacked as a protocol buffer of kind ~S.~:@>"
 (defmethod event->notification ((connection bus-connection)
 				(event      notification))
   ;; Pack EVENT into an octet-vector.
-  (handler-bind
-      ((error #'(lambda (condition)
-		  (error 'encoding-error
-			 :event            event
-			 :format-control   "~@<The event ~S could not ~
+  (with-condition-translation
+      (((error encoding-error)
+	:event            event
+	:format-control   "~@<The event ~S could not ~
 be packed using protocol buffer serialization.~@:>"
-			 :format-arguments (list event)
-			 :cause            condition))))
+	:format-arguments (list event)))
     (let* ((length (pb:packed-size event))
 	   (buffer (%ensure-send-buffer connection length)))
       (declare (type fixnum length))
