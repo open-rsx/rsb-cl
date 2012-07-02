@@ -1,4 +1,4 @@
-;;; in-connector.lisp ---
+;;; in-connector.lisp --- In-direction connector for socket transport.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -74,15 +74,14 @@ queue received events for delivery."))
     ;;       In this case, an error is signaled
     ;; 2. The notification does not form a complete event
     ;;    In this case, nil is returned.
-    (handler-bind
-	((error #'(lambda (condition)
-		    (error 'decoding-error
-			   :encoded          (list notification) ;;; TODO(jmoringe): hack
-			   :format-control   "~@<After unpacking, the ~
+    (with-condition-translation
+	(((error decoding-error)
+	  :encoded          (list notification) ;;; TODO(jmoringe): hack
+	  :format-control   "~@<After unpacking, the ~
 notification~_~A~_could not be converted into an event.~:@>"
-			   :format-arguments `(,(with-output-to-string (stream)
-								       (describe notification stream)))
-			   :cause            condition))))
-      (notification->event converter notification
-			   :expose-wire-schema?  expose-wire-schema?
-			   :expose-payload-size? expose-payload-size?))))
+	  :format-arguments (list (with-output-to-string (stream)
+				    (describe notification stream)))))
+      (notification->event
+       converter notification
+       :expose-wire-schema?  expose-wire-schema?
+       :expose-payload-size? expose-payload-size?))))

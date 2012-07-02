@@ -39,6 +39,8 @@
 endpoint designated by HOST and PORT and attach CONNECTOR to it.
 Attaching CONNECTOR marks the `bus-client' instance as being in use
 and protects it from being destroyed in a race condition situation."
+  (log1 :trace "Trying to obtain bus client ~S:~D for ~A"
+	host port connector)
   (let ((options (make-connection-options connector))
 	(key     (cons host port)))
     (bt:with-lock-held (*bus-clients-lock*)

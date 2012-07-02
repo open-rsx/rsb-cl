@@ -137,8 +137,10 @@ connected to the bus."))
 	;; Remove ourselves as handlers from the removed connections
 	;; and close these connections.
 	(iter (for connection in removed)
-	      (log1 :info bus "Closing connection ~A" connection)
+	      ;; Prevent the error handling from being executed
+	      ;; concurrently/recursively.
 	      (setf (processor-error-policy connection) nil)
+	      (log1 :info bus "Closing connection ~A" connection)
 	      (handler-case (close connection)
 		(error (condition)
 		  (warn "~@<Error closing connection ~A: ~A~:@>"

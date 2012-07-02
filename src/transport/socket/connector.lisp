@@ -93,14 +93,14 @@ employ socked-based bus access."))
 	   port))
 	(slot-value instance 'server?)
 	(let ((value (or server? server)))
-	 (etypecase value
-	   ((member t nil :auto)
-	    value)
-	   (string
-	    (cond
-	      ((string= value "0")    nil)
-	      ((string= value "1")    t)
-	      ((string= value "auto") :auto)))))))
+	  (etypecase value
+	    ((member t nil :auto)
+	     value)
+	    (string
+	     (cond
+	       ((string= value "0")    nil)
+	       ((string= value "1")    t)
+	       ((string= value "auto") :auto)))))))
 
 (defmethod notify ((connector connector)
 		   (scope     scope)
@@ -138,6 +138,7 @@ employ socked-based bus access."))
 CONNECTOR to it. If SERVER? is :AUTO, first try to create a server
 provider and try to fall back to a client provider if that fails."
   (ecase server?
+    ;; Act as server unconditionally.
     ((t)
      (restart-case
 	 (ensure-bus-server host port connector)
@@ -147,6 +148,8 @@ provider and try to fall back to a client provider if that fails."
 ~A:~D as client.~@:>"
 			   host port))
 	 (%get-bus host port nil connector))))
+
+    ;; Act as client unconditionally.
     ((nil)
      (restart-case
 	 (ensure-bus-client host port connector)
@@ -156,6 +159,7 @@ provider and try to fall back to a client provider if that fails."
 bus at ~A:~D.~@:>"
 			   host port))
 	 (%get-bus host port t connector))))
+
     ;; Try to create a server bus provider and fall back to connecting
     ;; via a client bus provider if the server bus provider could not
     ;; be created.
@@ -165,12 +169,13 @@ bus at ~A:~D.~@:>"
        ((or usocket:address-in-use-error
 	    usocket:address-not-available-error
 	    #+sbcl sb-bsd-sockets:socket-error) (server-condition)
-	 (handler-bind
-	     ((error (lambda (client-condition)
-		       (error 'socket-bus-auto-connection-error
-			      :format-control "Failed to get ~
-socket-based bus as server:~&~@<> ~@;~A~@>~&Failed to get socket-based ~
-bus as client:~&~@<> ~@;~A~@>"
-			      :format-arguments (list server-condition
-						      client-condition)))))
+	 (with-condition-translation
+	     (((error socket-bus-auto-connection-error
+		      :var           client-condition
+		      :cause-initarg nil)
+	       :format-control   "Failed to get socket-based bus as ~
+server:~&~@<> ~@;~A~@>~&Failed to get socket-based bus as ~
+client:~&~@<> ~@;~A~@>"
+	       :format-arguments (list server-condition
+				       client-condition)))
 	   (ensure-bus-client host port connector)))))))
