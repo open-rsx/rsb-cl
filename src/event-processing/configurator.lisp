@@ -110,15 +110,10 @@ participant instance as its \"client\"."))
   (log1 :trace configurator "Detaching ~D connector~:P"
 	(length (configurator-connectors configurator)))
   (iter (for connector in (configurator-connectors configurator))
-	(restart-case
-	    ;; Give each connector ten seconds to detach. If one takes
-	    ;; longer, skip it.
-	    (bt:with-timeout (10)
-	      (notify configurator connector :connector-removed))
-	  (continue ()
-	    :report (lambda (stream)
-		      (format stream "~@<Ignore the error and ~
-continue with the remaining connectors.~@:>"))))))
+	;; Give each connector ten seconds to detach. If one takes
+	;; longer, skip it.
+	(with-restart-and-timeout (10)
+	  (notify configurator connector :connector-removed))))
 
 
 ;;; Connectors

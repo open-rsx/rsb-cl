@@ -204,12 +204,7 @@ COMPONENTS."
   "Remove METHOD from SERVER with a CONTINUE restart in place to allow
 callers to ignore errors. Signal a `bordeaux-threads:timeout'
 condition, if the operation does not complete within ten seconds."
-  (restart-case
-      ;; Give METHOD TIMEOUT seconds to detach. If one takes longer,
-      ;; allow skipping it.
-      (bt:with-timeout (10)
-	(setf (server-method server (method-name method)) nil))
-    (continue ()
-      :report (lambda (stream)
-		(format stream "~@<Ignore the error and continue with ~
-the remaining methods.~@:>")))))
+  ;; Give METHOD ten seconds to detach. If one takes longer, allow
+  ;; skipping it.
+  (with-restart-and-timeout (10)
+    (setf (server-method server (method-name method)) nil)))

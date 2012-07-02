@@ -96,7 +96,7 @@
 		:cl-hooks
 		:cl-dynamic-classes
 		:log5
-		
+
 		:nibbles
 		:puri
 		:uuid
@@ -120,7 +120,9 @@
 
 			      (:file       "util"
 			       :depends-on ("package" "types" "scope"
-					    "protocol"))))
+					    "protocol"))
+			      (:file       "error-handling"
+			       :depends-on ("package"))))
 
 		(:module     "filter"
 		 :pathname   "src/filter"

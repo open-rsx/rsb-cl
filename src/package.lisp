@@ -101,6 +101,11 @@
   (:export
    :error-hook)
 
+  ;; Error handling
+  (:export
+   :invoke-with-restart-and-timeout
+   :with-restart-and-timeout)
+
   ;; Meta data protocol
   (:export
    :meta-data
