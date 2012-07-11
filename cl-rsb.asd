@@ -1,6 +1,6 @@
 ;;; cl-rsb.asd --- Common Lisp implementation of RSB.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -329,10 +329,12 @@
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "Unit Tests for the cl-rsb system."
-  :depends-on  (:lift
+  :depends-on  ((:version :lift   "1.7.1")
+
 		:cl-protobuf
 		:cl-spread
-		:cl-rsb)
+
+		(:version :cl-rsb #.(version/string)))
   :properties  ((:spread-port  . #.(or #+sbcl (let ((value (sb-posix:getenv "SPREAD_PORT")))
 						(when value (read-from-string value)))
 				       5678)))
