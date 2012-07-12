@@ -90,10 +90,12 @@ FILE(GLOB ASD_FILES
      "*.asd")
 INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/src"
         DESTINATION    "share/common-lisp/source/${SYSTEM_NAME}"
-        FILES_MATCHING PATTERN "*.lisp")
+        FILES_MATCHING PATTERN "*.lisp"
+        PATTERN        ".svn" EXCLUDE)
 INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/test"
         DESTINATION    "share/common-lisp/source/${SYSTEM_NAME}"
-        FILES_MATCHING PATTERN "*.lisp")
+        FILES_MATCHING PATTERN "*.lisp"
+        PATTERN        ".svn" EXCLUDE)
 INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/data"
         DESTINATION    "share/common-lisp/source/${SYSTEM_NAME}"
         FILES_MATCHING
