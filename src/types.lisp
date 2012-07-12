@@ -53,7 +53,7 @@
 
 (deftype sequence-number ()
   "Event sequence numbers are 32-bit unsigned integers."
-  '(and fixnum (unsigned-byte 32)))
+  '(unsigned-byte 32))
 
 (deftype event-id ()
   "A pair of an origin id and sequence that uniquely identifies and
