@@ -243,12 +243,10 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
-			      (:file       "restart-message-receiver-mixin"
+			      (:file       "restart-mixins"
 			       :depends-on ("package" "protocol"))
 			      (:file       "threaded-message-receiver-mixin"
 			       :depends-on ("package" "threaded-receiver-mixin"))
-			      (:file       "restart-notification-sender-mixin"
-			       :depends-on ("package" "protocol"))
 			      (:file       "sometimes-interruptible-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "expose-transport-metrics-mixin"
@@ -427,9 +425,7 @@
 			       :depends-on ("package"))
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
-			      (:file       "restart-message-receiver-mixin"
-			       :depends-on ("package"))
-			      (:file       "restart-notification-sender-mixin"
+			      (:file       "restart-mixins"
 			       :depends-on ("package"))))
 
 		(:module     "patterns"
