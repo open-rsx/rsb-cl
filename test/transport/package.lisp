@@ -74,12 +74,12 @@
        ;; Check wire-type
        (ensure (typep wire-type 'wire-type))
        (ensure-same wire-type expected-wire-type
-		    :test #'equal)
+		    :test #'type=)
        ;; Check schemas.
        (iter (for schema in schemas)
 	     (ensure (typep schema 'keyword)))
        (ensure-same schemas expected-schemas
-		    :test #'equal)
+		    :test #'set-equal)
        ;; Check options.
        (iter (for option in options)
 	     (ensure (typep option 'list))))))
