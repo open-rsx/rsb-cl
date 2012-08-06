@@ -180,6 +180,22 @@ and bound to a variable named like the value of CLASS."
 	   ;; errors.
 	   (ensure-same seen-errors expected-errors :test #'equal))))))
 
+(define-condition restart-test-error (error)
+  ((method :initarg  :method
+	   :reader restart-test-error-method
+	   :documentation
+	   "Stores the method from which the condition was
+signaled."))
+  (:default-initargs
+   :method (missing-required-initarg 'restart-test-error :method))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Simulated error in ~S method.~@:>"
+	     (restart-test-error-method condition))))
+  (:documentation
+   "This error is signaled to test establishing of restarts around
+certain code."))
+
 (defmacro define-restart-method-test-case ((class method (instance-var &rest args)
 				            &key
 					    (restarts '(log continue)))
@@ -190,10 +206,13 @@ and bound to a variable named like the value of CLASS."
       `(progn
 	 ;; Define a method that signals an error unless a variable is
 	 ;; set.
-	 (defvar ,var-name t)
+	 (declaim (special ,var-name))
+	 (defvar ,var-name nil)
 
 	 (defmethod ,method ((,instance-var ,class) ,@args)
-	   (when ,var-name (error "~@<~S failed.~@:>" ',method)))
+	   (when ,var-name (error 'restart-test-error :method ',method))
+	   (when (next-method-p)
+	     (call-next-method)))
 
 	 ;; Define the test case that invokes the method and fails if
 	 ;; the error is not handled by restarts.
@@ -204,13 +223,21 @@ and bound to a variable named like the value of CLASS."
 			    method class))
 	   ,case-name
 
+	   (let ((,var-name t))
+	     (ensure-condition 'restart-test-error
+	       ,@body))
+
 	   (let+ (((&flet do-one (restart)
 		     (setf ,var-name t)
 		     (handler-bind
-			 ((error #'(lambda (condition)
-				     (declare (ignore condition))
-				     (setf ,var-name nil)
-				     (invoke-restart (find-restart restart)))))
-		       ,@body))))
+		      ((restart-test-error
+			#'(lambda (condition)
+			    (declare (ignore condition))
+			    (setf ,var-name nil)
+			    (invoke-restart
+			     (or (find-restart restart)
+				 (error "~@<Restart ~S not found.~@:>"
+					restart))))))
+			   ,@body))))
 	     ,@(iter (for restart in restarts)
 		     (collect `(do-one ',restart))))))))
