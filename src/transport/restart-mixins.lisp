@@ -139,3 +139,53 @@ failed decoding and continue with the next event.~@:>"))
 continue with the next event.~@:>"))
       (declare (ignore condition))
       nil)))
+
+
+;;; abort restart methods
+;;
+;; Methods which add the `cl:abort' restart to the respective primary
+;; interface method
+
+(defun invoke-with-detaching-abort-restart (connector thunk)
+  "Call THUNK with an established `cl:abort' restart which detaches
+CONNECTOR."
+  (restart-case
+      (funcall thunk)
+    (abort (&optional condition)
+      :report (lambda (stream)
+		(format stream "~@<Abort and detach connector ~A. No ~
+events will be sent/received via this connector.~@:>"
+			connector))
+      (declare (ignore condition))
+      (log1 :info connector "Aborting and detaching connector")
+      ;; Try to detach CONNECTOR. If that fails, warn and continue.
+      (handler-case
+          ;; TODO(jmoringe, 2012-05-23): this is a hack since we do
+          ;; not detach from a particular scope. should probably more
+          ;; be like
+          ;; (notify connector t :detached)
+	  (notify connector (make-scope "/dummy") :detached)
+	(error (condition)
+	  (warn "~@<Error during detaching of ~A: ~A~@:>"
+		connector condition)))
+      (apply #'abort (when condition (list condition))))))
+
+(defmacro with-detaching-abort-restart ((connector) &body body)
+  "Execute BODY with an established `cl:abort' restart which detaches
+CONNECTOR."
+  `(invoke-with-detaching-abort-restart
+    ,connector (lambda () ,@body)))
+
+(defmethod emit :around ((connector   restart-message-receiver-mixin)
+			 (block?      t))
+  (with-detaching-abort-restart (connector)
+    (call-next-method)))
+
+(defmethod receive-messages :around ((connector restart-message-receiver-mixin))
+  (with-detaching-abort-restart (connector)
+    (call-next-method)))
+
+(defmethod handle :around ((connector    restart-notification-sender-mixin)
+			   (notification t))
+  (with-detaching-abort-restart (connector)
+    (call-next-method)))

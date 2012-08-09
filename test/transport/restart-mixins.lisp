@@ -45,6 +45,18 @@
 
 
 ;;; Tests for `restart-notification-sender-mixin' class
+(define-restart-method-test-case
+    (restart-message-receiver-mixin
+     emit (connector (block? t))
+     :restarts (abort))
+  (emit simple-connector t))
+
+(define-restart-method-test-case
+    (restart-message-receiver-mixin
+     receive-messages (connector)
+     :restarts (abort))
+  (receive-messages simple-connector))
+
 ;;
 
 (deftestsuite restart-notification-sender-mixin-root (transport-root)
@@ -61,3 +73,9 @@
     (restart-notification-sender-mixin
      event->notification (connector (notification t)))
     (event->notification simple-connector :does-not-matter))
+
+(define-restart-method-test-case
+    (restart-notification-sender-mixin
+     handle (connector (notification t))
+     :restarts (abort))
+  (handle simple-connector :does-not-matter))
