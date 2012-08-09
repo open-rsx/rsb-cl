@@ -50,10 +50,11 @@ sending attempt and continue with the next notification.~@:>"))
       (log1 :warn connector "Failed to send a notification~@[: ~_~A~]"
 	    condition)
       nil)
-    (continue ()
+    (continue (&optional condition)
       :report (lambda (stream)
 		(format stream "~@<Ignore the failed sending attempt ~
 and continue with the next notification.~@:>"))
+      (declare (ignore condition))
       nil)))
 
 (defmethod event->notification :around ((connector    restart-notification-sender-mixin)
@@ -70,10 +71,11 @@ failed encoding and continue with the next event.~@:>"))
       (log1 :warn connector "Failed to encode an event~@[: ~_~A~]"
 	    condition)
       nil)
-    (continue ()
+    (continue (&optional condition)
       :report (lambda (stream)
 		(format stream "~@<Ignore the failed encoding and ~
 continue with the next event.~@:>"))
+      (declare (ignore condition))
       nil)))
 
 
@@ -102,10 +104,11 @@ the failed receiving attempt and continue with the next ~
 notification.~@:>"))
 	    (log1 :warn connector "Failed to receive a notification~@[: ~_~A~]" condition)
 	    nil)
-	  (continue ()
+	  (continue (&optional condition)
 	    :report (lambda (stream)
 		      (format stream "~@<Ignore the failed receiving ~
 attempt and continue with the next notification.~@:>"))
+            (declare (ignore condition))
 	    nil))))
 
 (defmethod message->event :around ((connector   restart-message-receiver-mixin)
@@ -122,8 +125,9 @@ but with and without emitting a log message respectively."
 failed decoding and continue with the next event.~@:>"))
       (log1 :warn connector "Failed to decode a notification~@[: ~_~A~]" condition)
       nil)
-    (continue ()
+    (continue (&optional condition)
       :report (lambda (stream)
 		(format stream "~@<Ignore the failed decoding and ~
 continue with the next event.~@:>"))
+      (declare (ignore condition))
       nil)))
