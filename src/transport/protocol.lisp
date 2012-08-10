@@ -227,11 +227,16 @@ of the subtype `no-suitable-converter' is signaled."
       (cond
 	;; The connector does not require a converter.
 	((eq wire-type t)
-	 (apply #'make-instance class args))
+	 (apply #'make-instance class
+		:schema name
+		args))
 	;; The connector requires a converter and we found a suitable
 	;; one.
 	(converter
-	 (apply #'make-instance class :converter converter args))
+	 (apply #'make-instance class
+		:schema    name
+		:converter converter
+		args))
 	;; The connector requires a converter, but we did not find a
 	;; suitable one.
 	(t
