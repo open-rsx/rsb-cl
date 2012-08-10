@@ -44,6 +44,8 @@ log message respectively. "
   (restart-case
       (call-next-method)
     (log (&optional condition)
+      :test   (lambda (condition)
+                (typep condition '(not connection-closed)))
       :report (lambda (stream)
 		(format stream "~@<Log a message and ignore the failed ~
 sending attempt and continue with the next notification.~@:>"))
@@ -51,6 +53,8 @@ sending attempt and continue with the next notification.~@:>"))
 	    condition)
       nil)
     (continue (&optional condition)
+      :test   (lambda (condition)
+                (typep condition '(not connection-closed)))
       :report (lambda (stream)
 		(format stream "~@<Ignore the failed sending attempt ~
 and continue with the next notification.~@:>"))
@@ -98,6 +102,8 @@ log message respectively. "
   (iter (restart-case
 	    (return-from receive-message (call-next-method))
 	  (log (&optional condition)
+            :test   (lambda (condition)
+                      (typep condition '(not connection-closed)))
 	    :report (lambda (stream)
 		      (format stream "~@<Log a message and ignore ~
 the failed receiving attempt and continue with the next ~
@@ -105,6 +111,8 @@ notification.~@:>"))
 	    (log1 :warn connector "Failed to receive a notification~@[: ~_~A~]" condition)
 	    nil)
 	  (continue (&optional condition)
+            :test   (lambda (condition)
+                      (typep condition '(not connection-closed)))
 	    :report (lambda (stream)
 		      (format stream "~@<Ignore the failed receiving ~
 attempt and continue with the next notification.~@:>"))

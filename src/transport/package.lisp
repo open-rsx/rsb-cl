@@ -45,6 +45,11 @@
    :connector-construction-failed-direction
    :connector-construction-failed-args
 
+   :connection-closed
+   :connection-closed-connection
+
+   :connection-unexpectedly-closed
+
    :no-suitable-converter
    :connector-construction-failed-wire-type
    :connector-construction-failed-candidates

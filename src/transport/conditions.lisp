@@ -57,6 +57,45 @@ direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~
    "This error is signaled when the construction of a connector
 instance fails."))
 
+
+;;;
+;;
+
+(define-condition connection-closed (condition)
+  ((connection :initarg  :connection
+	       :reader   connection-closed-connection
+	       :documentation
+	       "Stores the connection which has been closed."))
+  (:default-initargs
+   :connection (missing-required-initarg 'connection-closed :connection))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The connection ~A is closed.~@:>"
+	     (connection-closed-connection condition))))
+  (:documentation
+   "This condition and subclasses are signaled when a connection is
+closed."))
+
+(define-condition connection-unexpectedly-closed (communication-error
+                                                  connection-closed
+                                                  chainable-condition)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The connection ~A has been closed ~
+unexpectedly.~/more-conditions::maybe-print-cause/~@:>"
+	     (connection-closed-connection condition)
+	     condition)))
+  (:documentation
+   "This error is signaled when a connection is closed
+unexpectedly. In contrast to the more generic `connection-closed'
+condition, this is considered an error."))
+
+
+;;; Conversion-related errors
+;;
+;; No suitable convert, encoding and decoding errors.
+
 (define-condition no-suitable-converter (connector-construction-failed)
   ((wire-type  :initarg  :wire-type
 	       :reader   connector-construction-failed-wire-type
@@ -84,10 +123,6 @@ converter list)~;~:*in candidate list ~{~A~^, ~_~}~].~@:>"
    "This error is signaled when the construction of a connector
 instance fails because the list of available converters does not
 contain a suitable one for the requested connector."))
-
-
-;;; Generic encoding and decoding errors
-;;
 
 (define-condition decoding-error (rsb-error
 				  simple-condition
