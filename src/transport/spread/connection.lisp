@@ -105,16 +105,30 @@ groups in which they are members."))
     (remhash group (slot-value connection 'groups))
     (spread:leave (slot-value connection 'connection) group)))
 
-(defmethod receive-message ((connection connection) (block? t))
-  (spread:receive (slot-value connection 'connection) :block? block?))
+(macrolet
+    ((with-spread-condition-translation (&body body)
+       `(handler-bind
+	    ((spread:spread-error
+	       #'(lambda (condition)
+		   (when (member (spread:spread-error-code condition)
+				 '(:net-error-on-session :connection-closed))
+		     (error 'connection-unexpectedly-closed
+			    :connection connection
+			    :cause      condition)))))
+	  ,@body)))
 
-(defmethod send-message ((connection  connection)
-			 (destination list)
-			 (payload     simple-array))
-  (check-type payload octet-vector "an octet-vector")
+  (defmethod receive-message ((connection connection) (block? t))
+    (with-spread-condition-translation
+	(spread:receive (slot-value connection 'connection) :block? block?)))
 
-  (spread:send-bytes
-   (slot-value connection 'connection) destination payload))
+  (defmethod send-message ((connection  connection)
+			   (destination list)
+			   (payload     simple-array))
+    (check-type payload octet-vector "an octet-vector")
+
+    (with-spread-condition-translation
+      (spread:send-bytes
+       (slot-value connection 'connection) destination payload))))
 
 (defmethod print-object ((object connection) stream)
   (with-slots (connection groups) object
