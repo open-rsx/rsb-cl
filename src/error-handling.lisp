@@ -25,6 +25,25 @@
 (cl:in-package :rsb)
 
 
+;;; Documentation references
+;;
+
+(defun documentation-ref/rsb-bug ()
+  "TODO(jmoringe): document"
+  (list :rsb/project "Report a bug"
+	"https://code.cor-lab.org/projects/rsb/issues/new"))
+
+(defun documentation-ref/rsb-manual (&rest parts)
+  "TODO(jmoringe): document"
+  (flet ((linkify (string)
+	   (string-downcase (substitute #\- #\Space string))))
+    (list :rsb/manual parts
+	  (format nil
+		  "http://docs.cor-lab.org/rsb-manual/trunk/html/~{~A.html~^#~A~}"
+		  ;; "file:///home/jmoringe/code/cor-lab/rsb/rsb-manual/build/html/~{~A.html~^#~A~}"
+		  (mapcar #'linkify parts)))))
+
+
 ;;; Useful macros
 ;;
 

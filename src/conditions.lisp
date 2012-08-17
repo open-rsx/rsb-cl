@@ -34,8 +34,12 @@
    "This class should be mixed into all RSB-related condition
 classes."))
 
-(define-condition communication-error (rsb-error)
+(define-condition communication-error (rsb-error
+				       reference-condition)
   ()
+  (:default-initargs
+   :references (list (documentation-ref/rsb-manual "Troubleshooting")
+		     (documentation-ref/rsb-bug)))
   (:report
    (lambda (condition stream)
      (declare (ignore condition))
@@ -48,7 +52,8 @@ classes."))
 ;;
 
 (define-condition participation-failed (rsb-error
-					chainable-condition)
+					chainable-condition
+					reference-condition)
   ((scope      :initarg  :scope
 	       :type     (or puri:uri scope)
 	       :reader   participation-failed-scope
@@ -61,6 +66,9 @@ would have participated.")
 	       :documentation
 	       "A list of transports the participant would have used
 to connect to the bus."))
+  (:default-initargs
+   :references (list (documentation-ref/rsb-manual "Troubleshooting")
+		     (documentation-ref/rsb-bug)))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
@@ -115,7 +123,11 @@ fails."))
 (define-condition no-transports (participation-failed)
   ()
   (:default-initargs
-   :transports nil)
+   :transports nil
+   :references (list (documentation-ref/rsb-manual "Troubleshooting")
+		     (documentation-ref/rsb-manual "Concepts" "URIs")
+		     (documentation-ref/rsb-manual "Common" "Common Environment Variables")
+		     (documentation-ref/rsb-bug)))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~

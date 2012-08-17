@@ -1,4 +1,4 @@
-;;; conditions.lisp ---
+;;; conditions.lisp --- Conditions used in the converter module.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -96,3 +96,47 @@ a wire-type ~S representation using the wire-schema ~
   (:documentation
    "This error is signaled when a domain object cannot be converted to
 a wire-type representation."))
+
+(define-condition no-converter (rsb-error
+                                reference-condition)
+  ((datum :initarg  :datum
+          :reader   no-converter-datum
+          :documentation
+          "")
+   (tried :initarg  :tried
+          :type     list
+          :reader   no-converter-tried
+          :initform nil
+          :documentation
+          ""))
+  (:default-initargs
+   :datum      (missing-required-initarg 'no-converter :datum)
+   :references (list (rsb::documentation-ref/rsb-manual "Troubleshooting" "Missing Converters")))
+  (:documentation
+   "Instances of subclasses of this condition class are signaled when
+no converter is able to perform a certain conversion."))
+
+(define-condition no-wire->domain-converter (no-converter)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<No converter could handle the wire-data ~S (in ~S ~
+wire-schema). Tried ~{~A~^, ~_~}~@:>"
+             (no-converter-datum condition)
+             :TODO-WIRE-SCHEMA
+             (no-converter-tried condition))))
+  (:documentation
+   "This error is signaled when a wire->domain conversion cannot be
+performed because a suitable converter cannot be found."))
+
+(define-condition no-domain->wire-converter (no-converter)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<No converter could handle the domain-object ~
+~S. Tried ~{~A~^, ~_~}~@:>"
+             (no-converter-datum condition)
+             (no-converter-tried condition))))
+  (:documentation
+   "This error is signaled when a domain->wire conversion cannot be
+performed because a suitable converter cannot be found."))
