@@ -12,7 +12,7 @@ EXECUTE_PROCESS(COMMAND           "@SBCL_EXECUTABLE@"
                                   --eval "(setf *terminal-io*
                                                 (make-two-way-stream
                                                   (make-synonym-stream (quote *standard-input*))
-		                                  (make-synonym-stream (quote *standard-output*))))"
+                                                  (make-synonym-stream (quote *standard-output*))))"
                                   @DO@
                 WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@"
                 @REDIRECTIONS@
