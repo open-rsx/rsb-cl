@@ -89,6 +89,10 @@
    :tagging-configurator-mixin
    :configurator-tags)
 
+  ;; `transport-tagging-configurator-mixin' class
+  (:export
+   :transport-tagging-configurator-mixin)
+
   ;; `broadcast-processor' class
   (:export
    :broadcast-processor)

@@ -194,6 +194,9 @@
 
 			      (:file       "tagging-configurator-mixin"
 			       :depends-on ("package" "tagging-processor-mixin"))
+			      (:file       "transport-tagging-configurator-mixin"
+			       :depends-on ("package"
+					    "tagging-configurator-mixin"))
 
 			      (:file       "client"
 			       :depends-on ("package" "configurator"))))
