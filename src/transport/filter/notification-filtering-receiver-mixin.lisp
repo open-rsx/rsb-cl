@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:in-package :rsb.transport)
+(cl:in-package :rsb.transport.filter)
 
 
 ;;; Mixin class `notification-filtering-receive-mixin'

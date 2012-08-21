@@ -277,7 +277,14 @@
 
 			      (:file       "macros"
 			       :depends-on ("listener" "reader"
-					     "informer"))))
+					    "informer"))))
+
+		(:module     "transport-filter"
+		 :pathname   "src/transport/filter"
+		 :depends-on ("transport")
+		 :components ((:file       "package")
+			      (:file       "notification-filtering-receiver-mixin"
+			       :depends-on ("package"))))
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"
@@ -428,7 +435,12 @@
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
 			      (:file       "restart-mixins"
-			       :depends-on ("package"))
+			       :depends-on ("package"))))
+
+		(:module     "transport-filter"
+		 :pathname   "test/transport/filter"
+		 :depends-on ("transport")
+		 :components ((:file       "package")
 			      (:file       "notification-filtering-receiver-mixin"
 			       :depends-on ("package"))))
 

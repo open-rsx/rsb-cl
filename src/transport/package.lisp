@@ -36,7 +36,6 @@
 
    :rsb
    :rsb.event-processing
-   :rsb.filter
    :rsb.converter)
 
   ;; Conditions
@@ -157,14 +156,6 @@
    :expose-transport-metrics-mixin
    :connector-expose
    :connector-expose?)
-
-  ;; Notification filtering protocol and
-  ;; `notification-filtering-receiver-mixin' class
-  (:export
-   :connector-notification-filters
-
-   :notification-filtering-receiver-mixin
-   :connector-notification-filter)
 
   (:documentation
    "This package contains the transport layer of the RSB Common Lisp

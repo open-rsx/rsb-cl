@@ -22,7 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:in-package :rsb.transport.test)
+(cl:in-package :rsb.transport.filter.test)
 
 (defclass notification-filtering-mock-connector (notification-filtering-receiver-mixin)
   ((notifications :initarg  :notifications
@@ -33,7 +33,7 @@
 			    (block?    t))
   (pop (connector-notifications connector)))
 
-(deftestsuite notification-filtering-receiver-mixin-root (transport-root)
+(deftestsuite notification-filtering-receiver-mixin-root (transport-filter-root)
   ((simple-connector))
   (:setup
    (setf simple-connector
