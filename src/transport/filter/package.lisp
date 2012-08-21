@@ -23,6 +23,8 @@
 ;;     Bielefeld University
 
 (cl:defpackage :rsb.transport.filter
+  (:nicknames :rsb.tp.ft)
+
   (:use
    :cl
    :alexandria
