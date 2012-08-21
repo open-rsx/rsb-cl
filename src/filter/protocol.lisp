@@ -28,9 +28,19 @@
 ;;; Filter protocol
 ;;
 
-(defgeneric matches? (filter event)
+(defgeneric matches? (filter thing)
   (:documentation
-   "Return non-nil if EVENT matches the criteria of FILTER."))
+   "Return non-nil if THING matches the criteria of FILTER. In many
+situations, THING is an `rsb:event' instance."))
+
+
+;;; Default behavior
+;;
+
+(defmethod matches? ((filter function) (thing t))
+  "Default behavior when called with a function as FILTER is to
+`funcall' FUNCTION on THING."
+  (funcall filter thing))
 
 
 ;;; Default behavior
