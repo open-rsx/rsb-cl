@@ -191,6 +191,10 @@
 			       :depends-on ("package" "util" "configurator"))
 			      (:file       "out-route-configurator"
 			       :depends-on ("package" "configurator"))
+
+			      (:file       "tagging-configurator-mixin"
+			       :depends-on ("package" "tagging-processor-mixin"))
+
 			      (:file       "client"
 			       :depends-on ("package" "configurator"))))
 

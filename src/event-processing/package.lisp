@@ -32,7 +32,7 @@
    :iterate
    :let-plus
    :more-conditions
-   
+
    :rsb)
 
   ;; Push source protocol
@@ -83,6 +83,11 @@
   ;; `out-route-configurator' class
   (:export
    :out-route-configurator)
+
+  ;; `tagging-configurator-mixin' class
+  (:export
+   :tagging-configurator-mixin
+   :configurator-tags)
 
   ;; `broadcast-processor' class
   (:export
