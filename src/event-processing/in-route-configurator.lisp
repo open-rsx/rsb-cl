@@ -24,7 +24,8 @@
 
 (cl:in-package :rsb.event-processing)
 
-(defclass in-route-configurator (configurator)
+(defclass in-route-configurator (transport-filtering-configurator-mixin
+				 configurator)
   ((filters :type     list
 	    :initform nil
 	    :accessor configurator-filters

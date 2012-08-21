@@ -24,7 +24,8 @@
 
 (cl:in-package :rsb.event-processing)
 
-(defclass out-route-configurator (configurator)
+(defclass out-route-configurator (transport-tagging-configurator-mixin
+				  configurator)
   ()
   (:default-initargs
    :direction :out)

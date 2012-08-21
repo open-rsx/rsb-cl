@@ -185,15 +185,6 @@
 			      (:file       "error-handling-dispatcher-mixin"
 			       :depends-on ("package" "error-policy-mixin"))
 
-			      (:file       "configurator"
-			       :depends-on ("package"
-					    "broadcast-processor"
-					    "pull-processor"))
-			      (:file       "in-route-configurator"
-			       :depends-on ("package" "util" "configurator"))
-			      (:file       "out-route-configurator"
-			       :depends-on ("package" "configurator"))
-
 			      (:file       "tagging-configurator-mixin"
 			       :depends-on ("package" "tagging-processor-mixin"))
 			      (:file       "transport-tagging-configurator-mixin"
@@ -201,6 +192,17 @@
 					    "tagging-configurator-mixin"))
 			      (:file       "transport-filtering-configurator-mixin"
 			       :depends-on ("package" "protocol"))
+
+			      (:file       "configurator"
+			       :depends-on ("package"
+					    "broadcast-processor"
+					    "pull-processor"))
+			      (:file       "in-route-configurator"
+			       :depends-on ("package" "util" "configurator"
+					    "transport-filtering-configurator-mixin"))
+			      (:file       "out-route-configurator"
+			       :depends-on ("package" "configurator"
+					    "transport-tagging-configurator-mixin"))
 
 			      (:file       "client"
 			       :depends-on ("package" "configurator"))))
