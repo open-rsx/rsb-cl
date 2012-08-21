@@ -38,6 +38,9 @@ via the `processor-tags' and `processor-tag?' protocol methods."))
 				     tags)
   (setf (configurator-tags instance) tags))
 
+(defmethod collect-processor-mixins append ((configurator tagging-configurator-mixin))
+  '(tagging-processor-mixin))
+
 (defmethod configurator-tags ((configurator tagging-configurator-mixin))
   "Return the plist of tags currently applied by the processor of
 CONFIGURATOR."
