@@ -30,7 +30,7 @@
 
 (defclass notification-filtering-receiver-mixin ()
   ((notification-filter :reader   connector-notification-filter
-			:initform (make-instance 'rsb.filter:conjoin-filter)
+			:initform (make-instance 'conjoin-filter)
 			:documentation
 			"This filter instance is used to store the set
 of filters applied by the connector to incoming notifications."))
