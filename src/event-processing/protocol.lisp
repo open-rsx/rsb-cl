@@ -125,6 +125,26 @@ the fact."
    "Apply the error handling policy of PROCESSOR to CONDITION."))
 
 
+;;; Tagging processor protocol
+;;
+
+(defgeneric processor-tags (processor)
+  (:documentation
+   "TODO(jmoringe): document"))
+
+(defgeneric (setf processor-tags) (new-value processor)
+  (:documentation
+   "TODO(jmoringe): document"))
+
+(defgeneric processor-tag? (processor)
+  (:documentation
+   "TODO(jmoringe): document"))
+
+(defgeneric (setf processor-tag?) (new-value processor)
+  (:documentation
+   "TODO(jmoringe): document"))
+
+
 ;;; Configurator protocol
 ;;
 

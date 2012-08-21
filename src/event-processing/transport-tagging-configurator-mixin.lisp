@@ -64,7 +64,6 @@ enable or disable the tagging of events with a list of transports."
 
 (defun compute-transport-tag (connectors)
   "Compute and return a transport tag string for CONNECTORS."
-  (let ((schemas (map 'list (compose #'first
-				     (find-symbol "CONNECTOR-SCHEMAS" :rsb.transport)) ;;; TODO(jmoringe):
-		      connectors)))
-   (format nil "~{~(~A~)~^;~}" schemas)))
+  (let ((connector-schemas (find-symbol "CONNECTOR-SCHEMAS" :rsb.transport))) ;;; TODO(jmoringe):
+    (format nil "~{~(~A~)~^;~}"
+	    (mapcar (compose #'first connector-schemas) connectors))))

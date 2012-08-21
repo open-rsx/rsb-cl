@@ -31,6 +31,7 @@
 (defclass in-connector (connector
 			timestamping-receiver-mixin
 			restart-message-receiver-mixin
+			;; rsb.transport.filter::transport-tag-filter-mixin
 			broadcast-processor
 			assembly-mixin
 			expose-transport-metrics-mixin)

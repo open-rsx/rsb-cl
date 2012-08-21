@@ -30,7 +30,22 @@
 
 (defclass connector (uri-mixin
 		     error-policy-mixin)
-  ((rsb::uri :reader   connector-url))
+  ((rsb::uri :reader   connector-url)
+   (priority :initarg  :priority
+	     :type     non-negative-integer
+	     :accessor connector-priority
+	     :documentation
+	     "The non-negative integer stored in this slot determines
+the priority of the connector instance when it competes against other
+connector instances. An example of such a situation is multi-path
+connectivity since one connector has to be selected among multiple
+possibilities."))
+  (:metaclass connector-class)
+  (:options
+   (priority non-negative-integer
+    :default 0
+    :description
+    ""))
   (:documentation
    "A connector implements access to the bus by means of a particular
 mechanism. One example is a connector that makes use of the Spread
