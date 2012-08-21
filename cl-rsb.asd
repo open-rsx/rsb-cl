@@ -286,7 +286,9 @@
 			      (:file       "protocol"
 			       :depends-on ("package"))
 			      (:file       "notification-filtering-receiver-mixin"
-			       :depends-on ("package"))))
+			       :depends-on ("package"))
+			      (:file       "event-filter->notification-filter-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"
@@ -444,6 +446,8 @@
 		 :depends-on ("transport")
 		 :components ((:file       "package")
 			      (:file       "notification-filtering-receiver-mixin"
+			       :depends-on ("package"))
+			      (:file       "event-filter->notification-filter-mixin"
 			       :depends-on ("package"))))
 
 		(:module     "patterns"

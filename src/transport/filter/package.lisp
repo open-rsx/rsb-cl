@@ -26,9 +26,12 @@
   (:use
    :cl
    :alexandria
-   :iter
+   :iterate
+   :bind
 
+   :rsb
    :rsb.filter
+   :rsb.event-processing
    :rsb.transport)
 
   ;; Notification filtering protocol and
@@ -41,7 +44,9 @@
 
   ;; Notification filter construction protocol
   (:export
-   :make-notification-filter-for-filter)
+   :make-notification-filter-for-filter
+
+   :event-filter->notification-filter-mixin)
 
   (:documentation
    "This package contains infrastructure for transport-level

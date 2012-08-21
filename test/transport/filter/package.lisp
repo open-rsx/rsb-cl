@@ -29,6 +29,8 @@
    :iterate
    :lift
 
+   :rsb.filter
+   :rsb.event-processing
    :rsb.transport
    :rsb.transport.filter
 
