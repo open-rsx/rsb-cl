@@ -1,4 +1,4 @@
-;;; event-filter->notification-filter-mixin.lisp ---
+;;; event-filter->notification-filter-mixin.lisp --- Unit tests for the event-filter->notification-filter-mixin class.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -24,6 +24,10 @@
 
 (cl:in-package :rsb.transport.filter.test)
 
+
+;;; Class `mock-connector'
+;;
+
 (defclass mock-connector (event-filter->notification-filter-mixin)
   ())
 
@@ -31,6 +35,10 @@
 						(filter    origin-filter))
   (make-instance 'rsb.filter::type-filter
 		 :type (list 'eql (filter-origin filter))))
+
+
+;;; Tests
+;;
 
 (deftestsuite event-filter->notification-filter-mixin-root (transport-filter-root)
   ((simple-connector (make-instance 'mock-connector))
