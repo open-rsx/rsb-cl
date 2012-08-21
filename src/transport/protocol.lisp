@@ -176,6 +176,20 @@ metrics exposed by CONNECTOR. Otherwise remove METRIC from the
 list."))
 
 
+;;; Notification filtering protocol
+;;
+
+(defgeneric connector-notification-filters (connector)
+  (:documentation
+   "Return a list of the notification filters installed on
+CONNECTOR."))
+
+(defgeneric (setf connector-notification-filters) (new-value connector)
+  (:documentation
+   "Set the list of notification filters installed on CONNECTOR to
+NEW-VALUE."))
+
+
 ;;; Transport implementations
 ;;
 

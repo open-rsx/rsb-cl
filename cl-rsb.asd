@@ -251,7 +251,9 @@
 			       :depends-on ("package" "protocol"))
 			      (:file       "expose-transport-metrics-mixin"
 			       :depends-on ("package" "protocol"
-					    "connector-class"))))
+					    "connector-class"))
+			      (:file       "notification-filtering-receiver-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module      "src"
 		 :depends-on  ("src-early"
@@ -426,6 +428,8 @@
 			      (:file       "error-handling-mixins"
 			       :depends-on ("package"))
 			      (:file       "restart-mixins"
+			       :depends-on ("package"))
+			      (:file       "notification-filtering-receiver-mixin"
 			       :depends-on ("package"))))
 
 		(:module     "patterns"
