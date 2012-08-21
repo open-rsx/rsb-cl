@@ -79,7 +79,10 @@ of PARTICIPANT."
 ;;; TODO(jmoringe): infer direction?
 
 (defun make-participant (class scope direction transports converters
-			 &rest args)
+			 &rest args
+			 &key
+			 error-policy
+			 &allow-other-keys)
   "Make and return a participant instance of CLASS that participates
 in the channel designated by SCOPE.
 

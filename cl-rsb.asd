@@ -619,6 +619,26 @@ RSB events to/from Google protocol buffers."
 			      (:file       "protocol-buffers")))))
 
 
+;;; System connection with cl-protobuf-and-xpath
+;;
+
+#+asdf-system-connections
+(defsystem-connection :cl-rsb-and-cl-protobuf-and-xpath
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     #.(version/string)
+  :license     "GPL3; see COPYING file for details."
+  :description "This system connection allows XPath matching filters
+to be applied to packed and unpacked protocol buffer data."
+  :requires    (cl-rsb
+		cl-protobuf-and-xpath)
+  :components  ((:file       "filter-protocol-buffer-xpath"
+		 :pathname   "src/filter/protocol-buffer-xpath")
+
+		(:file       "spread-protocol-buffer-xpath"
+		 :pathname   "src/transport/spread/protocol-buffer-xpath")))
+
+
 ;;; System connection with usocket
 ;;
 

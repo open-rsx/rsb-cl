@@ -45,6 +45,7 @@ to access the bus.")
 	       :documentation
 	       "Stores the processor instance that handles incoming or
 outgoing events."))
+  #+not-now
   (:default-initargs
    :error-policy #'log-error)
   (:documentation

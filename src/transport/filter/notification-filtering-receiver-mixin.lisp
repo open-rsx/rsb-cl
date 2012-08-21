@@ -58,6 +58,7 @@ discarded."))
 notifications which do not match the set of filters installed on
 CONNECTOR."
   (let (notification)
+    ;;; TODO(jmoringe): is this iteration necessary?
     (iter (setf notification (call-next-method))
 	  (unless (matches? connector notification)
 	    (setf notification nil))
