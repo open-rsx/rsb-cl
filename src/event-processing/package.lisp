@@ -33,7 +33,8 @@
    :let-plus
    :more-conditions
 
-   :rsb)
+   :rsb
+   :rsb.filter)
 
   ;; Push source protocol
   (:export
@@ -92,6 +93,11 @@
   ;; `transport-tagging-configurator-mixin' class
   (:export
    :transport-tagging-configurator-mixin)
+
+  ;; `transport-filtering-configurator-mixin' class
+  (:export
+   :transport-filtering-configurator-mixin
+   :configurator-transport-tag-filter)
 
   ;; `broadcast-processor' class
   (:export
