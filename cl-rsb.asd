@@ -283,6 +283,8 @@
 		 :pathname   "src/transport/filter"
 		 :depends-on ("transport")
 		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
 			      (:file       "notification-filtering-receiver-mixin"
 			       :depends-on ("package"))))
 

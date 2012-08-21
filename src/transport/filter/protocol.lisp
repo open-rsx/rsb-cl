@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for transport.filter module.
+;;; protocol.lisp --- Protocol for the transport.filter module.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -22,32 +22,23 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:defpackage :rsb.transport.filter
-  (:use
-   :cl
-   :alexandria
-   :iter
+(cl:in-package :rsb.transport.filter)
 
-   :rsb.filter
-   :rsb.transport)
+
+;;; Notification filter construction protocol
+;;
 
-  ;; Notification filtering protocol and
-  ;; `notification-filtering-receiver-mixin' class
-  (:export
-   :connector-notification-filters
-
-   :notification-filtering-receiver-mixin
-   :connector-notification-filter)
-
-  ;; Notification filter construction protocol
-  (:export
-   :make-notification-filter-for-filter)
-
+(defgeneric make-notification-filter-for-filter (connector filter)
   (:documentation
-   "This package contains infrastructure for transport-level
-filtering, that is
+   "Make and return a filter instance that implements the behavior of
+FILTER by matching notifications received by CONNECTOR or nil if such
+a filter cannot be constructed."))
 
-+ discarding notifications before decoding them into events
+
+;;; Default behavior
+;;
 
-+ discarding events before passing them to event-processing and
-  dispatching code"))
+(defmethod make-notification-filter-for-filter ((connector t)
+						(filter    t))
+  "Default behavior is to not return a filter."
+  (values))
