@@ -108,6 +108,11 @@
    :filter-xpath
    :filter-compiled-xpath)
 
+  ;; `transport-tag-filter' class
+  (:export
+   :transport-tag-filter
+   :filter-transport-ranking)
+
   ;; DSL
   (:export
    :filter)

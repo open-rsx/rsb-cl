@@ -156,7 +156,9 @@
 					    "filter-mixin"))
 			      (:file       "method-filter"
 			       :depends-on ("package" "protocol"
-					    "filter-mixin"))))
+					    "filter-mixin"))
+			      (:file       "transport-tag-filter"
+			       :depends-on ("package"))))
 
 		(:module     "event-processing"
 		 :pathname   "src/event-processing"
