@@ -31,7 +31,7 @@
    :lift
 
    :nibbles
-   
+
    :rsb
    :rsb.event-processing
    :rsb.transport
@@ -84,9 +84,9 @@ socket. Should be incremented after each use.")
 	       old *next-port*)))
      *next-port*))
   (:function
-   (make-socket-url (server?)
-     (format nil "socket://localhost:~D~:[~;?server=1~]"
-	     *next-port* server?)))
+   (make-socket-url (server? options)
+     (format nil "socket://localhost:~D~@[?~{~A=~A~^&~}~]"
+	     *next-port* (append (when server? (list "server" "1")) options))))
   (:function
    (check-bus (bus expected-connections expected-connectors)
      (flet ((check-thing (title reader expected)
