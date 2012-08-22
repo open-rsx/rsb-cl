@@ -27,7 +27,7 @@
 (deftestsuite transport-socket-bus-root (transport-socket-root)
   (deadlock-detector)
   (:function
-   (make-connector (class host port server?)
+   (make-socket-connector (class host port server?)
      (apply #'make-instance class
 	    :host      host
 	    :port      port
@@ -63,6 +63,21 @@ classes."))
 
 (addtest (transport-socket-bus-root
           :documentation
+	  "Test supplying incompatible options for a single
+connection.")
+  incompatible-options
+
+  ;; Has to signal an error since the incompatible options are
+  ;; supplied for a single host-port combination.
+  (ensure-condition reader-creation-failed
+    (with-reader (r1 (make-socket-url t nil))
+      (with-reader (r2 (make-socket-url nil '("nodelay" "1")))
+	(with-reader (r3 (make-socket-url nil nil))
+	  ;; body is not important
+	  )))))
+
+(addtest (transport-socket-bus-root
+          :documentation
 	  "Test creating `bus-client' instances and attaching and
 detaching connectors to them. Try multiple connectors of different
 classes which also causes the test case to be repeated without a fresh
@@ -75,15 +90,15 @@ port. This helps ensuring proper cleanup.")
 
     (let* ((host        "localhost")
 	   (port        *next-port*)
-	   (connector-1 (make-connector connector-class host port nil))
-	   (connector-2 (make-connector connector-class host port nil)))
+	   (connector-1 (make-socket-connector connector-class host port nil))
+	   (connector-2 (make-socket-connector connector-class host port nil)))
 
       ;; There is no server yet, so this has to signal an error.
       (ensure-condition 'usocket:connection-refused-error ;;; TODO(jmoringe): keep this condition type?
 	(ensure-bus-client host port connector-1))
 
       ;; Create a bus server.
-      (with-reader (dummy (make-socket-url t) :converters '((t . :fundamental-null)))
+      (with-reader (dummy (make-socket-url t nil) :converters '((t . :fundamental-null)))
 	;; We should be able to create a bus clients now. We create
 	;; two connectors and request a bus client for each of
 	;; them. The first request should cause the bus client to be
@@ -121,8 +136,8 @@ port. This helps ensuring proper cleanup.")
 
     (let* ((host        "localhost")
 	   (port        *next-port*)
-	   (connector-1 (make-connector connector-class host port t))
-	   (connector-2 (make-connector connector-class host port t)))
+	   (connector-1 (make-socket-connector connector-class host port t))
+	   (connector-2 (make-socket-connector connector-class host port t)))
 
       ;; Create two connectors and request a bus server for each of
       ;; them. The first request should cause the bus server to be

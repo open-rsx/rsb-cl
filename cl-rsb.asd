@@ -459,15 +459,9 @@
 		 :pathname   "test/transport/socket"
 		 :depends-on ("test" "transport")
 		 :components ((:file       "package")
-
 			      (:file       "bus"
 			       :depends-on ("package"))
-
-			      (:file       "in-push-connector"
-			       :depends-on ("package"))
-			      (:file       "in-pull-connector"
-			       :depends-on ("package"))
-			      (:file       "out-connector"
+			      (:file       "connectors"
 			       :depends-on ("package"))))
 
 		(:module     "spread"
