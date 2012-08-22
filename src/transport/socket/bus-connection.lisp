@@ -120,14 +120,17 @@ after calling NEW-VALUE."
 
 (defmethod receive-message ((connection bus-connection)
 			    (block?     t))
-  (let* ((stream   (usocket:socket-stream (connection-socket connection)))
-	 (length   (read-ub32/le stream))
-	 (buffer   (%ensure-receive-buffer connection length))
-	 (received (read-sequence buffer stream :end length)))
-    (unless (= received length)
-      (error "~@<Short read (expected: ~D; got ~D)~@:>"
-	     length received))
-    (values (cons buffer length) :undetermined)))
+  (let* ((stream (usocket:socket-stream (connection-socket connection)))
+	 (length (read-ub32/le stream)))
+    (when (zerop length)
+      (signal 'connection-closed
+              :connection connection))
+    (let* ((buffer   (%ensure-receive-buffer connection length))
+	   (received (read-sequence buffer stream :end length)))
+      (unless (= received length)
+	(error "~@<Short read (expected: ~D; got ~D)~@:>"
+	       length received))
+      (values (cons buffer length) :undetermined))))
 
 (defmethod receive-message ((connection bus-connection)
 			    (block?     (eql nil)))
@@ -191,15 +194,25 @@ be packed using protocol buffer serialization.~@:>"
 ;;
 
 (defmethod close ((connection bus-connection)
-		  &key &allow-other-keys)
+		  &key abort)
   (let+ (((&accessors (lock     connection-lock)
 		      (closing? %connection-closing?)
-		      (socket   connection-socket)) connection))
+		      (socket   connection-socket)) connection)
+	 (stream (usocket:socket-stream (connection-socket connection))))
     ;; Ensure that CONNECTION is not already closing or being closed.
     (bt:with-lock-held (lock)
       (when closing?
 	(return-from close))
       (setf closing? t))
+
+    (unless abort
+      (ignore-errors
+       (log1 :info "Sending disconnect message")
+       (write-ub32/le 0 stream)
+       (finish-output stream)
+       (log1 :info "Waiting for disconnect message")
+       (assert (zerop (read-ub32/le stream)))
+       (log1 :info "Received disconnect message")))
 
     ;; If this really is the initial attempt to close CONNECTION, stop
     ;; the receiver thread and close the socket.
