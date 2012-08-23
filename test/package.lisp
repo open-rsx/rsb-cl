@@ -60,8 +60,7 @@
 (cl:in-package :rsb.test)
 
 (deftestsuite root ()
-  ((spread-port (asdf:component-property
-		 (asdf:find-system :cl-rsb-test) :spread-port)))
+  ()
   (:function
    (make-id (source)
      (uuid:make-uuid-from-string source)))
