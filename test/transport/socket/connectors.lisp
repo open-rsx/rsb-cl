@@ -41,12 +41,12 @@
 		       class-name)))
 
 	   (define-basic-connector-test-cases ,class-name
+	     :initargs           (list :host      "localhost"
+				       :port      *next-port*
+				       :converter :fundamental-null)
 	     :expected-direction ,(make-keyword direction)
 	     :expected-wire-type 'octet-vector
-	     :expected-schemas   '(:socket)
-	     :construct-args     (:host      "localhost"
-				  :port      *next-port*
-				  :converter :fundamental-null))
+	     :expected-schemas   '(:socket))
 
 	   (addtest (,suite-name
 		     :documentation

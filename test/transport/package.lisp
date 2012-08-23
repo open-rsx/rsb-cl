@@ -110,13 +110,31 @@ transport test suites."))
 (defmacro define-basic-connector-test-cases
     (class
      &key
+     (name              (%guess-connector-name class))
      (suite-name        (symbolicate class "-ROOT"))
-     (name              (guess-connector-name class))
-     construct-args
+     initargs
      expected-direction
      expected-wire-type
      expected-schemas)
-  "Define basic test cases for the connector class CLASS."
+  "Define basic test cases for the connector class CLASS.
+
+NAME is a keyword designating TRANSPORT e.g. in calls to
+`rsb.transport:make-transport'.
+
+SUITE-NAME is a symbol naming the test suite part of which the
+generated test cases should be.
+
+INITARGS are initargs which should be used when making connector
+instances.
+
+EXPECTED-DIRECTION specifies the expected direction of the connector
+class.
+
+EXPECTED-WIRE-TYPE specifies the expected wire-type of the connector
+class.
+
+EXPECTED-SCHEMAS specifies the list of expected schemas of the
+connector class."
   `(progn
      (addtest (,suite-name
           :documentation
@@ -149,7 +167,7 @@ instance."
 			class))
        construct
 
-       (let ((instance (make-instance ',class ,@construct-args)))
+       (let ((instance (apply #'make-instance ',class ,initargs)))
 	 (check-connector
 	  instance ,expected-direction ,expected-wire-type)))
 
@@ -158,7 +176,8 @@ instance."
 	  ,(format nil "Test printing a ~A connector instance."
 		   class))
        print
-       (let ((instance (make-instance ',class ,@construct-args)))
+
+       (let ((instance (apply #'make-instance ',class ,initargs)))
 	 (with-output-to-string (stream)
 	   (print-object instance stream))))))
 
@@ -166,7 +185,7 @@ instance."
 ;;; Utility functions
 ;;
 
-(defun guess-connector-name (class-name)
+(defun %guess-connector-name (class-name)
   "Guess the keyword naming the connector class named CLASS-NAME."
   (let* ((package-name (package-name (symbol-package class-name)))
 	 (.-position   (position #\. package-name :from-end t)))
