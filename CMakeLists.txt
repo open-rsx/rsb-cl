@@ -96,8 +96,7 @@ INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/test"
         FILES_MATCHING PATTERN "*.lisp")
 INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/data"
         DESTINATION    "share/common-lisp/source/${SYSTEM_NAME}"
-        FILES_MATCHING
-        PATTERN        "*.proto")
+        FILES_MATCHING PATTERN "*.proto")
 INSTALL(DIRECTORY
         DESTINATION "share/common-lisp/source/${SYSTEM_NAME}")
 INSTALL(FILES       ${ASD_FILES}
