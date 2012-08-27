@@ -243,26 +243,31 @@ have an origin, do nothing."
     (when-let ((id (event-id/opaque event)))
       (setf (%event-id event) (event-id->uuid id)))))
 
-(defun print-event-data (stream data colon? at?)
+(defun print-event-data (stream data &optional colon? at?)
   "Print the event payload DATA to stream in a type-dependent manner.
 This function is intended for use with the / `format' control.
+
 COLON? controls whether an indication of the size of DATA should be
 printed.
+
 AT? is ignored."
   (declare (ignore at?))
-  (let ((*print-length* (or *print-length* 5)))
+  (let+ ((*print-length* (or *print-length* 5))
+	 ((&flet maybe-shorten-string (string max)
+	    ;; Shorten STRING to obey `*print-length*'.
+	    (let ((length (length string)))
+	      (if (<= length max)
+		  string
+		  (concatenate
+		   'string (subseq string 0 max) "...")))))
+	 ((&flet make-printable (string)
+	    ;; Replace unprintable characters in STRING with ".".
+	    (substitute-if
+	     #\. #'(lambda (char) (< (char-code char) 32)) string))))
     (format stream "~S~@[ (~D)~]"
 	    (etypecase data
-	      (string (%maybe-shorten-string data *print-length*))
+	      (string (make-printable
+		       (maybe-shorten-string data *print-length*)))
 	      (t      data))
 	    (when (and colon? (typep data 'sequence))
 	      (length data)))))
-
-(defun %maybe-shorten-string (string max)
-  "DOC"
-  (let ((length (length string)))
-    (if (<= length max)
-	string
-	(concatenate 'string
-		     (subseq string 0 (min max length))
-		     "..."))))

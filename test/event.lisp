@@ -132,4 +132,6 @@ expected ~:[not ~;~]to be.~@:>"
 
   (check-print (make-event "/foo/bar" "baz"))
   (check-print (make-event "/foo/bar" (make-string 1000
-						   :initial-element #\a))))
+						   :initial-element #\a)))
+  (check-print (make-event "/foo/bar" "with
+newline")))
