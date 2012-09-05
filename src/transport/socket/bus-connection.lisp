@@ -131,7 +131,7 @@ after calling NEW-VALUE."
 
 (defmethod receive-message ((connection bus-connection)
 			    (block?     (eql nil)))
-  ;; Check whether reading would and only continue if not.
+  ;; Check whether reading would block and only continue if not.
   (let ((stream (usocket:socket-stream (connection-socket connection))))
     (when (or block? (listen stream))
       (call-next-method))))
@@ -145,14 +145,14 @@ after calling NEW-VALUE."
 
   ;; Try to unpack MESSAGE into a `notification' instance. Signal
   ;; `decoding-error' if that fails.
-  (let+ (((data . offset) message))
+  (let+ (((data . length) message))
     (with-condition-translation
 	(((error decoding-error)
-	  :encoded          (subseq data 0 offset)
+	  :encoded          (subseq data 0 length)
 	  :format-control   "~@<The wire-data ~S could not be unpacked ~
 as a protocol buffer of kind ~S.~:@>"
-	  :format-arguments (list (subseq data 0 offset) 'notification)))
-      (pb:unpack data 'notification 0 offset))))
+	  :format-arguments (list (subseq data 0 length) 'notification)))
+      (pb:unpack data 'notification 0 length))))
 
 
 ;;; Sending
@@ -191,7 +191,9 @@ be packed using protocol buffer serialization.~@:>"
 ;;
 
 (defmethod close ((connection bus-connection)
-		  &key &allow-other-keys)
+		  &key abort)
+  (declare (ignore abort))
+
   (let+ (((&accessors (lock     connection-lock)
 		      (closing? %connection-closing?)
 		      (socket   connection-socket)) connection))

@@ -112,6 +112,7 @@ connected to the bus."))
 	(log1 :info bus "Added   connections ~{~S~^, ~}" added)
 	(log1 :info bus "Removed connections ~{~S~^, ~}" removed)
 
+	;; Install our handler and error policy in added connections.
 	(iter (for connection in added)
 	      ;; Add ourselves as handlers to the added connection.
 	      (push (curry proxy connection) (handlers connection))
@@ -130,8 +131,7 @@ connected to the bus."))
 	      (log1 :info bus "Starting connection ~A" connection)
 	      (start-receiver connection))
 
-	;; Remove ourselves as handlers from the removed connections
-	;; and close these connections.
+	;; Close removed connections.
 	(iter (for connection in removed)
 	      ;; Prevent the error handling from being executed
 	      ;; concurrently/recursively.
