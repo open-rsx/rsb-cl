@@ -122,13 +122,9 @@ connected to the bus."))
 	      (setf (processor-error-policy connection)
 		    #'(lambda (condition)
 			(declare (ignore condition))
-			;; Avoid deadlock if this is invoked while the
-			;; connection is currently being removed.
-			(bt:make-thread
-			 #'(lambda ()
-			     (log1 :info bus "Removing connection ~A" connection)
-			     (with-locked-bus (bus :connections? t)
-			       (removef (bus-connections bus) connection))))))
+			(log1 :info bus "Removing connection ~A" connection)
+			(with-locked-bus (bus :connections? t)
+			  (removef (bus-connections bus) connection))))
 
 	      ;; Start the connection.
 	      (log1 :info bus "Starting connection ~A" connection)
@@ -141,7 +137,7 @@ connected to the bus."))
 	      (setf (processor-error-policy connection) nil)
 	      (handler-case (close connection)
 		(error (condition)
-		  (warn "~@<Error closing connection ~A: ~A~:@>"
+		  (log1 :warn bus "Error closing connection ~A: ~A"
 			connection condition))))))))
 
 (defmethod (setf bus-connectors) :around ((new-value list)
