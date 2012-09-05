@@ -63,43 +63,61 @@ thread."))
 		    :name (format nil "Message Receiver for ~A"
 				  connector))
 
-    ;; Wait until the thread has entered `receive-messages' and
-    ;; established the catch environment for the `terminate-thread'
-    ;; tag.
+    ;; Wait until the thread has entered `receive-messages'.
     (bt:with-lock-held (control-mutex)
       (iter (until (connector-started? connector))
 	    (bt:condition-wait control-condition control-mutex)))))
 
 (defmethod stop-receiver ((connector threaded-receiver-mixin))
-  (let+ (((&accessors (thread connector-thread)) connector))
-    ;; Interrupt the receiver thread and throw our `terminate-thread'
-    ;; tag.
-    (log1 :info connector "Interrupting receiver thread")
-    (bt:interrupt-thread thread #'exit-receiver)
+  (let+ (((&accessors (thread        connector-thread)
+		      (control-mutex connector-control-mutex)) connector))
+    (bt:with-lock-held (control-mutex)
+      (cond
+	;; If this is called from the receiver thread, there is no
+	;; need for an interruption. We can just unwind normally.
+	((eq thread (bt:current-thread))
+	 (log1 :info connector "In receiver thread; aborting")
+	 (exit-receiver))
 
-    ;; The thread should be terminating or already have terminated.
-    (log1 :info connector "Joining receiver thread")
-    (bt:join-thread thread)
-    (setf thread nil)))
+	((bt:thread-alive-p thread)
+	 ;; On very rare occasions, interrupting the thread
+	 ;; fails. Retry in such cases.
+	 (iter (while (bt:thread-alive-p thread))
+	       ;; Interrupt the receiver thread and abort.
+	       (log1 :info connector "Interrupting receiver thread with abort")
+	       (ignore-errors
+		(bt:interrupt-thread thread #'exit-receiver))
+
+	       ;; The thread should be terminating or already have
+	       ;; terminated.
+	       (log1 :info connector "Joining receiver thread")
+	       (handler-case
+		   (bt:with-timeout (.1)
+		     (bt:join-thread thread))
+		 (bt:timeout (condition)
+		   (declare (ignore condition))
+		   (log1 :warn connector "Interrupting receiver failed; retrying")))))))))
 
 (defmethod receive-messages :around ((connector threaded-receiver-mixin))
   "Catch the 'terminate tag that is thrown to indicate interruption
 requests."
-  (catch 'terminate-thread
-    ;; Notify the thread which is waiting in `start-receiver' that we
-    ;; can catch the 'terminate-thread tag now.
-    (let+ (((&accessors
-	     (thread            connector-thread)
-	     (control-mutex     connector-control-mutex)
-	     (control-condition connector-control-condition)) connector))
-      (bt:with-lock-held (control-mutex)
-	(setf thread (bt:current-thread))
-	(bt:condition-notify control-condition)))
-    (log1 :info connector "Entering receive loop")
-    (call-next-method))
+  ;; Notify the thread which is waiting in `start-receiver'.
+  (restart-case
+      (progn
+       (let+ (((&accessors
+		(thread            connector-thread)
+		(control-mutex     connector-control-mutex)
+		(control-condition connector-control-condition)) connector))
+	 (bt:with-lock-held (control-mutex)
+	   (setf thread (bt:current-thread))
+	   (bt:condition-notify control-condition)))
+       (log1 :info connector "Entering receive loop")
+       (call-next-method))
+    (abort (&optional condition)
+      (declare (ignore condition))))
   (log1 :info connector "Left receive loop"))
 
 (defun exit-receiver ()
   "Cause a receiver thread to exit. Has to be called from the receiver
 thread."
-  (throw 'terminate-thread nil))
+  (ignore-errors (abort)))
