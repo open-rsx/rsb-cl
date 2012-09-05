@@ -58,10 +58,9 @@ thread."))
 	   (control-mutex     connector-control-mutex)
 	   (control-condition connector-control-condition)) connector))
     ;; Launch the thread.
-    (log1 :info connector "Starting receiver thread")
+    (log1 :info connector "Starting worker thread")
     (bt:make-thread (curry #'receive-messages connector)
-		    :name (format nil "Message Receiver for ~A"
-				  connector))
+		    :name (format nil "Worker for ~A" connector))
 
     ;; Wait until the thread has entered `receive-messages'.
     (bt:with-lock-held (control-mutex)
