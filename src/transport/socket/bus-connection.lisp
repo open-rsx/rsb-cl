@@ -108,7 +108,7 @@ but shares these among participants in the process."))
 	 (error "~@<Protocol error during handshake; expected four 0 ~
 bytes.~@:>"))))))
 
-(defmethod (setf processor-error-policy) ((new-value  function)
+(defmethod (setf processor-error-policy) ((new-value  t)
 					  (connection bus-connection))
   "Wrap NEW-VALUE in an error policy that exits the receiver thread
 after calling NEW-VALUE."
@@ -198,16 +198,30 @@ be packed using protocol buffer serialization.~@:>"
     ;; Ensure that CONNECTION is not already closing or being closed.
     (bt:with-lock-held (lock)
       (when closing?
-	(return-from close))
+	(return-from close nil))
       (setf closing? t))
 
     ;; If this really is the initial attempt to close CONNECTION, stop
     ;; the receiver thread and close the socket.
-    (log1 :info connection "Stopping receiver thread")
     (unwind-protect
-	 (stop-receiver connection)
-      (log1 :info connection "Closing socket")
-      (ignore-errors (usocket:socket-close socket)))))
+	 (progn
+	   ;; If there is pending input data, give the receiving
+	   ;; machinery 1 second to retrieve it.
+	   (iter (while (ignore-errors
+			 (listen (usocket:socket-stream socket))))
+		 (repeat 100)
+		 (sleep .01))
+
+	   ;; After pending input data hopefully has been retrieved,
+	   ;; stop the receiver.
+	   (log1 :info connection "Stopping receiver thread")
+	   (stop-receiver connection))
+
+      ;; Try to flush out pending output data and close the socket.
+      (ignore-errors (finish-output (usocket:socket-stream socket)))
+      (ignore-errors (usocket:socket-close socket)))
+    ;; Return t to indicate that we actually closed the connection.
+    t))
 
 
 ;;;
@@ -234,8 +248,20 @@ CONNECTION when invoked. "
       (log1 :info connection "Closing and executing error policy ~A due to condition: ~A"
 	    function condition)
       (unwind-protect
-	   (ignore-errors (close connection))
-	(when function (funcall function condition)))))
+	   (handler-case
+	       ;; `close' returns nil if CONNECTION was already being
+	       ;; closed. In that case, we do not have to call
+	       ;; FUNCTION (because somebody else did/does) and can
+	       ;; abort the receiver thread right away.
+	       (when (not (close connection))
+		 (setf function nil))
+	     (error (condition)
+	       (log1 :warn connection "When executing error policy, error closing connection: ~A"
+		     condition)))
+	;; If necessary, execute the original error policy, FUNCTION.
+	(if function
+	    (funcall function condition)
+	    (stop-receiver connection)))))
 
 (macrolet
     ((define-ensure-buffer (name accessor)
