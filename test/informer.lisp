@@ -137,3 +137,19 @@ method.")
   ;; inprocess transport. So we just add the error handler without
   ;; exercising it.
   (send informer "foo"))
+
+(addtest (informer-root
+	  :documentation
+	  "Test sequence number generator, especially modular
+arithmetic behavior around 1**32.")
+  sequence-number-generator
+
+  (ensure-cases (start expected)
+      `((0                 (0 1 2))
+	(,(- (ash 1 32) 2) (,(- (ash 1 32) 2) ,(- (ash 1 32) 1) 0 1 2)))
+
+    (let ((generator (rsb::make-sequence-number-generator start)))
+      (iter (for value/generated next (funcall generator))
+	    (for value/expected  in   expected)
+	    (ensure-same value/generated value/expected
+			 :test #'=)))))
