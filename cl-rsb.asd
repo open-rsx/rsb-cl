@@ -29,7 +29,10 @@
 
   (:export
    :version/list
-   :version/string))
+   :version/string)
+
+  (:export
+   :+optimization-fast+unsafe+))
 
 (cl:in-package :cl-rsb-system)
 
@@ -71,6 +74,15 @@
 (defun version/string ()
   "Return a version string of the form \"MAJOR.MINOR.REVISION\"."
   (format nil "~{~A.~A.~A~}" (version/list)))
+
+
+;;; Optimization settings
+;;
+
+(defparameter +optimization-fast+unsafe+
+  (if (boundp '+optimization-fast+unsafe+)
+      (symbol-value '+optimization-fast+unsafe+)
+      '(optimize (speed 3) (compilation-speed 0) (space 0) (debug 0) (safety 0))))
 
 
 ;;; System definitions

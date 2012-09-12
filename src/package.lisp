@@ -273,6 +273,10 @@
 
    :maybe-shorten-sequence)
 
+  ;; Optimization settings
+  (:import-from :cl-rsb-system
+   :+optimization-fast+unsafe+)
+
   (:documentation
    "This package contains most of the basic, client-facing
 functionality of cl-rsb:
