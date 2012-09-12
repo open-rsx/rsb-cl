@@ -117,6 +117,15 @@ See `version/list' for details on keyword parameters."
       '(optimize (speed 3) (compilation-speed 0) (space 0) (debug 0) (safety 0))))
 
 
+;;; Optimization settings
+;;
+
+(defconstant +optimization-fast+unsafe+
+  (if (boundp '+optimization-fast+unsafe+)
+      (symbol-value '+optimization-fast+unsafe+)
+      '(optimize (speed 3) (compilation-speed 0) (space 0) (debug 0) (safety 0))))
+
+
 ;;; System definitions
 ;;
 
