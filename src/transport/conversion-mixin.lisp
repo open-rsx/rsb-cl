@@ -25,11 +25,14 @@
 (cl:in-package :rsb.transport)
 
 (defclass conversion-mixin ()
-  ((converter :initarg  :converter
-	      :accessor connector-converter
-	      :documentation
-	      "A converter to which the actual conversion work is
-delegated."))
+  ((converter     :initarg  :converter
+		  :accessor connector-converter
+		  :documentation
+		  "A converter to which the actual conversion work is
+delegated.")
+   (serialization :accessor connector-serialization
+		  :documentation
+		  ""))
   (:default-initargs
    :converter (missing-required-initarg
 	       'conversion-mixin :converter))
@@ -38,22 +41,39 @@ delegated."))
 the subclass which delegate the conversion tasks to a stored
 converter."))
 
-(defmethod domain->wire ((connector     conversion-mixin)
+(defmethod shared-initialize :after ((instance   conversion-mixin)
+                                     (slot-names t)
+                                     &key
+				     converter
+				     (serialization (%make-default-serialization
+						     instance converter)))
+  (setf (connector-serialization instance) serialization))
+
+
+
+#+no (defmethod domain->wire ((connector     conversion-mixin)
 			 (domain-object t))
   "Delegate conversion of DOMAIN-OBJECT to the converter stored in
 CONNECTOR."
   (domain->wire (connector-converter connector) domain-object))
 
-(defmethod wire->domain ((connector   conversion-mixin)
+#+no (defmethod wire->domain ((connector   conversion-mixin)
 			 (wire-data   t)
 			 (wire-schema t))
   "Delegate the conversion of WIRE-DATA, WIRE-SCHEMA to the converter
 stored in CONNECTOR."
   (wire->domain (connector-converter connector) wire-data wire-schema))
 
-(defmethod print-object ((object conversion-mixin) stream)
-  (let+ (((&accessors-r/o (converter connector-converter)) object)
-	 (sequence? (typep converter 'sequence)))
-    (print-unreadable-object (object stream :type t :identity t)
-      (format stream "~:[~S~;(~D)~]"
-	      sequence? (if sequence? (length converter) converter)))))
+
+;;;
+;;
+
+(defun %make-default-serialization (connector converter)
+  "TODO(jmoringe): document"
+  (make-instance
+   'rsb.serialization::protocol-buffer ;;; TODO(jmoringe, 2012-09-10):
+   :converter            converter
+   :expose-wire-schema?  (connector-expose?
+			  connector :rsb.transport.wire-schema)
+   :expose-payload-size? (connector-expose?
+			  connector :rsb.transport.payload-size)))

@@ -113,7 +113,7 @@ immediately available. If something has been received, return two
 values: the received message and a symbol designating the
 wire-schema of the received data."))
 
-(defgeneric message->event (connector message wire-schema)
+#+no (defgeneric message->event (connector message wire-schema)
   (:documentation
    "Convert MESSAGE with wire-schema WIRE-SCHEMA into an `event'
 instance and return the event. If message cannot be converted into an
@@ -128,7 +128,7 @@ wrong."))
   (:documentation
    "Send NOTIFICATION via CONNECTOR."))
 
-(defgeneric event->notification (connector event)
+#+no (defgeneric event->notification (connector event)
   (:documentation
    "Convert EVENT into a notification for sending via
 CONNECTOR. Return the notification. If EVENT cannot be converted into

@@ -38,12 +38,14 @@
    :iterate
    :let-plus
    :more-conditions
-   
+
    :nibbles
-   
+
    :rsb
    :rsb.event-processing
    :rsb.transport
+   :rsb.serialization
+
    :rsb.protocol)
 
   ;; Conditions
@@ -67,7 +69,7 @@
   ;; Variables and constants
   (:export
    :+protocol-version+)
-  
+
   (:documentation
    "This package contains a transport implementation based on the
 spread group communication system."))

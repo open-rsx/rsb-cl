@@ -261,11 +261,25 @@ See `version/list' for details on keyword parameters."
 			       :depends-on ("package" "conditions"
 					    "protocol"))))
 
+		(:module     "serialization"
+		 :pathname   "src/serialization"
+		 :depends-on ("src-early"
+			      "converter")
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
+			      (:file       "util"
+			       :depends-on ("package"))
+			      (:file       "mixins"
+			       :depends-on ("package" "protocol"
+					    "util"))))
+
 		(:module     "transport"
 		 :pathname   "src/transport"
 		 :depends-on ("src-early"
 			      "event-processing" ;; for error-policy-mixin
-			      "converter")       ;; for conversion-mixin
+			      "converter"        ;; for conversion-mixin?
+			      "serialization")   ;; for conversion-mixin?
 		 :components ((:file       "package")
 			      (:file       "variables"
 			       :depends-on ("package"))
@@ -633,10 +647,14 @@ RSB events to/from Google protocol buffers."
 			       :pathname   "rsb/protocol/collections/EventsByScopeMap"
 			       :depends-on ("Notification"))))
 
-		(:module     "converter-protocol-buffer"
+		(:module     "converter"
 		 :pathname   "src/converter"
 		 :components ((:file       "fundamental-numbers")
-			      (:file       "protocol-buffers")))))
+			      (:file       "protocol-buffers")))
+
+		(:module     "serialization"
+		 :pathname   "src/serialization"
+		 :components ((:file       "protocol-buffer")))))
 
 
 ;;; System connection with usocket
@@ -650,7 +668,6 @@ RSB events to/from Google protocol buffers."
   :license     "LGPLv3; see COPYING file for details."
   :description "This system connection provides a simple socket-based connector."
   :requires    (cl-rsb
-		cl-rsb-and-cl-protobuf
 		usocket)
   :components  ((:module     "socket"
 		 :pathname   "src/transport/socket"
@@ -660,11 +677,9 @@ RSB events to/from Google protocol buffers."
 
 			      (:file       "util"
 			       :depends-on ("package"))
-			      (:file       "conversion"
-			       :depends-on ("package"))
 
 			      (:file       "bus-connection"
-			       :depends-on ("package" "util" "conversion"))
+			       :depends-on ("package" "util"))
 			      (:file       "bus"
 			       :depends-on ("package" "bus-connection"))
 			      (:file       "bus-client"
@@ -674,8 +689,7 @@ RSB events to/from Google protocol buffers."
 
 			      (:file       "connector"
 			       :depends-on ("package"
-					    "bus-client" "bus-server"
-					    "conversion"))
+					    "bus-client" "bus-server"))
 			      (:file       "in-connector"
 			       :depends-on ("package" "connector"))
 			      (:file       "in-pull-connector"

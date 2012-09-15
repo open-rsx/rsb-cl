@@ -56,11 +56,7 @@ queue received events for delivery."))
 (defmethod message->event ((connector    in-connector)
 			   (notification notification)
 			   (wire-schema  t))
-  (let+ (((&accessors-r/o (converter connector-converter)) connector)
-	 (expose-wire-schema?  (connector-expose?
-				connector :rsb.transport.wire-schema))
-	 (expose-payload-size? (connector-expose?
-				connector :rsb.transport.payload-size)))
+  (let+ (((&accessors-r/o (serialization connector-serialization)) connector))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -81,7 +77,4 @@ queue received events for delivery."))
 notification~_~A~_could not be converted into an event.~:@>"
 	  :format-arguments (list (with-output-to-string (stream)
 				    (describe notification stream)))))
-      (notification->event
-       converter notification
-       :expose-wire-schema?  expose-wire-schema?
-       :expose-payload-size? expose-payload-size?))))
+      (notification->event connector notification))))
