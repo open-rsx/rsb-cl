@@ -282,6 +282,16 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package" "conditions"
                                             "protocol"))))
 
+                (:module     "serialization"
+                 :pathname   "src/serialization"
+                 :depends-on ("src-early"
+                              "converter")
+                 :sertial    t
+                 :components ((:file       "package")
+                              (:file       "protocol")
+                              (:file       "util")
+                              (:file       "mixins")))
+
                 (:module     "transport"
                  :pathname   "src/transport"
                  :depends-on ("src-early"
@@ -655,7 +665,11 @@ RSB events to/from Google protocol buffers."
 
                 (:module     "converter-protocol-buffer"
                  :pathname   "src/converter"
-                 :components ((:file       "protocol-buffers")))))
+                 :components ((:file       "protocol-buffers")))
+
+                (:module     "serialization-protocol-buffer"
+                 :pathname   "src/serialization"
+                 :components ((:file       "protocol-buffer")))))
 
 ;;; System connection with usocket
 

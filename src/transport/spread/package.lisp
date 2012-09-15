@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for transport.spread module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,6 +26,8 @@
    #:rsb
    #:rsb.event-processing
    #:rsb.transport
+   #:rsb.serialization
+
    #:rsb.protocol)
 
   ;; Conditions

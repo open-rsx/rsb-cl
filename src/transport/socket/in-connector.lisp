@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- In-direction connector for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -39,11 +39,7 @@ queue received events for delivery."))
 (defmethod message->event ((connector    in-connector)
                            (notification notification)
                            (wire-schema  t))
-  (let+ (((&accessors-r/o (converter connector-converter)) connector)
-         (expose-wire-schema?  (connector-expose?
-                                connector :rsb.transport.wire-schema))
-         (expose-payload-size? (connector-expose?
-                                connector :rsb.transport.payload-size)))
+  (let+ (((&structure-r/o connector- converter) connector))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -65,7 +61,4 @@ queue received events for delivery."))
                              into an event.~:@>"
           :format-arguments (list (with-output-to-string (stream)
                                     (describe notification stream)))))
-      (notification->event
-       converter notification
-       :expose-wire-schema?  expose-wire-schema?
-       :expose-payload-size? expose-payload-size?))))
+      (notification->event connector notification))))

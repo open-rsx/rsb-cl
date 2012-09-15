@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ;;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
@@ -12,6 +13,58 @@
                             &key
                             expose-wire-schema?
                             expose-payload-size?)
+=======
+;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
+;;
+;; Copyright (C) 2011, 2012 Jan Moringen
+;;
+;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+;;
+;; This file may be licensed under the terms of the GNU Lesser General
+;; Public License Version 3 (the ``LGPL''), or (at your option) any
+;; later version.
+;;
+;; Software distributed under the License is distributed on an ``AS
+;; IS'' basis, WITHOUT WARRANTY OF ANY KIND, either express or
+;; implied. See the LGPL for the specific language governing rights
+;; and limitations.
+;;
+;; You should have received a copy of the LGPL along with this
+;; program. If not, go to http://www.gnu.org/licenses/lgpl.html or
+;; write to the Free Software Foundation, Inc., 51 Franklin Street,
+;; Fifth Floor, Boston, MA 02110-1301, USA.
+;;
+;; The development of this software was supported by:
+;;   CoR-Lab, Research Institute for Cognition and Robotics
+;;     Bielefeld University
+
+(cl:in-package :rsb.transport.spread)
+
+(defclass fragmentation-protocol-buffer ()
+  ((notificaton-serialization :initarg  :notificaton-serialization
+			      :reader serialization-notification-serialization
+			      :documentation
+			      "")
+   (max-fragment-size         :initarg  :max-fragment-size
+			      :type     positive-integer
+			      :reader   serialization-max-fragment-size
+			      :documentation
+			      "")
+   (pool                      :initarg  :pool
+			      :reader   serialization-pool
+			      :documentation
+			      ""))
+  (:default-initargs
+   :notificaton-serialization (missing-required-initarg 'fragmentation-protocol-buffer :notificaton-serialization)
+   :pool (missing-required-initarg 'fragmentation-protocol-buffer :pool))
+  (:documentation
+   "TODO(jmoringe): document"))
+
+;; TODO collect caches
+
+(defmethod notification->event ((serialization fragmentation-protocol-buffer)
+				(notification  fragmented-notification))
+>>>>>>> Moved notification serialization to new package rsb.serialization
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."
@@ -19,11 +72,9 @@ been fragmented into multiple notifications."
 
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
-      (one-notification->event
-       converter
-       (fragmented-notification-notification notification)
-       :expose-wire-schema?  expose-wire-schema?
-       :expose-payload-size? expose-payload-size?)
+      (notification->event
+       (serialization-notification-serialization serialization)
+       (fragmented-notification-notification notification))
 
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
@@ -31,7 +82,7 @@ been fragmented into multiple notifications."
       ;; fragments have arrived.
       (when-let ((assembly (merge-fragment pool notification)))
         (one-notification->event
-         converter
+         (serialization-notification-serialization serialization)
          (fragmented-notification-notification
           (aref (assembly-fragments assembly) 0))
          :data                (assembly-concatenated-data assembly)
@@ -115,9 +166,8 @@ contained in NOTIFICATION."
 
 ;;; Event -> Notification
 
-(declaim (ftype (function (t event positive-fixnum) list) event->notifications))
-
-(defun event->notifications (converter event max-fragment-size)
+(defmethod event->notification ((serialization fragmentation-protocol-buffer )
+                                (event         rsb:event))
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
 into one notification."
@@ -125,7 +175,11 @@ into one notification."
   (setf (timestamp event :send) (local-time:now))
 
   ;; Put EVENT into one or more notifications.
-  (let+ (((&accessors-r/o (origin          event-origin)
+  (let+ (((&accessors-r/o
+           (fragment-serialization serialization-notification-serialization)
+           (max-fragment-size      serialization-max-fragment-size))
+          serialization)
+         ((&accessors-r/o (origin          event-origin)
                           (sequence-number event-sequence-number)
                           (scope           event-scope)
                           (method          event-method)
@@ -134,33 +188,33 @@ into one notification."
                           (timestamps      event-timestamps)
                           (causes          event-causes)) event)
          ((&values wire-data wire-schema)
-          (rsb.converter:domain->wire converter data))
+          (rsb.converter:domain->wire fragment-serialization data)) ; TODO(jmoringe, 2012-09-15): assumption about fragment-serialization
          (data-size (length wire-data)))
     (declare (type octet-vector wire-data))
 
-    (iter (with remaining     =     data-size)
-          (with offset        =     0)
-          (for  i             :from 0)
+    (iter (with remaining =     data-size)
+          (with offset    =     0)
+          (for  i         :from 0)
           (let* ((notification  (apply #'make-notification
-                                      sequence-number origin
-                                      (when (first-iteration-p)
-                                        (list scope method wire-schema
-                                              meta-data timestamps causes))))
+                                       sequence-number origin
+                                       (when (first-iteration-p)
+                                         (list scope method wire-schema
+                                               meta-data timestamps causes))))
                  (fragment      (make-instance 'fragmented-notification
                                                :notification   notification
                                                :num-data-parts 1
                                                :data-part      i))
                  (packed-size   (pb:packed-size fragment))
                  (room          (- max-fragment-size packed-size))
-                 (fragment-size (if (< room 5) ;; conservative
-                                               ;; estimate of required
-                                               ;; number of bytes to
-                                               ;; encode a bit of
-                                               ;; payload
-                                  (error 'insufficient-room
-                                         :required  (+ packed-size 5)
-                                         :available max-fragment-size)
-                                  (min (- room 4) remaining))))
+                 (fragment-size (if (< room 5) ; conservative
+                                               ; estimate of required
+                                               ; number of bytes to
+                                               ; encode a bit of
+                                               ; payload
+                                    (error 'insufficient-room
+                                           :required  (+ packed-size 5)
+                                           :available max-fragment-size)
+                                    (min (- room 4) remaining))))
 
             (setf (notification-data notification)
                   (make-data-fragment wire-data offset fragment-size))
@@ -239,64 +293,3 @@ CAUSES."
              (notification-causes notification))))
 
     notification))
-
-(defun timestamp->unix-microseconds (timestamp)
-  "Convert the `local-time:timestamp' instance TIMESTAMP into an
-integer which counts the number of microseconds since UNIX epoch."
-  (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
-     (* 1       (local-time:timestamp-microsecond timestamp))))
-
-(defun unix-microseconds->timestamp (unix-microseconds)
-  "Convert UNIX-MICROSECONDS to an instance of
-`local-time:timestamp'."
-  (let+ (((&values unix-seconds microseconds)
-          (floor unix-microseconds 1000000)))
-   (local-time:unix-to-timestamp
-    unix-seconds :nsec (* 1000 microseconds))))
-
-(defvar *keyword-readtable*
-  (let ((readtable (copy-readtable nil)))
-    (setf (readtable-case readtable) :invert)
-    readtable)
-  "This readtable is used to print and read keywords. The goal is to
-get a natural mapping between Lisp keywords and corresponding strings
-for most cases.")
-
-(declaim (inline string->bytes bytes->string))
-
-(defun string->bytes (string)
-  "Converter STRING into an octet-vector."
-  (declare (notinline string->bytes))
-  (if (stringp string)
-      (sb-ext:string-to-octets string :external-format :ascii)
-      (string->bytes (princ-to-string string))))
-
-(defun bytes->string (bytes)
-  "Convert BYTES into a string."
-  (sb-ext:octets-to-string bytes :external-format :ascii))
-
-(defun keyword->bytes (keyword)
-  "Convert the name of KEYWORD into an octet-vector."
-  (if (find #\: (symbol-name keyword))
-      (string->bytes (symbol-name keyword))
-      (let ((*readtable* *keyword-readtable*))
-        (string->bytes (princ-to-string keyword)))))
-
-(defun bytes->keyword (bytes)
-  "Converter BYTES into a keyword."
-  (if (find (char-code #\:) bytes)
-      (intern (bytes->string bytes) (find-package :keyword))
-      (let ((*package*   (find-package :keyword))
-            (*readtable* *keyword-readtable*))
-        (read-from-string (bytes->string bytes)))))
-
-(defun wire-schema->bytes (wire-schema)
-  "Convert WIRE-SCHEMA to an ASCII representation stored in an
-octet-vector."
-  (keyword->bytes wire-schema))
-
-(defun bytes->wire-schema (bytes)
-  "Return a keyword representing the wire-schema encoded in bytes."
-  (when (emptyp bytes)
-    (error "~@<Empty wire-schema.~:@>"))
-  (bytes->keyword bytes))

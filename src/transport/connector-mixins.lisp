@@ -135,25 +135,37 @@ events in a `message->event' method."))
 ;;; Mixin class `conversion-mixin'
 
 (defclass conversion-mixin ()
-  ((converter :initarg  :converter
-              :accessor connector-converter
-              :documentation
-              "A converter to which the actual conversion work is
-delegated."))
+  ((converter     :initarg  :converter
+                  :accessor connector-converter
+                  :documentation
+                  "A converter to which the actual conversion work is
+                   delegated.")
+   (serialization :accessor connector-serialization
+                  :documentation
+                  "TODO"))
   (:default-initargs
-   :converter (missing-required-initarg 'conversion-mixin :converter))
+   :converter     (missing-required-initarg 'conversion-mixin :converter)
+   :serialization (missing-required-initarg 'conversion-mixin :serialization))
   (:documentation
    "This mixin adds methods on `domain->wire' and `wire->domain' for
-the subclass which delegate the conversion tasks to a stored
-converter."))
+    the subclass which delegate the conversion tasks to a stored
+    converter."))
 
-(defmethod domain->wire ((connector     conversion-mixin)
+(defmethod shared-initialize :after ((instance   conversion-mixin)
+                                     (slot-names t)
+                                     &key
+                                     converter
+                                     (serialization (%make-default-serialization
+                                                     instance converter)))
+  (setf (connector-serialization instance) serialization))
+
+#+not-needed (defmethod domain->wire ((connector     conversion-mixin)
                          (domain-object t))
   "Delegate conversion of DOMAIN-OBJECT to the converter stored in
 CONNECTOR."
   (domain->wire (connector-converter connector) domain-object))
 
-(defmethod wire->domain ((connector   conversion-mixin)
+#+not-needed (defmethod wire->domain ((connector   conversion-mixin)
                          (wire-data   t)
                          (wire-schema t))
   "Delegate the conversion of WIRE-DATA, WIRE-SCHEMA to the converter
@@ -166,6 +178,16 @@ stored in CONNECTOR."
         (print-unreadable-object (object stream :type t :identity t)
           (format stream "~:[~S~;(~D)~]"
                   sequence? (if sequence? (length converter) converter)))))
+
+(defun %make-default-serialization (connector converter)
+  "TODO(jmoringe): document"
+  (make-instance
+   'rsb.serialization::protocol-buffer ;;; TODO(jmoringe, 2012-09-10):
+   :converter            converter
+   :expose-wire-schema?  (connector-expose?
+                          connector :rsb.transport.wire-schema)
+   :expose-payload-size? (connector-expose?
+                          connector :rsb.transport.payload-size)))
 
 ;;; Mixin class `timestamping-receiver-mixin'
 
