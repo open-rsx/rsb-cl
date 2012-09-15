@@ -361,7 +361,17 @@ See `version/list' for details on keyword parameters."
 
 			      (:file       "macros"
 			       :depends-on ("package" "local-server"
-					    "remote-server")))))
+					    "remote-server"))))
+
+		(:module      "plugins"
+		 :pathname    "src/plugins"
+		 :serial      t
+		 :components  ((:file      "package")
+			       (:file      "conditions")
+			       (:file      "protocol")
+			       (:file      "variables")
+			       (:file      "plugins")
+			       (:file      "repository"))))
 
   :in-order-to ((doc-op  (doc-op  :cl-rsb-doc))
 		(test-op (test-op :cl-rsb-test))))
@@ -393,13 +403,9 @@ See `version/list' for details on keyword parameters."
   :depends-on  ((:version :lift   "1.7.1")
 
 		:cl-protobuf
-		:cl-spread
 		:usocket
 
 		(:version :cl-rsb #.(version/string)))
-  :properties  ((:spread-port  . #.(or #+sbcl (let ((value (sb-posix:getenv "SPREAD_PORT")))
-						(when value (read-from-string value)))
-				       5678)))
   :components  ((:module     "test"
 		 :components ((:file       "package")
 
@@ -506,28 +512,12 @@ See `version/list' for details on keyword parameters."
 			      (:file       "bus"
 			       :depends-on ("package"))
 			      (:file       "connectors"
-			       :depends-on ("package"))))
-
-		(:module     "spread"
-		 :pathname   "test/transport/spread"
-		 :depends-on ("test" "transport")
-		 :components ((:file       "package")
-			      (:file       "util"
-			       :depends-on ("package"))
-			      (:file       "fragmentation"
-			       :depends-on ("package"))
-			      (:file       "connection"
-			       :depends-on ("package"))
-			      (:file       "connectors"
 			       :depends-on ("package")))))
 
   :in-order-to ((test-op (load-op :cl-rsb-test))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
-  (eval (read-from-string
-	 "(SPREAD:WITH-DAEMON (:PORT (ASDF:COMPONENT-PROPERTY
-                                       (ASDF:FIND-SYSTEM :CL-RSB-TEST) :SPREAD-PORT))
-            (LIFT:RUN-TESTS :CONFIG :GENERIC))")))
+  (eval (read-from-string "(LIFT:RUN-TESTS :CONFIG :GENERIC))")))
 
 
 ;;; System connection with clon
@@ -545,54 +535,6 @@ introspection of RSB configuration options."
 		com.dvlsoft.clon)
   :components  ((:file       "clon"
 		 :pathname   "src/clon")))
-
-
-;;; System connection with cl-spread
-;;
-
-#+asdf-system-connections
-(defsystem-connection :cl-rsb-and-cl-spread
-  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
-  :description "This system connections provides a RSB transport based
-on the spread group communication system."
-  :requires    (cl-rsb
-		cl-spread
-		cl-protobuf
-		cl-rsb-and-cl-protobuf)
-  :depends-on  (:nibbles
-		:ironclad)
-  :components  ((:module     "spread"
-		 :pathname   "src/transport/spread"
-		 :components ((:file       "package")
-			      (:file       "conditions"
-			       :depends-on ("package"))
-			      (:file       "util"
-			       :depends-on ("package"))
-			      (:file       "fragmentation"
-			       :depends-on ("package" "conditions" "util"))
-			      (:file       "conversion"
-			       :depends-on ("package" "conditions" "fragmentation"))
-
-			      (:file       "connection"
-			       :depends-on ("package" "util"))
-
-			      (:file       "assembly-mixin"
-			       :depends-on ("package" "fragmentation"))
-			      (:file       "connector"
-			       :depends-on ("package" "util"
-					    "connection" "conversion"))
-			      (:file       "in-connector"
-			       :depends-on ("package" "connector"
-					    "assembly-mixin"))
-			      (:file       "in-push-connector"
-			       :depends-on ("package" "in-connector"))
-			      (:file       "in-pull-connector"
-			       :depends-on ("package" "in-connector"))
-			      (:file       "out-connector"
-			       :depends-on ("package" "connector"))))))
 
 
 ;;; System connection with cl-protobuf
