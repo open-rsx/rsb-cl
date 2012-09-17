@@ -12,6 +12,18 @@ SET(CPACK_DEBIAN_PACKAGE_SECTION      "lisp")
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "all")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS      "common-lisp-controller (>= 5.11)")
 
+# Generate system links
+SET(COMMANDS "")
+IF(CMAKE_VERSION VERSION_LESS "2.8.7")
+    SET(PREFIX "\\\${CMAKE_INSTALL_PREFIX}")
+ELSE()
+    SET(PREFIX "\\\${CMAKE_INSTALL_PREFIX}/usr")
+ENDIF()
+FOREACH(NAME ${ASD_FILES} )
+    SET(COMMANDS "${COMMANDS} && ln -fs \\\"../source/${CMAKE_PROJECT_NAME}/${NAME}\\\" \\\"${PREFIX}/share/common-lisp/systems/${NAME}\\\"")
+ENDFOREACH()
+SET(CPACK_INSTALL_COMMANDS "sh -c 'mkdir -p \\\"${PREFIX}/share/common-lisp/systems\\\" ${COMMANDS}'")
+
 # Generate postinst and prerm hooks
 SET(POSTINST_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/postinst")
 SET(PRERM_SCRIPT    "${CMAKE_CURRENT_BINARY_DIR}/prerm")
