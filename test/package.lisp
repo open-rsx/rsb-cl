@@ -39,10 +39,6 @@
   (:export
    :root)
 
-  ;; Test environment
-  (:export
-   :spread-port)
-
   ;; Test utilities
   (:export
    :check-print
