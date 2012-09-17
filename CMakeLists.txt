@@ -149,6 +149,43 @@ endif()
 
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
+# Execute Lisp process
+MACRO(CONFIGURE_LISP NAME CODE)
+    SET(NAME "${NAME}")
+    SET(DO   "${CODE} --quit")
+    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
+                   "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
+                   @ONLY)
+    SET(REDIRECTIONS)
+ENDMACRO()
+MACRO(CONFIGURE_LISP_REDIRECT NAME CODE)
+    SET(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.out\"
+                      ERROR_FILE  \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.err\"")
+    CONFIGURE_LISP(${NAME} ${CODE})
+ENDMACRO()
+MACRO(EXECUTE_LISP NAME CODE OUTPUT_VARIABLE)
+    CONFIGURE_LISP(${NAME} "${CODE}")
+    MESSAGE(STATUS "Executing Lisp process \"${NAME}\"")
+    EXECUTE_PROCESS(COMMAND cmake -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
+                    OUTPUT_VARIABLE ${OUTPUT_VARIABLE}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+ENDMACRO()
+
+# Project definition (version is grovelled from asd system definition
+# and, possibly in combination with version.sexp file written above).
+SET(SYSTEM_NAME "cl-rsb")
+PROJECT(${SYSTEM_NAME})
+SET(REDIRECTIONS "ERROR_QUIET")
+EXECUTE_LISP("version"
+             "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
+              --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
+             VERSION_FROM_LISP)
+GIT_VERSION_COMPONENTS(${VERSION_FROM_LISP} RSB_VERSION_MAJOR
+                                            RSB_VERSION_MINOR
+                                            RSB_VERSION_PATCH
+                                            RSB_VERSION_COMMIT)
+MESSAGE(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
+
 # Tests
 enable_testing()
 
