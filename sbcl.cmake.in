@@ -3,11 +3,11 @@ SET(ENV{SBCL_HOME}                "@SBCL_HOME@")
 SET(ENV{CL_SOURCE_REGISTRY}       "@CL_SOURCE_REGISTRY@")
 SET(ENV{ASDF_OUTPUT_TRANSLATIONS} "@ASDF_OUTPUT_TRANSLATIONS@")
 
-MESSAGE("Executing Lisp process @NAME@")
 EXECUTE_PROCESS(COMMAND           "@SBCL_EXECUTABLE@"
+                                  --noinform
                                   @LISP_RUNTIME_OPTIONS@
                                   --disable-debugger
-                                  --no-sysinit
+                                  --no-sysinit --no-userinit
                                   @LISP_INIT@
                                   --eval "(setf *terminal-io*
                                                 (make-two-way-stream
