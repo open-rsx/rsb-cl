@@ -49,10 +49,10 @@ notifications on one channel of the bus."))
 				  &key &allow-other-keys)
   "Return the converter for WIRE-TYPE that is used by the connectors
 of PARTICIPANT."
-  (map 'list #'cdr
-       (remove wire-type (participant-converters participant)
-	       :key      #'car
-	       :test-not #'subtypep)))
+  (mapcar #'cdr
+	  (remove wire-type (participant-converters participant)
+		  :key      #'car
+		  :test-not #'subtypep)))
 
 (defmethod participant-error-hook ((participant participant))
   (hooks:object-hook participant 'error-hook))

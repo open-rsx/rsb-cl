@@ -38,11 +38,11 @@ nil. If URI does not specify a transport, return nil."
 	 (queries (split-sequence-if
 		   #'separator? (puri:uri-query uri)
 		   :remove-empty-subseqs t))
-	 (names-and-values (map 'list (curry #'split-sequence #\=)
-				queries)))
+	 (names-and-values (mapcar (curry #'split-sequence #\=)
+				   queries)))
     (iter (for (name value) in names-and-values)
 	  (let ((key (make-keyword (string-upcase name))))
-	    (if (member key '(:host :port))
+	    (if (member key '(:scheme :host :port) :test #'eq)
 		(warn "~@<Ignoring query-option ~S - use ~:*~(~A~) part ~
 of the URI instead.~@:>"
 		      key)
@@ -88,8 +88,8 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)
       (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
 	    fragment uri))
     (values (make-scope path)
-	    (map 'list (curry #'%merge-options uri-options)
-		 transport-options))))
+	    (mapcar (curry #'%merge-options uri-options)
+		    transport-options))))
 
 
 ;;; Utility functions

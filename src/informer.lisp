@@ -64,7 +64,7 @@ channel."))
 
     ;; Ensure that the destination scope of DATA is identical to
     ;; INFORMER's scope.
-    (unless (sub-scope? (event-scope data) (participant-scope informer))
+    (unless (sub-scope? (event-scope data) scope)
       (error 'invalid-event-scope
 	     :event          data
 	     :expected-scope scope))))
@@ -86,7 +86,7 @@ channel."))
 
   ;; Additional meta-data.
   (iter (for (key value) on meta-data :by #'cddr)
-	(unless (member key '(:method :causes :unchecked?))
+	(unless (member key '(:method :causes :unchecked?) :test #'eq)
 	  (setf (meta-data event key) value)))
 
   ;; Additional causes.

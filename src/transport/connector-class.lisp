@@ -51,7 +51,7 @@ order to provide storage and retrieval (via methods on
 `connector-options') for connector direction, wire-type, schemas and
 options."))
 
-(defmethod shared-initialize :after ((instance   connector-class)
+(defmethod shared-initialize :before ((instance   connector-class)
 				     (slot-names t)
 				     &key
 				     wire-type
@@ -99,13 +99,13 @@ super-classes."
 Option definitions in subclasses take precedence over definitions in
 super-classes."
   (let+ (((&slots options) class))
-   (map-into options (curry #'%maybe-expand-option class) options)
-   (remove-duplicates
-    (append (slot-value class 'options)
-	    (mappend #'connector-options
-		     (closer-mop:class-direct-superclasses class)))
-    :key      #'first
-    :from-end t)))
+    (map-into options (curry #'%maybe-expand-option class) options)
+    (remove-duplicates
+     (append (slot-value class 'options)
+	     (mappend #'connector-options
+		      (closer-mop:class-direct-superclasses class)))
+     :key      #'first
+     :from-end t)))
 
 (defmethod closer-mop:validate-superclass ((class      connector-class)
 					   (superclass standard-class))

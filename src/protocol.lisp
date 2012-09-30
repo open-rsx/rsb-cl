@@ -41,17 +41,18 @@
 
 	  (defun ,function-name (,@args)
 	    ,(format nil "Invoke the ~A restart; ~A" name doc)
-	    (let ((restart (find-restart ',name)))
-	      (if restart
-		  (invoke-restart restart ,@args)
-		  (warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name)))))))
+	    (if-let ((restart (find-restart ',name)))
+	      (invoke-restart restart ,@args)
+	      (warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name))))))
 
   (define-restart retry ()
     "Retry the failed operation.")
 
-  ;; use-value restart and function is provided by CL.
+  ;; use-value restart and function are provided by CL.
 
   ;; continue restart and function are provided by CL.
+
+  ;; abort restart and function are provided by CL.
 
   (define-restart log (condition)
     "Log the error and continue processing."

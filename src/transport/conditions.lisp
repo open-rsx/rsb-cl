@@ -47,7 +47,7 @@ been constructed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for ~
-direction ~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~].~
+direction ~A~@[ with options~{~_~2T~16A~^: ~@<~@;~S~>~^,~}~].~
 ~/more-conditions::maybe-print-cause/~@:>"
 	     (connector-construction-failed-name      condition)
 	     (connector-construction-failed-direction condition)

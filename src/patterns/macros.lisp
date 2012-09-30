@@ -77,9 +77,9 @@ variable."
 			    (continue))))
 		    (%remove-method-with-restart-and-timeout
 		     ,var method)))))))
-	 (add-and-remove (map 'list #'process-one methods)))
+	 (add-and-remove (mapcar #'process-one methods)))
     `(unwind-protect
 	  (progn
-	    ,@(map 'list #'first add-and-remove)
+	    ,@(mapcar #'first add-and-remove)
 	    ,@body)
-       ,@(map 'list #'second add-and-remove))))
+       ,@(mapcar #'second add-and-remove))))

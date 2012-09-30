@@ -193,9 +193,8 @@ the requested class cannot be found."
   (check-type name      keyword   "a keyword")
   (check-type direction direction "either :IN-PUSH, :IN-PULL or :OUT")
 
-  (let ((name1 (let ((*package* (find-package :keyword)))
-		 (symbolicate name "-" direction))))
-    (find-transport-class name1)))
+  (find-transport-class
+   (format-symbol :keyword "~A-~A" name direction)))
 
 (defun make-connector (name direction converters &rest args)
   "Create a connector instance for the direction designated by
