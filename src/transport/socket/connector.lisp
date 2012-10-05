@@ -164,18 +164,20 @@ bus at ~A:~D.~@:>"
     ;; via a client bus provider if the server bus provider could not
     ;; be created.
     (:auto
-     (handler-case
-	 (ensure-bus-server host port connector)
-       ((or usocket:address-in-use-error
-	    usocket:address-not-available-error
-	    #+sbcl sb-bsd-sockets:socket-error) (server-condition)
-	 (with-condition-translation
-	     (((error socket-bus-auto-connection-error
-		      :var           client-condition
-		      :cause-initarg nil)
-	       :format-control   "Failed to get socket-based bus as ~
+     (bt:with-recursive-lock-held (*bus-clients-lock*)
+       (bt:with-recursive-lock-held (*bus-servers-lock*)
+	 (handler-case
+	     (ensure-bus-server host port connector)
+	   ((or usocket:address-in-use-error
+	     usocket:address-not-available-error
+	     #+sbcl sb-bsd-sockets:socket-error) (server-condition)
+	     (with-condition-translation
+		 (((error socket-bus-auto-connection-error
+			  :var           client-condition
+			  :cause-initarg nil)
+		   :format-control "Failed to get socket-based bus as ~
 server:~&~@<> ~@;~A~@>~&Failed to get socket-based bus as ~
 client:~&~@<> ~@;~A~@>"
-	       :format-arguments (list server-condition
-				       client-condition)))
-	   (ensure-bus-client host port connector)))))))
+		   :format-arguments (list server-condition
+					   client-condition)))
+	       (ensure-bus-client host port connector)))))))))

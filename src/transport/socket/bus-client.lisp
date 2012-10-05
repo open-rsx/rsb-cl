@@ -31,7 +31,7 @@
 (defvar *bus-clients* (make-hash-table :test #'equalp)
   "Map host names and ports to `bus-client' instances.")
 
-(defvar *bus-clients-lock* (bt:make-lock "Bus clients lock")
+(defvar *bus-clients-lock* (bt:make-recursive-lock "Bus clients lock")
   "A lock that protects accesses to `*bus-clients*'.")
 
 (defun ensure-bus-client (host port connector)
@@ -43,7 +43,7 @@ and protects it from being destroyed in a race condition situation."
 	host port connector)
   (let ((options (make-connection-options connector))
 	(key     (cons host port)))
-    (bt:with-lock-held (*bus-clients-lock*)
+    (bt:with-recursive-lock-held (*bus-clients-lock*)
       (or (when-let ((candidate (gethash key *bus-clients*)))
 	    (with-locked-bus (candidate)
 	      (when (bus-connectors candidate)
