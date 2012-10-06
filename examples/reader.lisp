@@ -22,9 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-;; Note: depending on your RSB configuration, this example may require
-;; a running Spread daemon for successful execution.
-
+;; mark-start::body
 ;; This will create a `reader' instance that receives events which are
 ;; sent to the channel designated by the scope "/example/reader". The
 ;; reader will use all transports which are enabled in the
@@ -56,3 +54,4 @@
   (let ((event (rsb:receive my-reader :block? t)))
     (format t "Received event: ~A~%" event)
     event)) ;; return the event
+;; mark-end::body

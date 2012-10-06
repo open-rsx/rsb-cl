@@ -22,9 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-;; Note: depending on your RSB configuration, this example may require
-;; a running Spread daemon for successful execution.
-
+;; mark-start::body
 ;; This will create a `listener' instance that receives events which
 ;; are sent to the channel designated by the scope
 ;; "/example/listener". The listener will use all transports which are
@@ -61,3 +59,4 @@
       ((event)
        (format t "Received event: ~A~%" event))
     (sleep 20)))
+;; mark-end::body
