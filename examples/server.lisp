@@ -22,9 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-;; Note: depending on your RSB configuration, this example may require
-;; a running Spread daemon for successful execution.
-
+;; mark-start::body
 ;; Create a `local-server' instance that offers its methods under the
 ;; scope "/example/clientserver".
 ;; The local server will use all transports which are enabled in the
@@ -57,3 +55,4 @@
   (rsb.patterns:with-methods (my-server)
       (("echo2" (arg string)
           arg))))
+;; mark-end::body

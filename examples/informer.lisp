@@ -22,9 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-;; Note: depending on your RSB configuration, this example may require
-;; a running Spread daemon for successful execution.
-
+;; mark-start::body
 ;; This will create an `informer' instance that publishes events to
 ;; the channel designated by the scope "/example/informer" and is
 ;; restricted to event payloads of type string. The informer will use
@@ -45,3 +43,4 @@
 ;; also in case of non-local exist.
 (rsb:with-informer (my-informer "/example/informer" 'string)
   (rsb:send my-informer "my-data"))
+;; mark-end::body

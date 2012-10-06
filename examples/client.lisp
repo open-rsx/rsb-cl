@@ -22,9 +22,7 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-;; Note: depending on your RSB configuration, this example may require
-;; a running Spread daemon for successful execution.
-
+;; mark-start::body
 ;; Create a `remote-server' instance that calls methods of the remote
 ;; server at "/example/clientserver".
 ;; The remote server will use all transports which are enabled in the
@@ -78,3 +76,4 @@
 	   "bla"
 	   :return :event
 	   :block? nil))
+;; mark-end::body
