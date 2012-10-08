@@ -23,57 +23,67 @@
 ;;     Bielefeld University
 
 ;; mark-start::body
-;; Create a `remote-server' instance that calls methods of the remote
-;; server at "/example/clientserver".
-;; The remote server will use all transports which are enabled in the
-;; global RSB configuration with their respective configured options.
-(defvar *my-remote-server* (rsb.patterns:make-remote-server "/example/clientserver"))
-
-;; Methods can be called without further preparation. Note that the
-;; initial call of a method may take more time than subsequent methods
-;; due to lazy initialization strategies.
-(rsb.patterns:call *my-remote-server* "echo" "bla")
-
-;; The remote server will remain connected to the bus until it is
-;; garbage collected or explicitly detached using the `detach'
-;; function.
-(rsb:detach *my-remote-server*)
-
 ;; For managing the lifetime of `remote-server' instances (e.g. for
 ;; short-lived clients), the `with-remote-server' macro can used. It
 ;; will take care of disposing of the `remote-server' instance after
 ;; it has been used, also in case of non-local exist.
-(rsb.patterns:with-remote-server (my-remote-server "/example/clientserver")
+;; mark-start::with-remote-server
+(rsb.patterns:with-remote-server (remote-server "/example/clientserver")
+  (format t "Server replied: ~A~%"
+	  (rsb.patterns:call remote-server "echo" "bla")))
+;; mark-end::with-remote-server
 
-  (rsb.patterns:call my-remote-server "echo" "bla")
+;; mark-start::calls
+(rsb.patterns:with-remote-server (remote-server "/example/clientserver")
 
   ;; The default behavior of returning the reply payload can be
   ;; changed using the :return keyword parameter.
-  (rsb.patterns:call my-remote-server "echo" "bla"
+  (rsb.patterns:call remote-server "echo" "bla"
 		     :return :event)
 
   ;; Non-blocking calls can be made using the :block? keyword
   ;; parameter. In that case, an object implementing the future
   ;; protocol is returned to represent the result of the computation.
-  (let ((future (rsb.patterns:call my-remote-server "echo" "bla"
+  (let ((future (rsb.patterns:call remote-server "echo" "bla"
 				   :block? nil)))
     (rsb.patterns:future-result future))
 
   ;; These behaviors can be combined:
-  (let ((future (rsb.patterns:call my-remote-server "echo" "bla"
+  (let ((future (rsb.patterns:call remote-server "echo" "bla"
 				   :block? nil
 				   :return :event)))
     (rsb.patterns:future-result future))
 
   ;; Another way of calling methods makes use of the fact that
   ;; `remote-method' instances are funcallable:
-  (map 'list (rsb.patterns:server-method my-remote-server "echo")
+  (map 'list (rsb.patterns:server-method remote-server "echo")
        '("a" "b" "c"))
 
   ;; This variant provides all the different behaviors of the `call'
   ;; variant:
-  (funcall (rsb.patterns:server-method my-remote-server "echo")
+  (funcall (rsb.patterns:server-method remote-server "echo")
 	   "bla"
 	   :return :event
 	   :block? nil))
+;; mark-end::calls
+
+;; Create a `remote-server' instance that calls methods of the remote
+;; server at "/example/clientserver".
+;; The remote server will use all transports which are enabled in the
+;; global RSB configuration with their respective configured options.
+;;
+;; Methods can be called without further preparation. Note that the
+;; initial call of a method may take more time than subsequent methods
+;; due to lazy initialization strategies.
+;;
+;; The remote server will remain connected to the bus until it is
+;; garbage collected or explicitly detached using the `detach'
+;; function.
+;; mark-start::variable
+(defvar *remote-server* (rsb.patterns:make-remote-server "/example/clientserver"))
+
+(rsb.patterns:call *remote-server* "echo" "bla")
+
+(rsb:detach *remote-server*)
+;; mark-end::variable
 ;; mark-end::body

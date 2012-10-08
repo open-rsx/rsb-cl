@@ -23,26 +23,6 @@
 ;;     Bielefeld University
 
 ;; mark-start::body
-;; This will create a `reader' instance that receives events which are
-;; sent to the channel designated by the scope "/example/reader". The
-;; reader will use all transports which are enabled in the
-;; configuration with their respective configured options.
-(defvar *my-reader* (rsb:make-reader "/example/reader"))
-
-;; Note: this form will block until an event is received.
-(let ((event (rsb:receive *my-reader* :block? t))) ;; block? defaults to t
-  (format t "Received event: ~A~%" event)
-  event) ;; return the event
-
-;; It is also possible to use `rsb:receive' in a non-blocking mode. In
-;; that case, an `event' or nil is returned.
-(let ((event (rsb:receive *my-reader* :block? nil)))
-  (format t "~:[Did not receive an event~;Received event: ~:*~A~]~%"
-	  event)
-  event) ;; return the event, or nil
-
-;; The reader will participate in the channel until it is garbage
-;; collected or explicitly detached from he channel.
 
 ;; For managing the lifetime of readers (e.g. for short-lived
 ;; readers), the `with-reader' macro can used. It will take care of
@@ -50,8 +30,39 @@
 ;; case of non-local exist.
 ;;
 ;; Note: this form will block until an event is received.
-(rsb:with-reader (my-reader "/example/reader")
-  (let ((event (rsb:receive my-reader :block? t)))
+;; mark-start::with-reader
+(rsb:with-reader (reader "/example/reader")
+  (let ((event (rsb:receive reader :block? t)))
     (format t "Received event: ~A~%" event)
     event)) ;; return the event
+;; mark-end::with-reader
+
+;; This will create a `reader' instance that receives events which are
+;; sent to the channel designated by the scope "/example/reader". The
+;; reader will use all transports which are enabled in the
+;; configuration with their respective configured options.
+;;
+;; Note: the `receive' call will block until an event is received.
+;; mark-start::variable
+(defvar *reader* (rsb:make-reader "/example/reader"))
+;; mark-end::variable
+
+;; The reader will participate in the channel until it is garbage
+;; collected or explicitly detached from he channel.
+
+;; mark-start::receive/block
+(let ((event (rsb:receive *reader* :block? t))) ;; block? defaults to t
+  (format t "Received event: ~A~%" event)
+  event) ;; return the event
+;; mark-end::receive/block
+
+;; It is also possible to use `rsb:receive' in a non-blocking mode. In
+;; that case, an `event' or nil is returned.
+;; mark-start::receive/noblock
+(let ((event (rsb:receive *reader* :block? nil)))
+  (format t "~:[Did not receive an event~;Received event: ~:*~A~]~%"
+	  event)
+  event) ;; return the event, or nil
+;; mark-end::receive/noblock
+
 ;; mark-end::body
