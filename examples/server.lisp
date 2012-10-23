@@ -39,7 +39,7 @@
 
 ;; mark-start::setf-method
 (rsb.patterns:with-local-server (server "/example/clientserver")
-  (setf (rsb.patterns:server-method server "echo2")
+  (setf (rsb.patterns:server-method server "echo")
 	#'(lambda (arg)
 	    arg)))
 ;; mark-end::setf-method
@@ -58,7 +58,7 @@
 ;; mark-start::variable
 (defvar *local-server* (rsb.patterns:make-local-server "/example/clientserver"))
 
-(setf (rsb.patterns:server-method *local-server* "echo3")
+(setf (rsb.patterns:server-method *local-server* "echo")
       #'(lambda (arg)
 	  arg))
 

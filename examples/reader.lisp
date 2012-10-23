@@ -31,8 +31,8 @@
 ;;
 ;; Note: this form will block until an event is received.
 ;; mark-start::with-reader
-(rsb:with-reader (reader "/example/reader")
-  (let ((event (rsb:receive reader :block? t)))
+(rsb:with-reader (reader "/example/informer")
+  (let ((event (rsb:receive reader)))
     (format t "Received event: ~A~%" event)
     event)) ;; return the event
 ;; mark-end::with-reader
@@ -44,11 +44,10 @@
 ;;
 ;; Note: the `receive' call will block until an event is received.
 ;; mark-start::variable
-(defvar *reader* (rsb:make-reader "/example/reader"))
-;; mark-end::variable
+(defvar *reader* (rsb:make-reader "/example/informer"))
 
 ;; The reader will participate in the channel until it is garbage
-;; collected or explicitly detached from he channel.
+;; collected or explicitly detached from the channel.
 
 ;; mark-start::receive/block
 (let ((event (rsb:receive *reader* :block? t))) ;; block? defaults to t
@@ -64,5 +63,6 @@
 	  event)
   event) ;; return the event, or nil
 ;; mark-end::receive/noblock
+;; mark-end::variable
 
 ;; mark-end::body

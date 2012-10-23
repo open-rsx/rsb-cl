@@ -31,7 +31,7 @@
 ;; To register a handler with limited lifetime, the `with-handler'
 ;; macro can be used.
 ;; mark-start::with-listener
-(rsb:with-listener (listener "/example/listener2")
+(rsb:with-listener (listener "/example/informer")
   (rsb::with-handler listener
       ((event)
        (format t "Received event: ~A~%" event))
@@ -52,7 +52,7 @@
 ;; The listener will participate in the channel until it is garbage
 ;; collected or explicitly detached from he channel.
 ;; mark-start::variable
-(defvar *listener* (rsb:make-listener "/example/listener"))
+(defvar *listener* (rsb:make-listener "/example/informer"))
 
 (push (lambda (event)
 	(format t "Received event: ~A~%" event))
