@@ -133,6 +133,7 @@ See `version/list' for details on keyword parameters."
 		:more-conditions
 
 
+		:lparallel
 		#+sbcl :sb-concurrency
 		:bordeaux-threads
 		:trivial-garbage
@@ -167,6 +168,14 @@ See `version/list' for details on keyword parameters."
 					    "protocol"))
 			      (:file       "error-handling"
 			       :depends-on ("package"))))
+
+		(:module     "executor"
+		 :pathname   "src/executor"
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
+			      (:file       "executor"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "filter"
 		 :pathname   "src/filter"
