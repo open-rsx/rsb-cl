@@ -1,6 +1,6 @@
 ;;; fragmentation.lisp --- Fragmentation and assembly of data/notifications.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -256,7 +256,7 @@ delete them."
       (when-let ((old (remove min-age (hash-table-values assemblies)
 			      :test #'>=
 			      :key  #'assembly-age)))
-	(log1 :info pool "Removing partial assemblies ~_~{~S~^, ~}" old)
+	(log1 :info pool "Removing ~D partial assembl~:@P" (length old))
 	(iter (for assembly in old)
 	      (remhash (assembly-id assembly) assemblies))))))
 
