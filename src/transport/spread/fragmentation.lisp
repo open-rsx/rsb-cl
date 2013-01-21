@@ -81,14 +81,15 @@ ASSEMBLY."
 (defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
 fragments of ASSEMBLY. ASSEMBLY has to be complete."
+  (declare #.cl-rsb-system:+optimization-fast+unsafe+)
   (let* ((fragments (map 'list (compose #'notification-data
 					#'fragmented-notification-notification)
 			 (assembly-fragments assembly)))
 	 (size      (reduce #'+ fragments :key #'length))
-	 (result    (make-array size :element-type '(unsigned-byte 8))))
-    (iter (for (the octet-vector fragment) in       fragments)
-	  (for (the fixnum start)          previous end :initially 0)
-	  (for (the fixnum end)            next     (+ start (length fragment)))
+	 (result    (make-octet-vector size)))
+    (iter (for (the simple-octet-vector fragment) in       fragments)
+	  (for (the fixnum start)                 previous end :initially 0)
+	  (for (the fixnum end)                   next     (+ start (length fragment)))
 	  (setf (subseq result start end) fragment))
     result))
 
@@ -228,8 +229,7 @@ MIN-AGE."))
 	 #'(lambda ()
 	     (iter (until (slot-value instance 'stop?))
 		   (let ((age-limit (assembly-pool-age-limit instance)))
-		     (delete-partial-assemblies
-		      instance age-limit)
+		     (delete-partial-assemblies instance age-limit)
 		     (sleep (/ age-limit 4)))))))
 
   ;; Terminate the thread that deletes partial assemblies.
