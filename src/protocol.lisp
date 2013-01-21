@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Main client-facing protocol provided by cl-rsb.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -262,6 +262,7 @@ converters is derived from the default configuration."))
 		  &rest meta-data
 		  &key
 		  method
+		  causes
 		  unchecked?
 		  &allow-other-keys)
   (:documentation
@@ -270,6 +271,9 @@ participates. Add key-value pairs in META-DATA to the meta-data of the
 event created from DATA.
 
 METHOD can be used to set the method of the sent event.
+
+CAUSES can be used to add a list of cause vectors to the sent
+event. The cause vector have to be `event-id's.
 
 UNCHECKED? controls whether the compatibility of INFORMER and DATA
 should be validated. This mainly applies if data is an `event'
