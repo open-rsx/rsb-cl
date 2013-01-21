@@ -1,6 +1,6 @@
 ;;; configuration.lisp ---
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -180,22 +180,15 @@ If supplied, CONFIG specifies the configuration that should be used to
 determine the set of default converters. if CONFIG is not supplied,
 the value of `*default-configuration*' is used."
   '((nibbles:octet-vector . (:fundamental-void
+			     :fundamental-bool
+			     :fundamental-uint32
+			     :fundamental-int32
+			     :fundamental-uint64
+			     :fundamental-int64
+			     :fundamental-float
+			     :fundamental-double
 			     :fundamental-utf-8-string
 			     :fundamental-bytes
-			     ;; TODO(jmoringe): hack
-			     #+asdf-protocol-buffer-descriptors
-			     :fundamental-double
-			     #+asdf-protocol-buffer-descriptors
-			     :fundamental-float
-			     #+asdf-protocol-buffer-descriptors
-			     :fundamental-uint64
-			     #+asdf-protocol-buffer-descriptors
-			     :fundamental-int64
-			     #+asdf-protocol-buffer-descriptors
-			     :fundamental-uint32
-			     #+asdf-protocol-buffer-descriptors
-			     :fundamental-int32
-			     #+asdf-protocol-buffer-descriptors
 			     :protocol-buffer))))
 
 (defun default-converter (wire-type

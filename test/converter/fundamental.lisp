@@ -1,6 +1,6 @@
 ;;; fundamental.lisp --- Unit tests for "fundamental" converters.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -60,6 +60,37 @@
       ("bar"                   t    "bar")
       (,(octetify #(65 65 65)) t    ,(octetify #(65 65 65)))
       (,(octetify #(65 65 65)) :foo ,(octetify #(65 65 65)))))
+
+
+;;; Converter fundamental-bool
+;;
+
+(deftestsuite fundamental-bool-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-bool' converter."))
+
+(define-basic-converter-test-cases (:fundamental-bool)
+    `((,(octetify #(0)) :bool nil)
+      (,(octetify #(1)) :bool t)
+      (:not-applicable  :bool "bar")
+      (,(octetify #(2)) :bool :error)))
+
+
+;;; Converter fundamental-int32
+;;
+
+(deftestsuite fundamental-int32-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-int32' converter."))
+
+(define-basic-converter-test-cases (:fundamental-int32)
+    `((,(octetify #(0 0 0 0))         :int32 0)
+      (,(octetify #(1 0 0 0))         :int32 1)
+      (,(octetify #(255 255 255 255)) :int32 -1)
+      (:not-applicable                :int32 "bar")
+      (,(octetify #(1))               :int32 :error)))
 
 
 ;;; Converter fundamental-ascii-string

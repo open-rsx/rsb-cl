@@ -1,6 +1,6 @@
 ;;; cl-rsb.asd --- Common Lisp implementation of RSB.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -635,8 +635,7 @@ RSB events to/from Google protocol buffers."
 
 		(:module     "converter-protocol-buffer"
 		 :pathname   "src/converter"
-		 :components ((:file       "fundamental-numbers")
-			      (:file       "protocol-buffers")))))
+		 :components ((:file       "protocol-buffers")))))
 
 
 ;;; System connection with usocket
