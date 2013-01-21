@@ -251,12 +251,13 @@ MIN-AGE."))
   "Find `assembly' instance in POOL whose age is at least MIN-AGE and
 delete them."
   (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)
-			  (lock       %assembly-pool-lock)) pool))
+			  (lock       %assembly-pool-lock)) pool)
+	 (string (princ-to-string pool)))
     (bt:with-lock-held (lock)
       (when-let ((old (remove min-age (hash-table-values assemblies)
 			      :test #'>=
 			      :key  #'assembly-age)))
-	(log1 :info pool "Removing ~D partial assembl~:@P" (length old))
+	(log1 :info string "Removing ~D partial assembl~:@P" (length old))
 	(iter (for assembly in old)
 	      (remhash (assembly-id assembly) assemblies))))))
 
