@@ -1,6 +1,6 @@
 ;;; scope.lisp --- Scope class and related functions.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -110,9 +110,12 @@ names."))
 (defmethod make-scope ((thing string)
 		       &key
 		       intern?)
-  (make-scope (split-sequence #\/ thing
-			      :remove-empty-subseqs t)
-	      :intern? intern?))
+  (let+ (((&values components separator-count)
+	  (split-sequence #\/ thing :remove-empty-subseqs t)))
+    (when (zerop separator-count)
+      (check-type separator-count positive-integer
+		  "a positive number of \"/\"-separators"))
+    (make-scope components :intern? intern?)))
 
 (defun scope= (thing1 thing2)
   "Return non-nil if THING1 is the same scope as THING2."

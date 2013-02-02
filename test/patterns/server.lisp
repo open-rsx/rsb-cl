@@ -1,6 +1,6 @@
 ;;; server.lisp --- Unit tests for the method1 and server classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -34,15 +34,24 @@
 	  "Test constructing `method1' instances.")
   construction
 
-  ;; Missing :name initarg
-  (ensure-condition 'missing-required-initarg
-    (make-instance 'method1))
+  (ensure-cases (initargs expected)
+      '(;; Some invalid instantiations.
+	(()                     missing-required-initarg) ; missing :name
+	((:name "illegal/name") type-error)
+	((:name "illegal name") type-error)
+	((:name "i113g4l n4m3") type-error)
 
-  ;; Some illegal method names
-  (ensure-cases (name)
-      '("illegal-name" "illegal/name" "illegal name" "i113g4l n4m3")
-    (ensure-condition 'type-error
-      (make-instance 'method1 :name name))))
+	;; These are valid.
+	((:name "legal-name")   t))
+
+    (let+ (((&flet do-it () (apply #'make-instance 'method1 initargs))))
+      (case expected
+	(missing-required-initarg
+	 (ensure-condition 'missing-required-initarg (do-it)))
+	(type-error
+	 (ensure-condition 'type-error (do-it)))
+	(t
+	 (do-it))))))
 
 (deftestsuite server-root (patterns-root)
   ((simple-server (make-instance 'server :scope "/server"))

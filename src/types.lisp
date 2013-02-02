@@ -1,6 +1,6 @@
 ;;; types.lisp --- Types used in the cl-rsb system.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -38,11 +38,12 @@
 (defun scope-component? (string)
   "Non-nil when STRING is a valid scope component."
   (let+ (((&flet valid-char? (char)
-	    (or (<= (char-code #\a) (char-code char) (char-code #\z))
-		(<= (char-code #\A) (char-code char) (char-code #\Z))
-		(<= (char-code #\0) (char-code char) (char-code #\9))
-		(char= char #\_)))))
-    (and (not (emptyp string))
+	    (or (char<= #\a char #\z)
+		(char<= #\A char #\Z)
+		(char<= #\0 char #\9)
+		(char= char #\_) (char= char #\-)))))
+    (declare (dynamic-extent #'valid-char?))
+    (and (stringp string) (not (emptyp string))
 	 (every #'valid-char? string))))
 
 (deftype scope-designator ()

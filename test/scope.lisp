@@ -1,6 +1,6 @@
 ;;; scope.lisp --- Unit tests for scope class and related functions.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -33,44 +33,59 @@
 
 (addtest (scope-root
           :documentation
-	  "Test constructing `scope' instances.")
-  construction
+	  "Test constructing `scope' instances from lists of component
+strings.")
+  construction/from-conponents
 
-  (ensure-same
-   (scope-components (make-scope (make-scope "/foo")))
-   '("foo")
-   :test #'equalp)
-  (ensure-same
-   (scope-components (make-scope '("bar" "foo")))
-   '("bar" "foo")
-   :test #'equalp)
-  (ensure-same
-   (scope-components (make-scope (make-scope #("baz" "bar"))))
-   '("baz" "bar")
-   :test #'equalp)
+  (ensure-cases (input expected-components)
+      `(;; Some invalid cases
+	(("/foo ")            type-error) ; invalid character: space
+	(("/!@#/+1")          type-error) ; invalid characters: !@#+
+	(#("!@#" "foo")       type-error) ; likewise for vector
+	(#("/")               type-error)
+	(("")                 type-error) ; empty component
 
-  (ensure-cases (invalid)
-      '("/foo " "/!@#/+1" #("!@#" "foo") #("/") '("") '())
-    (ensure-condition 'type-error
-      (make-scope invalid))))
+	;; These are valid
+	(,(make-scope "/foo") ("foo"))
+	(()                   ())
+	(("bar" "foo")        ("bar" "foo"))
+	(#("baz" "bar")       ("baz" "bar"))
+	(("foo" "_")          ("foo" "_"))
+	(("foo" "-")          ("foo" "-")))
+    (case expected-components
+      (type-error (ensure-condition 'type-error (make-scope input)))
+      (t          (ensure-same (scope-components (make-scope input))
+			       expected-components
+			       :test #'equalp)))))
 
 (addtest (scope-root
           :documentation
 	  "Test constructing `scope' instances from strings.")
-  from-string
+  construction/from-string
 
-  (ensure-cases (string components)
-      '(("///Foo//BAR" ("Foo" "BAR"))
+  (ensure-cases (string expected-components)
+      '(;; Some invalid cases.
+	("/foo "       type-error) ; invalid character: space
+	("/!@#/+1"     type-error) ; invalid characters: !@#+
+	(""            type-error) ; empty string
+
+	;; These are valid.
+	("///Foo//BAR" ("Foo" "BAR"))
 	("//foo/bar"   ("foo" "bar"))
 	("foo/bar"     ("foo" "bar"))
 	("//foo/bar"   ("foo" "bar"))
 	("/foo/bar/"   ("foo" "bar"))
 	("/foo/5/"     ("foo" "5"))
+	("/foo/-/"     ("foo" "-"))
+	("/foo/_/"     ("foo" "_"))
+	("/-/foo/"     ("-" "foo"))
+	("/_/foo/"     ("_" "foo"))
 	("/"           ()))
-    (ensure-same
-     (scope-components (make-scope string))
-     components
-     :test #'equal)))
+    (case expected-components
+      (type-error (ensure-condition 'type-error (make-scope string)))
+      (t          (ensure-same (scope-components (make-scope string))
+			       expected-components
+			       :test #'equal)))))
 
 (addtest (scope-root
           :documentation

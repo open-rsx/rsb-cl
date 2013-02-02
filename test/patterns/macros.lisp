@@ -1,6 +1,6 @@
 ;;; macros.lisp --- Unit tests for macros of the patterns module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -56,18 +56,21 @@
   macroexpand
 
   (ensure-cases (method expected)
-      '((("validname"    (foo string) foo) t)
+      '(;; Some invalid constructions.
+	(("invalid name" (foo string) foo) type-error)
+	(("%invalidname" (foo string) foo) type-error)
+	(("invalidtype"  (foo 5)      foo) type-error)
+
+	;; These are valid.
+	(("validname"    (foo string) foo) t)
 	((:validname     (foo string) foo) t)
 	((validname      (foo string) foo) t)
+	(("valid-name"   (foo string) foo) t)
 	(("v41id_n4m3"   (foo string) foo) t)
 	(("eventarg"     (foo :event) foo) t)
-	(("noarg"        ()        :const) t)
+	(("noarg"        ()        :const) t))
 
-	(("%invalidname" (foo string) foo) :error)
-	(("invalid-name" (foo string) foo) :error)
-	(("invalidtype"  (foo 5)      foo) :error))
-
-    (if (eq expected :error)
-	(ensure-condition 'type-error
-	  (macroexpand `(with-methods (server) (,method))))
-	(macroexpand `(with-methods (server) (,method))))))
+    (case expected
+      (type-error (ensure-condition 'type-error
+		    (macroexpand `(with-methods (server) (,method)))))
+      (t          (macroexpand `(with-methods (server) (,method)))))))
