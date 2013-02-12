@@ -156,7 +156,7 @@ See `version/list' for details on keyword parameters."
 			       :depends-on ("package"))
 
 			      (:file       "scope"
-			       :depends-on ("package" "protocol"))
+			       :depends-on ("package" "types" "protocol"))
 			      (:file       "event"
 			       :depends-on ("package" "types" "util"))
 			      (:file       "uris"
