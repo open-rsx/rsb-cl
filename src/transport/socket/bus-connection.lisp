@@ -1,6 +1,6 @@
 ;;; bus-connection.lisp --- Connection class used by bus provider.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -96,6 +96,10 @@ but shares these among participants in the process."))
 	   (usocket:socket-connect host port
 				   :element-type '(unsigned-byte 8)
 				   :nodelay      nodelay?))))
+
+  ;;; TODO(jmoringe, 2013-02-13): this unportable hack is required
+  ;;; until usocket adds support. Note redundant initarg above.
+  (setf (sb-bsd-sockets::sockopt-tcp-nodelay (usocket:socket (connection-socket instance))) nodelay?)
 
   ;; If requested, perform handshake in the requested role.
   (let ((stream (usocket:socket-stream (connection-socket instance))))
