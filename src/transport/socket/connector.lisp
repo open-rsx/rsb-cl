@@ -1,6 +1,6 @@
 ;;; connector.lisp --- Superclass for socket-based connectors.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -60,7 +60,7 @@ bus to which the connector provides access.")
 	     :initarg  :nodelay?
 	     :type     t
 	     :reader   connector-nodelay?
-	     :initform nil
+	     :initform t
 	     :documentation
 	     "Controls whether decreased troughput should be traded for reduced latency by the connector. For TCP connections this means the TCPNODELAY option should be set on the socket implementing the bus connection."))
   (:default-initargs
