@@ -1,6 +1,6 @@
 ;;; in-connector.lisp --- Superclass for in-direction connector classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -53,15 +53,16 @@ connector classes for Spread."))
 (defmethod receive-message ((connector in-connector)
 			    (block?    t))
   "Delegate receiving a message to the connection of CONNECTOR."
-  (values
-   (receive-message (connector-connection connector) block?)
-   :undetermined))
+  (let+ (((&values buffer length)
+	  (receive-message (connector-connection connector) block?)))
+   (values (cons buffer length) :undetermined)))
 
 (defmethod message->event ((connector   in-connector)
-			   (message     simple-array)
+			   (message     cons)
 			   (wire-schema t))
   (let+ (((&accessors-r/o (pool      connector-assembly-pool)
 			  (converter connector-converter)) connector)
+	 ((buffer . length)    message)
 	 (expose-wire-schema?  (connector-expose? connector :rsb.transport.wire-schema))
 	 (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
 	 notification)
@@ -76,7 +77,9 @@ connector classes for Spread."))
 unpacked as a protocol buffer of kind ~S.~:@>"
 			   :format-arguments '(fragmented-notification)
 			   :cause            condition))))
-      (setf notification (pb:unpack message 'fragmented-notification)))
+      (setf notification (pb:unpack
+			  buffer (make-instance 'fragmented-notification)
+			  0 length)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'

@@ -48,17 +48,23 @@ message."))
 ;;
 
 (defclass connection ()
-  ((connection :initarg  :connection
-	       :type     network.spread:connection
-	       :documentation
-	       "The underlying spread connection used by the connector
+  ((connection     :initarg  :connection
+		   :type     network.spread:connection
+		   :documentation
+		   "The underlying spread connection used by the connector
 instance.")
-   (groups     :type     hash-table
-	       :initform (make-hash-table :test #'equal)
-	       :documentation
-	       "A mapping of group names to reference counts. The
+   (groups         :type     hash-table
+		   :initform (make-hash-table :test #'equal)
+		   :documentation
+		   "A mapping of group names to reference counts. The
 connection instance is a member of every group that has a positive
-reference count."))
+reference count.")
+   (receive-buffer :type     (or null simple-octet-vector)
+		   :initform nil
+		   :documentation
+		   "Stores a buffer which is used for receiving
+messages. The buffer is allocated lazily to avoid wasting memory for
+send-only connections."))
   (:documentation
    "Instances of this class represent connections to Spread
 communication system and maintain a list of the Spread multicast
@@ -119,13 +125,21 @@ groups in which they are members."))
 	  ,@body)))
 
   (defmethod receive-message ((connection connection) (block? t))
-    (with-spread-condition-translation
-	(spread:receive (slot-value connection 'connection) :block? block?)))
+    (declare (inline %ensure-receive-buffer))
+    (let+ ((buffer (%ensure-receive-buffer connection))
+	   ((&slots-r/o connection) connection))
+      (with-spread-condition-translation
+	(values
+	 buffer
+	 (network.spread:receive-into connection buffer
+				      :block?         block?
+				      :return-sender? nil
+				      :return-groups? nil)))))
 
   (defmethod send-message ((connection  connection)
 			   (destination list)
 			   (payload     simple-array))
-    (check-type payload octet-vector "an octet-vector")
+    (check-type payload simple-octet-vector "a simple-octet-vector")
 
     (with-spread-condition-translation
 	(network.spread:send-bytes
@@ -137,3 +151,13 @@ groups in which they are members."))
       (format stream "~A (~D)"
 	      (network.spread:connection-name connection)
 	      (hash-table-count groups)))))
+
+
+;;; Utility functions
+;;
+
+(defun %ensure-receive-buffer (connection)
+  (or (slot-value connection 'receive-buffer)
+      (setf (slot-value connection 'receive-buffer)
+	    (make-octet-vector
+	     network.spread:+maximum-message-data-length+))))

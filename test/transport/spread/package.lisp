@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for unit tests of the transport.spread module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -27,6 +27,7 @@
    :cl
    :alexandria
    :iterate
+   :let-plus
    :more-conditions
    :lift
 

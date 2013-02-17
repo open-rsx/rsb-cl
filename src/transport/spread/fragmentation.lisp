@@ -265,8 +265,8 @@ delete them."
 ;;; Fragmentation
 ;;
 
-(declaim (ftype (function (octet-vector non-negative-fixnum non-negative-fixnum)
-			  octet-vector)
+(declaim (ftype (function (simple-octet-vector non-negative-fixnum non-negative-fixnum)
+			  simple-octet-vector)
 		make-data-fragment)
 	 (inline make-data-fragment))
 
@@ -281,7 +281,7 @@ delete them."
 (defun %make-key (event-id)
   "Return a vector that can be used to identify the notification from
 which SEQUENCE-NUMBER and SENDER-ID have been extracted."
-  (concatenate 'octet-vector
+  (concatenate 'simple-octet-vector
 	       (nth-value 1 (binio:encode-uint32-be
 			     (event-id-sequence-number event-id)))
 	       (event-id-sender-id event-id)))

@@ -1,6 +1,6 @@
 ;;; connectors.lisp --- Unit tests for connector classes.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -30,9 +30,12 @@
 
 (deftestsuite in-connector-root (transport-spread-root
 				 connector-suite)
-  ((a-string           (sb-ext:string-to-octets "foobarbaz"))
-   (empty-notification (pb:pack* (make-instance
-				  'rsb.protocol:notification))))
+  ((a-string           (let ((buffer (sb-ext:string-to-octets "foobarbaz")))
+			 (cons buffer (length buffer))))
+   (empty-notification (let+ (((&values length buffer)
+			       (pb:pack (make-instance
+					 'rsb.protocol:notification))))
+			 (cons buffer length))))
   (:documentation
    "Tests for the `in-connector' class and associated methods."))
 
@@ -41,27 +44,26 @@
 	  "Test `message->event' method.")
   message->event
 
-  (ensure-cases (notification wire-schema connector-args condition?)
-      `(;; In these cases, protocol buffer unpacking fails
-	(,a-string           :foo (:error-policy nil)          t)
+  (ensure-cases (notification wire-schema connector-args expected)
+      `(;; In these cases, protocol buffer unpacking fails.
+	(,a-string           :foo (:error-policy nil)          decoding-error)
 	(,a-string           :foo (:error-policy ,#'continue)  nil)
 	(,a-string           :foo (:error-policy ,#'log-error) nil)
 
 	;; Protocol buffer unpacking succeeds, but conversion to event
 	;; fails.
-	(,empty-notification :foo (:error-policy nil)          t)
+	(,empty-notification :foo (:error-policy nil)          decoding-error)
 	(,empty-notification :foo (:error-policy ,#'continue)  nil)
 	(,empty-notification :foo (:error-policy ,#'log-error) nil))
 
-    (let ((connector (apply #'make-instance 'in-pull-connector ;;; TODO(jmoringe): class
-			    (append common-args connector-args))))
-      (if condition?
-	  (ensure-condition 'decoding-error
-	    (rsb.ep:with-error-policy (connector)
-	      (message->event connector notification wire-schema)))
-	  (ensure-null
-	   (rsb.ep:with-error-policy (connector)
-	     (message->event connector notification wire-schema)))))))
+    (let+ ((connector (apply #'make-instance 'in-pull-connector ;;; TODO(jmoringe): class
+			     (append common-args connector-args)))
+	   ((&flet do-it ()
+	      (rsb.ep:with-error-policy (connector)
+		(message->event connector notification wire-schema)))))
+      (case expected
+	(decoding-error (ensure-condition 'decoding-error (do-it)))
+	((nil           (ensure-null (do-it))))))))
 
 
 ;;; Connector classes
