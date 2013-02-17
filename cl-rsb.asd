@@ -129,7 +129,7 @@ See `version/list' for details on keyword parameters."
   :depends-on  (:alexandria
 		:split-sequence
 		:iterate
-		:let-plus
+		(:version :let-plus "0.2")
 		:more-conditions
 
 

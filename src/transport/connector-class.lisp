@@ -1,6 +1,6 @@
 ;;; connector-class.lisp --- Metaclass for connector classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -69,7 +69,7 @@ options."))
   (let ((default-initargs (call-next-method)))
     ;; Added initargs for options with &slot specification.
     (iter (for option in (connector-options class))
-	  (let+ (((name nil
+	  (let+ (((name &ign
 		   &key (default t default-supplied?) &allow-other-keys)
 		  option))
 	    (when default-supplied?
@@ -115,7 +115,7 @@ super-classes."
 ;;; Utility functions
 ;;
 
-(defun+ %maybe-expand-option (class (&whole option name type &rest nil))
+(defun+ %maybe-expand-option (class (&whole option name type &rest &ign))
   "Potentially expand the options description OPTION using information
 from CLASS."
   (or (unless (eq type '&slot)
