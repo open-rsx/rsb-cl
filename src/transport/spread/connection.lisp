@@ -1,6 +1,6 @@
 ;;; connection.lisp --- Spread connections with membership management.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -49,7 +49,7 @@ message."))
 
 (defclass connection ()
   ((connection :initarg  :connection
-	       :type     spread:connection
+	       :type     network.spread:connection
 	       :documentation
 	       "The underlying spread connection used by the connector
 instance.")
@@ -87,12 +87,13 @@ groups in which they are members."))
                                      &key
 				     name)
   (when name
-    (setf (slot-value instance 'connection) (spread:connect name))))
+    (setf (slot-value instance 'connection)
+	  (network.spread:connect name))))
 
 (defmethod ref-group ((connection connection) (group string))
   (when (= (incf (gethash group (slot-value connection 'groups) 0)) 1)
     (log1 :info connection "Joining group ~S" group)
-    (spread:join (slot-value connection 'connection) group)))
+    (network.spread:join (slot-value connection 'connection) group)))
 
 (defmethod unref-group :around ((connection connection) (group string))
   (if (gethash group (slot-value connection 'groups))
@@ -103,14 +104,14 @@ groups in which they are members."))
   (when (zerop (decf (gethash group (slot-value connection 'groups) 0)))
     (log1 :info connection "leaving group ~S" group)
     (remhash group (slot-value connection 'groups))
-    (spread:leave (slot-value connection 'connection) group)))
+    (network.spread:leave (slot-value connection 'connection) group)))
 
 (macrolet
     ((with-spread-condition-translation (&body body)
        `(handler-bind
-	    ((spread:spread-error
+	    ((network.spread:spread-error
 	       #'(lambda (condition)
-		   (when (member (spread:spread-error-code condition)
+		   (when (member (network.spread:spread-error-code condition)
 				 '(:net-error-on-session :connection-closed))
 		     (error 'connection-unexpectedly-closed
 			    :connection connection
@@ -127,12 +128,12 @@ groups in which they are members."))
     (check-type payload octet-vector "an octet-vector")
 
     (with-spread-condition-translation
-	(spread:send-bytes
+	(network.spread:send-bytes
 	 (slot-value connection 'connection) destination payload))))
 
 (defmethod print-object ((object connection) stream)
   (with-slots (connection groups) object
     (print-unreadable-object (object stream :type t :identity t)
       (format stream "~A (~D)"
-	      (spread:connection-name connection)
+	      (network.spread:connection-name connection)
 	      (hash-table-count groups)))))

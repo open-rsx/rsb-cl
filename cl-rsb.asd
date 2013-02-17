@@ -374,7 +374,7 @@ See `version/list' for details on keyword parameters."
   :description "Documentation generation for the cl-rsb system."
   :depends-on  (:cxml-stp
 		:cl-protobuf
-		:cl-spread
+		:network.spread
 		:cl-rsb)
   :components  ((:module     "doc"
 		 :components ((:file       "package"))))
@@ -393,7 +393,7 @@ See `version/list' for details on keyword parameters."
   :depends-on  ((:version :lift   "1.7.1")
 
 		:cl-protobuf
-		:cl-spread
+		:network.spread
 		:usocket
 
 		(:version :cl-rsb #.(version/string)))
@@ -525,8 +525,8 @@ See `version/list' for details on keyword parameters."
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
   (eval (read-from-string
-	 "(SPREAD:WITH-DAEMON (:PORT (ASDF:COMPONENT-PROPERTY
-                                       (ASDF:FIND-SYSTEM :CL-RSB-TEST) :SPREAD-PORT))
+	 "(NETWORK.SPREAD:WITH-DAEMON (:PORT (ASDF:COMPONENT-PROPERTY
+                                               (ASDF:FIND-SYSTEM :CL-RSB-TEST) :SPREAD-PORT))
             (LIFT:RUN-TESTS :CONFIG :GENERIC))")))
 
 
@@ -547,11 +547,11 @@ introspection of RSB configuration options."
 		 :pathname   "src/clon")))
 
 
-;;; System connection with cl-spread
+;;; System connection with network.spread
 ;;
 
 #+asdf-system-connections
-(defsystem-connection :cl-rsb-and-cl-spread
+(defsystem-connection :cl-rsb-and-network.spread
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -559,7 +559,7 @@ introspection of RSB configuration options."
   :description "This system connections provides a RSB transport based
 on the spread group communication system."
   :requires    (cl-rsb
-		cl-spread
+		network.spread
 		cl-protobuf
 		cl-rsb-and-cl-protobuf)
   :depends-on  (:nibbles

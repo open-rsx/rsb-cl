@@ -1,6 +1,6 @@
 ;;; connector.lisp --- Superclass for spread connectors.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -44,7 +44,7 @@
     :description
     "The hostname of the spread daemon. Mutually exclusive with NAME.")
    (:port (integer 0 65534)
-    :default spread:*default-port*
+    :default network.spread:*default-port*
     :description
     "The port number of the spread daemon. Mutually exclusive with NAME.")
    (:tcpnodelay boolean
@@ -76,7 +76,7 @@ supplied."
 	  (cond
 	    ((and host port) (values host port))
 	    (port            (values nil  port))
-	    (name            (spread:parse-daemon-name name))))
+	    (name            (network.spread:parse-daemon-name name))))
 	 (name (format nil "~D~@[@~A~]" port host))
 	 ((&accessors-r/o (uri connector-url)) instance))
     (when host

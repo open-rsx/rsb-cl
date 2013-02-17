@@ -1,6 +1,6 @@
 ;;; connection.lisp --- Unit tests for the connection class.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -36,7 +36,7 @@
 
   (let ((name (format nil "~D" spread-port)))
     (make-instance 'connection
-		   :connection (spread:connect name))
+		   :connection (network.spread:connect name))
     (make-instance 'connection
 		   :name name)
 
@@ -47,4 +47,4 @@
     (ensure-condition 'error
       (make-instance 'connection
 		     :name       "3333@localhost"
-		     :connection (spread:connect name)))))
+		     :connection (network.spread:connect name)))))
