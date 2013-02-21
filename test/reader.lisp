@@ -95,4 +95,4 @@ mode.")
 
   ;; Try to send and receive an event to trigger the error.
   (send informer "foo")
-  (print (receive reader :block? nil)))
+  (receive reader :block? nil))
