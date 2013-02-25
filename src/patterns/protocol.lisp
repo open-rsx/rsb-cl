@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Protocols used in the pattern module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -143,7 +143,8 @@ event or just its payload respectively."))
 (defgeneric make-remote-server (scope-or-uri
 				&key
 				transports
-				converters)
+				converters
+				transform)
   (:documentation
    "Make and return a `remote-server' instance that calls methods
 provided by servers on the scope SCOPE-OR-URI.
@@ -158,6 +159,11 @@ transports should be chosen. Items are of the form (WIRE-TYPE
 . CONVERTER). If CONVERTERS is not supplied, a default set of
 converters is derived from the default configuration.
 
+When non-nil, TRANSFORM is a specification of type
+`transform-specification' describing transform objects (which have to
+work with `rsb.event-processing:transform!') that should be applied to
+arguments and/or return values.
+
 If the server cannot be created, an error of type
 `remote-server-creation-failed' is signaled."))
 
@@ -168,7 +174,8 @@ If the server cannot be created, an error of type
 (defgeneric make-local-server (scope-or-uri
 			       &key
 			       transports
-			       converters)
+			       converters
+			       transform)
   (:documentation
    "Make and return a `local-server' instance that provides methods on
 the scope SCOPE-OR-URI for other participants to call.
@@ -183,6 +190,11 @@ for particular wire-types from which the converters that are used in
 transports should be chosen. Items are of the form (WIRE-TYPE
 . CONVERTER). If CONVERTERS is not supplied, a default set of
 converters is derived from the default configuration.
+
+When non-nil, TRANSFORM is a specification of type
+`transform-specification' describing transform objects (which have to
+work with `rsb.event-processing:transform!') that should be applied to
+arguments and/or return values.
 
 If the server cannot be created, an error of type
 `local-server-creation-failed' is signaled."))

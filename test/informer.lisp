@@ -1,6 +1,6 @@
 ;;; informer.lisp --- Unit tests for informer class.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -40,6 +40,9 @@ function."))
     "/informer/construction")
   '("/informer/construction"
     (t :converters ((t . :foo)))
+    "/informer/construction")
+  `("/informer/construction"
+    (t :transform ,#'1+)
     "/informer/construction")
   '("inprocess:/informer/construction"
     (t)

@@ -1,6 +1,6 @@
 ;;; configurator.lisp ---
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -44,7 +44,13 @@ to access the bus.")
 	       :reader   configurator-processor
 	       :documentation
 	       "Stores the processor instance that handles incoming or
-outgoing events."))
+outgoing events.")
+   (transform  :initarg  :transform
+	       :reader   configurator-transform
+	       :initform nil
+	       :documentation
+	       "Stores the transform which should be applied to
+processed events."))
   (:default-initargs
    :error-policy #'log-error)
   (:documentation
@@ -58,7 +64,10 @@ participant instance as its \"client\"."))
 				     processor)
   ;; Create a processor if none has been supplied.
   (unless processor
-    (setf (slot-value instance 'processor) (make-processor instance)))
+    (setf (slot-value instance 'processor)
+	  (apply #'make-processor instance
+		 (when-let ((transform (configurator-transform instance)))
+		   (list :transform transform)))))
 
   ;; Propagate the selected error policy into the processor and
   ;; potentially connectors.
@@ -96,7 +105,8 @@ participant instance as its \"client\"."))
 	      (notify configurator connector :connector-removed))))))
 
 (defmethod collect-processor-mixins append ((configurator configurator))
-  '(error-policy-mixin))
+  (let+ (((&accessors-r/o (transform configurator-transform)) configurator))
+    (append '(error-policy-mixin) (when transform '(transform-mixin)))))
 
 (defmethod make-processor ((configurator configurator)
 			   &rest args

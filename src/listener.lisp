@@ -1,6 +1,6 @@
 ;;; listener.lisp --- Listeners receive events that are broadcast on a bus.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -58,14 +58,16 @@ a mechanism for dispatching matching events to these handlers."))
 (defmethod make-listener ((scope scope)
 			  &key
 			  (transports (transport-options))
-			  (converters (default-converters)))
+			  (converters (default-converters))
+			  transform)
   ;; Translate different kinds of errors into
   ;; `listener-creation-failed' errors.
   (with-condition-translation
       (((error listener-creation-failed)
 	:scope      scope
 	:transports transports))
-    (make-participant 'listener scope :in-push transports converters)))
+    (make-participant 'listener scope :in-push
+		      transports converters transform)))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))
 

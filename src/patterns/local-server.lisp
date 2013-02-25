@@ -1,6 +1,6 @@
 ;;; local-server.lisp --- The local-server class is used to provide a service.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -57,8 +57,8 @@ and send the reply using the informer."
   (setf (rsb.ep:handlers (method-listener instance))
 	(list (curry #'call (method-server instance) instance))))
 
-(define-lazy-creation-method local-method listener ()  "request")
-(define-lazy-creation-method local-method informer (t) "reply")
+(define-lazy-creation-method local-method listener :argument ()  "request")
+(define-lazy-creation-method local-method informer :return   (t) "reply")
 
 (defmethod call ((server  t)
 		 (method  local-method)
@@ -126,13 +126,15 @@ these methods are exposed for remote clients."))
 (defmethod make-local-server ((scope scope)
 			      &key
 			      (transports (transport-options))
-			      (converters (default-converters)))
+			      (converters (default-converters))
+			      transform)
   "Make and return a `local-server' instance that provides a service
 at the scope SCOPE."
   (make-instance 'local-server
 		 :scope             scope
 		 :converters        converters
-		 :transport-options transports))
+		 :transport-options transports
+		 :transform         transform))
 
 (define-participant-creation-uri-methods local-server (scope puri:uri))
 

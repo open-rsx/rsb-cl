@@ -1,6 +1,6 @@
 ;;; marcos.lisp --- Convenience marcos for RSB-related functionality.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -32,6 +32,7 @@
 		       &key
 		       transports
 		       converters
+		       transform
 		       &allow-other-keys)
 		      &body body)
 
@@ -39,7 +40,7 @@
 the channel designated by SCOPE-OR-URI. The ~:*~(~A~) is destroyed ~
 when the execution of BODY ends normally or because of a control ~
 transfer."  kind)
-       (declare (ignore transports converters))
+       (declare (ignore transports converters transform))
        (check-type var symbol "a symbol")
 
        `(let ((,`,var (,',make-name ,`,scope-or-uri

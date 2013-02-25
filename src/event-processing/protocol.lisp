@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Protocols provided by the event-processing module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -82,6 +82,48 @@ contained sink handle DATA."
   (:documentation
    "Dispatch EVENT in the manner implemented by PROCESSOR. This may
 mean to call some handlers, for example."))
+
+;;; Transformation protocol
+
+(defgeneric transform! (transform event)
+  (:documentation
+   "Destructively transform EVENT according to TRANSFORM and return
+the modified EVENT."))
+
+;; Default behavior
+
+(defmethod transform! :around ((transform t) (event t))
+  "Translate `error' s to `transform-error' s and establish `continue'
+and `use-value' restarts."
+  (with-condition-translation
+      (((error transform-error)
+	:transform transform
+	:object    event))
+    (restart-case
+	(call-next-method)
+      (continue ()
+	:report (lambda (stream)
+		  (format stream "~@<Continue without transforming ~
+~A.~@:>"
+			  event))
+	event)
+      (use-value (value)
+	:report (lambda (stream)
+		  (format stream "~@<Use a value instead of ~
+transforming ~A with ~A.~@:>"
+			  event transform))
+	value))))
+
+(defmethod transform! ((transform t) (event t))
+  "Signal an error since there is no suitable method on `transform!'."
+  (error "~@<No ~S method for ~A and ~A.~@:>"
+	 'transform! transform event))
+
+(defmethod transform! ((transform function) (event t))
+  (funcall transform event))
+
+(defmethod transform! ((transform sequence) (event t))
+  (reduce #'transform! transform :initial-value event :from-end t))
 
 
 ;;; Notification protocol

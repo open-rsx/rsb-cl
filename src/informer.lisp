@@ -121,7 +121,8 @@ channel."))
 			  (type  t)
 			  &key
 			  (transports (transport-options))
-			  (converters (default-converters)))
+			  (converters (default-converters))
+			  transform)
   ;; Translate different kinds of errors into
   ;; `informer-creation-failed' errors.
   (with-condition-translation
@@ -130,7 +131,8 @@ channel."))
 	:transports transports
 	:type       type))
     (let+ (((&values informer configurator)
-	    (make-participant 'informer scope :out transports converters
+	    (make-participant 'informer scope :out
+			      transports converters transform
 			      :type type)))
       ;; Connect the processor of CONFIGURATOR to INFORMER as an event
       ;; handler.

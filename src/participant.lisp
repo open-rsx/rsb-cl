@@ -39,6 +39,12 @@ connectors of the participant. Each element is of the form
   (WIRE-TYPE . CONVERTER)
 
 .")
+   (transform  :initarg  :transform
+	       :reader   participant-transform
+	       :initform nil
+	       :documentation
+	       "Stores the transform which should be applied to
+processed events.")
    (error-hook :type     list
 	       :initform nil
 	       :documentation
@@ -82,7 +88,8 @@ of PARTICIPANT."
 
 ;;; TODO(jmoringe): infer direction?
 
-(defun make-participant (class scope direction transports converters
+(defun make-participant (class scope direction
+			 transports converters transform
 			 &rest args)
   "Make and return a participant instance of CLASS that participates
 in the channel designated by SCOPE.
@@ -93,6 +100,9 @@ TRANSPORTS is a list of connector classes.
 
 CONVERTERS is an alist of converters for particular wire-types with
 items of the form (WIRE-TYPE . CONVERTER).
+
+When non-nil, TRANSFORM is a transform object usable with
+`rsb.event-processing:transform!'.
 
 ARGS are arguments for the created CLASS instance.
 
@@ -119,7 +129,8 @@ Return three values:
 			  ((:in-push :in-pull) 'rsb.ep:in-route-configurator)
 			  (:out                'rsb.ep:out-route-configurator))
 			:scope     scope
-			:direction direction))
+			:direction direction
+			:transform transform))
 	 (connectors   (rsb.transport:make-connectors
 			transports direction converters))
 	 (participant  (apply #'make-instance class
@@ -144,8 +155,7 @@ Return three values:
 
 (defmacro define-participant-creation-uri-methods (kind &rest args)
   (let* ((make-name      (symbolicate "MAKE-" kind))
-	 (arg-names      (map 'list (compose #'first #'ensure-list)
-			      args))
+	 (arg-names      (mapcar (compose #'first #'ensure-list) args))
 	 (designator-arg (first arg-names)))
     ;; We want the generated method to be specialized on URI
     ;; designators.
@@ -162,24 +172,28 @@ should be ~S.~@:>"
 	    (transports (transport-options
 			 :exclude-disabled?
 			 (not (uri-transport ,designator-arg))))
-	    (converters (default-converters)))
+	    (converters (default-converters))
+	    transform)
 	 (let+ (((&values scope options)
 		 (uri->scope-and-options ,designator-arg transports)))
 	   (,make-name scope ,@(rest arg-names)
 		       :transports options
-		       :converters converters)))
+		       :converters converters
+		       :transform  transform)))
 
        ;; This method operates on strings which it turns into either
        ;; URIs (if the string contains a colon) or scopes.
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
 			      &key
 			      (transports nil transports-supplied?)
-			      (converters nil converters-supplied?))
+			      (converters nil converters-supplied?)
+			      transform)
 	 (apply #',make-name
 		(if (find #\: ,designator-arg)
 		    (puri:parse-uri ,designator-arg)
 		    (make-scope ,designator-arg))
 		,@(rest arg-names)
+		:transform transform
 		(append
 		 (when transports-supplied?
 		   (list :transports transports))

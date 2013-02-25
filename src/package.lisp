@@ -1,6 +1,6 @@
 ;;; package.lisp --- Main package definition for the rsb system.
 ;;
-;; Copyright (C) 2010, 2011, 2012 Jan Moringen
+;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -188,6 +188,7 @@
    :participant-scope
    :participant-converters
    :participant-converter
+   :participant-transform
    :participant-error-hook)
 
   ;; Protocol for receiving participants

@@ -1,6 +1,6 @@
-;;; package.lisp --- Package definition for unit tests of the event-processing module.
+;;; processor-mixins.lisp --- Mixin classes for processor classes.
 ;;
-;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;; Copyright (C) 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -22,36 +22,22 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:defpackage :rsb.event-processing.test
-  (:use
-   :cl
-   :alexandria
-   :let-plus
-   :lift
+(cl:in-package :rsb.event-processing)
 
-   :rsb
-   :rsb.event-processing
+;;; `transform-mixin' class
 
-   :rsb.test)
-
+(defclass transform-mixin ()
+  ((transform :initarg  :transform
+	      :reader   processor-transform
+	      :documentation
+	      "Stores a transform (in the sense of being usable with
+`transform!') that should be applied to all handled data."))
+  (:default-initargs
+   :transform (missing-required-initarg 'transform-mixin :transform))
   (:documentation
-   "This package contains unit tests for the event-processing
-module"))
+   "This mixin class adds to processor classes the ability to apply a
+transform (in the sense of being usable with `transform!') to all
+handled data."))
 
-(cl:in-package :rsb.event-processing.test)
-
-(deftestsuite event-processing-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the event-processing module."))
-
-;;; `mock-processor' mock class
-
-(defclass mock-processor ()
-  ((handled :initarg  :handled
-	    :type     list
-	    :accessor processor-handled
-	    :initform nil)))
-
-(defmethod handle ((sink mock-processor) (data t))
-  (appendf (processor-handled sink) (list data)))
+(defmethod handle :around ((sink transform-mixin) (data t))
+  (call-next-method sink (transform! (processor-transform sink) data)))

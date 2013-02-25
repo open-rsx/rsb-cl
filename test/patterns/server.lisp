@@ -61,6 +61,33 @@
 
 (addtest (server-root
           :documentation
+	  "Test constructing `server' instances.")
+  construction
+
+  (ensure-cases (initargs &optional expected)
+      `(;; Some invalid constructions.
+	(()                            missing-required-initarg) ; scope
+	((:scope "/" :transform ,#'1+) type-error)
+	((:scope "/" :transform ,#'1+) type-error)
+
+	;; These are valid.
+	((:scope "/" :transform ((:return ,#'1+))))
+	((:scope "/" :transform ((:argument ,#'1+))))
+	((:scope "/" :transform ((:return ,#'1+ :argument ,#'1+))))
+	((:scope "/" :transform ((:argument ,#'1+ :return ,#'1+)))))
+
+    (let+ (((&flet do-it ()
+	      (apply #'make-instance 'server initargs))))
+      (case expected
+	(missing-required-initarg
+	 (ensure-condition 'missing-required-initarg (do-it)))
+	(type-error
+	 (ensure-condition 'type-error (do-it)))
+	(t
+	 (do-it))))))
+
+(addtest (server-root
+          :documentation
 	  "Test adding methods to a `server' instance.")
   set-method
 

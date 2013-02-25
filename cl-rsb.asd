@@ -208,14 +208,18 @@ See `version/list' for details on keyword parameters."
 		 :components ((:file       "package")
 			      (:file       "util"
 			       :depends-on ("package"))
-			      (:file       "protocol"
+			      (:file       "conditions"
 			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package" "conditions"))
 
 			      (:file       "broadcast-processor"
 			       :depends-on ("package" "protocol"))
 			      (:file       "pull-processor"
 			       :depends-on ("package" "protocol"))
 
+			      (:file       "processor-mixins"
+			       :depends-on ("package" "protocol"))
 			      (:file       "filtering-processor-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "deliver-timestamp-mixin"
@@ -228,7 +232,8 @@ See `version/list' for details on keyword parameters."
 			      (:file       "configurator"
 			       :depends-on ("package"
 					    "broadcast-processor"
-					    "pull-processor"))
+					    "pull-processor"
+					    "processor-mixins"))
 			      (:file       "in-route-configurator"
 			       :depends-on ("package" "util" "configurator"))
 			      (:file       "out-route-configurator"
@@ -442,9 +447,13 @@ See `version/list' for details on keyword parameters."
 		 :components ((:file       "package")
 			      (:file       "util"
 			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package"))
 			      (:file       "error-policy-mixin"
 			       :depends-on ("package"))
 			      (:file       "error-handling-dispatcher-mixin"
+			       :depends-on ("package"))
+			      (:file       "processor-mixins"
 			       :depends-on ("package"))
 
 			      (:file       "in-route-configurator"

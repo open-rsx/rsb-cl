@@ -183,7 +183,8 @@ RECEIVER to NEW-VALUE."))
 (defgeneric make-listener (scope-or-uri
 			   &key
 			   transports
-			   converters)
+			   converters
+			   transform)
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
@@ -197,7 +198,11 @@ CONVERTERS, if supplied, is an list that specifies a set of converters
 for particular wire-types from which the converters that are used in
 transports should be chosen. Items are of the form (WIRE-TYPE
 . CONVERTER). If CONVERTERS is not supplied, a default set of
-converters is derived from the default configuration."))
+converters is derived from the default configuration.
+
+When non-nil, TRANSFORM is a transform object, usable with
+`rsb.event-processing:transform!', that should be applied to received
+events."))
 
 
 ;;; Reader protocol
@@ -206,7 +211,8 @@ converters is derived from the default configuration."))
 (defgeneric make-reader (scope-or-uri
 			 &key
 			 transports
-			 converters)
+			 converters
+			 transform)
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
@@ -221,6 +227,10 @@ for particular wire-types from which the converters that are used in
 transports should be chosen. Items are of the form (WIRE-TYPE
 . CONVERTER). If CONVERTERS is not supplied, a default set of
 converters is derived from the default configuration.
+
+When non-nil, TRANSFORM is a transform object, usable with
+`rsb.event-processing:transform!', that should be applied to received
+events.
 
 The resulting `reader' instance can be used to receive data in
 \"pull\" manner using the `receive' function."))
@@ -242,7 +252,8 @@ nil is returned."))
 (defgeneric make-informer (scope-or-uri type
 			   &key
 			   transports
-			   converters)
+			   converters
+			   transform)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
@@ -256,7 +267,11 @@ CONVERTERS, if supplied, is an list that specifies a set of converters
 for particular wire-types from which the converters that are used in
 transports should be chosen. Items are of the form (WIRE-TYPE
 . CONVERTER). If CONVERTERS is not supplied, a default set of
-converters is derived from the default configuration."))
+converters is derived from the default configuration.
+
+When non-nil, TRANSFORM is a transform object, usable with
+`rsb.event-processing:transform!', that should be applied to sent
+events."))
 
 (defgeneric send (informer data
 		  &rest meta-data

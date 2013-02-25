@@ -1,6 +1,6 @@
 ;;; integration.lisp --- Integration test for local and remote servers.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -110,3 +110,31 @@ execution.")
 			      "does-not-matter"
 			      :block? nil)
 		     :timeout .1))))
+
+(addtest (integration-root
+          :documentation
+	  "Test transforming events between `local-server' and
+`remote-server' instances.")
+  transform
+
+  (let+ (((&flet event-1+ (event)
+	    (incf (event-data event))
+	    event))
+	 ((&flet event-2* (event)
+	    (setf (event-data event) (* 2 (event-data event)))
+	    event)))
+    (with-local-server (local-server
+			url :transform `((:argument ,#'event-1+)
+					 (:return   ,#'event-2*)))
+      (with-methods (local-server)
+	  (("addfive" (arg integer)
+	     (+ arg 5)))
+	(with-remote-server (remote-server
+			     url :transform `((:argument ,#'event-2*)
+					      (:return   ,#'event-1+)))
+	  (ensure-random-cases 100 ((i an-integer))
+
+	    ;; Invoke with payload result using `call' method
+	    (ensure-same (call remote-server "addfive" i)
+			 (1+ (* 2 (+ 5 (1+ (* 2 i)))))
+			 :test #'=)))))))

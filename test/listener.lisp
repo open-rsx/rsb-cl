@@ -46,6 +46,9 @@ function."))
   '("/listener/construction"
     (:converters ((t . :foo)))
     "/listener/construction")
+  `("/listener/construction"
+    (:transform ,#'1+)
+    "/listener/construction")
   '("inprocess://localhost/listener/construction"
     nil
     "/listener/construction")

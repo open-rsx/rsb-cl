@@ -1,6 +1,6 @@
 ;;; server.lisp --- A superclass for local and remote server classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -89,11 +89,15 @@ classes."))
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~S" (method-name object))))
 
-(defmacro define-lazy-creation-method (class slot args scope)
+(defmacro define-lazy-creation-method (class slot transform args scope)
   "Define a :before method on the reader function for SLOT of CLASS
-that creates the slot value, if required. ARGS are passed to the
-creation function and SCOPE is used to compute the scope of the
-created participant."
+that lazily creates the slot value.
+
+TRANSFORM has to be either :argument or :return and the corresponding
+transform is installed into the created participant.
+
+ARGS are passed to the creation function and SCOPE is used to compute
+the scope of the created participant."
   (let ((method-name (symbolicate "METHOD-" slot))
 	(writer-name (symbolicate "%METHOD-" slot))
 	(make-name   (symbolicate "MAKE-" slot)))
@@ -102,11 +106,14 @@ created participant."
 		slot)
        (unless (slot-value method ',slot)
 	 (let+ (((&accessors-r/o (server method-server)
-				 (name   method-name)) method))
+				 (name   method-name)) method)
+		(transform
+		 (cdr (assoc ,transform (participant-transform server)))))
 	   (setf (,writer-name method)
 		 (,make-name (%make-scope server ,scope name) ,@args
 			     :transports (server-transport-options server)
-			     :converters (participant-converters server))))))))
+			     :converters (participant-converters server)
+			     :transform  transform)))))))
 ;;; TODO(jmoringe): override configured error policy
 
 
@@ -122,6 +129,7 @@ created participant."
 		      "Stores the transport options that should be
 used by participants which implement the actual communication on
 behalf of the server.")
+   (rsb::transform    :type     transform-specification)
    (methods           :initarg  :methods
 		      :type     hash-table
 		      :reader   %server-methods
@@ -133,6 +141,12 @@ objects."))
    "This class serves as a superclass for local and remote server
 classes. It provides storage of transport options and methods and
 generic support for retrieving, adding and removing methods."))
+
+(defmethod shared-initialize :before ((instance   server)
+				      (slot-names t)
+				      &key
+				      transform)
+  (check-type transform transform-specification))
 
 (defmethod server-methods ((server server))
   (hash-table-values (%server-methods server)))

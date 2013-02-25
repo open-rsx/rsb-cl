@@ -1,6 +1,6 @@
 ;;; remote-server.lisp --- The remote-server class is used to access a service.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -59,8 +59,8 @@ server."))
        (apply #'call (method-server instance) instance data-or-event
 	      args))))
 
-(define-lazy-creation-method remote-method listener ()  "reply")
-(define-lazy-creation-method remote-method informer (t) "request")
+(define-lazy-creation-method remote-method listener :return   ()  "reply")
+(define-lazy-creation-method remote-method informer :argument (t) "request")
 
 (defmethod (setf %method-listener) :after ((new-value t)
 					   (method    remote-method))
@@ -209,11 +209,13 @@ call it."
 (defmethod make-remote-server ((scope scope)
 			       &key
 			       (transports (transport-options))
-			       (converters (default-converters)))
+			       (converters (default-converters))
+			       transform)
   (make-instance 'remote-server
 		 :scope             scope
 		 :converters        converters
-		 :transport-options transports))
+		 :transport-options transports
+		 :transform         transform))
 
 (define-participant-creation-uri-methods remote-server (scope puri:uri))
 

@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for event-processing module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -32,8 +32,15 @@
    :iterate
    :let-plus
    :more-conditions
-   
+
    :rsb)
+
+  ;; Conditions
+  (:export
+   :transform-error
+
+   :transform-error-transform
+   :transform-error-object)
 
   ;; Push source protocol
   (:export
@@ -50,6 +57,10 @@
   ;; Dispatching processor protocol
   (:export
    :dispatch)
+
+  ;; Transformation protocol
+  (:export
+   :transform!)
 
   ;; Notification protocol
   (:export
@@ -73,7 +84,8 @@
    :configurator-scope
    :configurator-direction
    :configurator-processor
-   :configurator-connectors)
+   :configurator-connectors
+   :configurator-transform)
 
   ;; `in-route-configurator' class
   (:export
@@ -109,6 +121,11 @@
   ;; `error-handling-dispatcher-mixin' class
   (:export
    :error-handling-dispatcher-mixin)
+
+  ;; `transform-mixin' class
+  (:export
+   :transform-mixin
+   :processor-transform)
 
   ;; `client' class and protocol
   (:export

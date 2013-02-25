@@ -1,6 +1,6 @@
 ;;; reader.lisp --- Pull-based receiving participant class.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -44,14 +44,16 @@ receiving events."))
 (defmethod make-reader ((scope scope)
 			&key
 			(transports (transport-options))
-			(converters (default-converters)))
+			(converters (default-converters))
+			transform)
   ;; Translate different kinds of errors into `reader-creation-failed'
   ;; errors.
   (with-condition-translation
       (((error reader-creation-failed)
 	:scope      scope
 	:transports transports))
-    (make-participant 'reader scope :in-pull transports converters)))
+    (make-participant 'reader scope :in-pull
+		      transports converters transform)))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))
 
