@@ -6,6 +6,7 @@
 
 ;;;; Loading this file does not terminate.
 
+;; mark-start::body
 ;; Note: depending on your RSB configuration, this example may require
 ;; a running Spread daemon for successful execution.
 
@@ -31,3 +32,4 @@
   (let ((event (rsb:receive reader)))
    (format t "Received ~A with payload ~%" event)
    (describe event)))
+;; mark-end::body

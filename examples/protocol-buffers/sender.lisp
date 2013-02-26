@@ -4,6 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
+;; mark-start::body
 ;; Note: depending on your RSB configuration, this example may require
 ;; a running Spread daemon for successful execution.
 
@@ -30,3 +31,4 @@
                                     :width  100
                                     :height 100
                                     :data   (nibbles:octet-vector 1 2 3))))
+;; mark-end::body
