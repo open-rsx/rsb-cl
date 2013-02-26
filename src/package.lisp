@@ -1,4 +1,4 @@
-;;; package.lisp ---
+;;; package.lisp --- Main package definition for the rsb system.
 ;;
 ;; Copyright (C) 2010, 2011, 2012 Jan Moringen
 ;;

@@ -1,6 +1,6 @@
 ;;; participant.lisp --- A superclass for participant classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -33,8 +33,12 @@
 	       :initform nil
 	       :reader   participant-converters
 	       :documentation
-	       "Stores the converters available for use in connectors
-of the participant.")
+	       "Stores a list of the converters available for use in
+connectors of the participant. Each element is of the form
+
+  (WIRE-TYPE . CONVERTER)
+
+.")
    (error-hook :type     list
 	       :initform nil
 	       :documentation

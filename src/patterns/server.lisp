@@ -143,11 +143,10 @@ generic support for retrieving, adding and removing methods."))
 			  (error? t))
   (check-type name method-name "a legal method name")
 
-  (let ((method (gethash name (%server-methods server))))
-    (or method
-	(when error?
-	  (error 'no-such-method
-		 :name name)))))
+  (or (gethash name (%server-methods server))
+      (when error?
+	(error 'no-such-method
+	       :name name))))
 
 (defmethod (setf server-method) ((new-value method1)
 				 (server    server)

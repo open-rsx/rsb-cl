@@ -117,7 +117,7 @@ channel."))
 ;;; `informer' creation
 ;;
 
-(defmethod make-informer ((scope t)
+(defmethod make-informer ((scope scope)
 			  (type  t)
 			  &key
 			  (transports (transport-options))
