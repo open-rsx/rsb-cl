@@ -1,6 +1,6 @@
 ;;; in-pull-connector.lisp --- In-direction, pull-style socket connector.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -29,12 +29,9 @@
 
 (defclass in-pull-connector (error-handling-pull-receiver-mixin
 			     in-connector)
-  ((queue :type     #+sbcl sb-concurrency:mailbox
-	  #-sbcl list
+  ((queue :type     lparallel.queue:queue
 	  :reader   connector-queue
-	  :initform #+sbcl (sb-concurrency:make-mailbox
-			    :name "event queue")
-	  #-sbcl nil
+	  :initform (lparallel.queue:make-queue)
 	  :documentation
 	  "Stores notifications as they arrive via the message bus."))
   (:metaclass connector-class)
@@ -43,22 +40,23 @@
    "This class implements in-direction, push-style communication over
 a socket."))
 
-(defmethod connector-queue-count ((connector in-pull-connector))
-  #+sbcl (sb-concurrency:mailbox-count
-	  (connector-queue connector))
-  #-sbcl (length (connector-queue connector)))
-
 (defmethod handle ((connector in-pull-connector)
 		   (data      notification))
   "Put DATA into the queue of CONNECTOR for later retrieval."
-  #+sbcl (sb-concurrency:send-message (connector-queue connector) data)
-  #-sbcl (appendf (connector-queue connector) data))
+  (lparallel.queue:push-queue data (connector-queue connector)))
+
+(defmethod receive-message ((connector in-pull-connector)
+			    (block?    (eql nil)))
+  "Extract and return one event from the queue maintained by
+CONNECTOR, if there are any. If there are no queued events, return
+nil."
+  (lparallel.queue:try-pop-queue (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
 			    (block?    t))
-  "Retrieve a notification from the queue of CONNECTOR."
-  #+sbcl (sb-concurrency:receive-message (connector-queue connector))
-  #-sbcl (error "Not implemented"))
+  "Extract and return one event from the queue maintained by
+CONNECTOR, if there are any. If there are no queued events, block."
+  (lparallel.queue:pop-queue (connector-queue connector)))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
   ;; Maybe block until a notification is received. Try to convert into
@@ -82,4 +80,5 @@ a socket."))
     (format stream "~A ~A (~D)"
 	    (connector-direction object)
 	    (connector-relative-url object "/")
-	    (connector-queue-count object))))
+	    (lparallel.queue:queue-count
+	     (connector-queue object)))))

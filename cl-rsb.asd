@@ -129,12 +129,11 @@ See `version/list' for details on keyword parameters."
   :depends-on  (:alexandria
 		:split-sequence
 		:iterate
-		(:version :let-plus "0.2")
+		(:version :let-plus  "0.2")
 		:more-conditions
 
-
-		#+sbcl :sb-concurrency
 		:bordeaux-threads
+		(:version :lparallel "2.3.2")
 		:trivial-garbage
 		:closer-mop
 		:cl-hooks

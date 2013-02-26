@@ -1,6 +1,6 @@
 ;;; in-pull-connector.lisp ---
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -43,39 +43,16 @@
 			     broadcast-processor
 			     error-handling-dispatcher-mixin
 			     error-handling-pull-receiver-mixin)
-  ((queue :type     #+sbcl sb-concurrency:mailbox
-	            #-sbcl list
+  ((queue :type     lparallel.queue:queue
 	  :reader   connector-queue
-	  #-sbcl    #-sbcl
-	  :accessor %connector-queue
-	  :initform #+sbcl (sb-concurrency:make-mailbox
-			    :name "event queue")
-	            #-sbcl nil
+	  :initform (lparallel.queue:make-queue)
 	  :documentation
-	  "Stores events as they arrive via the message bus.")
-   #-sbcl
-   (lock      :reader   %connector-queue-lock
-	      :initform (bt:make-lock "Connector Queue Lock")
-	      :documentation
-	      "Protects queue slot from concurrent access.")
-   #-sbcl
-   (condition :reader   %connector-queue-condition
-	      :initform (bt:make-condition-variable
-			 :name "Connector Queue Condition")
-	      :documentation
-	      "Notifies threads waiting for events being enqueued."))
+	  "Stores events as they arrive via the message bus."))
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))
-
-(defmethod connector-queue-count ((connector in-pull-connector))
-  #+sbcl (sb-concurrency:mailbox-count
-	  (connector-queue connector))
-  #-sbcl
-  (bt:with-lock-held ((%connector-queue-lock connector))
-    (length (connector-queue connector))))
 
 (defmethod notify ((connector in-pull-connector)
 		   (scope     scope)
@@ -92,41 +69,20 @@ process."))
 (defmethod handle ((connector in-pull-connector)
 		   (event     event))
   "Put EVENT into the queue maintained by CONNECTOR."
-  (log1 :info connector "Adding event ~S" event)
-  #+sbcl (sb-concurrency:send-message (connector-queue connector) event)
-  #-sbcl
-  (let+ (((&accessors-r/o
-	   (lock      %connector-queue-lock)
-	   (condition %connector-queue-condition)) connector))
-    (bt:with-lock-held (lock)
-      (appendf (%connector-queue connector) (list event))
-      (bt:condition-notify condition))))
+  (lparallel.queue:push-queue event (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
 			    (block?    (eql nil)))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, return
 nil."
-  #+sbcl (sb-concurrency:receive-message-no-hang
-	  (connector-queue connector))
-  #-sbcl
-  (bt:with-lock-held ((%connector-queue-lock connector))
-    (when (connector-queue connector)
-      (pop (%connector-queue connector)))))
+  (lparallel.queue:try-pop-queue (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
 			    (block?    t))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, block."
-  #+sbcl (sb-concurrency:receive-message (connector-queue connector))
-  #-sbcl
-  (let+ (((&accessors-r/o
-	   (lock      %connector-queue-lock)
-	   (condition %connector-queue-condition)) connector))
-    (bt:with-lock-held (lock)
-      (iter (until (connector-queue connector))
-	    (bt:condition-wait condition lock))
-      (pop (%connector-queue connector)))))
+  (lparallel.queue:pop-queue (connector-queue connector)))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
   (when-let ((event (receive-message connector block?)))
@@ -138,4 +94,5 @@ CONNECTOR, if there are any. If there are no queued events, block."
     (format stream "~A ~A (~D)"
 	    (connector-direction object)
 	    (connector-relative-url object "/")
-	    (connector-queue-count object))))
+	    (lparallel.queue:queue-count
+	     (connector-queue object)))))

@@ -1,6 +1,6 @@
 ;;; util.lisp ---
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -35,38 +35,29 @@
 (defun make-sequence-number-generator (&optional (start 0))
   "Return a function that returns increasing numbers starting with
 START."
-  #+sbcl
-  #.(if (subtypep 'sequence-number 'fixnum)
-	;; If `sequence-number' s are `fixnum' s, we assume `eq' does
-	;; the right thing.
-	'(let ((current (list start)))
-	   (declare (type (cons sequence-number null) current))
-	   #'(lambda ()
-	       (declare #.+optimization-fast+unsafe+)
-	       ;; Keep trying to store the incremented value until it
-	       ;; works.
-	       (iter (for old next (car current))
-		     (for new next (ldb (byte 32 0)
-					(1+ (the sequence-number old))))
-		     (until (eq old (sb-ext:compare-and-swap
-				     (car current) old new)))
-		     (finally (return old)))))
-	;; Otherwise, we have to wrap the value in a cons.
+  #.(if (subtypep 'sequence-number 'lparallel.counter:counter-value)
+	'(let ((current (lparallel.counter:make-counter start)))
+	   (lambda ()
+	     (declare #.+optimization-fast+unsafe+)
+	     (mod (lparallel.counter:inc-counter current)
+		  (ash 1 32))))
+	#+sbcl
+	;; We have to wrap the value in a cons.
 	'(let ((current (list (list start))))
 	   (declare (type (cons (cons sequence-number null) null) current))
-	   #'(lambda ()
-	       (declare #.+optimization-fast+unsafe+)
-	       ;; Keep trying to store the incremented value until it
-	       ;; works.
-	       (iter (for old next (car current))
-		     (for new next (list (ldb (byte 32 0)
-					      (1+ (the sequence-number
-						       (car old))))))
-		     (until (eq old (sb-ext:compare-and-swap
-				     (car current) old new)))
-		     (finally (return (car old)))))))
-  #-sbcl
-  #.(error "Not implemented."))
+	   (lambda ()
+	     (declare #.+optimization-fast+unsafe+)
+	     ;; Keep trying to store the incremented value until it
+	     ;; works.
+	     (iter (for old next (car current))
+		   (for new next (list (ldb (byte 32 0)
+					    (1+ (the sequence-number
+						     (car old))))))
+		   (until (eq old (sb-ext:compare-and-swap
+				   (car current) old new)))
+		   (finally (return (car old))))))
+	#-sbcl
+	'(error "Not implemented")))
 
 
 ;;; UUID utility functions
