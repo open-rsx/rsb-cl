@@ -1,6 +1,6 @@
 ;;; cl-rsb.asd --- Common Lisp implementation of RSB.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -58,13 +58,13 @@
 ;;; Version stuff
 ;;
 
-(defconstant +version-major+ 0
+(defparameter +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 7
+(defparameter +version-minor+ 7
   "Minor component of version number.")
 
-(defconstant +version-revision+ 0
+(defparameter +version-revision+ 0
   "Revision component of version number.")
 
 (defun version/list ()
