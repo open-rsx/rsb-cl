@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011, 2012 Jan Moringen
+# Copyright (C) 2011, 2012, 2013 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 #
@@ -22,142 +22,142 @@
 #   CoR-Lab, Research Institute for Cognition and Robotics
 #     Bielefeld University
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8)
 
 # Extract version components from an approximately "git describe"-like
 # formatted version string.
-MACRO(GIT_VERSION_COMPONENTS INPUT OUT_MAJOR OUT_MINOR OUT_REVISION OUT_COMMIT)
-    SET(REGEX "^[-.a-z0-9]*([0-9]+)\\.([0-9]+)[-.]([0-9]+)-?(g[a-f0-9]+(:?-dirty)?|)$")
-    STRING(REGEX REPLACE ${REGEX} "\\1" ${OUT_MAJOR}    "${INPUT}")
-    STRING(REGEX REPLACE ${REGEX} "\\2" ${OUT_MINOR}    "${INPUT}")
-    STRING(REGEX REPLACE ${REGEX} "\\3" ${OUT_REVISION} "${INPUT}")
-    STRING(REGEX REPLACE ${REGEX} "\\4" ${OUT_COMMIT}   "${INPUT}")
-ENDMACRO()
+macro(git_version_components INPUT OUT_MAJOR OUT_MINOR OUT_REVISION OUT_COMMIT)
+    set(REGEX "^[-.a-z0-9]*([0-9]+)\\.([0-9]+)[-.]([0-9]+)-?(g[a-f0-9]+(:?-dirty)?|)$")
+    string(REGEX REPLACE ${REGEX} "\\1" ${OUT_MAJOR}    "${INPUT}")
+    string(REGEX REPLACE ${REGEX} "\\2" ${OUT_MINOR}    "${INPUT}")
+    string(REGEX REPLACE ${REGEX} "\\3" ${OUT_REVISION} "${INPUT}")
+    string(REGEX REPLACE ${REGEX} "\\4" ${OUT_COMMIT}   "${INPUT}")
+endmacro()
 
 # Git-based version.
-FIND_PROGRAM(GIT_EXECUTABLE "git")
-IF(GIT_EXECUTABLE)
-    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe --long --dirty=-dirty
+find_program(GIT_EXECUTABLE "git")
+if(GIT_EXECUTABLE)
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --long --dirty=-dirty
                     RESULT_VARIABLE RESULT
                     OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_QUIET)
-    IF(RESULT EQUAL 0)
-        GIT_VERSION_COMPONENTS(${GIT_DESCRIBE_OUTPUT} IGN1 IGN2 REVISION COMMIT)
-        FILE(WRITE "${CMAKE_SOURCE_DIR}/version.sexp" "${REVISION} \"${COMMIT}\"")
-    ELSE()
-        MESSAGE(STATUS "Not a git repository: ${CMAKE_SOURCE_DIR}")
-    ENDIF()
-ELSE()
-    MESSAGE(STATUS "git executable not found")
-ENDIF()
+    if(RESULT EQUAL 0)
+        git_version_components(${GIT_DESCRIBE_OUTPUT} IGN1 IGN2 REVISION COMMIT)
+        file(WRITE "${CMAKE_SOURCE_DIR}/version.sexp" "${REVISION} \"${COMMIT}\"")
+    else()
+        message(STATUS "Not a git repository: ${CMAKE_SOURCE_DIR}")
+    endif()
+else()
+    message(STATUS "git executable not found")
+endif()
 
 # Find and check SBCL installation.
-SET(SBCL_HOME $ENV{SBCL_HOME})
-IF(NOT SBCL_HOME)
-    MESSAGE(STATUS "SBCL_HOME is not set. Trying to find SBCL on default path.")
-    FIND_PROGRAM(SBCL_EXECUTABLE sbcl)
-ELSE()
-    MESSAGE(STATUS "SBCL_HOME is set to ${SBCL_HOME}. Trying to find SBCL there.")
-    FIND_PROGRAM(SBCL_EXECUTABLE sbcl
+set(SBCL_HOME $ENV{SBCL_HOME})
+if(NOT SBCL_HOME)
+    message(STATUS "SBCL_HOME is not set. Trying to find SBCL on default path.")
+    find_program(SBCL_EXECUTABLE sbcl)
+else()
+    message(STATUS "SBCL_HOME is set to ${SBCL_HOME}. Trying to find SBCL there.")
+    find_program(SBCL_EXECUTABLE sbcl
                  PATHS "${SBCL_HOME}/../../bin" ${SBCL_HOME}
                  NO_DEFAULT_PATH)
-ENDIF()
-MESSAGE(STATUS "SBCL executable: ${SBCL_EXECUTABLE}")
+endif()
+message(STATUS "SBCL executable: ${SBCL_EXECUTABLE}")
 
 # Configure Lisp environment.
-SET(LISP_RUNTIME_OPTIONS "" CACHE STRING
+set(LISP_RUNTIME_OPTIONS "" CACHE STRING
     "Runtime options to pass to the Lisp system.")
-SET(LISP_INIT_FILE       "" CACHE FILEPATH
+set(LISP_INIT_FILE       "" CACHE FILEPATH
     "File to load as Lisp init file.")
-SET(LISP_INIT_CODE       "" CACHE STRING
+set(LISP_INIT_CODE       "" CACHE STRING
     "Lisp code to be evaulated during initialization.")
-SET(LISP_INIT "")
-IF(LISP_INIT_FILE)
-    SET(LISP_INIT "${LISP_INIT} --userinit ${LISP_INIT_FILE}")
-ENDIF()
-IF(LISP_INIT_CODE)
-    SET(LISP_INIT "${LISP_INIT} --eval \"${LISP_INIT_CODE}\"")
-ENDIF()
+set(LISP_INIT "")
+if(LISP_INIT_FILE)
+    set(LISP_INIT "${LISP_INIT} --userinit ${LISP_INIT_FILE}")
+endif()
+if(LISP_INIT_CODE)
+    set(LISP_INIT "${LISP_INIT} --eval \"${LISP_INIT_CODE}\"")
+endif()
 
-SET(CL_SOURCE_REGISTRY       "(:source-registry (:tree \\\"${CMAKE_CURRENT_SOURCE_DIR}\\\") :inherit-configuration)")
-SET(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
+set(CL_SOURCE_REGISTRY       "(:source-registry (:tree \\\"${CMAKE_CURRENT_SOURCE_DIR}\\\") :inherit-configuration)")
+set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
 
 # Execute Lisp process
-MACRO(CONFIGURE_LISP NAME CODE)
-    SET(NAME "${NAME}")
-    SET(DO   "${CODE} --quit")
-    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
+macro(configure_lisp NAME CODE)
+    set(NAME "${NAME}")
+    set(DO   "${CODE} --quit")
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
                    "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
                    @ONLY)
-    SET(REDIRECTIONS)
-ENDMACRO()
-MACRO(CONFIGURE_LISP_REDIRECT NAME CODE)
-    SET(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.out\"
+    set(REDIRECTIONS)
+endmacro()
+macro(configure_lisp_redirect NAME CODE)
+    set(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.out\"
                       ERROR_FILE  \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.err\"")
-    CONFIGURE_LISP(${NAME} ${CODE})
-ENDMACRO()
-MACRO(EXECUTE_LISP NAME CODE OUTPUT_VARIABLE)
-    CONFIGURE_LISP(${NAME} "${CODE}")
-    MESSAGE(STATUS "Executing Lisp process \"${NAME}\"")
-    EXECUTE_PROCESS(COMMAND cmake -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
+    configure_lisp(${NAME} ${CODE})
+endmacro()
+macro(execute_lisp NAME CODE OUTPUT_VARIABLE)
+    configure_lisp(${NAME} "${CODE}")
+    message(STATUS "Executing Lisp process \"${NAME}\"")
+    execute_process(COMMAND cmake -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
                     OUTPUT_VARIABLE ${OUTPUT_VARIABLE}
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-ENDMACRO()
+endmacro()
 
 # Project definition (version is grovelled from asd system definition
 # and, possibly in combination with version.sexp file written above).
-SET(SYSTEM_NAME "cl-rsb")
-PROJECT(${SYSTEM_NAME})
-SET(REDIRECTIONS "ERROR_QUIET")
-EXECUTE_LISP("version"
+set(SYSTEM_NAME "cl-rsb")
+project(${SYSTEM_NAME})
+set(REDIRECTIONS "ERROR_QUIET")
+execute_lisp("version"
              "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
               --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
              VERSION_FROM_LISP)
-GIT_VERSION_COMPONENTS(${VERSION_FROM_LISP} RSB_VERSION_MAJOR
+git_version_components(${VERSION_FROM_LISP} RSB_VERSION_MAJOR
                                             RSB_VERSION_MINOR
                                             RSB_VERSION_PATCH
                                             RSB_VERSION_COMMIT)
-MESSAGE(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
+message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
 # Tests
-ENABLE_TESTING()
+enable_testing()
 
-CONFIGURE_LISP_REDIRECT(test
+configure_lisp_redirect(test
                         "--eval \"(proclaim (quote (optimize (debug 3) (safety 3) (speed 0))))\"
                          --eval \"(asdf:test-system :${SYSTEM_NAME})\"")
-ADD_TEST(NAME    "rsb"
+add_test(NAME    "rsb"
          COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.test.cmake")
 
 # Installation
-FILE(GLOB ASD_FILES
+file(GLOB ASD_FILES
      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
      "*.asd")
-FILE(GLOB SEXP_FILES
+file(GLOB SEXP_FILES
      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
      "*.sexp")
-INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/src"
+install(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/src"
         DESTINATION    "share/common-lisp/source/${CMAKE_PROJECT_NAME}"
         FILES_MATCHING PATTERN "*.lisp")
-INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/test"
+install(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/test"
         DESTINATION    "share/common-lisp/source/${CMAKE_PROJECT_NAME}"
         FILES_MATCHING PATTERN "*.lisp")
-INSTALL(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/data"
+install(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/data"
         DESTINATION    "share/common-lisp/source/${CMAKE_PROJECT_NAME}"
         FILES_MATCHING PATTERN "*.proto")
-INSTALL(DIRECTORY
+install(DIRECTORY
         DESTINATION "share/common-lisp/source/${CMAKE_PROJECT_NAME}")
-INSTALL(FILES       ${ASD_FILES} ${SEXP_FILES}
+install(FILES       ${ASD_FILES} ${SEXP_FILES}
         DESTINATION "share/common-lisp/source/${CMAKE_PROJECT_NAME}/")
 
 # Packaging
-SET(PACKAGE_BASE_NAME           "${CMAKE_PROJECT_NAME}")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${RSB_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${RSB_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${RSB_VERSION_PATCH})
-SET(CPACK_PACKAGE_VERSION       "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-SET(CPACK_PACKAGE_VENDOR        "CoR-Lab, Bielefeld University")
-SET(CPACK_PACKAGE_FILE_NAME     "${PACKAGE_BASE_NAME}-${CPACK_PACKAGE_VERSION}")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
+set(PACKAGE_BASE_NAME           "${CMAKE_PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${RSB_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${RSB_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${RSB_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION       "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_PACKAGE_VENDOR        "CoR-Lab, Bielefeld University")
+set(CPACK_PACKAGE_FILE_NAME     "${PACKAGE_BASE_NAME}-${CPACK_PACKAGE_VERSION}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
 
-INCLUDE("${CMAKE_SOURCE_DIR}/cpack/CPackInclude.cmake")
+include("${CMAKE_SOURCE_DIR}/cpack/CPackInclude.cmake")

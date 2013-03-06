@@ -1,14 +1,14 @@
-IF(NOT CPACK_GENERATOR)
-    SET(CPACK_GENERATOR "TGZ")
-ENDIF()
+if(NOT CPACK_GENERATOR)
+    set(CPACK_GENERATOR "TGZ")
+endif()
 
-SET(CPACK_CONFIG_FILE "" CACHE FILEPATH "Path to a CMake lists syntax file providing settings for CPack.")
-SET(CPACK_PACKAGE_REVISION "" CACHE STRING "A suffix string which can be appended to package versions to account for e. g. multiple rebuilds without changes to the upstream project of the package.")
+set(CPACK_CONFIG_FILE "" CACHE FILEPATH "Path to a CMake lists syntax file providing settings for CPack.")
+set(CPACK_PACKAGE_REVISION "" CACHE STRING "A suffix string which can be appended to package versions to account for e. g. multiple rebuilds without changes to the upstream project of the package.")
 
-IF(CPACK_CONFIG_FILE)
-    INCLUDE(${CPACK_CONFIG_FILE})
-ENDIF()
+if(CPACK_CONFIG_FILE)
+    include(${CPACK_CONFIG_FILE})
+endif()
 
-MESSAGE(STATUS "Using CPack package generator: ${CPACK_GENERATOR}")
+message(STATUS "Using CPack package generator: ${CPACK_GENERATOR}")
 
-INCLUDE(CPack)
+include(CPack)
