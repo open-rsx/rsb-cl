@@ -74,6 +74,7 @@ channel."))
 		 &rest meta-data
 		 &key
 		 method
+		 timestamps
 		 causes)
   ;; Set EVENT's sequence number to our next sequence number and
   ;; origin to our id.
@@ -82,12 +83,20 @@ channel."))
 	(event-origin event)
 	(participant-id informer))
 
+  ;; Set method if supplied.
   (when method
     (setf (event-method event) method))
 
+  ;; Additional timestamps.
+  (iter (for (key value) on timestamps :by #'cddr)
+	(check-type value local-time:timestamp)
+	(setf (timestamp event key) value))
+
   ;; Additional meta-data.
   (iter (for (key value) on meta-data :by #'cddr)
-	(unless (member key '(:method :causes :unchecked?) :test #'eq)
+	(unless (member key '(:method :timestamps :causes :unchecked?)
+			:test #'eq)
+	  (check-type value string)
 	  (setf (meta-data event key) value)))
 
   ;; Additional causes.

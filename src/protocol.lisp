@@ -277,6 +277,7 @@ events."))
 		  &rest meta-data
 		  &key
 		  method
+		  timestamps
 		  causes
 		  unchecked?
 		  &allow-other-keys)
@@ -286,6 +287,9 @@ participates. Add key-value pairs in META-DATA to the meta-data of the
 event created from DATA.
 
 METHOD can be used to set the method of the sent event.
+
+TIMESTAMPS, if supplied, is interpreted as a plist of named timestamps
+in which values are `local-time:timestamp' instances.
 
 CAUSES can be used to add a list of cause vectors to the sent
 event. The cause vector have to be `event-id's.

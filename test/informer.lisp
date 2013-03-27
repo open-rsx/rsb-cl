@@ -69,17 +69,54 @@ function."))
   send/event
 
   (with-informer (informer "/informer/send/event" t)
-    (ensure-cases (scope data args expected-method expected-meta-data)
-	'(("/informer/send/event" "foo" ()              nil  nil)
-	  ("/informer/send/event" "foo" (:method :bar)  :bar nil)
-	  ("/informer/send/event" "foo" (:foo    "baz") nil  ((:foo . "baz"))))
+    (ensure-cases (scope data args
+		   expected-meta-data expected-method expected-timestamps
+		   expected-causes)
+	`(;; Some invalid cases.
+	  ("/informer/send/event" "foo" (:foo 1) ; invalid meta-data item
+	   type-error nil nil nil)
+	  ("/informer/send/event" "foo" (:timestamps (:foo 1)) ; invalid timestamp
+	   type-error nil nil nil)
 
-      (let* ((event  (make-event scope data))
-	     (result (apply #'send informer event args)))
-	(ensure-same (event-method result) expected-method
-		     :test #'eq)
-	(ensure-same (meta-data-alist result) expected-meta-data
-		     :test (rcurry #'set-equal :test #'equal))))))
+	  ;; These are valid
+	  ("/informer/send/event" "foo" ()
+	   () nil () ())
+
+	  ("/informer/send/event" "foo" (:method :bar)
+	   () :bar () ())
+
+	  ("/informer/send/event" "foo" (:foo "baz")
+	   ((:foo . "baz")) nil () ())
+
+	  ("/informer/send/event" "foo"
+	   (:timestamps (:foo ,(local-time:parse-timestring
+				"2013-03-27T14:12:32.062533+01:00")))
+	   () nil ((:foo . ,(local-time:parse-timestring
+			     "2013-03-27T14:12:32.062533+01:00"))) ())
+
+	  ("/informer/send/event" "foo" (:causes ((,(uuid:make-null-uuid) . 1)))
+	   () nil () ((,(uuid:make-null-uuid) . 1))))
+
+      (let+ (((&flet do-it ()
+		(apply #'send informer (make-event scope data) args)))
+	     ((&flet+ timestamp-entries-equal ((left-key  . left-timestamp)
+					       (right-key . right-timestamp))
+		(and (eq left-key right-key)
+		     (local-time:timestamp= left-timestamp right-timestamp)))))
+	(case expected-meta-data
+	  (type-error
+	   (ensure-condition 'type-error (do-it)))
+	  (t
+	   (let ((result (do-it)))
+	     (ensure-same (meta-data-alist result) expected-meta-data
+			  :test (rcurry #'set-equal :test #'equal))
+	     (ensure-same (event-method result) expected-method
+			  :test #'eq)
+	     (ensure-same (remove :create (timestamp-alist result) :key #'car)
+			  expected-timestamps
+			  :test (rcurry #'set-equal :test #'timestamp-entries-equal))
+	     (ensure-same (event-causes result) expected-causes
+			  :test (rcurry #'set-equal :test #'event-id=)))))))))
 
 (addtest (informer-root
           :documentation
