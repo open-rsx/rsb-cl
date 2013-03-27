@@ -176,8 +176,8 @@ bus at ~A:~D.~@:>"
 			  :var           client-condition
 			  :cause-initarg nil)
 		   :format-control "Failed to get socket-based bus as ~
-server:~&~@<> ~@;~A~@>~&Failed to get socket-based bus as ~
-client:~&~@<> ~@;~A~@>"
-		   :format-arguments (list server-condition
-					   client-condition)))
+server:~&~<> ~@;~A~:>~&Failed to get socket-based bus as ~
+client:~&~<> ~@;~A~:>"
+		   :format-arguments (list (list server-condition)
+					   (list client-condition))))
 	       (ensure-bus-client host port connector)))))))))
