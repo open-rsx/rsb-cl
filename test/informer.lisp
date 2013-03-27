@@ -73,7 +73,7 @@ function."))
 		   expected-meta-data expected-method expected-timestamps
 		   expected-causes)
 	`(;; Some invalid cases.
-	  ("/informer/send/event" "foo" (:foo 1) ; invalid meta-data item
+	  ("/informer/send/event" "foo" (:foo foo) ; invalid meta-data item
 	   type-error nil nil nil)
 	  ("/informer/send/event" "foo" (:timestamps (:foo 1)) ; invalid timestamp
 	   type-error nil nil nil)
@@ -87,6 +87,10 @@ function."))
 
 	  ("/informer/send/event" "foo" (:foo "baz")
 	   ((:foo . "baz")) nil () ())
+	  ("/informer/send/event" "foo" (:foo 1)
+	   ((:foo . 1)) nil () ())
+	  ("/informer/send/event" "foo" (:foo :baz)
+	   ((:foo . :baz)) nil () ())
 
 	  ("/informer/send/event" "foo"
 	   (:timestamps (:foo ,(local-time:parse-timestring

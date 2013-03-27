@@ -96,7 +96,7 @@ channel."))
   (iter (for (key value) on meta-data :by #'cddr)
 	(unless (member key '(:method :timestamps :causes :unchecked?)
 			:test #'eq)
-	  (check-type value string)
+	  (check-type value (or string keyword real))
 	  (setf (meta-data event key) value)))
 
   ;; Additional causes.
