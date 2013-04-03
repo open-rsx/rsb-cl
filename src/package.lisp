@@ -94,8 +94,14 @@
   (:export
    :*framework-timestamps*
 
+   :*id-random-state*
+
    :*default-configuration*
    :*default-configuration-files*)
+
+  ;; Reloading
+  (:export
+   :enable-id-random-state-reseed)
 
   ;; Hooks
   (:export

@@ -165,7 +165,7 @@ See `version/list' for details on keyword parameters."
 
 			      (:file       "util"
 			       :depends-on ("package" "types" "scope"
-					    "protocol"))
+					    "protocol" "variables"))
 			      (:file       "error-handling"
 			       :depends-on ("package"))))
 
@@ -323,7 +323,9 @@ See `version/list' for details on keyword parameters."
 
 			      (:file       "macros"
 			       :depends-on ("listener" "reader"
-					     "informer"))))
+					     "informer"))
+
+			      (:file       "reloading")))
 
 		(:module     "transport-inprocess"
 		 :pathname   "src/transport/inprocess"
@@ -412,6 +414,8 @@ See `version/list' for details on keyword parameters."
 			      (:file       "event"
 			       :depends-on ("package"))
 			      (:file       "uris"
+			       :depends-on ("package"))
+			      (:file       "util"
 			       :depends-on ("package"))
 			      (:file       "participant"
 			       :depends-on ("package"))

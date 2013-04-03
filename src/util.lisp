@@ -109,9 +109,13 @@ instances."))
     (id
      (setf (slot-value instance 'id)
 	   (if (stringp id) (uuid:make-uuid-from-string id) id)))
-    ;; If ID has not been supplied and the slot is unbound, set it.
+    ;; If ID has not been supplied and the slot is unbound, set
+    ;; it. Use the value of `*id-random-state*' to give clients
+    ;; control over the generated ids.
     ((not (slot-boundp instance 'id))
-     (setf (slot-value instance 'id) (uuid:make-v4-uuid)))))
+     (setf (slot-value instance 'id)
+	   (let ((uuid::*uuid-random-state* *id-random-state*))
+	     (uuid:make-v4-uuid))))))
 
 
 ;;; Scope mixin

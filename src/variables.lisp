@@ -1,6 +1,6 @@
 ;;; rsb.lisp --- Global and special variables used within RSB.
 ;;
-;; Copyright (C) 2010, 2011, 2012 Jan Moringen
+;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -33,6 +33,17 @@
 (defvar *framework-timestamps* '(:create :send :receive :deliver)
   "Names of timestamps which are associated to certain points in the
 life of RSB events.")
+
+
+;;; Pseudo random state
+;;
+;; For uuid generation and such.
+
+(declaim (special *id-random-state*))
+
+(defvar *id-random-state* (make-random-state nil)
+  "Stores a `random-state' object which should be used for generation
+of random IDs and similar things requiring pseudo randomness.")
 
 
 ;;; Configuration
