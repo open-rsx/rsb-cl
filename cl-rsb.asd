@@ -153,6 +153,8 @@ See `version/list' for details on keyword parameters."
 			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))
+			      (:file       "variables"
+			       :depends-on ("package"))
 
 			      (:file       "scope"
 			       :depends-on ("package" "types" "protocol"))
@@ -306,8 +308,6 @@ See `version/list' for details on keyword parameters."
 			       "event-processing"
 			       "transport")
 		 :components ((:file       "configuration")
-			      (:file       "variables"
-			       :depends-on ("configuration"))
 
 			      (:file       "participant"
 			       :depends-on ("configuration"))

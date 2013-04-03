@@ -80,11 +80,6 @@
 ;;;
 ;;
 
-;; Forward declaration of `*default-configuration-files*'
-(declaim (special *default-configuration-files*))
-
-(defvar *default-configuration-files*)
-
 (defun options-from-default-sources (&key
 				     (config-files *default-configuration-files*))
   "Combine options from the configuration sources mentioned in
@@ -104,11 +99,6 @@ CONFIG-FILES. Default:
 
 ;;;
 ;;
-
-;; Forward declaration of `*default-configuration*'
-(declaim (special *default-configuration*))
-
-(defvar *default-configuration*)
 
 (defun section-options (section &optional
 			(config *default-configuration*))
@@ -223,3 +213,10 @@ options."
 		     :key      #'car
 		     :test     #'equal
 		     :from-end t))
+
+
+;;; Set default configuration
+;;
+
+(eval-when (:load-toplevel :execute)
+  (setf *default-configuration* (options-from-default-sources)))

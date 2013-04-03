@@ -58,5 +58,5 @@ life of RSB events.")
 
 (declaim (special *default-configuration*))
 
-(defvar *default-configuration* (options-from-default-sources)
+(defvar *default-configuration* nil
   "DOC")
