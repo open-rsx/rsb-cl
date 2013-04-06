@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the socket transport.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -27,6 +27,12 @@
 (define-condition socket-bus-auto-connection-error (rsb-error
 						    simple-error)
   ()
+  (:default-initargs
+   :references (append
+		(default-references 'rsb-error)
+		(list (documentation-ref/rsb-manual
+		       "Troubleshooting"
+		       "Configuring the TCP-based Transport"))))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to connect to socket-based bus as ~

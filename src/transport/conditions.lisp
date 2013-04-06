@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the transport module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -44,6 +44,9 @@ have been constructed.")
 	      :documentation
 	      "Arguments for the connector instance that should have
 been constructed."))
+  (:default-initargs
+   :references (append (default-references 'rsb-error)
+		       (list (documentation-ref/rsb-glossary "transport"))))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for ~
@@ -108,6 +111,9 @@ be found.")
 	       :documentation
 	       "Stores an a list of converter candidates of the
 form (WIRE-TYPE . CONVERTER)."))
+  (:default-initargs
+   :references (append (default-references 'connector-construction-failed)
+		       (list (documentation-ref/rsb-glossary "converter"))))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for direction ~

@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in cl-rsb.
 ;;
-;; Copyright (C) 2010, 2011, 2012 Jan Moringen
+;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -28,18 +28,18 @@
 ;;; RSB-specific errors
 ;;
 
-(define-condition rsb-error (error)
-  ()
-  (:documentation
-   "This class should be mixed into all RSB-related condition
-classes."))
-
-(define-condition communication-error (rsb-error
-				       reference-condition)
+(define-condition rsb-error (error
+			     reference-condition)
   ()
   (:default-initargs
    :references (list (documentation-ref/rsb-manual "Troubleshooting")
 		     (documentation-ref/rsb-bug)))
+  (:documentation
+   "This class should be mixed into all RSB-related condition
+classes."))
+
+(define-condition communication-error (rsb-error)
+  ()
   (:report
    (lambda (condition stream)
      (declare (ignore condition))
@@ -52,8 +52,7 @@ classes."))
 ;;
 
 (define-condition participation-failed (rsb-error
-					chainable-condition
-					reference-condition)
+					chainable-condition)
   ((scope      :initarg  :scope
 	       :type     (or puri:uri scope)
 	       :reader   participation-failed-scope
@@ -66,9 +65,6 @@ would have participated.")
 	       :documentation
 	       "A list of transports the participant would have used
 to connect to the bus."))
-  (:default-initargs
-   :references (list (documentation-ref/rsb-manual "Troubleshooting")
-		     (documentation-ref/rsb-bug)))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
@@ -124,10 +120,11 @@ fails."))
   ()
   (:default-initargs
    :transports nil
-   :references (list (documentation-ref/rsb-manual "Troubleshooting")
-		     (documentation-ref/rsb-manual "Concepts" "URIs")
-		     (documentation-ref/rsb-manual "Common" "Common Environment Variables")
-		     (documentation-ref/rsb-bug)))
+   :references (append
+		(default-references 'participation-failed)
+		(list (documentation-ref/rsb-manual "Concepts" "URIs")
+		      (documentation-ref/rsb-manual
+		       "Common" "Common Environment Variables"))))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~

@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the converter module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -32,6 +32,10 @@
 		:documentation
 		"This wire-schema to or from which the failed
 conversion would have converted."))
+  (:default-initargs
+   :references (append
+		(default-references 'rsb-error)
+		(list (documentation-ref/rsb-glossary "converter"))))
   (:report
    (lambda (condition stream)
      (format stream "~@<A conversion to or from wire-schema ~S~
@@ -97,8 +101,7 @@ a wire-type ~S representation using the wire-schema ~
    "This error is signaled when a domain object cannot be converted to
 a wire-type representation."))
 
-(define-condition no-converter (rsb-error
-                                reference-condition)
+(define-condition no-converter (rsb-error)
   ((datum :initarg  :datum
           :reader   no-converter-datum
           :documentation
@@ -111,7 +114,9 @@ a wire-type representation."))
           ""))
   (:default-initargs
    :datum      (missing-required-initarg 'no-converter :datum)
-   :references (list (rsb::documentation-ref/rsb-manual "Troubleshooting" "Missing Converters")))
+   :references (append (default-references 'rsb-error)
+		       (list (documentation-ref/rsb-manual
+			      "Troubleshooting" "Missing Converters"))))
   (:documentation
    "Instances of subclasses of this condition class are signaled when
 no converter is able to perform a certain conversion."))

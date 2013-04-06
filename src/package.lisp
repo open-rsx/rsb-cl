@@ -72,7 +72,11 @@
    :invalid-event-type
 
    :invalid-event-scope
-   :invalid-event-expected-scope)
+   :invalid-event-expected-scope
+
+   :documentation-ref/rsb-bug
+   :documentation-ref/rsb-glossary
+   :documentation-ref/rsb-manual)
 
   ;; Restarts
   (:export
