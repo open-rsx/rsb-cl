@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the spread transport implementation.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -112,7 +112,7 @@ related to fragmenting events into multiple notifications are
 encountered."))
 
 (define-condition insufficient-room (fragmentation-problem
-				     error)
+				     rsb-error)
   ((required  :initarg  :required
 	      :type     positive-integer
 	      :reader   fragmentation-problem-required
