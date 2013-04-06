@@ -1,6 +1,6 @@
 ;;; collect-documentation-references.lisp ---
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 ;;
@@ -28,111 +28,141 @@
 		    :cl-hooks :more-conditions :nibbles))
     (values))
 
-(cl:defpackage :rsb.doc.check-references
+(cl:defpackage #:rsb.doc.check-references
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus)
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus)
 
   (:export
-   :*documentation-references*)
+   #:*documentation-references*)
 
   (:export
-   :check-references)
+   #:check-references)
 
   (:documentation
    "TODO(jmoringe): document"))
 
-(cl:in-package :rsb.doc.check-references)
+(cl:in-package #:rsb.doc.check-references)
+
+(defvar *fasl-directory* "/tmp/check-documentation-references-fasls/"
+  "TODO(jmoringe): document")
 
 (declaim (special *documentation-references*))
 
 (defvar *documentation-references* nil
   "TODO(jmoringe): document")
 
+(defun install-collect-macro (symbol)
+  (let ((symbol (etypecase symbol
+		  (symbol symbol)
+		  (string (read-from-string symbol)))))
+    (eval
+     `(define-compiler-macro ,symbol (&whole whole &rest parts)
+	"TODO(jmoringe): document"
+	(let ((spec (apply ',symbol parts)))
+	  (format t "~@<~A: ~<~A, ~{~A~^ » ~}~_<~A>~:>~@:>~%"
+		  *compile-file-pathname* spec)
+	  (pushnew spec *documentation-references*
+		   :test #'equal))
+	whole))))
+
+(defmacro with-system-fasl-directory
+    ((system &optional (directory '*fasl-directory*))
+     &body body)
+  "TODO(jmoringe): document"
+  (once-only (system directory)
+    (with-gensyms (old-value)
+      `(let ((,old-value  asdf:*output-translations-parameter*))
+	 (unwind-protect
+	      (progn
+		(asdf:initialize-output-translations
+		 `(:output-translations
+		   (,(namestring
+		      (asdf:component-pathname (asdf:find-system ,system)))
+		    ,,directory)
+		   :inherit-configuration))
+		,@body)
+	   (setf asdf:*output-translations-parameter* ,old-value)
+	   (ignore-errors
+	    (cl-fad:delete-directory-and-files ,directory)))))))
+
+(defmacro with-silent-compilation (&body body)
+  `(let ((*compile-print*   nil)
+	 (*compile-verbose* nil)
+	 (*load-print*      nil)
+	 (*load-verbose*    nil))
+     (handler-bind
+	 ((condition (lambda (condition)
+		       (declare (ignore condition))
+		       (when (find-restart 'muffle-warning)
+			 (invoke-restart 'muffle-warning)))))
+       ,@body)))
+
+(defun compile-system-silently (system)
+  (with-system-fasl-directory (system)
+    (with-silent-compilation
+      (asdf:load-system system))))
+
 (defun collect-references (system &optional load)
   "TODO(jmoringe): document"
-  (mapc #'load load)
+  (with-silent-compilation (mapc #'load load))
 
-  (let ((symbol (read-from-string "rsb::documentation-ref/rsb-manual")))
-   (eval
-    `(define-compiler-macro ,symbol (&whole whole &rest parts)
-       "TODO(jmoringe): document"
-       (let ((spec (apply ',symbol parts)))
-	 (format t "~@<~A: ~<~A, ~{~A~^ » ~}~_<~A>~:>~@:>~%"
-		 *compile-file-pathname* spec)
-	 (pushnew spec *documentation-references*
-		  :test #'equal))
-       whole)))
+  (install-collect-macro "rsb:documentation-ref/rsb-bug")
+  (install-collect-macro "rsb:documentation-ref/rsb-glossary")
+  (install-collect-macro "rsb:documentation-ref/rsb-manual")
 
-  (let ((old-value                  asdf:*output-translations-parameter*)
-	(*documentation-references* nil))
-    (unwind-protect
-	 (let ((*compile-print*   nil)
-	       (*compile-verbose* nil))
-	   (asdf:initialize-output-translations
-	    `(:output-translations
-	      (,(namestring
-		 (asdf:component-pathname (asdf:find-system system)))
-	       "/tmp/check-documentation-references-fasls/")
-	      :inherit-configuration))
-	   (handler-bind
-	       ((error     (lambda (condition)
-			     (when (find-restart 'continue)
-			       (invoke-restart 'continue))))
-		(condition (lambda (condition)
-			     (when (find-restart 'muffle-warning)
-			       (invoke-restart 'muffle-warning)))))
-	     (asdf:load-system system))
-	   *documentation-references*)
-      (setf asdf:*output-translations-parameter* old-value)
-      (ignore-errors
-       (cl-fad:delete-directory-and-files "/tmp/check-documentation-references-fasls/")))))
+  (let ((*documentation-references* '()))
+    (compile-system-silently system)
+    *documentation-references*))
 
-(defun check-references (&optional (references *documentation-references*))
-  "TODO(jmoringe): document"
+(defun+ check-reference ((&whole spec document section url))
   (let ((cxml:*catalog* (handler-bind ((warning #'muffle-warning))
 			  (cxml:make-catalog))))
-    (iter (for (document section url) in references)
+    (let+ (((&accessors-r/o (scheme   puri:uri-scheme)
+			    (path     puri:uri-path)
+			    (fragment puri:uri-fragment)) (puri:uri url))
+	   ((&values content code)
+	    (ecase scheme
+	      (:http (drakma:http-request url :want-stream t))
+	      (:file (if (probe-file path)
+			 (values (open path :element-type '(unsigned-byte 8)) 200)
+			 (values nil 404))))))
+      (cond
+	((/= code 200)
+	 (warn "~@<Broken link: ~
+		~/more-conditions::print-reference/ => ~D~@:>"
+	       spec code))
 
-	  (let+ (((&accessors-r/o (scheme   puri:uri-scheme)
-				  (path     puri:uri-path)
-				  (fragment puri:uri-fragment)) (puri:uri url))
-		 ((&values content code)
-		  (ecase scheme
-		    (:http (drakma:http-request url :want-stream t))
-		    (:file (if (probe-file path)
-			       (values (open path :element-type '(unsigned-byte 8)) 200)
-			       (values nil 404))))))
-	    (unless (= code 200)
-	      (warn "~@<Broken link: ~A, ~{~A~^ » ~} ~A => ~D~@:>"
-		    document section url code)
-	      (next-iteration))
+	(fragment
+	 (let+ (((&flet resolver (pubid sysid)
+		   (declare (ignore pubid))
+		   (when (eq (puri:uri-scheme sysid) :http)
+		     (drakma:http-request sysid :want-stream t))))
+		(dom (cxml:parse content (stp:make-builder)
+				 ;; :entity-resolver #'resolver
+				 )))
+	   (when (xpath:node-set-empty-p
+		  (xpath:evaluate (format nil "//node()[@id='~A']" fragment) dom))
+	     (warn "~@<Broken link anchor: ~/more-conditions::print-reference/: ~
+		    attribute id='~A' not in document~@:>"
+		   spec fragment))))))))
 
-	    (when fragment
-	      (let+ (((&flet resolver (pubid sysid)
-			(declare (ignore pubid))
-			(when (eq (puri:uri-scheme sysid) :http)
-			  (drakma:http-request sysid :want-stream t))))
-		     (dom (cxml:parse content (stp:make-builder)
-				      ;; :entity-resolver #'resolver
-				      )))
-		(when (xpath:node-set-empty-p
-		       (xpath:evaluate (format nil "//node()[@id='~A']" fragment) dom))
-		  (warn "~@<Broken link anchor: ~A, ~{~A~^ » ~} ~A: attribute id='~A' not in document~@:>"
-			document section url fragment)
-		  (next-iteration))))))))
-
-(defun collect+check-references (system &optional (load (list (asdf:system-relative-pathname system "src/package.lisp")
-							      (asdf:system-relative-pathname system "src/error-handling.lisp"))))
+(defun collect+check-references (system
+				 &optional
+				 (preload (mapcar (curry #'asdf:system-relative-pathname system)
+						  (list "src/package.lisp"
+							"src/variables.lisp"
+							"src/error-handling.lisp"))))
   "TODO(jmoringe): document"
-  (check-references (collect-references system load)))
+  (mapc #'check-reference (collect-references system preload)))
 
 (sb-ext:save-lisp-and-die "check-documentation-references"
 			  :executable t
-			  :toplevel   #'(lambda ()
-					  (handler-case
-					      (collect+check-references :cl-rsb)
-					    (error (condition)
-					      (format *error-output* "~A~%" condition)))))
+			  :toplevel   (lambda ()
+					(collect+check-references :cl-rsb)
+					(handler-case
+					    (collect+check-references :cl-rsb)
+					  (error (condition)
+					    (format *error-output* "~A~%" condition)))))
