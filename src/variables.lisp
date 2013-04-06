@@ -71,3 +71,15 @@ of random IDs and similar things requiring pseudo randomness.")
 
 (defvar *default-configuration* nil
   "DOC")
+
+
+;;; Documentation references
+;;
+
+(defvar *new-issue-url*
+  "https://code.cor-lab.org/projects/rsb/issues/new"
+  "URL which can be used to file issues against the project.")
+
+(defvar *manual-base-url*
+  "http://docs.cor-lab.org/rsb-manual/trunk/html"
+  "Base URL of the project documentation.")

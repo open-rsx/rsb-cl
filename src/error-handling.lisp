@@ -1,6 +1,6 @@
 ;;; error-handling.lisp --- Error handling functions used in cl-rsb.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -30,18 +30,21 @@
 
 (defun documentation-ref/rsb-bug ()
   "TODO(jmoringe): document"
-  (list :rsb/project "Report a bug"
-	"https://code.cor-lab.org/projects/rsb/issues/new"))
+  (list :rsb/project "Report a bug" *new-issue-url*))
+
+(defun documentation-ref/rsb-glossary (term)
+  "TODO(jmoringe): document"
+  (list :rsb/glossary term (format nil "~A/glossary.html#term-~A"
+				   *manual-base-url*
+				   (string-downcase (substitute #\- #\Space term)))))
 
 (defun documentation-ref/rsb-manual (&rest parts)
   "TODO(jmoringe): document"
   (flet ((linkify (string)
 	   (string-downcase (substitute #\- #\Space string))))
-    (list :rsb/manual parts
-	  (format nil
-		  "http://docs.cor-lab.org/rsb-manual/trunk/html/~{~A.html~^#~A~}"
-		  ;; "file:///home/jmoringe/code/cor-lab/rsb/rsb-manual/build/html/~{~A.html~^#~A~}"
-		  (mapcar #'linkify parts)))))
+    (list :rsb/manual parts (format nil "~A/~{~A.html~^#~A~}"
+				    *manual-base-url*
+				    (mapcar #'linkify parts)))))
 
 
 ;;; Useful macros

@@ -176,7 +176,7 @@ See `version/list' for details on keyword parameters."
 			       :depends-on ("package" "types" "scope"
 					    "protocol" "variables"))
 			      (:file       "error-handling"
-			       :depends-on ("package"))))
+			       :depends-on ("package" "variables"))))
 
 		(:module     "filter"
 		 :pathname   "src/filter"
