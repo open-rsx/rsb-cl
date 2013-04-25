@@ -1,6 +1,6 @@
 ;;; conversion.lisp --- Event <-> notification conversion for socket transport.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -178,9 +178,9 @@ and CAUSES."
 
     ;; Add TIMESTAMPS.
     (iter (for (key value) on timestamps :by #'cddr)
-	  (unless (eq key :create) ;; the event should not have :send,
-				   ;; :receive or :deliver at this
-				   ;; point
+	  (unless (member key '(:create :send)) ; the event should not
+				                ; have :receive or
+				                ; :deliver at this point
 	    (vector-push-extend
 	     (make-instance 'user-time
 			    :key       (keyword->bytes key)
