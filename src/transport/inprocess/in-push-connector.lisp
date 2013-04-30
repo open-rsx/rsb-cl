@@ -1,6 +1,6 @@
 ;;; in-push-connector.lisp ---
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -49,3 +49,7 @@ process."))
 		   (action    (eql :detached)))
   (log1 :info connector "Detaching from scope ~S" scope)
   (removef (by-scope scope) connector :count 1))
+
+(defmethod handle :before ((connector in-push-connector)
+			   (event     event))
+  (setf (timestamp event :receive) (local-time:now)))

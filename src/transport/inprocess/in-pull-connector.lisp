@@ -86,6 +86,7 @@ CONNECTOR, if there are any. If there are no queued events, block."
 
 (defmethod emit ((connector in-pull-connector) (block? t))
   (when-let ((event (receive-message connector block?)))
+    (setf (timestamp event :receive) (local-time:now))
     (dispatch connector event)
     t))
 

@@ -116,7 +116,10 @@ function."))
 			  :test (rcurry #'set-equal :test #'equal))
 	     (ensure-same (event-method result) expected-method
 			  :test #'eq)
-	     (ensure-same (remove :create (timestamp-alist result) :key #'car)
+	     (ensure-same (remove-if
+			   (lambda (name)
+			     (member name '(:create :send :receive :deliver)))
+			   (timestamp-alist result) :key #'car)
 			  expected-timestamps
 			  :test (rcurry #'set-equal :test #'timestamp-entries-equal))
 	     (ensure-same (event-causes result) expected-causes

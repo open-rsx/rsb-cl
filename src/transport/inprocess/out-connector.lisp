@@ -1,6 +1,6 @@
 ;;; out-connector.lisp --- An out-direction connector for inprocess communication.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -34,6 +34,10 @@
   (:documentation
    "Instances of this connector class deliver RSB events within a
 process."))
+
+(defmethod handle :before ((connector out-connector)
+			   (event     event))
+  (setf (timestamp event :send) (local-time:now)))
 
 (defmethod handle ((connector out-connector) (event event))
   (iter (for super in (super-scopes (event-scope event)
