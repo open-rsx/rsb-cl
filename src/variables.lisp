@@ -52,18 +52,19 @@ of random IDs and similar things requiring pseudo randomness.")
 (declaim (special *default-configuration-files*))
 
 (defvar *default-configuration-files*
-  '(;; Current directory
+  `(;; Current directory
     "rsb.conf"
 
     ;; User-specific configuration
-    #+(and unix (not darwin)) "~/.config/rsb.conf"
+    #+(and unix (not darwin)) #P"~/.config/rsb.conf"
     ;;#+darwin                ?
-    #+windows                 "~/rsb.conf"
+    #+windows                 ,(merge-pathnames
+				"rsb.conf" (user-homedir-pathname))
 
     ;; System-wide configuration
-    #+(and unix (not darwin)) "/etc/rsb.conf"
-    #+windows                 "c/rsb.conf"
+    #+(and unix (not darwin)) #P"/etc/rsb.conf"
     ;;#+darwin                ?
+    #+windows                 #P"/rsb.conf"
     )
   "List of configuration file names in order of decreasing priority.")
 
