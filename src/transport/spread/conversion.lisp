@@ -1,6 +1,6 @@
 ;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -244,9 +244,9 @@ CAUSES."
 
       ;; Add TIMESTAMPS.
       (iter (for (key value) on timestamps :by #'cddr)
-	    ;; the event should not have :receive or :deliver at this
-	    ;; point
-	    (unless (member key '(:create :send))
+	    ;; Framework timestamps are stored in dedicated fields of
+	    ;; the notification.
+	    (unless (member key *framework-timestamps* :test #'eq)
 	      (vector-push-extend
 	       (make-instance 'user-time
 			      :key       (keyword->bytes key)

@@ -118,7 +118,7 @@ function."))
 			  :test #'eq)
 	     (ensure-same (remove-if
 			   (lambda (name)
-			     (member name '(:create :send :receive :deliver)))
+			     (member name *framework-timestamps* :test #'eq))
 			   (timestamp-alist result) :key #'car)
 			  expected-timestamps
 			  :test (rcurry #'set-equal :test #'timestamp-entries-equal))

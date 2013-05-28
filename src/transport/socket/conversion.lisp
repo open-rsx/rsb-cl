@@ -178,9 +178,9 @@ and CAUSES."
 
     ;; Add TIMESTAMPS.
     (iter (for (key value) on timestamps :by #'cddr)
-	  (unless (member key '(:create :send)) ; the event should not
-				                ; have :receive or
-				                ; :deliver at this point
+	  ;; Framework timestamps are stored in dedicated fields of
+	  ;; the notification.
+	  (unless (member key *framework-timestamps* :test #'eq)
 	    (vector-push-extend
 	     (make-instance 'user-time
 			    :key       (keyword->bytes key)
