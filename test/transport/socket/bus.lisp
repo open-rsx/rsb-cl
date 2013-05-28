@@ -1,6 +1,6 @@
 ;;; bus.lisp --- Unit tests for the bus* classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -71,7 +71,7 @@ connection.")
   ;; supplied for a single host-port combination.
   (ensure-condition reader-creation-failed
     (with-reader (r1 (make-socket-url t nil))
-      (with-reader (r2 (make-socket-url nil '("nodelay" "1")))
+      (with-reader (r2 (make-socket-url nil '("tcpnodelay" "0")))
 	(with-reader (r3 (make-socket-url nil nil))
 	  ;; body is not important
 	  )))))

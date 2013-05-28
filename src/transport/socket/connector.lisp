@@ -56,13 +56,13 @@ bus to which the connector provides access.")
 	     :initform :auto
 	     :documentation
 	     "Controls whether the connector takes the server or client role for the bus.")
-   (nodelay? :initarg  :nodelay
+   (nodelay? :initarg  :tcpnodelay
 	     :initarg  :nodelay?
 	     :type     t
 	     :reader   connector-nodelay?
 	     :initform t
 	     :documentation
-	     "Controls whether decreased troughput should be traded for reduced latency by the connector. For TCP connections this means the TCPNODELAY option should be set on the socket implementing the bus connection."))
+	     "Controls whether decreased throughput should be traded for reduced latency by the connector. For TCP connections this means the TCP_NODELAY option should be set on the socket implementing the bus connection."))
   (:default-initargs
    :host (missing-required-initarg 'in-connector :host)
    :port (missing-required-initarg 'in-connector :port))
@@ -70,10 +70,10 @@ bus to which the connector provides access.")
   (:wire-type octet-vector)
   (:schemas   :socket)
   (:options
-   (:host     &slot)
-   (:port     &slot)
-   (:server?  &slot)
-   (:nodelay? &slot))
+   (:host       &slot)
+   (:port       &slot)
+   (:server     &slot)
+   (:tcpnodelay &slot))
   (:documentation
    "This class serves as a superclass for connector classes that
 employ socked-based bus access."))
@@ -84,7 +84,9 @@ employ socked-based bus access."))
                                      &key
 				     port
 				     server?
-				     server)
+				     server
+				     tcpnodelay
+				     nodelay?)
   (setf (slot-value instance 'port)
 	(etypecase port
 	  (string
@@ -100,7 +102,17 @@ employ socked-based bus access."))
 	     (cond
 	       ((string= value "0")    nil)
 	       ((string= value "1")    t)
-	       ((string= value "auto") :auto)))))))
+	       ((string= value "auto") :auto)))))
+	(slot-value instance 'nodelay?)
+	(let ((value (or tcpnodelay nodelay?)))
+	  (etypecase value
+	    (boolean value)
+	    (string
+	     (cond
+	       ((string= value "0") nil)
+	       ((string= value "1") t)
+	       (t                   (error "~@<Invalid value ~S.~@:>"
+					   value))))))))
 
 (defmethod notify ((connector connector)
 		   (scope     scope)
