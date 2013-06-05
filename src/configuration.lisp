@@ -171,12 +171,12 @@ determine the set of default converters. if CONFIG is not supplied,
 the value of `*default-configuration*' is used."
   '((nibbles:octet-vector . (:fundamental-void
 			     :fundamental-bool
+			     :fundamental-int64
 			     :fundamental-uint32
 			     :fundamental-int32
 			     :fundamental-uint64
-			     :fundamental-int64
-			     :fundamental-float
 			     :fundamental-double
+			     :fundamental-float
 			     :fundamental-utf-8-string
 			     :fundamental-bytes
 			     :protocol-buffer))))
