@@ -1,6 +1,6 @@
 ;;; scope-filter.lisp --- A filter that discriminates based on scopes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -35,7 +35,7 @@
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This filter discriminates based on the scopes of events. Event
-scopes are match the scope of the filter, if the are identical or
+scopes match the scope of the filter, if they are identical or
 sub-scopes."))
 
 (defmethod matches? ((filter scope-filter) (event event))
