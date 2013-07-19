@@ -91,8 +91,7 @@ CONFIG-FILES. Default:
   (apply #'merge-options
 	 (options-from-environment)
 	 (iter (for file in config-files)
-	       (with-input-from-file (stream file
-				      :if-does-not-exist nil)
+	       (with-open-file (stream file :if-does-not-exist nil)
 		 (when stream
 		   (collect (options-from-stream stream)))))))
 
