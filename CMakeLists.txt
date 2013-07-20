@@ -160,6 +160,14 @@ endif()
 
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
+# Dependencies
+find_package(RSBProtocol "${RSB_VERSION_MAJOR}.${RSB_VERSION_MINOR}.8" REQUIRED)
+
+message(STATUS "Protocol directory: ${RSBProtocol_DIR}")
+
+write_file("${CMAKE_SOURCE_DIR}/protocol-directory.sexp"
+           "\"${RSBProtocol_DIR}/\"")
+
 # Tests
 enable_testing()
 
@@ -182,9 +190,6 @@ install(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/src"
 install(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/test"
         DESTINATION    "share/common-lisp/source/${CMAKE_PROJECT_NAME}"
         FILES_MATCHING PATTERN "*.lisp")
-install(DIRECTORY      "${CMAKE_CURRENT_SOURCE_DIR}/data"
-        DESTINATION    "share/common-lisp/source/${CMAKE_PROJECT_NAME}"
-        FILES_MATCHING PATTERN "*.proto")
 install(DIRECTORY
         DESTINATION "share/common-lisp/source/${CMAKE_PROJECT_NAME}")
 install(FILES       ${ASD_FILES} ${SEXP_FILES}

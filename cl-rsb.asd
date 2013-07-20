@@ -108,8 +108,49 @@ See `version/list' for details on keyword parameters."
   (format nil "~{~A.~A~^.~A~^-~A~}" (apply #'version/list args)))
 
 
-;;; Optimization settings
+;;; Settings
 ;;
+
+;; Return a relative pathname which, when MERGE-PATHNAMESed with
+;; ANCHOR, yields DIRECTORY.
+(defun make-relative (directory anchor)
+  (assert (and (pathname-directory directory)
+	       (not (pathname-name directory))))
+  (when (eq :relative (first (pathname-directory directory)))
+    (return-from make-relative directory))
+
+  (labels ((from-components (pathname)
+	     (make-pathname :directory pathname))
+	   (relative-from-components (components)
+	     (from-components (list* :relative components))))
+    (let ((initial (from-components (pathname-directory anchor))))
+      (loop for current = initial then (from-components
+					(butlast (pathname-directory current)))
+	    for relative = (parse-namestring
+			    (enough-namestring directory current))
+	    while (equal relative directory)
+	    collect :up into ups
+	    finally (return (merge-pathnames
+			     (relative-from-components
+			      (rest (pathname-directory relative)))
+			     (relative-from-components ups)))))))
+
+(defparameter +protocol-directory+
+  (make-relative
+   (parse-namestring
+    (cond
+      ((boundp 'cl-user::*rsb.protocol-directory*)
+       (symbol-value 'cl-user::*rsb.protocol-directory*))
+      ((let* ((protocol-directory-file
+		(merge-pathnames "protocol-directory.sexp" *load-truename*))
+	      (stream (when (probe-file protocol-directory-file)
+			(open protocol-directory-file))))
+	 (unwind-protect
+	      (when stream (read stream))
+	   (when stream (ignore-errors (close stream))))))
+      (t "data/")))
+   *load-truename*)
+  "Directory from which protocol definitions should be loaded.")
 
 (defparameter +optimization-fast+unsafe+
   (if (boundp '+optimization-fast+unsafe+)
@@ -634,7 +675,7 @@ RSB events to/from Google protocol buffers."
 		cl-protobuf)
   :encoding    :utf-8
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-		 :pathname   "data"
+		 :pathname   #.+protocol-directory+
 		 :components ((:file       "EventId"
 			       :pathname   "rsb/protocol/EventId")
 			      (:file       "EventMetaData"
