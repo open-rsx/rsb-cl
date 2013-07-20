@@ -144,6 +144,7 @@ See `version/list' for details on keyword parameters."
 		:puri
 		:uuid
 		:local-time)
+  :encoding    :utf-8
   :components  ((:module     "src-early"
 		 :pathname   "src"
 		 :components ((:file       "package")
@@ -382,6 +383,7 @@ See `version/list' for details on keyword parameters."
 		:cl-protobuf
 		:network.spread
 		:cl-rsb)
+  :encoding    :utf-8
   :components  ((:module     "doc"
 		 :components ((:file       "package"))))
 
@@ -406,6 +408,7 @@ See `version/list' for details on keyword parameters."
   :properties  ((:spread-port  . #.(or #+sbcl (let ((value (sb-posix:getenv "SPREAD_PORT")))
 						(when value (read-from-string value)))
 				       5678)))
+  :encoding    :utf-8
   :components  ((:module     "test"
 		 :components ((:file       "package")
 
@@ -555,6 +558,7 @@ See `version/list' for details on keyword parameters."
 introspection of RSB configuration options."
   :requires    (cl-rsb
 		com.dvlsoft.clon)
+  :encoding    :utf-8
   :components  ((:file       "clon"
 		 :pathname   "src/clon")))
 
@@ -576,6 +580,7 @@ on the spread group communication system."
 		cl-rsb-and-cl-protobuf)
   :depends-on  (:nibbles
 		:ironclad)
+  :encoding    :utf-8
   :components  ((:module     "spread"
 		 :pathname   "src/transport/spread"
 		 :components ((:file       "package")
@@ -627,6 +632,7 @@ cl-rsb-and-cl-protobuf unless system cl-protobuf can be loaded~@:>"))
 RSB events to/from Google protocol buffers."
   :requires    (cl-rsb
 		cl-protobuf)
+  :encoding    :utf-8
   :components  ((:protocol-buffer-descriptor-directory "protocol"
 		 :pathname   "data"
 		 :components ((:file       "EventId"
@@ -663,6 +669,7 @@ RSB events to/from Google protocol buffers."
   :requires    (cl-rsb
 		cl-rsb-and-cl-protobuf
 		usocket)
+  :encoding    :utf-8
   :components  ((:module     "socket"
 		 :pathname   "src/transport/socket"
 		 :components ((:file       "package")
@@ -710,6 +717,7 @@ RSB events to/from Google protocol buffers."
 filter for events with text content."
   :requires    (cl-rsb
 		cl-ppcre)
+  :encoding    :utf-8
   :components  ((:module     "filter"
 		 :pathname   "src/filter"
 		 :components ((:file       "regex-filter")))))
@@ -728,6 +736,7 @@ filter for events with text content."
 uses XPath expressions to discriminate events."
   :requires    (cl-rsb
 		xpath)
+  :encoding    :utf-8
   :components  ((:module     "filter"
 		 :pathname   "src/filter"
 		 :components ((:file       "xpath-filter")))))
