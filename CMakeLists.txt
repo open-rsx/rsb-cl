@@ -123,6 +123,7 @@ set(SYSTEM_NAME "cl-rsb")
 project(${SYSTEM_NAME})
 
 # Determine at least major and minor version components.
+set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.1.err\"")
 execute_lisp("version"
              "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
               --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
@@ -136,7 +137,7 @@ git_version_components(${VERSION_FROM_LISP} RSB_VERSION_MAJOR
 # version components.
 if(NOT RSB_VERSION_PATCH)
     git_based_version(${RSB_VERSION_MAJOR} ${RSB_VERSION_MINOR})
-    set(REDIRECTIONS "ERROR_QUIET")
+    set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.2.err\"")
     execute_lisp("version"
                  "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
                   --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
