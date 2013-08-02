@@ -714,6 +714,8 @@ RSB events to/from Google protocol buffers."
   :components  ((:module     "socket"
 		 :pathname   "src/transport/socket"
 		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
 			      (:file       "conditions"
 			       :depends-on ("package"))
 

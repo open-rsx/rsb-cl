@@ -49,13 +49,14 @@ receiving and unpacking serialized notifications.")
 		   :documentation
 		   "Static (occasionally enlarged) buffer for packing
 and sending notifications.")
-   (closing?       :type     boolean
+   (closing?       :type     (member nil t :send :receive)
 		   :reader   connection-closing?
 		   :accessor %connection-closing?
 		   :initform nil
 		   :documentation
-		   "Stores a Boolean which indicates whether the
-connection is currently closing.")
+		   "Indicates indicates whether the connection is
+currently closing and, potentially, the role of the connection within
+the shutdown handshake.")
    (lock           :reader   connection-lock
 		   :initform (bt:make-lock "Connection lock")
 		   :documentation
@@ -102,15 +103,8 @@ but shares these among participants in the process."))
   (setf (sb-bsd-sockets::sockopt-tcp-nodelay (usocket:socket (connection-socket instance))) nodelay?)
 
   ;; If requested, perform handshake in the requested role.
-  (let ((stream (usocket:socket-stream (connection-socket instance))))
-    (case handshake
-      (:send
-       (write-ub32/le 0 stream)
-       (force-output stream))
-      (:receive
-       (unless (zerop (read-ub32/le stream))
-	 (error "~@<Protocol error during handshake; expected four 0 ~
-bytes.~@:>"))))))
+  (when handshake
+    (handshake instance :setup handshake)))
 
 (defmethod (setf processor-error-policy) ((new-value  t)
 					  (connection bus-connection))
@@ -119,19 +113,55 @@ after calling NEW-VALUE."
   (call-next-method (%make-error-policy connection new-value) connection))
 
 
+;;; Protocol
+;;
+
+(defun handshake (connection phase role)
+  (let ((stream (usocket:socket-stream (connection-socket connection))))
+    (log1 :info connection "Performing ~A role of ~A handshake" role phase)
+    ;; TODO temp until we implement shutdown protocol
+    (if (and (eq phase :shutdown) (eq role :send))
+	(sb-bsd-sockets:socket-shutdown
+	 (usocket::socket (connection-socket connection))
+	 :direction :output)
+	(ecase role
+	  (:send
+	   (write-ub32/le 0 stream)
+	   (finish-output stream))
+	  (:receive
+	   (unless (zerop (read-ub32/le stream))
+	     (error "~@<Protocol error during ~A role of ~A handshake; ~
+expected four 0 bytes.~@:>"
+		    role phase)))))
+    (log1 :info connection "Performed ~A role of ~A handshake" role phase)))
+
+
 ;;; Receiving
 ;;
 
 (defmethod receive-message ((connection bus-connection)
 			    (block?     t))
-  (let* ((stream   (usocket:socket-stream (connection-socket connection)))
-	 (length   (read-ub32/le stream))
-	 (buffer   (%ensure-receive-buffer connection length))
-	 (received (read-sequence buffer stream :end length)))
-    (unless (= received length)
-      (error "~@<Short read (expected: ~D; got ~D)~@:>"
-	     length received))
-    (values (cons buffer length) :undetermined)))
+  (let* ((stream (usocket:socket-stream (connection-socket connection)))
+	 (length (handler-case ; TODO temp until we implement shutdown protocol
+		     (read-ub32/le stream)
+		   (end-of-file ()
+		     (funcall (processor-error-policy connection)
+			      (make-condition 'connection-shutdown-requested
+					      :connection connection))
+		     (abort)))))
+    (if (zerop length)
+	(progn
+	  (log1 :info connection "Received shutdown request")
+	  (funcall (processor-error-policy connection)
+		   (make-condition 'connection-shutdown-requested
+				   :connection connection))
+	  (abort))
+	(let* ((buffer   (%ensure-receive-buffer connection length))
+	       (received (read-sequence buffer stream :end length)))
+	  (unless (= received length)
+	    (error "~@<Short read (expected: ~D; got ~D)~@:>"
+		   length received))
+	  (values (cons buffer length) :undetermined)))))
 
 (defmethod receive-message ((connection bus-connection)
 			    (block?     (eql nil)))
@@ -191,12 +221,14 @@ be packed using protocol buffer serialization.~@:>"
   (send-notification connection (event->notification connection event)))
 
 
-;;;
+;;; Shutdown
 ;;
 
-(defmethod close ((connection bus-connection)
-		  &key abort)
-  (declare (ignore abort))
+(defmethod disconnect ((connection bus-connection)
+		       &key
+		       abort
+		       handshake)
+  (check-type handshake (member nil :send :receive))
 
   (let+ (((&accessors (lock     connection-lock)
 		      (closing? %connection-closing?)
@@ -204,28 +236,46 @@ be packed using protocol buffer serialization.~@:>"
     ;; Ensure that CONNECTION is not already closing or being closed.
     (bt:with-lock-held (lock)
       (when closing?
-	(return-from close nil))
-      (setf closing? t))
+	;; If `disconnect' is called with `handshake' :send, it waits
+	;; for being called with `handshake' :receive from another
+	;; thread.p
+	(when (and (eq closing? :send) (eq handshake :receive))
+	  (setf closing? handshake))
+	(return-from disconnect nil))
+      (setf closing? (or handshake t)))
 
-    ;; If this really is the initial attempt to close CONNECTION, stop
-    ;; the receiver thread and close the socket.
+    ;; If this really is the initial attempt to disconnect CONNECTION,
+    ;; perform a shutdown handshake, if requested, stop the receiver
+    ;; thread and close the socket. Note that this will be skipped in
+    ;; case of an error-induced shutdown (`handshake' is nil in that
+    ;; case).
+    (when (and (not abort) handshake)
+
+      ;; Perform "send" part of shutdown handshake. This either
+      ;; completes the shutdown sequence (if the remote peer initiated
+      ;; it) or initiates it.
+      (handshake connection :shutdown :send)
+
+      ;; Wait for the shutdown sequence to complete. This can be the
+      ;; case immediately if we initiated it.
+      (iter (bt:with-lock-held (lock)
+	      (until (eq closing? :receive)))
+	    (repeat 5000)
+	    (sleep .001))
+      (unless (eq closing? :receive)
+	(warn "~@<Did not receive acknowledgment of shutdown ~
+handshake.~@:>")))
+
+    ;; After the shutdown protocol has hopefully been completed, stop
+    ;; the receiver and close the socket.
+    (log1 :info connection "Stopping receiver thread")
     (unwind-protect
-	 (progn
-	   ;; If there is pending input data, give the receiving
-	   ;; machinery 1 second to retrieve it.
-	   (iter (while (ignore-errors
-			 (listen (usocket:socket-stream socket))))
-		 (repeat 100)
-		 (sleep .01))
-
-	   ;; After pending input data hopefully has been retrieved,
-	   ;; stop the receiver.
-	   (log1 :info connection "Stopping receiver thread")
-	   (stop-receiver connection))
-
-      ;; Try to flush out pending output data and close the socket.
-      (ignore-errors (finish-output (usocket:socket-stream socket)))
-      (ignore-errors (usocket:socket-close socket)))
+	 ;; If this is called from the receiver thread itself, it will
+	 ;; just abort and unwind at this point.
+	 (stop-receiver connection)
+      (ignore-errors
+       (log1 :info connection "Closing socket")
+       (usocket:socket-close socket)))
     ;; Return t to indicate that we actually closed the connection.
     t))
 
@@ -237,7 +287,7 @@ be packed using protocol buffer serialization.~@:>"
   (let+ (((&accessors-r/o (socket   connection-socket)
 			  (closing? connection-closing?)) object))
     (print-unreadable-object (object stream :type t)
-      (format stream "~:[open~;closing~] ~/rsb.transport.socket::print-socket/"
+      (format stream "~:[open~;closing: ~:*~S~] ~/rsb.transport.socket::print-socket/"
 	      closing? socket))))
 
 
@@ -247,27 +297,27 @@ be packed using protocol buffer serialization.~@:>"
 (defun %make-error-policy (connection &optional function)
   "Return a error policy function that calls FUNCTION and closes
 CONNECTION when invoked. "
-  #'(lambda (condition)
+  (named-lambda bus-connection-error-policy (condition)
       ;; Closing CONNECTION can fail (or at least signal an error) for
       ;; various reasons. Make sure the installed error policy is
       ;; still called.
-      (log1 :info connection "Closing and executing error policy ~A due to condition: ~A"
+      (log1 :info connection "Maybe closing and executing error policy ~A due to condition: ~A"
 	    function condition)
-      (unwind-protect
+      (unwind-protect ; needed because `disconnect' may unwind.
 	   (handler-case
-	       ;; `close' returns nil if CONNECTION was already being
-	       ;; closed. In that case, we do not have to call
+	       ;; `disconnect' returns nil if CONNECTION was already
+	       ;; being closed. In that case, we do not have to call
 	       ;; FUNCTION (because somebody else did/does) and can
 	       ;; abort the receiver thread right away.
-	       (when (not (close connection))
-		 (setf function nil))
+	       (let ((handshake (shutdown-handshake-for condition)))
+		 (when (not (disconnect connection :handshake handshake))
+		   (setf function nil)))
 	     (error (condition)
 	       (log1 :warn connection "When executing error policy, error closing connection: ~A"
 		     condition)))
 	;; If necessary, execute the original error policy, FUNCTION.
-	(if function
-	    (funcall function condition)
-	    (stop-receiver connection)))))
+	(when function
+	  (funcall function condition)))))
 
 (macrolet
     ((define-ensure-buffer (name accessor)

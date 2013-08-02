@@ -1,6 +1,6 @@
 ;;; bus.lisp --- Superclass for bus provider classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -123,7 +123,7 @@ connected to the bus."))
 	      (setf (processor-error-policy connection)
 		    #'(lambda (condition)
 			(declare (ignore condition))
-			(log1 :info bus "Removing connection ~A" connection)
+			(log1 :info bus "Removing connection ~A after error policy" connection)
 			(with-locked-bus (bus :connections? t)
 			  (removef (bus-connections bus) connection))))
 
@@ -135,11 +135,10 @@ connected to the bus."))
 	(iter (for connection in removed)
 	      ;; Prevent the error handling from being executed
 	      ;; concurrently/recursively.
-	      (setf (processor-error-policy connection) nil)
-	      (log1 :info bus "Closing connection ~A" connection)
-	      (handler-case (close connection)
+	      (log1 :info bus "Maybe closing connection ~A after remove" connection)
+	      (handler-case (disconnect connection :handshake :send)
 		(error (condition)
-		  (log1 :warn bus "Error closing connection ~A: ~A"
+		  (log1 :warn bus "Error closing connection ~A after remove: ~A"
 			connection condition))))))))
 
 (defmethod (setf bus-connectors) :around ((new-value list)

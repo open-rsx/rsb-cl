@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the socket transport.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -35,3 +35,19 @@ automatically determined client or server~@:>")
   (:documentation
    "This error is signaled when a an attempt to obtain a bus
 provider in automatic client vs. server selection mode."))
+
+(define-condition connection-shutdown-requested (condition)
+  ((connection :initarg  :connection
+	       :type     t
+	       :reader   connection-shutdown-requested-connection
+	       :documentation
+	       "Stores the connection the shutdown of which has been
+requested."))
+  (:default-initargs
+   :connection (missing-required-initarg 'connection-closed :connection))
+  (:documentation
+   "This condition is signaled when the remote peer requests
+termination of the connection."))
+
+(defmethod shutdown-handshake-for ((condition connection-shutdown-requested))
+  :receive)
