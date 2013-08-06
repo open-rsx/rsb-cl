@@ -47,7 +47,7 @@ if(GIT_EXECUTABLE)
         set(RELEASE_TAG "release-${MAJOR}.${MINOR_MINUS_ONE}")
         execute_process(COMMAND ${GIT_EXECUTABLE} describe
                                                   --long --dirty=-dirty
-                                                  --match "${RELEASE_TAG}"
+                                                  --tags --match "${RELEASE_TAG}"
                         RESULT_VARIABLE RESULT
                         OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
                         OUTPUT_STRIP_TRAILING_WHITESPACE
