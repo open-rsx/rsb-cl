@@ -1,6 +1,6 @@
 ;;; bus-server.lisp --- A class that accepts connections from bus clients.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -39,7 +39,8 @@
 endpoint designated by HOST and PORT and attach CONNECTOR to it.
 Attaching CONNECTOR marks the `bus-server' instance as being in use
 and protects it from being destroyed in a race condition situation."
-  (log1 :trace "Trying to obtain bus server ~S:~D for ~A"
+  (setf host "0.0.0.0")
+  (log1 :trace "Trying to obtain bus server ~A:~D for ~A"
 	host port connector)
   (let ((options (make-connection-options connector))
 	(key     (cons host port)))
