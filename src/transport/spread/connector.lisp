@@ -74,9 +74,9 @@ supplied."
 				     port)
   (let+ (((&values host port)
 	  (cond
+	    (name            (network.spread:parse-daemon-name name))
 	    ((and host port) (values host port))
-	    (port            (values nil  port))
-	    (name            (network.spread:parse-daemon-name name))))
+	    (port            (values nil  port))))
 	 (name (format nil "~D~@[@~A~]" port host))
 	 ((&accessors-r/o (uri connector-url)) instance))
     (when host
