@@ -81,8 +81,9 @@ should be used by connections associated to the bus instance.")
 		     "Stores a functions that is used as a handler for
 `bus-connection' instances."))
   (:default-initargs
-   :host (missing-required-initarg 'in-connector :host)
-   :port (missing-required-initarg 'in-connector :port))
+   :host    (missing-required-initarg 'bus :host)
+   :port    (missing-required-initarg 'bus :port)
+   :options (missing-required-initarg 'bus :options))
   (:documentation
    "This class is intended to be used as a superclass of client and
 server providers of bus access. It manages a list of connections to
