@@ -121,7 +121,7 @@ participates."))
 				   &key
 				   error?)
   (:documentation
-   "Return the converter used PARTICIPANT for WIRE-TYPE.
+   "Return the converter used by PARTICIPANT for WIRE-TYPE.
 If PARTICIPANT does not have a converter for WIRE-TYPE, signal an
 error if ERROR? is non-nil, otherwise return nil."))
 

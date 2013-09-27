@@ -128,7 +128,7 @@ function(execute_lisp NAME CODE OUTPUT_VARIABLE)
 endfunction()
 
 # Project definition (version is grovelled from asd system definition,
-# possibly in combination with version.sexp file written belowx).
+# possibly in combination with version.sexp file written below).
 set(SYSTEM_NAME "cl-rsb")
 project(${SYSTEM_NAME})
 
@@ -174,7 +174,7 @@ enable_testing()
 configure_lisp_redirect(test
                         "--eval \"(proclaim (quote (optimize (debug 3) (safety 3) (speed 0))))\"
                          --eval \"(asdf:test-system :${SYSTEM_NAME})\"")
-add_test(NAME    "rsb"
+add_test(NAME    "${SYSTEM_NAME}"
          COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.test.cmake")
 
 # Installation
@@ -202,7 +202,6 @@ set(CPACK_PACKAGE_VERSION_MINOR ${RSB_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${RSB_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION       "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 set(CPACK_PACKAGE_VENDOR        "CoR-Lab, Bielefeld University")
-set(CPACK_PACKAGE_FILE_NAME     "${PACKAGE_BASE_NAME}-${CPACK_PACKAGE_VERSION}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
 
 include("${CMAKE_SOURCE_DIR}/cpack/CPackInclude.cmake")

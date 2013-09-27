@@ -1,4 +1,4 @@
-;;; rsb.lisp --- Global and special variables used within RSB.
+;;; variables.lisp --- Global and special variables used within RSB.
 ;;
 ;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
 ;;

@@ -127,10 +127,10 @@ names."))
   "Return non-nil if SUB is a sub-scope of SUPER."
   (let ((scope1 (make-scope sub))
 	(scope2 (make-scope super)))
-    (nth-value
-     0 (starts-with-subseq (scope-components scope2)
-			   (scope-components scope1)
-			   :test 'string=))))
+    (values
+     (starts-with-subseq (scope-components scope2)
+			 (scope-components scope1)
+			 :test 'string=))))
 
 (defun super-scope? (super sub)
   "Return non-nil if SUPER is a super-scope of SUB."
