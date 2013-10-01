@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.patterns)
 
-
 ;;; Direct call mechanism
-;;
 
 (declaim (special *local-call*))
 

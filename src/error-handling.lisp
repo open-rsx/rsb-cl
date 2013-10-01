@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb)
 
-
 ;;; Useful macros
-;;
 
 (declaim (special *in-timeout?*))
 
@@ -16,7 +14,7 @@
   "Non-nil when a timeout is active for the current thread, nil otherwise.")
 
 (declaim (ftype (function (positive-real function) *)
-		invoke-with-restart-and-timeout))
+                invoke-with-restart-and-timeout))
 
 (defun invoke-with-restart-and-timeout (timeout thunk)
   "Call THUNK signaling a `bt:timeout' if it does not complete within
@@ -33,13 +31,13 @@ timeout. This is intended to prevent recursive timeouts."
       ;; is active, call THUNK without timeout. This avoid race
       ;; conditions between timeouts and recursive timeout handling.
       (if *in-timeout?*
-	  (funcall thunk)
-	  (let ((*in-timeout?* t))
-	    (bt:with-timeout (timeout)
-	      (funcall thunk))))
+          (funcall thunk)
+          (let ((*in-timeout?* t))
+            (bt:with-timeout (timeout)
+              (funcall thunk))))
     (continue ()
       :report (lambda (stream)
-		(format stream "~@<Ignore the error and continue.~@:>")))))
+                (format stream "~@<Ignore the error and continue.~@:>")))))
 
 (defmacro with-restart-and-timeout ((timeout) &body body)
   "Execute BODY signaling a `bt:timeout' if it does not complete

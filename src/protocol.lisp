@@ -6,26 +6,24 @@
 
 (cl:in-package :rsb)
 
-
 ;;; Error handling
-;;
-
-;; not invoking any restart says processing should be aborted and the
-;; stack should be unwound.
+;;;
+;;; Not invoking any restart says processing should be aborted and the
+;;; stack should be unwound.
 
 (macrolet
     ((define-restart (name (&rest args) doc
-		      &key
-		      (function-name name))
+                      &key
+                      (function-name name))
        `(progn
-	  (defmethod documentation ((thing (eql ',name)) (kind (eql 'restart)))
-	    ,doc)
+          (defmethod documentation ((thing (eql ',name)) (kind (eql 'restart)))
+            ,doc)
 
-	  (defun ,function-name (,@args)
-	    ,(format nil "Invoke the ~A restart; ~A" name doc)
-	    (if-let ((restart (find-restart ',name)))
-	      (invoke-restart restart ,@args)
-	      (warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name))))))
+          (defun ,function-name (,@args)
+            ,(format nil "Invoke the ~A restart; ~A" name doc)
+            (if-let ((restart (find-restart ',name)))
+              (invoke-restart restart ,@args)
+              (warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name))))))
 
   (define-restart retry ()
     "Retry the failed operation.")
@@ -45,17 +43,13 @@
 processing."
     :function-name signal-warning))
 
-
 ;;; Event protocol
-;;
 
 (defgeneric event-id/opaque (event)
   (:documentation
    "Return an object that uniquely identifies EVENT."))
 
-
 ;;; Component URL protocol
-;;
 
 (defgeneric relative-url (component)
   (:documentation
@@ -72,23 +66,19 @@ merged with the relative URL of COMPONENT."))
    "Return a list of URLs each of which describes the location and/or
 reachability of COMPONENT in transport-specific way."))
 
-
-;;; Default behavior
-;;
+;; Default behavior
 
 (defmethod abstract-uri ((component t))
   "Merge the relative URL of COMPONENT with a scheme-only \"anchor\"."
   (puri:merge-uris (relative-url component)
-		   (make-instance 'puri:uri
-				  :scheme :rsb)))
+                   (make-instance 'puri:uri
+                                  :scheme :rsb)))
 
 (defmethod transport-specific-urls ((component t))
   "For arbitrary COMPONENTs, location information is not available."
   nil)
 
-
 ;;; Common participant protocol
-;;
 
 (defgeneric participant-id (participant)
   (:documentation
@@ -100,8 +90,8 @@ reachability of COMPONENT in transport-specific way."))
 participates."))
 
 (defgeneric participant-converter (participant wire-type
-				   &key
-				   error?)
+                                   &key
+                                   error?)
   (:documentation
    "Return the converter used by PARTICIPANT for WIRE-TYPE.
 If PARTICIPANT does not have a converter for WIRE-TYPE, signal an
@@ -123,30 +113,26 @@ the transport or transports it uses for this participation."))
 continuing in a best effort manner instead of signaling."
   (handler-bind
       (((or error bt:timeout)
-	#'(lambda (condition)
-	    (warn "~@<Error during detaching of ~A: ~A~@:>"
-		  participant condition)
-	    (continue))))
+        #'(lambda (condition)
+            (warn "~@<Error during detaching of ~A: ~A~@:>"
+                  participant condition)
+            (continue))))
     (detach participant)))
 
-
 ;;; Default behavior
-;;
 
 (defmethod participant-converter :around ((participant t) (wire-type t)
-					  &key
-					  (error? t))
+                                          &key
+                                          (error? t))
   "Signal an error if the next method could not retrieve the
 converter."
   (or (call-next-method)
       (when error?
-	(error "~@<Participant ~A does not have a converter for
+        (error "~@<Participant ~A does not have a converter for
 wire-type ~A.~@:>"
-	       participant wire-type))))
+               participant wire-type))))
 
-
 ;;; Common protocol for receiving participants
-;;
 
 (defgeneric receiver-filters (receiver)
   (:documentation
@@ -158,15 +144,13 @@ RECEIVER."))
    "Set the list of filters associated to the receiving participant
 RECEIVER to NEW-VALUE."))
 
-
 ;;; Listener protocol
-;;
 
 (defgeneric make-listener (scope-or-uri
-			   &key
-			   transports
-			   converters
-			   transform)
+                           &key
+                           transports
+                           converters
+                           transform)
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
@@ -186,15 +170,13 @@ When non-nil, TRANSFORM is a transform object, usable with
 `rsb.event-processing:transform!', that should be applied to received
 events."))
 
-
 ;;; Reader protocol
-;;
 
 (defgeneric make-reader (scope-or-uri
-			 &key
-			 transports
-			 converters
-			 transform)
+                         &key
+                         transports
+                         converters
+                         transform)
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
@@ -218,8 +200,8 @@ The resulting `reader' instance can be used to receive data in
 \"pull\" manner using the `receive' function."))
 
 (defgeneric receive (reader
-		     &key
-		     block?)
+                     &key
+                     block?)
   (:documentation
    "Receive data from the channel in which READER is
 participating. When data is received, it is returned in form of an
@@ -227,15 +209,13 @@ participating. When data is received, it is returned in form of an
 available if there is none. If BLOCK? is nil and no data is available,
 nil is returned."))
 
-
 ;;; Informer protocol
-;;
 
 (defgeneric make-informer (scope-or-uri type
-			   &key
-			   transports
-			   converters
-			   transform)
+                           &key
+                           transports
+                           converters
+                           transform)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
@@ -256,13 +236,13 @@ When non-nil, TRANSFORM is a transform object, usable with
 events."))
 
 (defgeneric send (informer data
-		  &rest meta-data
-		  &key
-		  method
-		  timestamps
-		  causes
-		  unchecked?
-		  &allow-other-keys)
+                  &rest meta-data
+                  &key
+                  method
+                  timestamps
+                  causes
+                  unchecked?
+                  &allow-other-keys)
   (:documentation
    "Send DATA to participants of the channel in which INFORMER
 participates. Add key-value pairs in META-DATA to the meta-data of the

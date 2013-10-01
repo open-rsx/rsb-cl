@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb)
 
-
 ;;; Scope-related types
-;;
 
 (deftype scope-component ()
   '(and string (satisfies scope-component?)))
@@ -20,22 +18,20 @@
 (defun scope-component? (string)
   "Non-nil when STRING is a valid scope component."
   (let+ (((&flet valid-char? (char)
-	    (or (char<= #\a char #\z)
-		(char<= #\A char #\Z)
-		(char<= #\0 char #\9)
-		(char= char #\_) (char= char #\-)))))
+            (or (char<= #\a char #\z)
+                (char<= #\A char #\Z)
+                (char<= #\0 char #\9)
+                (char= char #\_) (char= char #\-)))))
     (declare (dynamic-extent #'valid-char?))
     (and (stringp string) (not (emptyp string))
-	 (every #'valid-char? string))))
+         (every #'valid-char? string))))
 
 (deftype scope-designator ()
   "A scope can be designated by a string, a list of scope components
 or a `scope' instance."
   '(or string scope-components scope))
 
-
 ;;; Event-related types
-;;
 
 (deftype sequence-number ()
   "Event sequence numbers are 32-bit unsigned integers."
@@ -54,9 +50,7 @@ event."
   "Name of a meta-data item."
   'keyword)
 
-
 ;;; Event-processing-related types
-;;
 
 (deftype error-policy ()
   "Objects of this type designate behaviors in case of errors."

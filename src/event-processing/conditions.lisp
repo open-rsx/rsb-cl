@@ -7,15 +7,15 @@
 (cl:in-package :rsb.event-processing)
 
 (define-condition transform-error (error
-				   chainable-condition)
+                                   chainable-condition)
   ((transform :initarg  :transform
-	      :reader   transform-error-transform
-	      :documentation
-	      "Stores the failed transformed.")
+              :reader   transform-error-transform
+              :documentation
+              "Stores the failed transformed.")
    (object    :initarg  :object
-	      :reader   transform-error-object
-	      :documentation
-	      "Stores the object for which the transform failed."))
+              :reader   transform-error-object
+              :documentation
+              "Stores the object for which the transform failed."))
   (:default-initargs
    :transform (missing-required-initarg 'transform-error :transform)
    :object    (missing-required-initarg 'transform-error :object))
@@ -23,8 +23,8 @@
    (lambda (condition stream)
      (format stream "~@<Could not apply transform ~A to ~
 ~A~/more-conditions::maybe-print-cause/~@:>"
-	     (transform-error-transform condition)
-	     (transform-error-object    condition)
-	     condition)))
+             (transform-error-transform condition)
+             (transform-error-object    condition)
+             condition)))
   (:documentation
    "This error is signaled when a transform fails."))

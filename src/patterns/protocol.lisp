@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.patterns)
 
-
 ;;; Future protocol
-;;
 
 (defgeneric future-done? (future)
   (:documentation
@@ -16,9 +14,9 @@
 which is represented by FUTURE did finish and nil otherwise."))
 
 (defgeneric future-result (future
-			   &key
-			   timeout
-			   error?)
+                           &key
+                           timeout
+                           error?)
   (:documentation
    "Obtain and return the result represented by FUTURE. If the
 operation producing the result is not done, block until it finishes or
@@ -49,9 +47,7 @@ may signal the error NEW-VALUE. NEW-VALUE can be a condition object, a
 string or a list of the form (CONDITION-CLASS-NAME KW1 VALUE1
 ...). All three forms have to be usable as arguments to `error'."))
 
-
 ;;; Method protocol
-;;
 
 (defgeneric method-server (method)
   (:documentation
@@ -61,15 +57,13 @@ string or a list of the form (CONDITION-CLASS-NAME KW1 VALUE1
   (:documentation
    "Return the name of METHOD."))
 
-
 ;;; Local and remote method invocation protocol
-;;
 
 (defgeneric call (server method request
-		  &key
-		  block?
-		  timeout
-		  return)
+                  &key
+                  block?
+                  timeout
+                  return)
   (:documentation
    "Call METHOD of SERVER with argument REQUEST and return the result
 of the method call. If a remote call fails for some reason, an error
@@ -90,24 +84,22 @@ values are :event, which causes the whole reply event to be returned,
 and :payload, which causes the payload of the reply event to be
 returned."))
 
-
 ;;; Server protocol
-;;
 
 (defgeneric server-methods (server)
   (:documentation
    "Return a list of methods provided by SERVER."))
 
 (defgeneric server-method (server name
-			   &key
-			   error?)
+                           &key
+                           error?)
   (:documentation
    "Return the method named NAME of SERVER. If no such method exists
 and ERROR? is non-nil signal an error. Otherwise return nil."))
 
 (defgeneric (setf server-method) (new-value server name
-				  &key
-				  argument)
+                                  &key
+                                  argument)
   (:documentation
    "Store NEW-VALUE as the method named NAME of SERVER. NEW-VALUE can
 be a method instance a thing like a function based on which a method
@@ -118,15 +110,13 @@ When supplied, ARGUMENT has to be either :event or :payload causing
 the associated callback function of NEW-VALUE to receive the request
 event or just its payload respectively."))
 
-
 ;;; Remote server protocol
-;;
 
 (defgeneric make-remote-server (scope-or-uri
-				&key
-				transports
-				converters
-				transform)
+                                &key
+                                transports
+                                converters
+                                transform)
   (:documentation
    "Make and return a `remote-server' instance that calls methods
 provided by servers on the scope SCOPE-OR-URI.
@@ -149,15 +139,13 @@ arguments and/or return values.
 If the server cannot be created, an error of type
 `remote-server-creation-failed' is signaled."))
 
-
 ;;; Local server protocol
-;;
 
 (defgeneric make-local-server (scope-or-uri
-			       &key
-			       transports
-			       converters
-			       transform)
+                               &key
+                               transports
+                               converters
+                               transform)
   (:documentation
    "Make and return a `local-server' instance that provides methods on
 the scope SCOPE-OR-URI for other participants to call.

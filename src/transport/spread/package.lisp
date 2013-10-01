@@ -65,8 +65,8 @@ field to obtain the wire protocol version.")
 
 (defconstant +protocol-version+
   (let ((field-number (pb::field-desc-number
-		       (pb:find-descriptor
-			".rsb.protocol.Notification.event_id"))))
+                       (pb:find-descriptor
+                        ".rsb.protocol.Notification.event_id"))))
     (- field-number +protocol-version-base+))
   "Spread wire protocol version. Determined by subtracting the value
 of `+protocol-version-base+' from the field number of the

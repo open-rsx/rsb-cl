@@ -12,32 +12,32 @@
    (octetify (data)
      (etypecase data
        (string
-	(sb-ext:string-to-octets data))
+        (sb-ext:string-to-octets data))
        (sequence
-	(coerce data 'octet-vector))
+        (coerce data 'octet-vector))
        (t
-	data))))
+        data))))
   (:function
    (make-fragment (sequence-number length id data)
      (let* ((event-id     (make-instance
-			   'rsb.protocol:event-id
-			   :sender-id       (uuid:uuid-to-byte-array
-					     (uuid:make-null-uuid))
-			   :sequence-number sequence-number))
-	    (notification (make-instance 'rsb.protocol:notification
-					 :event-id event-id
-					 :data     data)))
+                           'rsb.protocol:event-id
+                           :sender-id       (uuid:uuid-to-byte-array
+                                             (uuid:make-null-uuid))
+                           :sequence-number sequence-number))
+            (notification (make-instance 'rsb.protocol:notification
+                                         :event-id event-id
+                                         :data     data)))
        (make-instance 'rsb.protocol:fragmented-notification
-		      :notification   notification
-		      :num-data-parts length
-		      :data-part      id))))
+                      :notification   notification
+                      :num-data-parts length
+                      :data-part      id))))
   (:function
    (make-event* (data)
      (let ((event (make-event "/foo" (octetify data))))
        (setf (event-origin event)
-	     (uuid:make-null-uuid)
-	     (event-sequence-number event)
-	     0)
+             (uuid:make-null-uuid)
+             (event-sequence-number event)
+             0)
        event)))
   (:documentation
    "Unit tests for the fragmentation and assembly of
@@ -45,108 +45,108 @@ data/notifications."))
 
 (addtest (fragmentation-root
           :documentation
-	  "Smoke test for the `merge-fragment' with an `assembly-pool'
+          "Smoke test for the `merge-fragment' with an `assembly-pool'
 instance.")
   assemble-smoke
 
   (ensure-cases (sequence-number num-parts parts part-ids expected)
       `((0
-	 5
-	 ("foo" "bar" "baz" "a" "b")
-	 (0     1     2     3   4)
-	 "foobarbazab")
-	(1
-	 2
-	 ("foo" "baz" "foo" "a" "bar")
-	 (0     5     0     2   1)
-	 "foobar"))
+         5
+         ("foo" "bar" "baz" "a" "b")
+         (0     1     2     3   4)
+         "foobarbazab")
+        (1
+         2
+         ("foo" "baz" "foo" "a" "bar")
+         (0     5     0     2   1)
+         "foobar"))
     ;; We repeat the assembly for all permutation of the fragments.
     (let ((fragments (iter (for part in parts)
-			   (for i    in part-ids)
-			   (collect (make-fragment
-				     sequence-number num-parts i (octetify part))))))
+                           (for i    in part-ids)
+                           (collect (make-fragment
+                                     sequence-number num-parts i (octetify part))))))
       (map-permutations
        (lambda (permutation)
-	 (let* ((pool      (make-instance 'assembly-pool))
-		(returns   (map 'list (curry #'merge-fragment pool)
-				permutation))
-		(assembly  (find-if (complement #'null) returns))
-		(result    (assembly-concatenated-data assembly)))
-	   (ensure      (assembly-complete? assembly))
-	   (ensure-same result (octetify expected)
-			:test #'equalp)))
+         (let* ((pool      (make-instance 'assembly-pool))
+                (returns   (map 'list (curry #'merge-fragment pool)
+                                permutation))
+                (assembly  (find-if (complement #'null) returns))
+                (result    (assembly-concatenated-data assembly)))
+           (ensure      (assembly-complete? assembly))
+           (ensure-same result (octetify expected)
+                        :test #'equalp)))
        fragments))))
 
 (addtest (fragmentation-root
           :documentation
-	  "Smoke test for the `event->notifications' function.")
+          "Smoke test for the `event->notifications' function.")
   fragment-smoke
 
   (ensure-cases (data chunk-size error?)
       `((""                   90 nil)
-	("foobarbazfezwhoop"  85 nil)
-	("foobarbazb"         88 nil)
-	("fooobaar"           89 nil)
-	(,(make-string 1000) 100 nil)
+        ("foobarbazfezwhoop"  85 nil)
+        ("foobarbazb"         88 nil)
+        ("fooobaar"           89 nil)
+        (,(make-string 1000) 100 nil)
 
-	(""                   20 t)
-	("bla"                20 t))
+        (""                   20 t)
+        ("bla"                20 t))
 
     (let ((event (make-event* data)))
       (if error?
-	  (ensure-condition 'insufficient-room
-	    (event->notifications :fundamental-null event chunk-size))
-	  (let ((result (event->notifications
-			 :fundamental-null event chunk-size)))
-	    (ensure (every (compose (rcurry #'<= chunk-size)
-				    #'pb:packed-size)
-			   result)))))))
+          (ensure-condition 'insufficient-room
+            (event->notifications :fundamental-null event chunk-size))
+          (let ((result (event->notifications
+                         :fundamental-null event chunk-size)))
+            (ensure (every (compose (rcurry #'<= chunk-size)
+                                    #'pb:packed-size)
+                           result)))))))
 
 (addtest (fragmentation-root
           :documentation
-	  "Do full roundtrips of fragmenting data using
+          "Do full roundtrips of fragmenting data using
 `event->notifications' and then re-assemble the fragments using
 `merge-fragments'.")
   roundtrip
 
   (ensure-cases (data chunk-size)
       `((""                   90)
-	("foobarbazfezwhoop"  85)
-	("foobarbazb"         88)
-	("fooobaar"           89)
-	(,(make-string 1000) 100))
+        ("foobarbazfezwhoop"  85)
+        ("foobarbazb"         88)
+        ("fooobaar"           89)
+        (,(make-string 1000) 100))
 
     (let* ((event         (make-event* (octetify data)))
-	   (notifications (event->notifications :fundamental-null event chunk-size))
-	   (pool          (make-instance 'assembly-pool))
-	   (result        (assembly-concatenated-data
-			   (lastcar (map 'list (curry #'merge-fragment pool)
-					 (shuffle notifications))))))
+           (notifications (event->notifications :fundamental-null event chunk-size))
+           (pool          (make-instance 'assembly-pool))
+           (result        (assembly-concatenated-data
+                           (lastcar (map 'list (curry #'merge-fragment pool)
+                                         (shuffle notifications))))))
       (ensure-same (octetify data) result
-		   :test #'equalp))))
+                   :test #'equalp))))
 
 (addtest (fragmentation-root
           :documentation
-	  "Ensure that warnings are signaled when invalid fragments
+          "Ensure that warnings are signaled when invalid fragments
 are added to an assembly.")
   warnings
 
   (let ((sequence-number 0)
-	(pool            (make-instance 'assembly-pool)))
+        (pool            (make-instance 'assembly-pool)))
     (merge-fragment pool (make-fragment
-			  sequence-number 3 0 (octetify "foo")))
+                          sequence-number 3 0 (octetify "foo")))
 
     (ensure-condition 'invalid-fragment-id
       (merge-fragment pool (make-fragment
-			    sequence-number 3 5 (octetify "foo"))))
+                            sequence-number 3 5 (octetify "foo"))))
 
     (ensure-condition 'duplicate-fragment
       (merge-fragment pool (make-fragment
-			    sequence-number 3 0 (octetify "foo"))))))
+                            sequence-number 3 0 (octetify "foo"))))))
 
 (addtest (fragmentation-root
           :documentation
-	  "Test `print-object' method on `assembly-pool'.")
+          "Test `print-object' method on `assembly-pool'.")
   print-smoke
 
   (let ((pool (make-instance 'assembly-pool)))
@@ -160,11 +160,11 @@ are added to an assembly.")
 
 (addtest (pruning-assembly-pool-root
           :documentation
-	  "Check that old incomplete assemblies actually get pruned.")
+          "Check that old incomplete assemblies actually get pruned.")
   prune
 
   (let ((pool (make-instance 'pruning-assembly-pool
-			     :age-limit 1)))
+                             :age-limit 1)))
     (merge-fragment pool (make-fragment 0 2 0 (octetify "bla")))
     (let ((count (assembly-pool-count pool)))
       (ensure-same
@@ -184,7 +184,7 @@ get pruned, the count of the pool was ~D, not ~D.~@:>"
 
 (addtest (pruning-assembly-pool-root
           :documentation
-	  "Test `print-object' method on `pruning-assembly-pool'.")
+          "Test `print-object' method on `pruning-assembly-pool'.")
   print-smoke
 
   (let ((pool (make-instance 'pruning-assembly-pool)))

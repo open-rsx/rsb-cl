@@ -8,10 +8,10 @@
 
 (defclass client ()
   ((configurator :initarg  :configurator
-		 :type     configurator
-		 :reader   client-configurator
-		 :documentation
-		 "The configurator instance working for this
+                 :type     configurator
+                 :reader   client-configurator
+                 :documentation
+                 "The configurator instance working for this
 client."))
   (:default-initargs
    :configurator (missing-required-initarg 'client :configurator))
@@ -22,7 +22,7 @@ subsystem in the sense that they have an associated `configurator'."))
 (defmethod transport-specific-urls ((component client))
   "Return transport URL for connectors used by COMPONENT."
   (iter (for connector in (configurator-connectors
-			   (client-configurator component)))
-	(collect
-	    (funcall (find-symbol "CONNECTOR-RELATIVE-URL" :rsb.transport)
-		     connector component))))
+                           (client-configurator component)))
+        (collect
+            (funcall (find-symbol "CONNECTOR-RELATIVE-URL" :rsb.transport)
+                     connector component))))

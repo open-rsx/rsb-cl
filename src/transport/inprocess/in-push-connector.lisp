@@ -10,9 +10,9 @@
   (find-class 'in-push-connector))
 
 (defclass in-push-connector (connector
-			     broadcast-processor
-			     error-handling-dispatcher-mixin
-			     error-handling-push-receiver-mixin)
+                             broadcast-processor
+                             error-handling-dispatcher-mixin
+                             error-handling-push-receiver-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
@@ -21,17 +21,17 @@
 process."))
 
 (defmethod notify ((connector in-push-connector)
-		   (scope     scope)
-		   (action    (eql :attached)))
+                   (scope     scope)
+                   (action    (eql :attached)))
   (log1 :info connector "Attaching to scope ~S" scope)
   (push connector (by-scope scope)))
 
 (defmethod notify ((connector in-push-connector)
-		   (scope     scope)
-		   (action    (eql :detached)))
+                   (scope     scope)
+                   (action    (eql :detached)))
   (log1 :info connector "Detaching from scope ~S" scope)
   (removef (by-scope scope) connector :count 1))
 
 (defmethod handle :before ((connector in-push-connector)
-			   (event     event))
+                           (event     event))
   (setf (timestamp event :receive) (local-time:now)))

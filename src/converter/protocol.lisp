@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.converter)
 
-
 ;;; Converter protocol
-;;
 
 (defgeneric wire->domain (converter wire-data wire-schema)
   (:documentation
@@ -30,9 +28,7 @@ Example:
 RSB.CONVERTER> (domain->wire :fundamental-string \"foo\")
 => #(102 111 111) :string"))
 
-
 ;;; Converter info protocol
-;;
 
 (defgeneric wire->domain? (converter wire-data wire-schema)
   (:documentation
@@ -56,12 +52,10 @@ Example:
 RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
 => :fundamental-string 'octet-vector :string"))
 
-
 ;;; Default behavior
-;;
 
 (defmethod no-applicable-method ((function (eql (fdefinition 'wire->domain?)))
-				 &rest args)
+                                 &rest args)
   "If there is no method on `wire->domain?' for a given combination of
 converter, wire-data and wire-schema, the converter cannot handle the
 data."
@@ -69,71 +63,69 @@ data."
   nil)
 
 (defmethod no-applicable-method ((function (eql (fdefinition 'domain->wire?)))
-				 &rest args)
+                                 &rest args)
   "If there is no method on `domain->wire?' for a given pair of
 converter and data, the converter cannot handle the data."
   (declare (ignore args))
   nil)
 
 (defmethod wire->domain :around ((converter   t)
-				 (wire-data   t)
-				 (wire-schema t))
+                                 (wire-data   t)
+                                 (wire-schema t))
   "Install \"retry\" and \"use-value\" restarts around the call to the
 next `wire->domain' method."
   (iter
     (restart-case
-	(with-condition-translation
-	    (((error wire->domain-conversion-error)
-	      :wire-schema wire-schema
-	      :encoded     wire-data
-	      :domain-type :undetermined))
-	  (return (call-next-method)))
+        (with-condition-translation
+            (((error wire->domain-conversion-error)
+              :wire-schema wire-schema
+              :encoded     wire-data
+              :domain-type :undetermined))
+          (return (call-next-method)))
       (retry ()
-	:report (lambda (stream)
-		  (format stream "~@<Retry converting ~S (in ~S ~
+        :report (lambda (stream)
+                  (format stream "~@<Retry converting ~S (in ~S ~
 schema) using converter ~A.~@:>"
-			  wire-data wire-schema converter)) nil)
+                          wire-data wire-schema converter)) nil)
       (use-value (value)
-	:report      (lambda (stream)
-		       (format stream "~@<Supply a replacement value ~
+        :report      (lambda (stream)
+                       (format stream "~@<Supply a replacement value ~
 to use instead of converting ~S (in ~S schema) using converter ~
 ~A.~@:>"
-			       wire-data wire-schema converter))
-	:interactive (lambda ()
-		       (format *query-io* "Enter replacement value (evaluated): ")
-		       (list (read *query-io*)))
-	(return value)))))
+                               wire-data wire-schema converter))
+        :interactive (lambda ()
+                       (format *query-io* "Enter replacement value (evaluated): ")
+                       (list (read *query-io*)))
+        (return value)))))
 
 (defmethod domain->wire :around ((converter     t)
-				 (domain-object t))
+                                 (domain-object t))
   "Install \"retry\" and \"use-value\" restarts around the call to the
 next `domain->wire' method."
   (iter
     (restart-case
-	(with-condition-translation
-	    (((error domain->wire-conversion-error)
-	      :wire-schema   :undetermined
-	      :domain-object domain-object
-	      :wire-type     :undetermined))
-	  (return (call-next-method)))
+        (with-condition-translation
+            (((error domain->wire-conversion-error)
+              :wire-schema   :undetermined
+              :domain-object domain-object
+              :wire-type     :undetermined))
+          (return (call-next-method)))
       (retry ()
-	:report (lambda (stream)
-		  (format stream "~@<Retry converting ~A using converter ~A.~@:>"
-			  domain-object converter))
-	nil)
+        :report (lambda (stream)
+                  (format stream "~@<Retry converting ~A using converter ~A.~@:>"
+                          domain-object converter))
+        nil)
       (use-value (value)
-	:report      (lambda (stream)
-		       (format stream "~@<Supply a replacement value ~
+        :report      (lambda (stream)
+                       (format stream "~@<Supply a replacement value ~
 to use instead of converting ~A using converter ~A.~@:>"
-			       domain-object converter))
-	:interactive (lambda ()
-		       (format *query-io* "Enter replacement value (evaluated): ")
-		       (list (read *query-io*)))
-	(return value)))))
+                               domain-object converter))
+        :interactive (lambda ()
+                       (format *query-io* "Enter replacement value (evaluated): ")
+                       (list (read *query-io*)))
+        (return value)))))
 
-
 ;;; Converter implementations
-;;
 
 (dynamic-classes:define-findable-class-family converter
     "Converters are things that do something.")

@@ -18,15 +18,15 @@
 
 (addtest (with-methods-root
           :documentation
-	  "Smoke test for the `with-methods' macro.")
+          "Smoke test for the `with-methods' macro.")
   smoke
 
   (with-local-server (server "inprocess:")
     (with-methods (server)
-	(("mymethod"     (foo string) foo)
-	 (:myothermethod (bar integer)
-	  (declare (ignore bar)))
-	 ("noarg"        ()))
+        (("mymethod"     (foo string) foo)
+         (:myothermethod (bar integer)
+          (declare (ignore bar)))
+         ("noarg"        ()))
       (ensure (server-method server "mymethod"))
       (ensure (server-method server "MYOTHERMETHOD"))
       (ensure (server-method server "noarg")))
@@ -34,25 +34,25 @@
 
 (addtest (with-methods-root
           :documentation
-	  "Test macroexpansion behavior of `with-methods' macro.")
+          "Test macroexpansion behavior of `with-methods' macro.")
   macroexpand
 
   (ensure-cases (method expected)
       '(;; Some invalid constructions.
-	(("invalid name" (foo string) foo) type-error)
-	(("%invalidname" (foo string) foo) type-error)
-	(("invalidtype"  (foo 5)      foo) type-error)
+        (("invalid name" (foo string) foo) type-error)
+        (("%invalidname" (foo string) foo) type-error)
+        (("invalidtype"  (foo 5)      foo) type-error)
 
-	;; These are valid.
-	(("validname"    (foo string) foo) t)
-	((:validname     (foo string) foo) t)
-	((validname      (foo string) foo) t)
-	(("valid-name"   (foo string) foo) t)
-	(("v41id_n4m3"   (foo string) foo) t)
-	(("eventarg"     (foo :event) foo) t)
-	(("noarg"        ()        :const) t))
+        ;; These are valid.
+        (("validname"    (foo string) foo) t)
+        ((:validname     (foo string) foo) t)
+        ((validname      (foo string) foo) t)
+        (("valid-name"   (foo string) foo) t)
+        (("v41id_n4m3"   (foo string) foo) t)
+        (("eventarg"     (foo :event) foo) t)
+        (("noarg"        ()        :const) t))
 
     (case expected
       (type-error (ensure-condition 'type-error
-		    (macroexpand `(with-methods (server) (,method)))))
+                    (macroexpand `(with-methods (server) (,method)))))
       (t          (macroexpand `(with-methods (server) (,method)))))))

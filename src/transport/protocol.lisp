@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.transport)
 
-
 ;;; Connector protocol
-;;
 
 (defgeneric connector-url (connector)
   (:documentation
@@ -20,9 +18,7 @@ CONNECTOR."))
    "Return a complete URL suitable for locating the resource THING via
  CONNECTOR."))
 
-
 ;;; Connector introspection protocol
-;;
 
 (defgeneric connector-direction (connector)
   (:documentation
@@ -47,9 +43,7 @@ form (NAME TYPE &optional DOCUMENTATION) where name is a keyword which
 names the option and TYPE is the type of acceptable values of the
 option."))
 
-
 ;;; Default behavior
-;;
 
 (defmethod connector-direction ((connector standard-object))
   "Default behavior is to retrieve the direction from the class of
@@ -82,9 +76,7 @@ of CONNECTOR."
   "Default behavior is to claim to accept no options."
   nil)
 
-
 ;;; Message receiver protocol
-;;
 
 (defgeneric receive-message (connector block?)
   (:documentation
@@ -102,9 +94,7 @@ instance and return the event. If message cannot be converted into an
 event, return nil instead. Signal a `decoding-error' if something goes
 wrong."))
 
-
 ;;; Notification sender protocol
-;;
 
 (defgeneric send-notification (connector notification)
   (:documentation
@@ -117,9 +107,7 @@ CONNECTOR. Return the notification. If EVENT cannot be converted into
 a notification, maybe return nil, depending on the error handling
 policy. Maybe signal an `encoding-error' if something goes wrong."))
 
-
 ;;; Threaded receiver protocol
-;;
 
 (defgeneric start-receiver (connector)
   (:documentation
@@ -134,9 +122,7 @@ policy. Maybe signal an `encoding-error' if something goes wrong."))
   (:documentation
    "CONNECTOR receives and processes messages until interrupted."))
 
-
 ;;; Transport metric exposing protocol
-;;
 
 (defgeneric connector-expose (connector)
   (:documentation
@@ -157,9 +143,7 @@ CONNECTOR."))
 metrics exposed by CONNECTOR. Otherwise remove METRIC from the
 list."))
 
-
 ;;; Transport implementations
-;;
 
 (dynamic-classes:define-findable-class-family transport
     "Transports are implemented by input and output connector
@@ -191,42 +175,42 @@ construction fails due to the lack of a suitable converter, an error
 of the subtype `no-suitable-converter' is signaled."
   (handler-bind
       (((and error (not no-suitable-converter))
-	#'(lambda (condition)
-	    (error 'connector-construction-failed
-		   :name      name
-		   :direction direction
-		   :args      args
-		   :cause     condition))))
+        #'(lambda (condition)
+            (error 'connector-construction-failed
+                   :name      name
+                   :direction direction
+                   :args      args
+                   :cause     condition))))
     (let* ((class     (find-connector-class name direction))
-	   (wire-type (connector-wire-type class))
-	   (converter (unless (eq wire-type t)
-			(or (getf args :converter)
-			    (cdr (find wire-type converters
-				       :key  #'car
-				       :test #'subtypep)))))
-	   (args      (remove-from-plist args :converter)))
+           (wire-type (connector-wire-type class))
+           (converter (unless (eq wire-type t)
+                        (or (getf args :converter)
+                            (cdr (find wire-type converters
+                                       :key  #'car
+                                       :test #'subtypep)))))
+           (args      (remove-from-plist args :converter)))
       (cond
-	;; The connector does not require a converter.
-	((eq wire-type t)
-	 (apply #'make-instance class
-		:schema name
-		args))
-	;; The connector requires a converter and we found a suitable
-	;; one.
-	(converter
-	 (apply #'make-instance class
-		:schema    name
-		:converter converter
-		args))
-	;; The connector requires a converter, but we did not find a
-	;; suitable one.
-	(t
-	 (error 'no-suitable-converter
-		:name       name
-		:direction  direction
-		:args       args
-		:wire-type  wire-type
-		:candidates converters))))))
+        ;; The connector does not require a converter.
+        ((eq wire-type t)
+         (apply #'make-instance class
+                :schema name
+                args))
+        ;; The connector requires a converter and we found a suitable
+        ;; one.
+        (converter
+         (apply #'make-instance class
+                :schema    name
+                :converter converter
+                args))
+        ;; The connector requires a converter, but we did not find a
+        ;; suitable one.
+        (t
+         (error 'no-suitable-converter
+                :name       name
+                :direction  direction
+                :args       args
+                :wire-type  wire-type
+                :candidates converters))))))
 
 (defun make-connectors (specs direction &optional converters)
   "Create and return zero or more connector instances for the
@@ -242,5 +226,5 @@ where NAME and ARGS have to acceptable for calls to
   (check-type direction direction "either :IN-PUSH, :IN-PULL or :OUT")
 
   (iter (for (name . args) in specs)
-	(collect (apply #'make-connector
-			name direction converters args))))
+        (collect (apply #'make-connector
+                        name direction converters args))))

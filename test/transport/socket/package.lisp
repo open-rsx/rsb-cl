@@ -60,29 +60,29 @@ socket. Should be incremented after each use.")
    (next-port ()
      (let ((old *next-port*))
        (iter (until (port-usable? *next-port*))
-	     (incf *next-port*))
+             (incf *next-port*))
        (unless (= old *next-port*)
-	 (format *lift-debug-output* "~&;; Port in use; Incrementing ~D -> ~D~&"
-	       old *next-port*)))
+         (format *lift-debug-output* "~&;; Port in use; Incrementing ~D -> ~D~&"
+               old *next-port*)))
      *next-port*))
   (:function
    (make-socket-url (server? options)
      (format nil "socket://localhost:~D~@[?~{~A=~A~^&~}~]"
-	     *next-port* (append (when server? (list "server" "1")) options))))
+             *next-port* (append (when server? (list "server" "1")) options))))
   (:function
    (check-bus (bus expected-connections expected-connectors)
      (flet ((check-thing (title reader expected)
-	      (etypecase expected
-		(list
-		 (ensure-same (funcall reader bus) expected
-			      :test (rcurry #'set-equal :test #'eq)))
-		(number
-		 (let ((num (length (funcall reader bus))))
-		   (ensure-same num expected
-				:test      #'=
-				:report    "~@<Bus was expected to have ~
+              (etypecase expected
+                (list
+                 (ensure-same (funcall reader bus) expected
+                              :test (rcurry #'set-equal :test #'eq)))
+                (number
+                 (let ((num (length (funcall reader bus))))
+                   (ensure-same num expected
+                                :test      #'=
+                                :report    "~@<Bus was expected to have ~
 ~D ~(~A~)~:P (not ~D)~:@>"
-				:arguments (expected title num)))))))
+                                :arguments (expected title num)))))))
        ;; Ensure that connections of BUS match EXPECTED-CONNECTIONS.
        (check-thing :connection #'bus-connections expected-connections)
        ;; Ensure that connectors of BUS match EXPECTED-CONNECTORS.

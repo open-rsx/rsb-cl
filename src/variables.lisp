@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb)
 
-
 ;;; Framework timestamps
-;;
 
 (declaim (special *framework-timestamps*))
 
@@ -16,10 +14,9 @@
   "Names of timestamps which are associated to certain points in the
 life of RSB events.")
 
-
 ;;; Pseudo random state
-;;
-;; For uuid generation and such.
+;;;
+;;; For uuid generation and such.
 
 (declaim (special *id-random-state*))
 
@@ -27,9 +24,7 @@ life of RSB events.")
   "Stores a `random-state' object which should be used for generation
 of random IDs and similar things requiring pseudo randomness.")
 
-
 ;;; Configuration
-;;
 
 (declaim (special *default-configuration-files*))
 
@@ -41,7 +36,7 @@ of random IDs and similar things requiring pseudo randomness.")
     #+(and unix (not darwin)) #P"~/.config/rsb.conf"
     ;;#+darwin                ?
     #+windows                 ,(merge-pathnames
-				"rsb.conf" (user-homedir-pathname))
+                                "rsb.conf" (user-homedir-pathname))
 
     ;; System-wide configuration
     #+(and unix (not darwin)) #P"/etc/rsb.conf"

@@ -17,21 +17,19 @@ event processor for sending of events."))
 (defmethod collect-processor-mixins append ((configurator out-route-configurator))
   '(broadcast-processor))
 
-
 ;;; Connectors
-;;
 
 (defmethod notify ((configurator out-route-configurator)
-		   (connector    t)
-		   (action       (eql :connector-added)))
+                   (connector    t)
+                   (action       (eql :connector-added)))
   (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
     (call-next-method)
     (log1 :trace configurator "Connecting ~S -> ~S" processor connector)
     (push connector (handlers processor))))
 
 (defmethod notify ((configurator out-route-configurator)
-		   (connector    t)
-		   (action       (eql :connector-removed)))
+                   (connector    t)
+                   (action       (eql :connector-removed)))
   (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
     (log1 :trace configurator "Disconnecting ~S -> ~S" processor connector)
     (removef (handlers processor) connector)

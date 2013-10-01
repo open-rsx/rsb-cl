@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.transport.test)
 
-
 ;;; Tests for `restart-message-receiver-mixin' class
-;;
 
 (deftestsuite restart-message-receiver-mixin-root (transport-root)
   ((simple-connector (make-instance 'restart-message-receiver-mixin)))
@@ -25,9 +23,7 @@
      message->event (connector (message t) (wire-schema t)))
   (message->event simple-connector :does-not-matter :likewise))
 
-
 ;;; Tests for `restart-notification-sender-mixin' class
-;;
 
 (deftestsuite restart-notification-sender-mixin-root (transport-root)
   ((simple-connector (make-instance 'restart-notification-sender-mixin)))

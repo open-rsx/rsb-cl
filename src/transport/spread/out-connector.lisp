@@ -10,14 +10,14 @@
   (find-class 'out-connector))
 
 (defclass out-connector (restart-notification-sender-mixin
-			 error-handling-sender-mixin
-			 connector)
+                         error-handling-sender-mixin
+                         connector)
   ((max-fragment-size :initarg  :max-fragment-size
-		      :type     positive-fixnum
-		      :reader   connector-max-fragment-size
-		      :initform 100000
-		      :documentation
-		      "Stores the maximum fragment size the connector
+                      :type     positive-fixnum
+                      :reader   connector-max-fragment-size
+                      :initform 100000
+                      :documentation
+                      "Stores the maximum fragment size the connector
 should use."))
   (:metaclass connector-class)
   (:direction :out)
@@ -31,23 +31,23 @@ should use."))
 
 (defmethod handle ((connector out-connector) (event event))
   (let ((group-names   (scope->groups (event-scope event)))
-	(notifications (event->notification connector event))) ;; TODO only if group is populated?
+        (notifications (event->notification connector event))) ;; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (send-notification connector (cons group-names notifications))))
 
 (defmethod event->notification ((connector out-connector)
-				(event     event))
+                                (event     event))
   "Delegate conversion to `event->notifications'. The primary purpose
 of this method is performing the conversion with restarts installed."
   (event->notifications
    connector event (connector-max-fragment-size connector)))
 
 (defmethod send-notification ((connector                out-connector)
-			      (groups-and-notifications cons))
+                              (groups-and-notifications cons))
   "Send each notification using `send-message'. The primary purpose of
 this method is sending the notifications with restarts installed."
   (let+ (((&accessors-r/o (connection connector-connection)) connector)
-	 ((group-names . notifications) groups-and-notifications))
+         ((group-names . notifications) groups-and-notifications))
     (iter (for notification in notifications)
-	  (send-message connection group-names (pb:pack* notification)))))
+          (send-message connection group-names (pb:pack* notification)))))

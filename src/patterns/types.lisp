@@ -25,7 +25,7 @@ applied to the argument and return value of a method."
   `(or null
        (cons (cons (eql :argument) t) null)
        (cons (cons (eql :argument) t)
-	     (cons (cons (eql :return)   t) null))
+             (cons (cons (eql :return)   t) null))
        (cons (cons (eql :return)   t) null)
        (cons (cons (eql :return) t)
-	     (cons (cons (eql :argument)   t) null))))
+             (cons (cons (eql :argument)   t) null))))

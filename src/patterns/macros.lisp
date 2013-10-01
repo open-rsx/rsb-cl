@@ -30,38 +30,38 @@ variable."
   (check-type var symbol "a symbol")
 
   (let+ (((&flet+ process-one ((name (&optional arg (request-type t))
-				&rest body))
-	    (let+ ((name/string (string name))
-		   ((&values body declarations) (parse-body body))
-		   ((&with-gensyms arg-var)))
-	      (check-type name/string  method-name "a valid method name")
-	      (check-type arg          symbol      "a symbol")
-	      (check-type request-type symbol      ":EVENT or a symbol naming a type")
+                                &rest body))
+            (let+ ((name/string (string name))
+                   ((&values body declarations) (parse-body body))
+                   ((&with-gensyms arg-var)))
+              (check-type name/string  method-name "a valid method name")
+              (check-type arg          symbol      "a symbol")
+              (check-type request-type symbol      ":EVENT or a symbol naming a type")
 
-	      (list
-	       ;; Create method lambda and add to server.
-	       `(setf (server-method ,var ,name/string
-				     ,@(when (eq request-type :event)
-				         `(:argument :event)))
-		      #'(lambda (,@(when arg `(,arg-var)))
-			  (let (,@(when arg `((,arg ,arg-var))))
-			   ,@declarations
-			   ,@(when (and arg (not (eq request-type :event)))
-				   `((check-type ,arg-var ,request-type)))
-			   ,@body)))
-	       ;; Remove from server.
-	       `(when-let ((method (server-method ,var ,name/string :error? nil)))
-		  (handler-bind
-		      (((or error bt:timeout)
-			#'(lambda (condition)
-			    (warn "~@<Error removing method ~S: ~A~@:>"
-				  method condition)
-			    (continue))))
-		    (%remove-method-with-restart-and-timeout
-		     ,var method)))))))
-	 (add-and-remove (mapcar #'process-one methods)))
+              (list
+               ;; Create method lambda and add to server.
+               `(setf (server-method ,var ,name/string
+                                     ,@(when (eq request-type :event)
+                                         `(:argument :event)))
+                      #'(lambda (,@(when arg `(,arg-var)))
+                          (let (,@(when arg `((,arg ,arg-var))))
+                           ,@declarations
+                           ,@(when (and arg (not (eq request-type :event)))
+                                   `((check-type ,arg-var ,request-type)))
+                           ,@body)))
+               ;; Remove from server.
+               `(when-let ((method (server-method ,var ,name/string :error? nil)))
+                  (handler-bind
+                      (((or error bt:timeout)
+                        #'(lambda (condition)
+                            (warn "~@<Error removing method ~S: ~A~@:>"
+                                  method condition)
+                            (continue))))
+                    (%remove-method-with-restart-and-timeout
+                     ,var method)))))))
+         (add-and-remove (mapcar #'process-one methods)))
     `(unwind-protect
-	  (progn
-	    ,@(mapcar #'first add-and-remove)
-	    ,@body)
+          (progn
+            ,@(mapcar #'first add-and-remove)
+            ,@body)
        ,@(mapcar #'second add-and-remove))))

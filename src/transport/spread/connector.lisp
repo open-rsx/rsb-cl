@@ -7,12 +7,12 @@
 (cl:in-package :rsb.transport.spread)
 
 (defclass connector (rsb.transport:connector
-		     conversion-mixin)
+                     conversion-mixin)
   ((connection :initarg  :connection
-	       :type     connection
-	       :reader   connector-connection
-	       :documentation
-	       ""))
+               :type     connection
+               :reader   connector-connection
+               :documentation
+               ""))
   (:metaclass connector-class)
   (:default-initargs
    :schema :spread)
@@ -38,10 +38,10 @@
 connectors."))
 
 (defmethod initialize-instance :before ((instance connector)
-					&key
-					connection
-					name
-					port)
+                                        &key
+                                        connection
+                                        name
+                                        port)
   "Make sure that at least one of CONNECTION, NAME and PORT is
 supplied."
   (unless (or connection name port)
@@ -49,18 +49,18 @@ supplied."
      'connector :either-connection-or-name-or-port)))
 
 (defmethod shared-initialize :after ((instance connector) (slot-names t)
-				     &key
-				     connection
-				     name
-				     host
-				     port)
+                                     &key
+                                     connection
+                                     name
+                                     host
+                                     port)
   (let+ (((&values host port)
-	  (cond
-	    (name            (network.spread:parse-daemon-name name))
-	    ((and host port) (values host port))
-	    (port            (values nil  port))))
-	 (name (format nil "~D~@[@~A~]" port host))
-	 ((&accessors-r/o (uri connector-url)) instance))
+          (cond
+            (name            (network.spread:parse-daemon-name name))
+            ((and host port) (values host port))
+            (port            (values nil  port))))
+         (name (format nil "~D~@[@~A~]" port host))
+         ((&accessors-r/o (uri connector-url)) instance))
     (when host
       (setf (puri:uri-host uri) host))
     (setf (puri:uri-port uri) port)
@@ -69,4 +69,4 @@ supplied."
     ;; daemon designated by NAME.
     (unless connection
       (setf (slot-value instance 'connection)
-	    (make-instance 'connection :name name)))))
+            (make-instance 'connection :name name)))))

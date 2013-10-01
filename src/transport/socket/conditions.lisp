@@ -7,7 +7,7 @@
 (cl:in-package :rsb.transport.socket)
 
 (define-condition socket-bus-auto-connection-error (rsb-error
-						    simple-error)
+                                                    simple-error)
   ()
   (:report
    (lambda (condition stream)
@@ -20,10 +20,10 @@ provider in automatic client vs. server selection mode."))
 
 (define-condition connection-shutdown-requested (condition)
   ((connection :initarg  :connection
-	       :type     t
-	       :reader   connection-shutdown-requested-connection
-	       :documentation
-	       "Stores the connection the shutdown of which has been
+               :type     t
+               :reader   connection-shutdown-requested-connection
+               :documentation
+               "Stores the connection the shutdown of which has been
 requested."))
   (:default-initargs
    :connection (missing-required-initarg 'connection-closed :connection))

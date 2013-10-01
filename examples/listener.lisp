@@ -37,13 +37,13 @@
 (defvar *listener* (rsb:make-listener "/example/informer"))
 
 (push (lambda (event)
-	(format t "Received event: ~A~%" event))
+        (format t "Received event: ~A~%" event))
       (rsb.ep:handlers *listener*))
 ;; mark-end::variable
 
 ;; In order to be notified about event receiving errors, additional
 ;; error handlers have to be registered.
 (push (lambda (condition)
-	(format t "Error: ~A~%" condition))
+        (format t "Error: ~A~%" condition))
       (hooks:hook-handlers (hooks:object-hook *listener* 'rsb:error-hook)))
 ;; mark-end::body

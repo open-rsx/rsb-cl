@@ -11,12 +11,12 @@
 
 (defclass fallback-policy-mixin ()
   ((fallback-policy :initarg  :always
-		    :initarg  :fallback-policy
-		    :type     fallback-policy
-		    :accessor filter-fallback-policy
-		    :initform :match
-		    :documentation
-		    "The value of this slots determines the behavior
+                    :initarg  :fallback-policy
+                    :type     fallback-policy
+                    :accessor filter-fallback-policy
+                    :initform :match
+                    :documentation
+                    "The value of this slots determines the behavior
 of the filter in case it primary discrimination mechanism is not
 applicable to an event."))
   (:metaclass closer-mop:funcallable-standard-class)
@@ -26,12 +26,12 @@ cannot process all events using their primary discrimination method
 and thus need a fallback policy."))
 
 (defmethod matches? ((filter fallback-policy-mixin)
-		     (event  t))
+                     (event  t))
   "Decide whether EVENT should match FILTER based on FILTER's fallback
 policy. This method is only called, if no more specific method on
 `matches?' made a decision."
   (let+ (((&accessors-r/o
-	   (fallback-policy filter-fallback-policy)) filter))
+           (fallback-policy filter-fallback-policy)) filter))
     (ecase fallback-policy
       (:match        t)
       (:do-not-match nil))))

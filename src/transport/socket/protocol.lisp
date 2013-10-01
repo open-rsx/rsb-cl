@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.transport.socket)
 
-
 ;;; Connection shutdown protocol
-;;
 
 (defgeneric shutdown-handshake-for (condition)
   (:documentation
@@ -21,9 +19,9 @@ when encountering an error condition."
   nil)
 
 (defgeneric disconnect (connection
-			&key
-			abort
-			handshake)
+                        &key
+                        abort
+                        handshake)
   (:documentation
    "Maybe perform shutdown handshake, stop receiver thread and close
 socket of connection.

@@ -13,29 +13,27 @@
 receiving events."))
 
 (defmethod receive ((reader reader)
-		    &key
-		    (block? t))
+                    &key
+                    (block? t))
   (let ((processor (rsb.ep:configurator-processor
-		    (rsb.ep:client-configurator reader))))
+                    (rsb.ep:client-configurator reader))))
     (rsb.ep:emit processor block?)))
 
-
 ;;; `reader' creation
-;;
 
 (defmethod make-reader ((scope scope)
-			&key
-			(transports (transport-options))
-			(converters (default-converters))
-			transform)
+                        &key
+                        (transports (transport-options))
+                        (converters (default-converters))
+                        transform)
   ;; Translate different kinds of errors into `reader-creation-failed'
   ;; errors.
   (with-condition-translation
       (((error reader-creation-failed)
-	:scope      scope
-	:transports transports))
+        :scope      scope
+        :transports transports))
     (make-participant 'reader scope :in-pull
-		      transports converters transform)))
+                      transports converters transform)))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))
 

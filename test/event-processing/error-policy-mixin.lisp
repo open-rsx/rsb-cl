@@ -21,25 +21,25 @@
 (macrolet
     ((define-smoke-test (name &body invoke-form)
        `(addtest (error-policy-mixin-root
-		  :documentation
-		  "Test basic error handling policies of the
+                  :documentation
+                  "Test basic error handling policies of the
 `error-policy-mixin' class.")
-	  ,name
+          ,name
 
-	  ;; Error policy nil means to just unwind.
-	  (setf (processor-error-policy simple-processor) nil)
-	  (ensure-condition 'simple-error
-	    ,@invoke-form)
+          ;; Error policy nil means to just unwind.
+          (setf (processor-error-policy simple-processor) nil)
+          (ensure-condition 'simple-error
+            ,@invoke-form)
 
-	  ;; The error policy #'continue should prevent the error from
-	  ;; being signaled.
-	  (setf (processor-error-policy simple-processor) #'continue)
-	  ,@invoke-form
+          ;; The error policy #'continue should prevent the error from
+          ;; being signaled.
+          (setf (processor-error-policy simple-processor) #'continue)
+          ,@invoke-form
 
-	  ;; The error policy #'log-error should prevent the error
-	  ;; from being signaled.
-	  (setf (processor-error-policy simple-processor) #'log-error)
-	  ,@invoke-form)))
+          ;; The error policy #'log-error should prevent the error
+          ;; from being signaled.
+          (setf (processor-error-policy simple-processor) #'log-error)
+          ,@invoke-form)))
 
   (define-smoke-test smoke/function
       (invoke-with-error-policy simple-processor #'signaling-function))

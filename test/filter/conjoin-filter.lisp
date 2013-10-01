@@ -7,11 +7,11 @@
 (cl:in-package :rsb.filter.test)
 
 (deftestsuite conjoin-filter-root (filter-root
-				   filter-suite)
+                                   filter-suite)
   ((simple-filter (filter
-		   '((:and
-		      (:type :type string)
-		      (:scope :scope "/foo"))))))
+                   '((:and
+                      (:type :type string)
+                      (:scope :scope "/foo"))))))
   (:documentation
    "Unit tests for the `conjoin-filter' class."))
 

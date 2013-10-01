@@ -8,10 +8,10 @@
 
 (defclass assembly-mixin ()
   ((assembly-pool :initarg  :assembly-pool
-		  :type     assembly-pool
-		  :reader   connector-assembly-pool
-		  :documentation
-		  ""))
+                  :type     assembly-pool
+                  :reader   connector-assembly-pool
+                  :documentation
+                  ""))
   (:metaclass connector-class)
   (:options
    (:age-limit positive-real
@@ -25,11 +25,11 @@ originate from fragmented events) into events."))
 
 (defmethod initialize-instance :after ((instance assembly-mixin)
                                        &key
-				       assembly-pool
-				       age-limit)
+                                       assembly-pool
+                                       age-limit)
   (unless assembly-pool
     (setf (slot-value instance 'assembly-pool)
-	  (if age-limit
-	      (make-instance 'pruning-assembly-pool
-			     :age-limit age-limit)
-	      (make-instance 'assembly-pool)))))
+          (if age-limit
+              (make-instance 'pruning-assembly-pool
+                             :age-limit age-limit)
+              (make-instance 'assembly-pool)))))

@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.transport)
 
-
 ;;; Mixin class `error-handling-pull-receiver-mixin'
-;;
 
 (defclass error-handling-pull-receiver-mixin (error-policy-mixin)
   ()
@@ -18,15 +16,13 @@ connector classes to provide client-supplied error handling policies
 for the `emit' method."))
 
 (defmethod emit :around ((connector error-handling-pull-receiver-mixin)
-			 (block?    t))
+                         (block?    t))
   "Call the actual `emit' method with a condition handler that applies
 the error policy of CONNECTOR."
   (with-error-policy (connector)
     (call-next-method)))
 
-
 ;;; Mixin class `error-handling-push-receiver-mixin'
-;;
 
 (defclass error-handling-push-receiver-mixin (error-policy-mixin)
   ()
@@ -41,9 +37,7 @@ that applies the error policy of CONNECTOR."
   (with-error-policy (connector)
     (call-next-method)))
 
-
 ;;; Mixin class `error-handling-sender-mixin'
-;;
 
 (defclass error-handling-sender-mixin (error-policy-mixin)
   ()
@@ -53,7 +47,7 @@ classes to provide client-supplied error handling policies for the
 `handle' method."))
 
 (defmethod handle :around ((connector error-handling-sender-mixin)
-			   (event     event))
+                           (event     event))
   "Call the actual `handle' method with a condition handler that
 applies the error policy of CONNECTOR."
   (with-error-policy (connector)

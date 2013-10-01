@@ -7,14 +7,14 @@
 (cl:in-package :rsb.transport.socket)
 
 (defclass in-connector (connector
-			timestamping-receiver-mixin
-			restart-message-receiver-mixin
-			broadcast-processor
-			expose-transport-metrics-mixin)
+                        timestamping-receiver-mixin
+                        restart-message-receiver-mixin
+                        broadcast-processor
+                        expose-transport-metrics-mixin)
   ((scope :type     scope
-	  :accessor connector-scope
-	  :documentation
-	  "Stores the scope to which the connector is attached."))
+          :accessor connector-scope
+          :documentation
+          "Stores the scope to which the connector is attached."))
   (:metaclass connector-class)
   (:documentation
    "Superclass for in-direction socket connectors. Instances of this
@@ -22,28 +22,28 @@ class observe a bus (which owns the actual socket) when attached and
 queue received events for delivery."))
 
 (defmethod notify ((connector in-connector)
-		   (scope     scope)
-		   (action    (eql :attached)))
+                   (scope     scope)
+                   (action    (eql :attached)))
   (setf (connector-scope connector) scope)
   (call-next-method)
   (with-locked-bus ((connector-bus connector))
     (push connector (handlers (connector-bus connector)))))
 
 (defmethod notify ((connector in-connector)
-		   (scope     scope)
-		   (action    (eql :detached)))
+                   (scope     scope)
+                   (action    (eql :detached)))
   (with-locked-bus ((connector-bus connector))
     (removef (handlers (connector-bus connector)) connector))
   (call-next-method))
 
 (defmethod message->event ((connector    in-connector)
-			   (notification notification)
-			   (wire-schema  t))
+                           (notification notification)
+                           (wire-schema  t))
   (let+ (((&accessors-r/o (converter connector-converter)) connector)
-	 (expose-wire-schema?  (connector-expose?
-				connector :rsb.transport.wire-schema))
-	 (expose-payload-size? (connector-expose?
-				connector :rsb.transport.payload-size)))
+         (expose-wire-schema?  (connector-expose?
+                                connector :rsb.transport.wire-schema))
+         (expose-payload-size? (connector-expose?
+                                connector :rsb.transport.payload-size)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -58,12 +58,12 @@ queue received events for delivery."))
     ;; 2. The notification does not form a complete event
     ;;    In this case, nil is returned.
     (with-condition-translation
-	(((error decoding-error)
-	  :encoded          (list notification) ;;; TODO(jmoringe): hack
-	  :format-control   "~@<After unpacking, the ~
+        (((error decoding-error)
+          :encoded          (list notification) ; TODO(jmoringe): hack
+          :format-control   "~@<After unpacking, the ~
 notification~_~A~_could not be converted into an event.~:@>"
-	  :format-arguments (list (with-output-to-string (stream)
-				    (describe notification stream)))))
+          :format-arguments (list (with-output-to-string (stream)
+                                    (describe notification stream)))))
       (notification->event
        converter notification
        :expose-wire-schema?  expose-wire-schema?

@@ -42,49 +42,49 @@
   ()
   (:function
    (check-connector-class (class
-			   expected-direction
-			   expected-wire-type
-			   expected-schemas)
+                           expected-direction
+                           expected-wire-type
+                           expected-schemas)
      (let ((direction (connector-direction class))
-	   (wire-type (connector-wire-type class))
-	   (schemas   (connector-schemas class))
-	   (options   (connector-options class)))
+           (wire-type (connector-wire-type class))
+           (schemas   (connector-schemas class))
+           (options   (connector-options class)))
        ;; Check direction.
        (ensure (typep direction 'direction))
        (ensure-same direction expected-direction
-		    :test #'eq)
+                    :test #'eq)
        ;; Check wire-type
        (ensure (typep wire-type 'wire-type))
        (ensure-same wire-type expected-wire-type
-		    :test #'type=)
+                    :test #'type=)
        ;; Check schemas.
        (iter (for schema in schemas)
-	     (ensure (typep schema 'keyword)))
+             (ensure (typep schema 'keyword)))
        (ensure-same schemas expected-schemas
-		    :test #'set-equal)
+                    :test #'set-equal)
        ;; Check options.
        (iter (for option in options)
-	     (ensure (typep option 'list))))))
+             (ensure (typep option 'list))))))
   (:function
    (check-connector (connector expected-direction expected-wire-type)
      ;; Check direction.
      (let ((direction (connector-direction connector))
-	   (wire-type (connector-wire-type connector))
-	   (url       (connector-url connector))
-	   (rel-url   (connector-relative-url connector "/foo")))
+           (wire-type (connector-wire-type connector))
+           (url       (connector-url connector))
+           (rel-url   (connector-relative-url connector "/foo")))
        ;; Check direction.
        (ensure (typep direction 'direction))
        (ensure-same direction expected-direction
-		    :test #'eq)
+                    :test #'eq)
        ;; Check wire-type
        (ensure (typep wire-type 'wire-type))
        (ensure-same wire-type expected-wire-type
-		    :test #'equal)
+                    :test #'equal)
        ;; Check URLs.
        (ensure (typep url 'puri:uri))
        (ensure (typep rel-url 'puri:uri))
        (ensure-same (puri:uri-path rel-url) "/foo/"
-		    :test #'string=))))
+                    :test #'string=))))
   (:documentation
    "This test suite class is intended to be used as a superclass of
 transport test suites."))
@@ -120,55 +120,53 @@ connector class."
   `(progn
      (addtest (,suite-name
           :documentation
-	  ,(format nil "Test whether `find-connector-class' can find ~
+          ,(format nil "Test whether `find-connector-class' can find ~
 the ~A connector class."
-		   class))
+                   class))
        find-connector-class
 
        (ensure-same (find-class ',class)
-		    (find-connector-class ',name ,expected-direction)
-		    :test #'eq))
+                    (find-connector-class ',name ,expected-direction)
+                    :test #'eq))
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Test basic properties of the ~A connector ~
+               :documentation
+               ,(format nil "Test basic properties of the ~A connector ~
 class."
-			class))
+                        class))
        class
 
        (check-connector-class
-	(find-class ',class)
-	,expected-direction
-	,expected-wire-type
-	,expected-schemas))
+        (find-class ',class)
+        ,expected-direction
+        ,expected-wire-type
+        ,expected-schemas))
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Test basic properties of a ~A connector ~
+               :documentation
+               ,(format nil "Test basic properties of a ~A connector ~
 instance."
-			class))
+                        class))
        construct
 
        (let ((instance (apply #'make-instance ',class ,initargs)))
-	 (check-connector
-	  instance ,expected-direction ,expected-wire-type)))
+         (check-connector
+          instance ,expected-direction ,expected-wire-type)))
 
      (addtest (,suite-name
           :documentation
-	  ,(format nil "Test printing a ~A connector instance."
-		   class))
+          ,(format nil "Test printing a ~A connector instance."
+                   class))
        print
 
        (let ((instance (apply #'make-instance ',class ,initargs)))
-	 (with-output-to-string (stream)
-	   (print-object instance stream))))))
+         (with-output-to-string (stream)
+           (print-object instance stream))))))
 
-
 ;;; Utility functions
-;;
 
 (defun %guess-connector-name (class-name)
   "Guess the keyword naming the connector class named CLASS-NAME."
   (let* ((package-name (package-name (symbol-package class-name)))
-	 (.-position   (position #\. package-name :from-end t)))
+         (.-position   (position #\. package-name :from-end t)))
     (make-keyword (subseq package-name (1+ .-position)))))

@@ -7,9 +7,9 @@
 (cl:in-package :rsb.filter.test)
 
 (deftestsuite method-filter-root (filter-root
-				  filter-suite)
+                                  filter-suite)
   ((simple-filter (make-instance 'method-filter
-				 :method "FOO")))
+                                 :method "FOO")))
   (:documentation
    "Test suite for the `method-filter' class."))
 

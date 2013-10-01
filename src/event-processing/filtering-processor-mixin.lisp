@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.event-processing)
 
-
 ;;; Filtering processor protocol
-;;
 
 (defgeneric processor-filters (processor)
   (:documentation
@@ -18,17 +16,15 @@
   (:documentation
    "Set the list of filters applied by PROCESSOR to NEW-VALUE."))
 
-
 ;;; Mixin class `filtering-processor-mixin'
-;;
 
 (defclass filtering-processor-mixin ()
   ((filter :initarg  :filter
-	   :type     rsb.filter:conjoin-filter
-	   :reader   processor-filter
-	   :initform (make-instance 'rsb.filter:conjoin-filter)
-	   :documentation
-	   "The filter object is used to hold a list of filters that
+           :type     rsb.filter:conjoin-filter
+           :reader   processor-filter
+           :initform (make-instance 'rsb.filter:conjoin-filter)
+           :documentation
+           "The filter object is used to hold a list of filters that
 act in a conjunctive manner."))
   (:documentation
    "The mixin class adds filtering of events before further
@@ -42,12 +38,12 @@ respective processor."))
   (rsb.filter:filter-children (processor-filter processor)))
 
 (defmethod (setf processor-filters) ((new-value list)
-				     (processor filtering-processor-mixin))
+                                     (processor filtering-processor-mixin))
   (setf (rsb.filter:filter-children (processor-filter processor))
-	new-value))
+        new-value))
 
 (defmethod handle ((processor filtering-processor-mixin)
-		   (event     event))
+                   (event     event))
   "Terminate processing of EVENT unless it matches PROCESSOR's
 filters."
   (when (rsb.filter:matches? (processor-filter processor) event)

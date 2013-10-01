@@ -13,14 +13,14 @@
 
 (addtest (spread-connection-root
           :documentation
-	  "Test construction of `connection' instances.")
+          "Test construction of `connection' instances.")
   construct
 
   (let ((name (format nil "~D" spread-port)))
     (make-instance 'connection
-		   :connection (network.spread:connect name))
+                   :connection (network.spread:connect name))
     (make-instance 'connection
-		   :name name)
+                   :name name)
 
     ;; Neither :connection nor :name => missing required initarg
     (ensure-condition 'missing-required-initarg
@@ -28,5 +28,5 @@
     ;; Both :connection and :name => mutually exclusive initargs
     (ensure-condition 'error
       (make-instance 'connection
-		     :name       "3333@localhost"
-		     :connection (network.spread:connect name)))))
+                     :name       "3333@localhost"
+                     :connection (network.spread:connect name)))))

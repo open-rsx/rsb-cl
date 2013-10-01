@@ -6,44 +6,40 @@
 
 (cl:in-package :rsb)
 
-
 ;;; Sequence number functions
-;;
 
 (declaim (ftype (function (&optional sequence-number)
-			  (function () sequence-number))
-		make-sequence-number-generator))
+                          (function () sequence-number))
+                make-sequence-number-generator))
 
 (defun make-sequence-number-generator (&optional (start 0))
   "Return a function that returns increasing numbers starting with
 START."
   #.(if (subtypep 'sequence-number 'lparallel.counter:counter-value)
-	'(let ((current (lparallel.counter:make-counter start)))
-	   (lambda ()
-	     (declare #.+optimization-fast+unsafe+)
-	     (mod (lparallel.counter:inc-counter current)
-		  (ash 1 32))))
-	#+sbcl
-	;; We have to wrap the value in a cons.
-	'(let ((current (list (list start))))
-	   (declare (type (cons (cons sequence-number null) null) current))
-	   (lambda ()
-	     (declare #.+optimization-fast+unsafe+)
-	     ;; Keep trying to store the incremented value until it
-	     ;; works.
-	     (iter (for old next (car current))
-		   (for new next (list (ldb (byte 32 0)
-					    (1+ (the sequence-number
-						     (car old))))))
-		   (until (eq old (sb-ext:compare-and-swap
-				   (car current) old new)))
-		   (finally (return (car old))))))
-	#-sbcl
-	'(error "Not implemented")))
+        '(let ((current (lparallel.counter:make-counter start)))
+           (lambda ()
+             (declare #.+optimization-fast+unsafe+)
+             (mod (lparallel.counter:inc-counter current)
+                  (ash 1 32))))
+        #+sbcl
+        ;; We have to wrap the value in a cons.
+        '(let ((current (list (list start))))
+           (declare (type (cons (cons sequence-number null) null) current))
+           (lambda ()
+             (declare #.+optimization-fast+unsafe+)
+             ;; Keep trying to store the incremented value until it
+             ;; works.
+             (iter (for old next (car current))
+                   (for new next (list (ldb (byte 32 0)
+                                            (1+ (the sequence-number
+                                                     (car old))))))
+                   (until (eq old (sb-ext:compare-and-swap
+                                   (car current) old new)))
+                   (finally (return (car old))))))
+        #-sbcl
+        '(error "Not implemented")))
 
-
 ;;; UUID utility functions
-;;
 
 (defun print-id (stream id colon? at?)
   "Print the UUID ID to STREAM. If COLON? is non-nil, all components
@@ -58,21 +54,19 @@ of ID are printed. Otherwise, just a block of 8 digits is printed.  "
      (format stream "~8,'0X" (slot-value id 'uuid::time-low)))))
 
 (defmacro print-unreadable-id-object ((object stream &key (type t))
-				      &body body)
+                                      &body body)
   "Print OBJECT to STREAM in a manner similar to
 `print-unreadable-object' but use the `id' slot of OBJECT as object
 identity."
   (once-only (object stream)
     (with-unique-names (id-var)
       `(let ((,id-var (slot-value ,object 'id)))
-	 (print-unreadable-object (,object ,stream :type ,type)
-	   ,@body
-	   (write-char #\Space stream)
-	   (print-id ,stream ,id-var nil nil))))))
+         (print-unreadable-object (,object ,stream :type ,type)
+           ,@body
+           (write-char #\Space stream)
+           (print-id ,stream ,id-var nil nil))))))
 
-
 ;;; UUID mixin
-;;
 
 (defclass uuid-mixin ()
   ((id :type     uuid:uuid
@@ -83,30 +77,28 @@ identity."
 instances."))
 
 (defmethod shared-initialize :after ((instance  uuid-mixin)
-				     (slot-name t)
-				     &key
-				     id)
+                                     (slot-name t)
+                                     &key
+                                     id)
   (cond
     ;; If ID has been supplied, set the slot value to it.
     (id
      (setf (slot-value instance 'id)
-	   (if (stringp id) (uuid:make-uuid-from-string id) id)))
+           (if (stringp id) (uuid:make-uuid-from-string id) id)))
     ;; If ID has not been supplied and the slot is unbound, set
     ;; it. Use the value of `*id-random-state*' to give clients
     ;; control over the generated ids.
     ((not (slot-boundp instance 'id))
      (setf (slot-value instance 'id)
-	   (let ((uuid::*uuid-random-state* *id-random-state*))
-	     (uuid:make-v4-uuid))))))
+           (let ((uuid::*uuid-random-state* *id-random-state*))
+             (uuid:make-v4-uuid))))))
 
-
 ;;; Scope mixin
-;;
 
 (defclass scope-mixin ()
   ((scope :type     scope
-	  :documentation
-	  "Stores the scope that is associated to the instance. For
+          :documentation
+          "Stores the scope that is associated to the instance. For
 long-lived and reused objects, interned scopes should be stored."))
   (:default-initargs
    :scope (missing-required-initarg 'scope-mixin :scope))
@@ -115,40 +107,36 @@ long-lived and reused objects, interned scopes should be stored."))
 which have a mandatory associated scope."))
 
 (defmethod shared-initialize :after ((instance   scope-mixin)
-				     (slot-names t)
-				     &key
-				     scope
-				     (intern-scope? t))
+                                     (slot-names t)
+                                     &key
+                                     scope
+                                     (intern-scope? t))
   (when scope
     (setf (slot-value instance 'scope)
-	  (make-scope scope :intern? intern-scope?))))
+          (make-scope scope :intern? intern-scope?))))
 
-
 ;;; URI mixin
-;;
 
 (defclass uri-mixin ()
   ((uri :type     puri:uri
-	:documentation
-	"Stores the URI of the object."))
+        :documentation
+        "Stores the URI of the object."))
   (:documentation
    "This mixin class is intended to be mixed into classes instance of
 which have an associated URI."))
 
 (defmethod shared-initialize :after ((instance   uri-mixin)
-				     (slot-names t)
-				     &key
-				     uri)
+                                     (slot-names t)
+                                     &key
+                                     uri)
   (when uri
     (setf (slot-value instance 'uri) (puri:uri uri))))
 
-
 ;;; Plist meta data mixin
-;;
 
 (defmacro define-plist-data-mixin (name
-				   &key
-				   (slot-name name))
+                                   &key
+                                   (slot-name name))
   "Define a class `plist-NAME-mixin' which manages a plist in a
 slot. Define the following accessors along with the class:
 + `NAME-count' :: Return number of items.
@@ -157,93 +145,91 @@ slot. Define the following accessors along with the class:
 + `NAME-plist' :: Return items as plist.
 + `NAME-alist' :: Return items as alist."
   (let+ ((class-name (symbolicate "PLIST-" name "-MIXIN"))
-	 (initarg    (make-keyword slot-name))
-	 ((count-name keys-name values-name plist-name alist-name)
-	  (map 'list (curry #'symbolicate name)
-	       '("-COUNT" "-KEYS" "-VALUES" "-PLIST" "-ALIST"))))
+         (initarg    (make-keyword slot-name))
+         ((count-name keys-name values-name plist-name alist-name)
+          (map 'list (curry #'symbolicate name)
+               '("-COUNT" "-KEYS" "-VALUES" "-PLIST" "-ALIST"))))
     `(progn
        (defclass ,class-name ()
-	 ((,slot-name :initarg  ,initarg
-		      :type     list
-		      :initform nil
-		      :documentation
+         ((,slot-name :initarg  ,initarg
+                      :type     list
+                      :initform nil
+                      :documentation
 
-		      ,(format nil "Stores the ~(~A~) items associated ~
+                      ,(format nil "Stores the ~(~A~) items associated ~
 to the instance."
-			       name)))
-	 (:documentation
-	  "This mixin adds storage for a plist of items and associated
+                               name)))
+         (:documentation
+          "This mixin adds storage for a plist of items and associated
 accessors. See `define-plist-data-mixin' for a description."))
 
        (defgeneric ,count-name (object)
-	 (:method ((object ,class-name))
-	   (ash (length (slot-value object ',slot-name)) -1))
-	 (:documentation
-	  ,(format nil "Return the number of ~(~A~) items stored in OBJECT."
-		   name)))
+         (:method ((object ,class-name))
+           (ash (length (slot-value object ',slot-name)) -1))
+         (:documentation
+          ,(format nil "Return the number of ~(~A~) items stored in OBJECT."
+                   name)))
 
        (defgeneric ,keys-name (object)
-	 (:method ((object ,class-name))
-	   (iter (for (key) on (slot-value object ',slot-name)
-		      :by #'cddr)
-		 (collect key)))
-	 (:documentation
+         (:method ((object ,class-name))
+           (iter (for (key) on (slot-value object ',slot-name)
+                      :by #'cddr)
+                 (collect key)))
+         (:documentation
 
-	  ,(format nil "Return a list of the keys of ~(~A~) items ~
+          ,(format nil "Return a list of the keys of ~(~A~) items ~
 stored in OBJECT."
-		   name)))
+                   name)))
 
        (defgeneric ,values-name (object)
-	 (:method ((object ,class-name))
-	   (iter (for (key value) on (slot-value object ',slot-name)
-		      :by #'cddr)
-		 (collect value)))
-	 (:documentation
-	  ,(format nil "Return a list of the values of ~(~A~) items ~
+         (:method ((object ,class-name))
+           (iter (for (key value) on (slot-value object ',slot-name)
+                      :by #'cddr)
+                 (collect value)))
+         (:documentation
+          ,(format nil "Return a list of the values of ~(~A~) items ~
 stored in OBJECT."
-		   name)))
+                   name)))
 
        (defgeneric ,plist-name (object)
-	 (:method ((object ,class-name))
-	   (slot-value object ',slot-name))
-	 (:documentation
-	  ,(format nil "Return a plist of the ~(~A~) items stored in ~
+         (:method ((object ,class-name))
+           (slot-value object ',slot-name))
+         (:documentation
+          ,(format nil "Return a plist of the ~(~A~) items stored in ~
 OBJECT."
-		   name)))
+                   name)))
 
        (defgeneric ,alist-name (object)
-	 (:method ((object ,class-name))
-	   (plist-alist (slot-value object ',slot-name)))
-	 (:documentation
-	  ,(format nil "Return an alist of the ~(~A~) items stored ~
+         (:method ((object ,class-name))
+           (plist-alist (slot-value object ',slot-name)))
+         (:documentation
+          ,(format nil "Return an alist of the ~(~A~) items stored ~
 in OBJECT."
-		   name)))
+                   name)))
 
        (defgeneric ,name (object key)
-	 (:method ((object ,class-name) (key t))
-	   (getf (slot-value object ',slot-name) key))
-	 (:documentation
-	  ,(format nil "Return the ~(~A~) item of OBJECT identified ~
+         (:method ((object ,class-name) (key t))
+           (getf (slot-value object ',slot-name) key))
+         (:documentation
+          ,(format nil "Return the ~(~A~) item of OBJECT identified ~
 by KEY."
-		   name)))
+                   name)))
 
        (defgeneric (setf ,name) (new-value object key)
-	 (:method ((new-value t) (object ,class-name) (key t))
-	   (setf (getf (slot-value object ',slot-name) key) new-value))
-	 (:documentation
+         (:method ((new-value t) (object ,class-name) (key t))
+           (setf (getf (slot-value object ',slot-name) key) new-value))
+         (:documentation
 
-	  ,(format nil "Associate NEW-VALUE to OBJECT as the ~(~A~)
+          ,(format nil "Associate NEW-VALUE to OBJECT as the ~(~A~)
 item identified by KEY."
-		   name))))))
+                   name))))))
 
-
 ;;; Utility functions
-;;
 
 (defun maybe-shorten-sequence (thing)
   (if (typep thing 'sequence)
       (let ((length (length thing)))
-	(values (subseq thing 0 (min length 200)) (> length 200)))
+        (values (subseq thing 0 (min length 200)) (> length 200)))
       (values thing nil)))
 
 (defmacro log1 (category object-or-message &rest args)
@@ -259,18 +245,18 @@ arguments are assumed to be format arguments."
   (check-type category keyword)
 
   (let+ ((category (intern (string category) :log5))
-	 (package  (iter (for name in (cons (package-name *package*)
-					    (package-nicknames *package*)))
-			 (finding name minimizing (length name))))
-	 (object   (unless (stringp object-or-message)
-		     object-or-message))
-	 ((message &rest args)
-	  (if object
-	      args
-	      (cons object-or-message args))))
+         (package  (iter (for name in (cons (package-name *package*)
+                                            (package-nicknames *package*)))
+                         (finding name minimizing (length name))))
+         (object   (unless (stringp object-or-message)
+                     object-or-message))
+         ((message &rest args)
+          (if object
+              args
+              (cons object-or-message args))))
     (if object
-	`(log5:with-context ,package
-	   (log5:with-context ,object
-	     (log5:log-for ,category ,message ,@args)))
-	`(log5:with-context ,package
-	   (log5:log-for ,category ,message ,@args)))))
+        `(log5:with-context ,package
+           (log5:with-context ,object
+             (log5:log-for ,category ,message ,@args)))
+        `(log5:with-context ,package
+           (log5:log-for ,category ,message ,@args)))))

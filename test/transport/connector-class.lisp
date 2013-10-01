@@ -13,16 +13,16 @@
 
 (addtest (connector-class-root
           :documentation
-	  "Test constructing an instance of `connector-class'.")
+          "Test constructing an instance of `connector-class'.")
   construction/valid
 
   (eval
    '(defclass foo ()
       ((an-option :initarg  :an-option
-		  :type     boolean
-		  :initform t
-		  :documentation
-		  "doc"))
+                  :type     boolean
+                  :initform t
+                  :documentation
+                  "doc"))
       (:metaclass connector-class)
       (:direction :in-push)
       (:wire-type string)
@@ -35,12 +35,12 @@
     (ensure-same (connector-wire-type class) 'string)
     (ensure-same (connector-schemas class)   '(:whoop))
     (ensure-same (connector-options class)   '((:an-option boolean
-						:default     t
-						:description "doc")))))
+                                                :default     t
+                                                :description "doc")))))
 
 (addtest (connector-class-root
           :documentation
-	  "Test error behavior for an invalid constructing an instance
+          "Test error behavior for an invalid constructing an instance
 of `connector-class'.")
   construction/invalid
 
@@ -49,10 +49,10 @@ of `connector-class'.")
   ;; to be signaled.
   (ensure-condition 'error
     (eval '(progn
-	    (defclass bar ()
-	      ()
-	      (:metaclass connector-class)
-	      (:options
-	       (:no-such-option &slot)))
-	    (closer-mop:finalize-inheritance
-	     (find-class 'bar))))))
+            (defclass bar ()
+              ()
+              (:metaclass connector-class)
+              (:options
+               (:no-such-option &slot)))
+            (closer-mop:finalize-inheritance
+             (find-class 'bar))))))

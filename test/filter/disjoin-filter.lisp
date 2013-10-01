@@ -7,11 +7,11 @@
 (cl:in-package :rsb.filter.test)
 
 (deftestsuite disjoin-filter-root (filter-root
-				   filter-suite)
+                                   filter-suite)
   ((simple-filter (filter
-		   '(:or
-		     (:scope :scope "/foo/bar")
-		     (:type :type string)))))
+                   '(:or
+                     (:scope :scope "/foo/bar")
+                     (:type :type string)))))
   (:documentation
    "Unit tests for the `disjoin-filter' class."))
 

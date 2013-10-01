@@ -8,8 +8,8 @@
 
 (deftestsuite error-handling-dispatcher-mixin-root (event-processing-root)
   ((simple-processor (make-instance (ensure-processor-class
-				     '(error-handling-dispatcher-mixin
-				       broadcast-processor))))
+                                     '(error-handling-dispatcher-mixin
+                                       broadcast-processor))))
    (simple-event     (make-event "/" "bla")))
   (:documentation
    "Test suite for the `error-handling-dispatcher-mixin' class."))
@@ -20,7 +20,7 @@
 
 (addtest (error-handling-dispatcher-mixin-root
           :documentation
-	  "Test basic error handling policies of the
+          "Test basic error handling policies of the
 `error-handling-dispatcher-mixin' class.")
   smoke
 

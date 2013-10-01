@@ -14,6 +14,6 @@ event delivery contexts to attach :deliver timestamps to processed
 events."))
 
 (defmethod handle :before ((processor deliver-timestamp-mixin)
-			   (event     event))
+                           (event     event))
   "Attach a :deliver timestamp to EVENT."
   (setf (timestamp event :deliver) (local-time:now)))

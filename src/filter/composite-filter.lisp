@@ -8,11 +8,11 @@
 
 (defclass composite-filter (filter-mixin)
   ((children :initarg  :children
-	     :type     list
-	     :accessor filter-children
-	     :initform nil
-	     :documentation
-	     "A list of subordinate filters."))
+             :type     list
+             :accessor filter-children
+             :initform nil
+             :documentation
+             "A list of subordinate filters."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Instances of subclasses of this class implement complex filtering
@@ -24,9 +24,7 @@ rather than subclasses."))
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "(~D)" (length (filter-children object)))))
 
-
 ;;; Class `conjoin-filter'
-;;
 
 (defmethod find-filter-class ((spec (eql :conjoin)))
   (find-class 'conjoin-filter))
@@ -44,9 +42,7 @@ logical and of the decisions made by their subordinate filters."))
 (defmethod matches? ((filter conjoin-filter) (event t))
   (every (rcurry #'matches? event) (filter-children filter)))
 
-
 ;;; Class `disjoin-filter'
-;;
 
 (defmethod find-filter-class ((spec (eql :disjoin)))
   (find-class 'disjoin-filter))

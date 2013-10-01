@@ -11,9 +11,7 @@
   (:documentation
    "Root unit test suite for fundamental converters."))
 
-
 ;;; Converter fundamental-void
-;;
 
 (deftestsuite fundamental-void-root (fundamental-root)
   ()
@@ -27,9 +25,7 @@
       (:not-applicable  :void ,(octetify #()))
       (:not-applicable  :void ,(octetify #(1)))))
 
-
 ;;; Converter fundamental-null
-;;
 
 (deftestsuite fundamental-null-root (fundamental-root)
   ()
@@ -43,9 +39,7 @@
       (,(octetify #(65 65 65)) t    ,(octetify #(65 65 65)))
       (,(octetify #(65 65 65)) :foo ,(octetify #(65 65 65)))))
 
-
 ;;; Converter fundamental-bool
-;;
 
 (deftestsuite fundamental-bool-root (fundamental-root)
   ()
@@ -58,9 +52,7 @@
       (:not-applicable  :bool "bar")
       (,(octetify #(2)) :bool :error)))
 
-
 ;;; Converter fundamental-int32
-;;
 
 (deftestsuite fundamental-int32-root (fundamental-root)
   ()
@@ -74,9 +66,7 @@
       (:not-applicable                :int32 "bar")
       (,(octetify #(1))               :int32 :error)))
 
-
 ;;; Converter fundamental-ascii-string
-;;
 
 (deftestsuite fundamental-ascii-string-root (fundamental-root)
   ()
@@ -90,9 +80,7 @@
       (:error                  :ascii-string "Aλ")
       (,(octetify #(65 129))   :ascii-string :error)))
 
-
 ;;; Converter fundamental-utf-8-string
-;;
 
 (deftestsuite fundamental-utf-8-string-root (fundamental-root)
   ()
@@ -106,9 +94,7 @@
       (,(octetify #(65 206 187)) :utf-8-string "Aλ")
       (,(octetify #(255))        :utf-8-string :error)))
 
-
 ;;; Converter fundamental-bytes
-;;
 
 (deftestsuite fundamental-bytes-root (fundamental-root)
   ()

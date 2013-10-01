@@ -10,8 +10,8 @@
   (find-class 'in-push-connector))
 
 (defclass in-push-connector (in-connector
-			     timestamping-receiver-mixin
-			     error-handling-push-receiver-mixin)
+                             timestamping-receiver-mixin
+                             error-handling-push-receiver-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
@@ -20,6 +20,6 @@
 a socket."))
 
 (defmethod handle ((connector in-push-connector)
-		   (data      notification))
-  ;;; TODO(jmoringe): condition translation?
+                   (data      notification))
+  ;; TODO(jmoringe): condition translation?
   (dispatch connector (message->event connector data :undetermined)))

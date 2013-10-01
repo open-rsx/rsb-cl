@@ -57,10 +57,10 @@ module"))
 
 (deftestsuite transport-spread-root (transport-root)
   ((spread-port (asdf:component-property
-		 (asdf:find-system :cl-rsb-test) :spread-port))
+                 (asdf:find-system :cl-rsb-test) :spread-port))
    common-args)
   (:setup
    (setf common-args `(:port      ,spread-port
-		       :converter :fundamental-null)))
+                       :converter :fundamental-null)))
   (:documentation
    "Root unit test suite for the transport.spread module."))

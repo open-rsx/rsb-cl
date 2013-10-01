@@ -6,34 +6,26 @@
 
 (cl:in-package :rsb.filter)
 
-
 ;;; Filter protocol
-;;
 
 (defgeneric matches? (filter event)
   (:documentation
    "Return non-nil if EVENT matches the criteria of FILTER."))
 
-
 ;;; Default behavior
-;;
 
 (defmethod matches? ((filter function) (event t))
   "Apply FILTER to EVENT."
   (funcall filter event))
 
-
 ;;; Payload matching protocol
-;;
 
 (defgeneric payload-matches? (filter payload
-			      &key &allow-other-keys)
+                              &key &allow-other-keys)
   (:documentation
    "Return non-nil if PAYLOAD matches the criteria of FILTER."))
 
-
 ;;; Filter class family
-;;
 
 (dynamic-classes:define-findable-class-family filter
     "The classes in this family implement event filtering strategies
@@ -46,13 +38,11 @@ using the `make-filter' and `filter' functions.")
 ARGS as initargs."
   (apply #'make-instance (find-filter-class name) args))
 
-
 ;;; Filter construction mini-DSL
-;;
 
 (defgeneric filter (spec
-		    &rest args
-		    &key &allow-other-keys)
+                    &rest args
+                    &key &allow-other-keys)
   (:documentation
    "Construct and return a filter instance according to SPEC and
 ARGS. SPEC is either a keyword designating a filter class or a list of
@@ -68,18 +58,18 @@ initarg. The value of this initarg is computed by recursively applying
 `filter' to each CHILDSPECN."))
 
 (defmethod filter ((spec symbol)
-		   &rest args
-		   &key)
+                   &rest args
+                   &key)
   (handler-bind
       ((error #'(lambda (condition)
-		  (error 'filter-construction-error
-			 :spec  (cons spec args)
-			 :cause condition))))
+                  (error 'filter-construction-error
+                         :spec  (cons spec args)
+                         :cause condition))))
     (apply #'make-filter spec args)))
 
 (defmethod filter ((spec list)
-		   &rest args
-		   &key)
+                   &rest args
+                   &key)
   (let+ (((class &rest child-specs) spec)
-	 (children (map 'list (curry  #'apply #'filter) child-specs)))
+         (children (map 'list (curry  #'apply #'filter) child-specs)))
     (apply #'filter class :children children args)))

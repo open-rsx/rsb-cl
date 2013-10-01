@@ -10,12 +10,12 @@
   (find-class 'in-pull-connector))
 
 (defclass in-pull-connector (error-handling-pull-receiver-mixin
-			     in-connector)
+                             in-connector)
   ((queue :type     lparallel.queue:queue
-	  :reader   connector-queue
-	  :initform (lparallel.queue:make-queue)
-	  :documentation
-	  "Stores notifications as they arrive via the message bus."))
+          :reader   connector-queue
+          :initform (lparallel.queue:make-queue)
+          :documentation
+          "Stores notifications as they arrive via the message bus."))
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
@@ -23,19 +23,19 @@
 a socket."))
 
 (defmethod handle ((connector in-pull-connector)
-		   (data      notification))
+                   (data      notification))
   "Put DATA into the queue of CONNECTOR for later retrieval."
   (lparallel.queue:push-queue data (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
-			    (block?    (eql nil)))
+                            (block?    (eql nil)))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, return
 nil."
   (lparallel.queue:try-pop-queue (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
-			    (block?    t))
+                            (block?    t))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, block."
   (lparallel.queue:pop-queue (connector-queue connector)))
@@ -45,22 +45,22 @@ CONNECTOR, if there are any. If there are no queued events, block."
   ;; an event and return the event in case of success. In blocking
   ;; mode, wait for the next notification.
   (iter (let* ((payload (receive-message connector block?))
-	       (event   (when payload
-			  (message->event
-			   connector payload :undetermined))))
+               (event   (when payload
+                          (message->event
+                           connector payload :undetermined))))
 
-	  ;; Due to non-blocking receive mode and error handling
-	  ;; policies, we may not obtain an `event' instance from the
-	  ;; notification.
-	  (when event
-	    (dispatch connector event))
-	  (when (or event (not block?))
-	    (return event)))))
+          ;; Due to non-blocking receive mode and error handling
+          ;; policies, we may not obtain an `event' instance from the
+          ;; notification.
+          (when event
+            (dispatch connector event))
+          (when (or event (not block?))
+            (return event)))))
 
 (defmethod print-object ((object in-pull-connector) stream)
   (print-unreadable-object (object stream :identity t)
     (format stream "~A ~A (~D)"
-	    (connector-direction object)
-	    (connector-relative-url object "/")
-	    (lparallel.queue:queue-count
-	     (connector-queue object)))))
+            (connector-direction object)
+            (connector-relative-url object "/")
+            (lparallel.queue:queue-count
+             (connector-queue object)))))

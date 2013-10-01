@@ -10,10 +10,10 @@
   (find-class 'scope-filter))
 
 (defclass scope-filter (filter-mixin
-			scope-mixin)
+                        scope-mixin)
   ((rsb::scope :accessor filter-scope
-	       :documentation
-	       "A superscope of the scopes of matching events."))
+               :documentation
+               "A superscope of the scopes of matching events."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This filter discriminates based on the scopes of events. Event

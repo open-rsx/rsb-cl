@@ -12,7 +12,7 @@
 ;; mark-start::with-remote-server
 (rsb.patterns:with-remote-server (remote-server "/example/clientserver")
   (format t "Server replied: ~A~%"
-	  (rsb.patterns:call remote-server "echo" "bla")))
+          (rsb.patterns:call remote-server "echo" "bla")))
 ;; mark-end::with-remote-server
 
 ;; mark-start::calls
@@ -21,19 +21,19 @@
   ;; The default behavior of returning the reply payload can be
   ;; changed using the :return keyword parameter.
   (rsb.patterns:call remote-server "echo" "bla"
-		     :return :event)
+                     :return :event)
 
   ;; Non-blocking calls can be made using the :block? keyword
   ;; parameter. In that case, an object implementing the future
   ;; protocol is returned to represent the result of the computation.
   (let ((future (rsb.patterns:call remote-server "echo" "bla"
-				   :block? nil)))
+                                   :block? nil)))
     (rsb.patterns:future-result future))
 
   ;; These behaviors can be combined:
   (let ((future (rsb.patterns:call remote-server "echo" "bla"
-				   :block? nil
-				   :return :event)))
+                                   :block? nil
+                                   :return :event)))
     (rsb.patterns:future-result future))
 
   ;; Another way of calling methods makes use of the fact that
@@ -44,9 +44,9 @@
   ;; This variant provides all the different behaviors of the `call'
   ;; variant:
   (funcall (rsb.patterns:server-method remote-server "echo")
-	   "bla"
-	   :return :event
-	   :block? nil))
+           "bla"
+           :return :event
+           :block? nil))
 ;; mark-end::calls
 
 ;; Create a `remote-server' instance that calls methods of the remote

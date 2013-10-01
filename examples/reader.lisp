@@ -16,7 +16,7 @@
 (rsb:with-reader (reader "/example/informer")
   (let ((event (rsb:receive reader)))
     (format t "Received event: ~A~%" event)
-    event)) ;; return the event
+    event)) ; return the event
 ;; mark-end::with-reader
 
 ;; This will create a `reader' instance that receives events which are
@@ -34,7 +34,7 @@
 ;; mark-start::receive/block
 (let ((event (rsb:receive *reader* :block? t))) ;; block? defaults to t
   (format t "Received event: ~A~%" event)
-  event) ;; return the event
+  event) ; return the event
 ;; mark-end::receive/block
 
 ;; It is also possible to use `rsb:receive' in a non-blocking mode. In
@@ -42,8 +42,8 @@
 ;; mark-start::receive/noblock
 (let ((event (rsb:receive *reader* :block? nil)))
   (format t "~:[Did not receive an event~;Received event: ~:*~A~]~%"
-	  event)
-  event) ;; return the event, or nil
+          event)
+  event) ; return the event, or nil
 ;; mark-end::receive/noblock
 ;; mark-end::variable
 

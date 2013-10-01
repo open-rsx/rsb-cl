@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.transport.socket)
 
-
 ;;; Global map of bus client connections
-;;
 
 (defvar *bus-clients* (make-hash-table :test #'equalp)
   "Map host names and ports to `bus-client' instances.")
@@ -22,26 +20,24 @@ endpoint designated by HOST and PORT and attach CONNECTOR to it.
 Attaching CONNECTOR marks the `bus-client' instance as being in use
 and protects it from being destroyed in a race condition situation."
   (log1 :trace "Trying to obtain bus client ~S:~D for ~A"
-	host port connector)
+        host port connector)
   (let ((options (make-connection-options connector))
-	(key     (cons host port)))
+        (key     (cons host port)))
     (bt:with-recursive-lock-held (*bus-clients-lock*)
       (or (when-let ((candidate (gethash key *bus-clients*)))
-	    (with-locked-bus (candidate)
-	      (when (bus-connectors candidate)
-		(check-connection-options (bus-options candidate) options)
-		(notify connector candidate :attached)
-		candidate)))
-	  (let ((bus (make-instance 'bus-client
-				    :host    host
-				    :port    port
-				    :options options)))
-	    (notify connector bus :attached)
-	    (setf (gethash key *bus-clients*) bus))))))
+            (with-locked-bus (candidate)
+              (when (bus-connectors candidate)
+                (check-connection-options (bus-options candidate) options)
+                (notify connector candidate :attached)
+                candidate)))
+          (let ((bus (make-instance 'bus-client
+                                    :host    host
+                                    :port    port
+                                    :options options)))
+            (notify connector bus :attached)
+            (setf (gethash key *bus-clients*) bus))))))
 
-
 ;;; `bus-client' class
-;;
 
 (defclass bus-client (bus)
   ()
@@ -52,15 +48,15 @@ client socket."))
 (defmethod shared-initialize :after ((instance   bus-client)
                                      (slot-names t)
                                      &key
-				     host
-				     port
-				     options)
+                                     host
+                                     port
+                                     options)
   ;; Add a single connection to INSTANCE. The returned connection is
   ;; guaranteed to have completing the handshake and thus receives all
   ;; events published on the bus afterward.
   (setf (bus-connections instance)
-	(list (apply #'make-instance 'bus-connection
-		     :host      host
-		     :port      port
-		     :handshake :receive
-		     options))))
+        (list (apply #'make-instance 'bus-connection
+                     :host      host
+                     :port      port
+                     :handshake :receive
+                     options))))

@@ -31,9 +31,9 @@ module"))
 
 (defclass mock-processor ()
   ((handled :initarg  :handled
-	    :type     list
-	    :accessor processor-handled
-	    :initform nil)))
+            :type     list
+            :accessor processor-handled
+            :initform nil)))
 
 (defmethod handle ((sink mock-processor) (data t))
   (appendf (processor-handled sink) (list data)))

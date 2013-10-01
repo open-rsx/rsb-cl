@@ -13,52 +13,52 @@
 (define-plist-data-mixin timestamp)
 
 (defclass event (scope-mixin
-		 plist-meta-data-mixin
-		 plist-timestamp-mixin)
+                 plist-meta-data-mixin
+                 plist-timestamp-mixin)
   ((sequence-number :initarg  :sequence-number
-		    :type     (or null sequence-number)
-		    :accessor event-sequence-number
-		    :initform nil
-		    :documentation
-		    "Stores a sequence number of the event \"within\"
+                    :type     (or null sequence-number)
+                    :accessor event-sequence-number
+                    :initform nil
+                    :documentation
+                    "Stores a sequence number of the event \"within\"
 the participant sending the event.")
    (id              :type     (or null uuid:uuid)
-		    :reader   event-id
-		    :writer   (setf %event-id)
-		    :documentation
-		    "Stores a unique id that is lazily computed from
+                    :reader   event-id
+                    :writer   (setf %event-id)
+                    :documentation
+                    "Stores a unique id that is lazily computed from
 the unique id of the participant sending the event (stored in the
 origin slot) and the sequence number of the event.")
    (scope           :accessor event-scope)
    (origin          :initarg  :origin
-		    :type     (or null uuid:uuid)
-		    :accessor event-origin
-		    :initform nil
-		    :documentation
-		    "Stores the id of the participant by which the
+                    :type     (or null uuid:uuid)
+                    :accessor event-origin
+                    :initform nil
+                    :documentation
+                    "Stores the id of the participant by which the
 event was published onto the bus.")
    (method          :initarg  :method
-		    :type     (or null keyword)
-		    :accessor event-method
-		    :initform nil
-		    :documentation
-		    "Stores the name of a \"method category\" which
+                    :type     (or null keyword)
+                    :accessor event-method
+                    :initform nil
+                    :documentation
+                    "Stores the name of a \"method category\" which
 characterizes the role of the event in a communication
 pattern (examples include \"request\", \"reply\", \"update\").")
    (data            :initarg  :data
-		    :type     t
-		    :accessor event-data
-		    :documentation
-		    "Stores the payload of the event as a \"domain
+                    :type     t
+                    :accessor event-data
+                    :documentation
+                    "Stores the payload of the event as a \"domain
 object\" (can be any Lisp object).")
    (meta-data       :accessor event-meta-data)
    (timestamp       :accessor event-timestamps)
    (causes          :initarg  :causes
-		    :type     list
-		    :accessor event-causes
-		    :initform nil
-		    :documentation
-		    "Stores a list of `event-id's that identify events
+                    :type     list
+                    :accessor event-causes
+                    :initform nil
+                    :documentation
+                    "Stores a list of `event-id's that identify events
 which somehow caused the event."))
   (:default-initargs
    :intern-scope? nil)
@@ -79,7 +79,7 @@ listeners. An event is a composite structure consisting of
 (defmethod shared-initialize :after ((instance   event)
                                      (slot-names t)
                                      &key
-				     (create-timestamp? t))
+                                     (create-timestamp? t))
   ;; Initialize or invalidate id.
   (setf (%event-id instance) nil)
 
@@ -89,7 +89,7 @@ listeners. An event is a composite structure consisting of
 
 (defmethod event-id/opaque ((event event))
   (when-let* ((origin          (event-origin event))
-	      (sequence-number (event-sequence-number event)))
+              (sequence-number (event-sequence-number event)))
     (cons origin sequence-number)))
 
 (defmethod event-id :before ((event event))
@@ -102,13 +102,13 @@ listeners. An event is a composite structure consisting of
   (setf (%event-id event) nil))
 
 (defun event= (left right
-	       &key
-	       (compare-sequence-numbers? t)
-	       (compare-origins?          t)
-	       (compare-methods?          t)
-	       (compare-timestamps        t)
-	       (compare-causes?           t)
-	       (data-test                 #'equal))
+               &key
+               (compare-sequence-numbers? t)
+               (compare-origins?          t)
+               (compare-methods?          t)
+               (compare-timestamps        t)
+               (compare-causes?           t)
+               (data-test                 #'equal))
   "Return non-nil if the events LEFT and RIGHT are equal.
 
 If COMPARE-SEQUENCE-NUMBERS? is non-nil, return nil unless LEFT and
@@ -134,70 +134,66 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 `eq'."
   (or (eq left right)
       (and (or (not compare-sequence-numbers?)
-	       (eql (event-sequence-number left)
-		    (event-sequence-number right)))
-	   ;; Scope and origin
-	   (scope= (event-scope left) (event-scope right))
-	   ;; Origin
-	   (or (not compare-origins?)
-	       (let ((left-origin  (event-origin left))
-		     (right-origin (event-origin right)))
-		 (or (and (not left-origin) (not right-origin))
-		     (and left-origin right-origin
-			  (uuid:uuid= left-origin right-origin)))))
-	   ;; Method
-	   (or (not compare-methods?)
-	       (eq (event-method left) (event-method right)))
-	   ;; Timestamps
-	   (or (null compare-timestamps)
-	       (iter (for key in (if (eq compare-timestamps t)
-				     *framework-timestamps*
-				     compare-timestamps))
-		     (let ((value-left  (timestamp left key))
-			   (value-right (timestamp right key)))
-		       (always (or (and (null value-left) (null value-right))
-				   (local-time:timestamp=
-				    value-left value-right))))))
-	   ;; Causes
-	   (or (not compare-causes?)
-	       (set-equal (event-causes left) (event-causes right)
-			  :test #'event-id=))
-	   ;; Payload
-	   (or (null data-test)
-	       (funcall data-test (event-data left) (event-data right))))))
+               (eql (event-sequence-number left)
+                    (event-sequence-number right)))
+           ;; Scope and origin
+           (scope= (event-scope left) (event-scope right))
+           ;; Origin
+           (or (not compare-origins?)
+               (let ((left-origin  (event-origin left))
+                     (right-origin (event-origin right)))
+                 (or (and (not left-origin) (not right-origin))
+                     (and left-origin right-origin
+                          (uuid:uuid= left-origin right-origin)))))
+           ;; Method
+           (or (not compare-methods?)
+               (eq (event-method left) (event-method right)))
+           ;; Timestamps
+           (or (null compare-timestamps)
+               (iter (for key in (if (eq compare-timestamps t)
+                                     *framework-timestamps*
+                                     compare-timestamps))
+                     (let ((value-left  (timestamp left key))
+                           (value-right (timestamp right key)))
+                       (always (or (and (null value-left) (null value-right))
+                                   (local-time:timestamp=
+                                    value-left value-right))))))
+           ;; Causes
+           (or (not compare-causes?)
+               (set-equal (event-causes left) (event-causes right)
+                          :test #'event-id=))
+           ;; Payload
+           (or (null data-test)
+               (funcall data-test (event-data left) (event-data right))))))
 
 (defmethod print-object ((object event) stream)
   (%maybe-set-event-id object) ;; force id computation
   (print-unreadable-id-object (object stream :type t)
     (format stream "~@<~@[~A ~]~A ~:/rsb::print-event-data/~@:>"
-	    (event-method object)
-	    (scope-string (event-scope object))
-	    (event-data object))))
+            (event-method object)
+            (scope-string (event-scope object))
+            (event-data object))))
 
-
 ;;; Convenience
-;;
 
 (defun make-event (scope data
-		   &rest meta-data
-		   &key
-		   method
-		   causes
-		   &allow-other-keys)
+                   &rest meta-data
+                   &key
+                   method
+                   causes
+                   &allow-other-keys)
   "Construct an event addressed at SCOPE with payload DATA and,
 optionally, meta-data consisting of the keys and values in the plist
 META-DATA.
 CAUSES can be used to supply a list of causes."
   (make-instance 'event
-		 :scope     (make-scope scope)
-		 :method    method
-		 :data      data
-		 :meta-data (remove-from-plist meta-data :method :causes)
-		 :causes    causes))
+                 :scope     (make-scope scope)
+                 :method    method
+                 :data      data
+                 :meta-data (remove-from-plist meta-data :method :causes)
+                 :causes    causes))
 
-
 ;;; Utility functions
-;;
 
 (declaim (ftype (function (event-id event-id) t) event-id=))
 
@@ -208,7 +204,7 @@ event."
        (uuid:uuid= (car left) (car right))))
 
 (declaim (ftype (function (event-id) uuid:uuid) event-id->uuid)
-	 (inline event-id->uuid))
+         (inline event-id->uuid))
 
 (defun event-id->uuid (event-id)
   "Derive a UUID from EVENT-ID."
@@ -235,21 +231,21 @@ printed.
 AT? is ignored."
   (declare (ignore at?))
   (let+ ((*print-length* (or *print-length* 5))
-	 ((&flet maybe-shorten-string (string max)
-	    ;; Shorten STRING to obey `*print-length*'.
-	    (let ((length (length string)))
-	      (if (<= length max)
-		  string
-		  (concatenate
-		   'string (subseq string 0 max) "...")))))
-	 ((&flet make-printable (string)
-	    ;; Replace unprintable characters in STRING with ".".
-	    (substitute-if
-	     #\. #'(lambda (char) (< (char-code char) 32)) string))))
+         ((&flet maybe-shorten-string (string max)
+            ;; Shorten STRING to obey `*print-length*'.
+            (let ((length (length string)))
+              (if (<= length max)
+                  string
+                  (concatenate
+                   'string (subseq string 0 max) "...")))))
+         ((&flet make-printable (string)
+            ;; Replace unprintable characters in STRING with ".".
+            (substitute-if
+             #\. #'(lambda (char) (< (char-code char) 32)) string))))
     (format stream "~S~@[ (~D)~]"
-	    (etypecase data
-	      (string (make-printable
-		       (maybe-shorten-string data *print-length*)))
-	      (t      data))
-	    (when (and colon? (typep data 'sequence))
-	      (length data)))))
+            (etypecase data
+              (string (make-printable
+                       (maybe-shorten-string data *print-length*)))
+              (t      data))
+            (when (and colon? (typep data 'sequence))
+              (length data)))))

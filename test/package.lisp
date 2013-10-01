@@ -52,7 +52,7 @@
       (funcall
        (conjoin #'stringp (complement #'emptyp))
        (with-output-to-string (stream)
-	 (print-object thing stream))))))
+         (print-object thing stream))))))
   (:function
    (check-event (event scope data)
      (ensure
@@ -83,9 +83,9 @@
      (abstract-uri participant)
      (let ((urls (transport-specific-urls participant)))
        (ensure (length= 1 urls)
-	       :report    "~@<The participant has ~D transport-specific ~
+               :report    "~@<The participant has ~D transport-specific ~
 URLs (~{~A~^, ~}), not ~D.~@:>"
-	       :arguments ((length urls) urls 1)))))
+               :arguments ((length urls) urls 1)))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))
@@ -94,131 +94,131 @@ that test participant classes."))
   "Define basic test cases for the participant subclass designated by
 KIND."
   (let ((suite-name (symbolicate kind "-ROOT"))
-	(make-name  (symbolicate "MAKE-" kind))
-	(with-name  (symbolicate "WITH-" kind)))
+        (make-name  (symbolicate "MAKE-" kind))
+        (with-name  (symbolicate "WITH-" kind)))
     `(progn
        (addtest (,suite-name
-		 :documentation
-		 ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
-			  kind make-name))
-	 construction
+                 :documentation
+                 ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
+                          kind make-name))
+         construction
 
-	 (ensure-cases (uri args expected-scope)
-	     (list ,@cases)
+         (ensure-cases (uri args expected-scope)
+             (list ,@cases)
 
-	   (if (eq expected-scope :error)
-	       (ensure-condition error
-		 (apply #',make-name uri args))
-	       (let ((participant (apply #',make-name uri args)))
-		 (unwind-protect
-		      (check-participant participant expected-scope)
-		   (detach/ignore-errors participant))))))
+           (if (eq expected-scope :error)
+               (ensure-condition error
+                 (apply #',make-name uri args))
+               (let ((participant (apply #',make-name uri args)))
+                 (unwind-protect
+                      (check-participant participant expected-scope)
+                   (detach/ignore-errors participant))))))
 
        (addtest (,suite-name
-		 :documentation
-		 ,(format nil "Test `print-object' method on `~(~A~)' class."
-			  kind))
-	 print
+                 :documentation
+                 ,(format nil "Test `print-object' method on `~(~A~)' class."
+                          kind))
+         print
 
-	 (,with-name (participant ,(format nil "/~(~A~)/print" kind)
-				  ,@(when (eq kind :informer) '(t)))
-	   (ensure
-	    (not (emptyp
-		  (with-output-to-string (stream)
-		    (format stream "~A" participant))))))))))
+         (,with-name (participant ,(format nil "/~(~A~)/print" kind)
+                                  ,@(when (eq kind :informer) '(t)))
+           (ensure
+            (not (emptyp
+                  (with-output-to-string (stream)
+                    (format stream "~A" participant))))))))))
 
 (defmacro define-error-hook-test-case ((class
-					&key
-					(participant? t))
-				       &body body)
+                                        &key
+                                        (participant? t))
+                                       &body body)
   "Generate a test case around BODY for the error-hook mechanism of
 CLASS.
 
 PARTICIPANT? controls whether a participant of class CLASS is created
 and bound to a variable named like the value of CLASS."
   (let+ ((suite-name (format-symbol *package* "~A-ROOT" class))
-	 (with-macro (format-symbol :rsb "WITH-~A" class))
-	 (scope      (format nil "/~(~A~)/errorhook" class))
-	 ((&flet maybe-wrap (body)
-	    (if participant?
-		`((,with-macro (,class ,scope) ,@body))
-		body))))
+         (with-macro (format-symbol :rsb "WITH-~A" class))
+         (scope      (format nil "/~(~A~)/errorhook" class))
+         ((&flet maybe-wrap (body)
+            (if participant?
+                `((,with-macro (,class ,scope) ,@body))
+                body))))
     `(addtest (,suite-name
-	      :documentation
-	      ,(format nil "Test the error-hook mechanism for the `~(~A~)' class."
-		       class))
+              :documentation
+              ,(format nil "Test the error-hook mechanism for the `~(~A~)' class."
+                       class))
        error-hook
 
        (let ((expected-errors)
-	     (seen-errors))
-	 (with-informer (informer ,scope t)
-	   ,@(maybe-wrap
-	      `(;; Install collecting error handler.
-		(push #'(lambda (condition) (push condition seen-errors) (continue))
-		      (hooks:hook-handlers (participant-error-hook ,class)))
-		,@body))
-	   ;; Make sure the expected errors match the actually seen
-	   ;; errors.
-	   (ensure-same seen-errors expected-errors :test #'equal))))))
+             (seen-errors))
+         (with-informer (informer ,scope t)
+           ,@(maybe-wrap
+              `(;; Install collecting error handler.
+                (push #'(lambda (condition) (push condition seen-errors) (continue))
+                      (hooks:hook-handlers (participant-error-hook ,class)))
+                ,@body))
+           ;; Make sure the expected errors match the actually seen
+           ;; errors.
+           (ensure-same seen-errors expected-errors :test #'equal))))))
 
 (define-condition restart-test-error (error)
   ((method :initarg  :method
-	   :reader restart-test-error-method
-	   :documentation
-	   "Stores the method from which the condition was
+           :reader restart-test-error-method
+           :documentation
+           "Stores the method from which the condition was
 signaled."))
   (:default-initargs
    :method (missing-required-initarg 'restart-test-error :method))
   (:report
    (lambda (condition stream)
      (format stream "~@<Simulated error in ~S method.~@:>"
-	     (restart-test-error-method condition))))
+             (restart-test-error-method condition))))
   (:documentation
    "This error is signaled to test establishing of restarts around
 certain code."))
 
 (defmacro define-restart-method-test-case ((class method (instance-var &rest args)
-				            &key
-					    (restarts '(log continue)))
-					   &body body)
+                                            &key
+                                            (restarts '(log continue)))
+                                           &body body)
     (let ((suite-name (symbolicate class "-ROOT"))
-	  (case-name  (symbolicate method "-SMOKE"))
-	  (var-name   (symbolicate "*" method "-FAIL?*")))
+          (case-name  (symbolicate method "-SMOKE"))
+          (var-name   (symbolicate "*" method "-FAIL?*")))
       `(progn
-	 ;; Define a method that signals an error unless a variable is
-	 ;; set.
-	 (declaim (special ,var-name))
-	 (defvar ,var-name nil)
+         ;; Define a method that signals an error unless a variable is
+         ;; set.
+         (declaim (special ,var-name))
+         (defvar ,var-name nil)
 
-	 (defmethod ,method ((,instance-var ,class) ,@args)
-	   (when ,var-name (error 'restart-test-error :method ',method))
-	   (when (next-method-p)
-	     (call-next-method)))
+         (defmethod ,method ((,instance-var ,class) ,@args)
+           (when ,var-name (error 'restart-test-error :method ',method))
+           (when (next-method-p)
+             (call-next-method)))
 
-	 ;; Define the test case that invokes the method and fails if
-	 ;; the error is not handled by restarts.
-	 (addtest (,suite-name
-		   :documentation
-		   ,(format nil "Smoke test for the :around method on ~
+         ;; Define the test case that invokes the method and fails if
+         ;; the error is not handled by restarts.
+         (addtest (,suite-name
+                   :documentation
+                   ,(format nil "Smoke test for the :around method on ~
 `~(~A~)' provided by `~(~A~)'."
-			    method class))
-	   ,case-name
+                            method class))
+           ,case-name
 
-	   (let ((,var-name t))
-	     (ensure-condition 'restart-test-error
-	       ,@body))
+           (let ((,var-name t))
+             (ensure-condition 'restart-test-error
+               ,@body))
 
-	   (let+ (((&flet do-one (restart)
-		     (setf ,var-name t)
-		     (handler-bind
-		      ((restart-test-error
-			#'(lambda (condition)
-			    (declare (ignore condition))
-			    (setf ,var-name nil)
-			    (invoke-restart
-			     (or (find-restart restart)
-				 (error "~@<Restart ~S not found.~@:>"
-					restart))))))
-			   ,@body))))
-	     ,@(iter (for restart in restarts)
-		     (collect `(do-one ',restart))))))))
+           (let+ (((&flet do-one (restart)
+                     (setf ,var-name t)
+                     (handler-bind
+                      ((restart-test-error
+                        #'(lambda (condition)
+                            (declare (ignore condition))
+                            (setf ,var-name nil)
+                            (invoke-restart
+                             (or (find-restart restart)
+                                 (error "~@<Restart ~S not found.~@:>"
+                                        restart))))))
+                           ,@body))))
+             ,@(iter (for restart in restarts)
+                     (collect `(do-one ',restart))))))))

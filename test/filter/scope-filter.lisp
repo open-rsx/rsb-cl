@@ -7,7 +7,7 @@
 (cl:in-package :rsb.filter.test)
 
 (deftestsuite scope-filter-root (filter-root
-				 filter-suite)
+                                 filter-suite)
   ((simple-filter (make-filter :scope :scope "/foo")))
   (:documentation
    "Unit tests for the `scope-filter' class."))

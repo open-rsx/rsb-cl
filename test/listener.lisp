@@ -7,13 +7,13 @@
 (cl:in-package :rsb.test)
 
 (deftestsuite listener-root (root
-			     participant-suite)
+                             participant-suite)
   ()
   (:function
    (send-some (informer)
      (iter (repeat 100)
-	   (send informer "foo")
-	   (send informer "bar"))))
+           (send informer "foo")
+           (send informer "bar"))))
   (:documentation
    "Unit tests for the `listener' class and `make-listener'
 function."))
@@ -42,7 +42,7 @@ function."))
 
 (addtest (listener-root
           :documentation
-	  "Test adding and removing handlers to/from a `listener'
+          "Test adding and removing handlers to/from a `listener'
 instance.")
   handlers
 
@@ -54,14 +54,14 @@ instance.")
     (let ((handler #'(lambda (event) (declare (ignore event)))))
       (push handler (rsb.ep:handlers listener))
       (ensure-same (rsb.ep:handlers listener) (list handler)
-		   :test #'equal)
+                   :test #'equal)
 
       (removef (rsb.ep:handlers listener) handler)
       (ensure-null (rsb.ep:handlers listener)))))
 
 (addtest (listener-root
           :documentation
-	  "Test receiving data sent by an informer.")
+          "Test receiving data sent by an informer.")
   receive
 
   (with-informer (informer "/foo" t)
@@ -71,24 +71,24 @@ instance.")
 
       ;; Test receive with filters
       (push (filter :origin :origin (uuid:make-v1-uuid))
-	    (receiver-filters listener))
+            (receiver-filters listener))
       (send-some informer)
 
       ;; Test receive with handlers
       (push #'(lambda (event) (declare (ignore event)))
-	    (rsb.ep:handlers listener))
+            (rsb.ep:handlers listener))
       (send-some informer))))
 
 (define-error-hook-test-case (listener)
   ;; Force an error during dispatch by injecting a signaling
   ;; pseudo-filter.
   (push (lambda (event)
-	  (let ((error (make-condition 'simple-error
-				       :format-control   "I hate ~A"
-				       :format-arguments (list event))))
-	    (push error expected-errors)
-	    (error error)))
-	(receiver-filters listener))
+          (let ((error (make-condition 'simple-error
+                                       :format-control   "I hate ~A"
+                                       :format-arguments (list event))))
+            (push error expected-errors)
+            (error error)))
+        (receiver-filters listener))
 
   ;; Try to send and receive an event to trigger the error.
   (send informer "foo"))

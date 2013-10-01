@@ -8,23 +8,23 @@
 
 (defclass connector-class (standard-class)
   ((direction :type     direction
-	      :reader   connector-direction
-	      :documentation
-	      "Stores the direction of instances of the connector
+              :reader   connector-direction
+              :documentation
+              "Stores the direction of instances of the connector
 class.")
    (wire-type :type     (or symbol list)
-	      :documentation
-	      "Stores the wire-type of instance of the connector
+              :documentation
+              "Stores the wire-type of instance of the connector
 class.")
    (schemas   :initarg  :schemas
-	      :type     list
-	      :initform nil
-	      :documentation
-	      "Stores a list of schemas provided by the connector
+              :type     list
+              :initform nil
+              :documentation
+              "Stores a list of schemas provided by the connector
 class.")
    (options   :type     list
-	      :documentation
-	      "Stores options accepted by the connector class. Options
+              :documentation
+              "Stores options accepted by the connector class. Options
 are mapped to initargs."))
   (:documentation
    "This metaclass can be used as the class of connector classes in
@@ -34,11 +34,11 @@ order to provide storage and retrieval (via methods on
 options."))
 
 (defmethod shared-initialize :before ((instance   connector-class)
-				     (slot-names t)
-				     &key
-				     wire-type
-				     direction
-				     (options nil options-supplied?))
+                                     (slot-names t)
+                                     &key
+                                     wire-type
+                                     direction
+                                     (options nil options-supplied?))
   (when wire-type
     (setf (slot-value instance 'wire-type) (first wire-type)))
   (when direction
@@ -51,14 +51,14 @@ options."))
   (let ((default-initargs (call-next-method)))
     ;; Added initargs for options with &slot specification.
     (iter (for option in (connector-options class))
-	  (let+ (((name &ign
-		   &key (default t default-supplied?) &allow-other-keys)
-		  option))
-	    (when default-supplied?
-	      (setf default-initargs
-		    (cons (list name default
-				(compile nil `(lambda () ,default)))
-			  (remove name default-initargs :key #'first))))))
+          (let+ (((name &ign
+                   &key (default t default-supplied?) &allow-other-keys)
+                  option))
+            (when default-supplied?
+              (setf default-initargs
+                    (cons (list name default
+                                (compile nil `(lambda () ,default)))
+                          (remove name default-initargs :key #'first))))))
     default-initargs))
 
 (defmethod connector-wire-type ((class connector-class))
@@ -67,14 +67,14 @@ necessary. "
   (if (slot-boundp class 'wire-type)
       (slot-value class 'wire-type)
       (some #'connector-wire-type
-	    (closer-mop:class-direct-superclasses class))))
+            (closer-mop:class-direct-superclasses class))))
 
 (defmethod connector-schemas ((class connector-class))
   "Retrieve supported schemas from CLASS and its transitive
 super-classes."
   (append (slot-value class 'schemas)
-	  (mappend #'connector-schemas
-		   (closer-mop:class-direct-superclasses class))))
+          (mappend #'connector-schemas
+                   (closer-mop:class-direct-superclasses class))))
 
 (defmethod connector-options ((class connector-class))
   "Retrieve options from CLASS and its transitive super-classes.
@@ -84,33 +84,31 @@ super-classes."
     (map-into options (curry #'%maybe-expand-option class) options)
     (remove-duplicates
      (append (slot-value class 'options)
-	     (mappend #'connector-options
-		      (closer-mop:class-direct-superclasses class)))
+             (mappend #'connector-options
+                      (closer-mop:class-direct-superclasses class)))
      :key      #'first
      :from-end t)))
 
 (defmethod closer-mop:validate-superclass ((class      connector-class)
-					   (superclass standard-class))
+                                           (superclass standard-class))
   t)
 
-
 ;;; Utility functions
-;;
 
 (defun+ %maybe-expand-option (class (&whole option name type &rest &ign))
   "Potentially expand the options description OPTION using information
 from CLASS."
   (or (unless (eq type '&slot)
-	option)
+        option)
       (when-let ((slot (find name (closer-mop:class-direct-slots class)
-			     :test #'member
-			     :key  #'closer-mop:slot-definition-initargs)))
-	`(,name
-	  ,(closer-mop:slot-definition-type slot)
-	  ,@(when-let ((initform (closer-mop:slot-definition-initform slot)))
-	      `(:default ,initform))
-	  ,@(when-let ((description (documentation slot t)))
-	      `(:description ,description))))
+                             :test #'member
+                             :key  #'closer-mop:slot-definition-initargs)))
+        `(,name
+          ,(closer-mop:slot-definition-type slot)
+          ,@(when-let ((initform (closer-mop:slot-definition-initform slot)))
+              `(:default ,initform))
+          ,@(when-let ((description (documentation slot t)))
+              `(:description ,description))))
       (error "~@<~S specified for option ~S, but no slot with ~
 initarg ~:*~S in class ~S.~@:>"
-	     '&slot name class)))
+             '&slot name class)))

@@ -8,10 +8,10 @@
 
 (defclass sometimes-interruptible-mixin ()
   ((interruptible? :initarg  :interruptible?
-		   :accessor connector-interruptible?
-		   :initform (cons :interruptible nil)
-		   :documentation
-		   "Stores the interruptibility state of the
+                   :accessor connector-interruptible?
+                   :initform (cons :interruptible nil)
+                   :documentation
+                   "Stores the interruptibility state of the
 receiver. One of interruptible, uninterruptible and interrupting."))
   (:documentation
    "This class is intended to be mixed into threaded receiver classes
@@ -21,26 +21,26 @@ that cannot always be interrupted."))
   (car (slot-value connector 'interruptible?)))
 
 (defmethod (setf connector-interruptible?) ((new-value symbol)
-					    (connector sometimes-interruptible-mixin))
+                                            (connector sometimes-interruptible-mixin))
   (let ((precondition (ecase new-value
-			(:interruptible   :uninterruptible)
-			(:uninterruptible :interruptible)
-			(:interrupting    :interruptible)))
-	(cell         (slot-value connector 'interruptible?)))
+                        (:interruptible   :uninterruptible)
+                        (:uninterruptible :interruptible)
+                        (:interrupting    :interruptible)))
+        (cell         (slot-value connector 'interruptible?)))
     (iter (until (eq (sb-ext:compare-and-swap
-		      (car cell) precondition new-value)
-		     precondition))))
+                      (car cell) precondition new-value)
+                     precondition))))
   new-value)
 
 (defmethod stop-receiver :around ((connector sometimes-interruptible-mixin))
   (unwind-protect
        (progn
-	 (setf (connector-interruptible? connector) :interrupting)
-	 (call-next-method))
+         (setf (connector-interruptible? connector) :interrupting)
+         (call-next-method))
     (setf (car (slot-value connector 'interruptible?)) :interruptible)))
 
 (defmethod handle :around ((connector sometimes-interruptible-mixin)
-			   (event     t))
+                           (event     t))
   (prog2
       (setf (connector-interruptible? connector) :uninterruptible)
       (call-next-method)

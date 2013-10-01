@@ -6,78 +6,74 @@
 
 (cl:in-package :rsb.transport.spread.test)
 
-
 ;;; `in-connector' superclass
-;;
 
 (deftestsuite in-connector-root (transport-spread-root
-				 connector-suite)
+                                 connector-suite)
   ((a-string           (let ((buffer (sb-ext:string-to-octets "foobarbaz")))
-			 (cons buffer (length buffer))))
+                         (cons buffer (length buffer))))
    (empty-notification (let+ (((&values length buffer)
-			       (pb:pack (make-instance
-					 'rsb.protocol:notification))))
-			 (cons buffer length))))
+                               (pb:pack (make-instance
+                                         'rsb.protocol:notification))))
+                         (cons buffer length))))
   (:documentation
    "Tests for the `in-connector' class and associated methods."))
 
 (addtest (in-connector-root
           :documentation
-	  "Test `message->event' method.")
+          "Test `message->event' method.")
   message->event
 
   (ensure-cases (notification wire-schema connector-args expected)
       `(;; In these cases, protocol buffer unpacking fails.
-	(,a-string           :foo (:error-policy nil)          decoding-error)
-	(,a-string           :foo (:error-policy ,#'continue)  nil)
-	(,a-string           :foo (:error-policy ,#'log-error) nil)
+        (,a-string           :foo (:error-policy nil)          decoding-error)
+        (,a-string           :foo (:error-policy ,#'continue)  nil)
+        (,a-string           :foo (:error-policy ,#'log-error) nil)
 
-	;; Protocol buffer unpacking succeeds, but conversion to event
-	;; fails.
-	(,empty-notification :foo (:error-policy nil)          decoding-error)
-	(,empty-notification :foo (:error-policy ,#'continue)  nil)
-	(,empty-notification :foo (:error-policy ,#'log-error) nil))
+        ;; Protocol buffer unpacking succeeds, but conversion to event
+        ;; fails.
+        (,empty-notification :foo (:error-policy nil)          decoding-error)
+        (,empty-notification :foo (:error-policy ,#'continue)  nil)
+        (,empty-notification :foo (:error-policy ,#'log-error) nil))
 
-    (let+ ((connector (apply #'make-instance 'in-pull-connector ;;; TODO(jmoringe): class
-			     (append common-args connector-args)))
-	   ((&flet do-it ()
-	      (rsb.ep:with-error-policy (connector)
-		(message->event connector notification wire-schema)))))
+    (let+ ((connector (apply #'make-instance 'in-pull-connector ; TODO(jmoringe): class
+                             (append common-args connector-args)))
+           ((&flet do-it ()
+              (rsb.ep:with-error-policy (connector)
+                (message->event connector notification wire-schema)))))
       (case expected
-	(decoding-error (ensure-condition 'decoding-error (do-it)))
-	((nil           (ensure-null (do-it))))))))
+        (decoding-error (ensure-condition 'decoding-error (do-it)))
+        ((nil           (ensure-null (do-it))))))))
 
-
 ;;; Connector classes
-;;
 
 (macrolet
     ((define-connector-suite (direction)
        (let ((class-name (format-symbol :rsb.transport.spread "~A-CONNECTOR" direction))
-	     (suite-name (format-symbol *package* "~A-CONNECTOR-ROOT" direction)))
-	 `(progn
-	    (deftestsuite ,suite-name (transport-spread-root
-				       connector-suite)
-	      ()
-	      (:documentation
-	       ,(format nil "Test suite for the `~(~A~)' class."
-			class-name)))
+             (suite-name (format-symbol *package* "~A-CONNECTOR-ROOT" direction)))
+         `(progn
+            (deftestsuite ,suite-name (transport-spread-root
+                                       connector-suite)
+              ()
+              (:documentation
+               ,(format nil "Test suite for the `~(~A~)' class."
+                        class-name)))
 
-	    (define-basic-connector-test-cases ,class-name
-	      :initargs           common-args
-	      :expected-direction ,(make-keyword direction)
-	      :expected-wire-type 'octet-vector
-	      :expected-schemas   '(:spread))
+            (define-basic-connector-test-cases ,class-name
+              :initargs           common-args
+              :expected-direction ,(make-keyword direction)
+              :expected-wire-type 'octet-vector
+              :expected-schemas   '(:spread))
 
-	    (addtest (,suite-name
-		      :documentation
-		      ,(format nil "Test constructing `~(~A~)' instances."
-			       class-name))
-	      construct/invalid
+            (addtest (,suite-name
+                      :documentation
+                      ,(format nil "Test constructing `~(~A~)' instances."
+                               class-name))
+              construct/invalid
 
-	      ;; Missing :host, :port, :name or :connection initarg.
-	      (ensure-condition 'missing-required-initarg
-		(make-instance ',class-name)))))))
+              ;; Missing :host, :port, :name or :connection initarg.
+              (ensure-condition 'missing-required-initarg
+                (make-instance ',class-name)))))))
 
   (define-connector-suite :out)
   (define-connector-suite :in-pull)

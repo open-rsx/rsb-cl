@@ -14,7 +14,7 @@ protocol."))
 
 (addtest (protocol-root
           :documentation
-	  "Smoke test for the `filter' function.")
+          "Smoke test for the `filter' function.")
   filter-smoke
 
   ;; No such filter class.

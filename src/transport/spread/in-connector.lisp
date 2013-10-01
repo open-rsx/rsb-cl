@@ -6,16 +6,14 @@
 
 (cl:in-package :rsb.transport.spread)
 
-
 ;;; `in-connector' class
-;;
 
 (defclass in-connector (connector
-			timestamping-receiver-mixin
-			restart-message-receiver-mixin
-			broadcast-processor
-			assembly-mixin
-			expose-transport-metrics-mixin)
+                        timestamping-receiver-mixin
+                        restart-message-receiver-mixin
+                        broadcast-processor
+                        assembly-mixin
+                        expose-transport-metrics-mixin)
   ()
   (:metaclass connector-class)
   (:documentation
@@ -23,45 +21,45 @@
 connector classes for Spread."))
 
 (defmethod notify ((connector in-connector)
-		   (scope     scope)
-		   (action    (eql :attached)))
+                   (scope     scope)
+                   (action    (eql :attached)))
   (ref-group (connector-connection connector) (scope->group scope)))
 
 (defmethod notify ((connector in-connector)
-		   (scope     scope)
-		   (action    (eql :detached)))
+                   (scope     scope)
+                   (action    (eql :detached)))
   (unref-group (connector-connection connector) (scope->group scope)))
 
 (defmethod receive-message ((connector in-connector)
-			    (block?    t))
+                            (block?    t))
   "Delegate receiving a message to the connection of CONNECTOR."
   (let+ (((&values buffer length)
-	  (receive-message (connector-connection connector) block?)))
+          (receive-message (connector-connection connector) block?)))
    (values (cons buffer length) :undetermined)))
 
 (defmethod message->event ((connector   in-connector)
-			   (message     cons)
-			   (wire-schema t))
+                           (message     cons)
+                           (wire-schema t))
   (let+ (((&accessors-r/o (pool      connector-assembly-pool)
-			  (converter connector-converter)) connector)
-	 ((buffer . length)    message)
-	 (expose-wire-schema?  (connector-expose? connector :rsb.transport.wire-schema))
-	 (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
-	 notification)
+                          (converter connector-converter)) connector)
+         ((buffer . length)    message)
+         (expose-wire-schema?  (connector-expose? connector :rsb.transport.wire-schema))
+         (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
+         notification)
 
     ;; Try to unpack MESSAGE into a `notification' instance. Signal
     ;; `decoding-error' if that fails.
     (handler-bind
-	((error #'(lambda (condition)
-		    (error 'decoding-error
-			   :encoded          message
-			   :format-control   "~@<The data could not be ~
+        ((error #'(lambda (condition)
+                    (error 'decoding-error
+                           :encoded          message
+                           :format-control   "~@<The data could not be ~
 unpacked as a protocol buffer of kind ~S.~:@>"
-			   :format-arguments '(fragmented-notification)
-			   :cause            condition))))
+                           :format-arguments '(fragmented-notification)
+                           :cause            condition))))
       (setf notification (pb:unpack
-			  buffer (make-instance 'fragmented-notification)
-			  0 length)))
+                          buffer (make-instance 'fragmented-notification)
+                          0 length)))
 
     ;; If message could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
@@ -76,14 +74,14 @@ unpacked as a protocol buffer of kind ~S.~:@>"
     ;; 2. The notification does not form a complete event
     ;;    In this case, nil is returned.
     (handler-bind
-	((error #'(lambda (condition)
-		    (error 'decoding-error
-			   :encoded          message
-			   :format-control   "~@<After unpacking, the ~
+        ((error #'(lambda (condition)
+                    (error 'decoding-error
+                           :encoded          message
+                           :format-control   "~@<After unpacking, the ~
 notification~_~A~_could not be converted into an event.~:@>"
-			   :format-arguments `(,(with-output-to-string (stream)
-						  (describe notification stream)))
-			   :cause            condition))))
+                           :format-arguments `(,(with-output-to-string (stream)
+                                                  (describe notification stream)))
+                           :cause            condition))))
       (notification->event pool converter notification
-			   :expose-wire-schema?  expose-wire-schema?
-			   :expose-payload-size? expose-payload-size?))))
+                           :expose-wire-schema?  expose-wire-schema?
+                           :expose-payload-size? expose-payload-size?))))

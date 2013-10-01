@@ -16,23 +16,23 @@ restarts for error recovery and optionally calls an error policy
 function."))
 
 (defmethod dispatch :around ((processor error-handling-dispatcher-mixin)
-			     (event     event))
+                             (event     event))
   "Install log and ignore restarts around a call to the next
 `dispatch' method. In case of an error, call the error-policy function
 of PROCESSOR, if any."
   (with-error-policy (processor)
     (restart-case
-	(call-next-method)
+        (call-next-method)
       (log (&optional condition)
-	:report (lambda (stream)
-		  (format stream "~@<Log a message and ignore the ~
+        :report (lambda (stream)
+                  (format stream "~@<Log a message and ignore the ~
 failure to dispatch event ~A.~@:>"
-			  event))
-	(log1 :warn processor "Failed to dispatch the event ~A~@[: ~A~]" event condition)
-	nil)
+                          event))
+        (log1 :warn processor "Failed to dispatch the event ~A~@[: ~A~]" event condition)
+        nil)
       (continue ()
-	:report (lambda (stream)
-		  (format stream "~@<Ignore the failure to dispatch ~
+        :report (lambda (stream)
+                  (format stream "~@<Ignore the failure to dispatch ~
 event ~A.~@:>"
-			  event))
-	nil))))
+                          event))
+        nil))))

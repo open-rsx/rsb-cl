@@ -7,7 +7,7 @@
 (cl:in-package :rsb.event-processing.test)
 
 (defclass mock-connector (rsb.transport:connector
-			  broadcast-processor)
+                          broadcast-processor)
   ()
   (:metaclass rsb.transport:connector-class)
   (:wire-type 'string)
@@ -15,26 +15,26 @@
 
 (deftestsuite in-route-configurator-root (event-processing-root)
   ((configurator (make-instance 'in-route-configurator
-				:scope     "/foo/bar"
-				:direction :in-pull)))
+                                :scope     "/foo/bar"
+                                :direction :in-pull)))
   (:function
    (check-configurator (configurator scope direction configurator-filters processor-filters)
      (ensure-same (configurator-scope configurator) (make-scope scope)
-		  :test #'scope=)
+                  :test #'scope=)
      (ensure-same (configurator-direction configurator) direction
-		  :test #'eq)
+                  :test #'eq)
      (ensure-same (configurator-filters configurator) configurator-filters
-		  :test #'equal)
+                  :test #'equal)
      (ensure-same (processor-filters
-		   (configurator-processor configurator))
-		  processor-filters
-		  :test #'equal)))
+                   (configurator-processor configurator))
+                  processor-filters
+                  :test #'equal)))
   (:documentation
    "Root test suite for the `in-route-configurator-root' class."))
 
 (addtest (in-route-configurator-root
           :documentation
-	  "Test the required state transitions and updates when adding
+          "Test the required state transitions and updates when adding
 and removing filters to an `in-route-configurator' instance.")
   adding/removing-filters
 
@@ -43,7 +43,7 @@ and removing filters to an `in-route-configurator' instance.")
     ;; there are no connectors.
     (notify configurator filter :filter-added)
     (check-configurator configurator "/foo/bar" :in-pull
-			(list filter) nil)
+                        (list filter) nil)
 
     (notify configurator filter :filter-removed)
     (check-configurator configurator "/foo/bar" :in-pull nil nil)
@@ -51,11 +51,11 @@ and removing filters to an `in-route-configurator' instance.")
     ;; However, when there is a connector, the filter should get
     ;; propagated to the processor.
     (push (make-instance 'mock-connector)
-	  (configurator-connectors configurator))
+          (configurator-connectors configurator))
 
     (notify configurator filter :filter-added)
     (check-configurator configurator "/foo/bar" :in-pull
-			(list filter) (list filter))
+                        (list filter) (list filter))
 
     (notify configurator filter :filter-removed)
     (check-configurator configurator "/foo/bar" :in-pull nil nil)))

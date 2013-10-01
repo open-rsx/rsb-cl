@@ -11,10 +11,10 @@
 
 (defclass type-filter (filter-mixin) ;; TODO typed-mixin?
   ((type :initarg  :type
-	 :type     (or list symbol)
-	 :accessor filter-type
-	 :documentation
-	 "The type of matching events."))
+         :type     (or list symbol)
+         :accessor filter-type
+         :documentation
+         "The type of matching events."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Instances of this filter class discriminate based on the type of

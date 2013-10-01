@@ -11,9 +11,9 @@
 
 (defclass origin-filter (filter-mixin)
   ((origin :type     uuid:uuid
-	   :accessor filter-origin
-	   :documentation
-	   ""))
+           :accessor filter-origin
+           :documentation
+           ""))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :origin (missing-required-initarg 'origin-filter :origin))
@@ -23,12 +23,12 @@
 (defmethod shared-initialize :after ((instance   origin-filter)
                                      (slot-names t)
                                      &key
-				     origin)
+                                     origin)
   (setf (slot-value instance 'origin)
-	(etypecase origin
-	  (uuid:uuid            origin)
-	  (string               (uuid:make-uuid-from-string origin))
-	  (nibbles:octet-vector (uuid:byte-array-to-uuid origin)))))
+        (etypecase origin
+          (uuid:uuid            origin)
+          (string               (uuid:make-uuid-from-string origin))
+          (nibbles:octet-vector (uuid:byte-array-to-uuid origin)))))
 
 (defmethod matches? ((filter origin-filter) (event event))
   (uuid:uuid= (filter-origin filter) (event-origin event)))

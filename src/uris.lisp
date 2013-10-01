@@ -16,19 +16,19 @@ nil. If URI does not specify a transport, return nil."
 (defun uri-options (uri)
   "Translate the query part of URI into a plist of options."
   (let+ (((&flet separator? (char)
-	    (or (eq char #\;) (eq char #\&))))
-	 (queries (split-sequence-if
-		   #'separator? (puri:uri-query uri)
-		   :remove-empty-subseqs t))
-	 (names-and-values (mapcar (curry #'split-sequence #\=)
-				   queries)))
+            (or (eq char #\;) (eq char #\&))))
+         (queries (split-sequence-if
+                   #'separator? (puri:uri-query uri)
+                   :remove-empty-subseqs t))
+         (names-and-values (mapcar (curry #'split-sequence #\=)
+                                   queries)))
     (iter (for (name value) in names-and-values)
-	  (let ((key (make-keyword (string-upcase name))))
-	    (if (member key '(:scheme :host :port) :test #'eq)
-		(warn "~@<Ignoring query-option ~S - use ~:*~(~A~) part ~
+          (let ((key (make-keyword (string-upcase name))))
+            (if (member key '(:scheme :host :port) :test #'eq)
+                (warn "~@<Ignoring query-option ~S - use ~:*~(~A~) part ~
 of the URI instead.~@:>"
-		      key)
-		(appending (list key value)))))))
+                      key)
+                (appending (list key value)))))))
 
 (defun uri->scope-and-options (uri &optional defaults)
   "Dissect URI of the form
@@ -58,24 +58,22 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)
 => (make-scope \"/\") '((:spread :port 4811))
 :test #'equal"
   (let+ (((&values transport host port) (uri-transport uri))
-	 ((&accessors-r/o (path        puri:uri-path)
-			  (fragment    puri:uri-fragment)
-			  (uri-options uri-options)) uri)
-	 (transport-options
-	  (%transport-options transport defaults host port)))
+         ((&accessors-r/o (path        puri:uri-path)
+                          (fragment    puri:uri-fragment)
+                          (uri-options uri-options)) uri)
+         (transport-options
+          (%transport-options transport defaults host port)))
     (when (eq transport :rsb)
       (error "~@<~S schema is not supported yet.~@:>"
-	     transport))
+             transport))
     (when fragment
       (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
-	    fragment uri))
+            fragment uri))
     (values (make-scope path)
-	    (mapcar (curry #'%merge-options uri-options)
-		    transport-options))))
+            (mapcar (curry #'%merge-options uri-options)
+                    transport-options))))
 
-
 ;;; Utility functions
-;;
 
 (defun %transport-options (transport defaults host port)
   "Extract options for TRANSPORT from DEFAULTS if TRANSPORT is not
@@ -83,11 +81,11 @@ nil. If HOST and PORT are not nil, replace the host and port options
 in the extracted transport options. Return the resulting options."
   (if (and transport (not (eq transport :rsb)))
       (list (%merge-options
-	     (append (when host (list :host host))
-		     (when port (list :port port))
-		     (cdr (find t defaults :test #'eq :key #'car)))
-	     (or (find transport defaults :test #'eq :key #'car)
-		 (list transport))))
+             (append (when host (list :host host))
+                     (when port (list :port port))
+                     (cdr (find t defaults :test #'eq :key #'car)))
+             (or (find transport defaults :test #'eq :key #'car)
+                 (list transport))))
       defaults))
 
 (defun %merge-options (options transport-options)

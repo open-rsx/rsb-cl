@@ -6,9 +6,7 @@
 
 (cl:in-package :rsb.transport.socket)
 
-
 ;;; Global map of bus servers
-;;
 
 (defvar *bus-servers* (make-hash-table :test #'equalp)
   "Map host names and ports to `bus-servers' instances.")
@@ -23,33 +21,31 @@ Attaching CONNECTOR marks the `bus-server' instance as being in use
 and protects it from being destroyed in a race condition situation."
   (setf host "0.0.0.0")
   (log1 :trace "Trying to obtain bus server ~A:~D for ~A"
-	host port connector)
+        host port connector)
   (let ((options (make-connection-options connector))
-	(key     (cons host port)))
+        (key     (cons host port)))
     (bt:with-recursive-lock-held (*bus-servers-lock*)
       (or (when-let ((candidate (gethash key *bus-servers*)))
-	    (with-locked-bus (candidate)
-	      (when (bus-connectors candidate)
-		(check-connection-options (bus-options candidate) options)
-		(notify connector candidate :attached)
-		candidate)))
-	  (let ((bus (make-instance 'bus-server
-				    :host    host
-				    :port    port
-				    :options options)))
-	    (notify connector bus :attached)
-	    (setf (gethash key *bus-servers*) bus))))))
+            (with-locked-bus (candidate)
+              (when (bus-connectors candidate)
+                (check-connection-options (bus-options candidate) options)
+                (notify connector candidate :attached)
+                candidate)))
+          (let ((bus (make-instance 'bus-server
+                                    :host    host
+                                    :port    port
+                                    :options options)))
+            (notify connector bus :attached)
+            (setf (gethash key *bus-servers*) bus))))))
 
-
 ;;; `bus-server' class
-;;
 
 (defclass bus-server (bus
-		      threaded-receiver-mixin)
+                      threaded-receiver-mixin)
   ((socket :reader   bus-socket
-	   :writer   (setf %bus-socket)
-	   :documentation
-	   "Stores the listening socket which accepts client
+           :writer   (setf %bus-socket)
+           :documentation
+           "Stores the listening socket which accepts client
 connections."))
   (:documentation
    "An instance of this class provides access to a bus through a
@@ -61,20 +57,20 @@ closed."))
 (defmethod shared-initialize :after ((instance   bus-server)
                                      (slot-names t)
                                      &key
-				     host
-				     port)
+                                     host
+                                     port)
   ;; Setup the listening socket.
   (setf (%bus-socket instance)
-	(usocket:socket-listen host port
-			       :element-type '(unsigned-byte 8)))
+        (usocket:socket-listen host port
+                               :element-type '(unsigned-byte 8)))
   (log1 :info instance "Opened listen socket")
 
   (log1 :info instance "Starting acceptor thread")
   (start-receiver instance))
 
 (defmethod notify ((bus     bus-server)
-		   (subject (eql t))
-		   (action  (eql :detached)))
+                   (subject (eql t))
+                   (action  (eql :detached)))
   ;; First, stop the acceptor thread to prevent access to the socket.
   (log1 :info bus "Stopping acceptor thread")
   (unwind-protect
@@ -87,42 +83,38 @@ closed."))
     ;; Close existing connections.
     (call-next-method)))
 
-
 ;;; Accepting clients
-;;
 
 (defmethod receive-messages ((bus bus-server))
   (let+ (((&accessors (server-socket bus-socket)
-		      (connections   bus-connections)
-		      (options       bus-options)) bus))
+                      (connections   bus-connections)
+                      (options       bus-options)) bus))
     ;; Main processing loop. Wait for activity on the server socket.
     ;; The loop is terminated by external interruption.
-    ;;; TODO(jmoringe): we can leak the socket if we are interrupted here
+    ;; TODO(jmoringe): we can leak the socket if we are interrupted here
     (iter (let ((client-socket (usocket:socket-accept
-				server-socket
-				:element-type '(unsigned-byte 8))))
-	    ;; Since we create and add the new connection with the bus
-	    ;; lock held, all events published on BUS after the
-	    ;; handshake of the new connection completes are
-	    ;; guaranteed to be delivered to the new connection. Also
-	    ;; note that the server role of the handshake, sending 4
-	    ;; bytes, usually does not involve blocking.
-	    (with-locked-bus (bus)
-	      (push (apply #'make-instance 'bus-connection
-			   :socket    client-socket
-			   :handshake :send
-			   options)
-		    connections))
-	    (log1 :info bus "Accepted bus client ~/rsb.transport.socket::print-socket/"
-		  client-socket)))))
+                                server-socket
+                                :element-type '(unsigned-byte 8))))
+            ;; Since we create and add the new connection with the bus
+            ;; lock held, all events published on BUS after the
+            ;; handshake of the new connection completes are
+            ;; guaranteed to be delivered to the new connection. Also
+            ;; note that the server role of the handshake, sending 4
+            ;; bytes, usually does not involve blocking.
+            (with-locked-bus (bus)
+              (push (apply #'make-instance 'bus-connection
+                           :socket    client-socket
+                           :handshake :send
+                           options)
+                    connections))
+            (log1 :info bus "Accepted bus client ~/rsb.transport.socket::print-socket/"
+                  client-socket)))))
 
-
 ;;;
-;;
 
 (defmethod print-object ((object bus-server) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "(S ~D) (C ~D) ~:/rsb.transport.socket::print-socket/"
-	    (length (bus-connections object))
-	    (length (bus-connectors  object))
-	    (bus-socket object))))
+            (length (bus-connections object))
+            (length (bus-connectors  object))
+            (bus-socket object))))

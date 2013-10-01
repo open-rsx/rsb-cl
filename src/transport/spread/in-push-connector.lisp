@@ -6,17 +6,15 @@
 
 (cl:in-package :rsb.transport.spread)
 
-
 ;;; `in-push-connector' class
-;;
 
 (defmethod find-transport-class ((spec (eql :spread-in-push)))
   (find-class 'in-push-connector))
 
 (defclass in-push-connector (in-connector
-			     threaded-message-receiver-mixin
-			     error-handling-push-receiver-mixin
-			     sometimes-interruptible-mixin)
+                             threaded-message-receiver-mixin
+                             error-handling-push-receiver-mixin
+                             sometimes-interruptible-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
@@ -25,14 +23,14 @@
 Spread transport."))
 
 (defmethod notify :after ((connector in-push-connector)
-			  (scope     scope)
-			  (action    (eql :attached)))
+                          (scope     scope)
+                          (action    (eql :attached)))
   "After attaching to SCOPE, start a receiver thread."
   (start-receiver connector))
 
 (defmethod notify :before ((connector in-push-connector)
-			   (scope     scope)
-			   (action    (eql :detached)))
+                           (scope     scope)
+                           (action    (eql :detached)))
   "Before detaching from SCOPE, join the receiver thread."
   (stop-receiver connector))
 

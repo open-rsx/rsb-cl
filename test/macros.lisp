@@ -7,14 +7,14 @@
 (cl:in-package :rsb.test)
 
 (deftestsuite macros-root (root
-			   participant-suite)
+                           participant-suite)
   ()
   (:documentation
    "Unit tests for macros provided by the cl-rsb system."))
 
 (addtest (macros-root
           :documentation
-	  "Smoke test for the `with-listener' macro.")
+          "Smoke test for the `with-listener' macro.")
   with-listener-smoke
 
   (with-listener (listener "/listener")
@@ -23,7 +23,7 @@
 
 (addtest (macros-root
           :documentation
-	  "Smoke test for the `with-reader' macro.")
+          "Smoke test for the `with-reader' macro.")
   with-reader-smoke
 
   (with-reader (reader "/reader")
@@ -32,7 +32,7 @@
 
 (addtest (macros-root
           :documentation
-	  "Smoke test for the `with-informer' macro.")
+          "Smoke test for the `with-informer' macro.")
   with-informer-smoke
 
   (with-informer (informer "/informer" t)

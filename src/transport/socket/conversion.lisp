@@ -6,86 +6,82 @@
 
 (cl:in-package :rsb.transport.socket)
 
-
 ;;; Notification -> Event
-;;
 
 (defun notification->event (converter notification
-			    &key
-			    expose-wire-schema?
-			    expose-payload-size?)
+                            &key
+                            expose-wire-schema?
+                            expose-payload-size?)
   "Convert NOTIFICATION to an `event' instance using CONVERTER for the
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data
 contained in NOTIFICATION."
   (let+ (((&flet event-id->cons (event-id)
-	    (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
-		  (event-id-sequence-number event-id))))
-	 ((&accessors-r/o
-	   (scope       notification-scope)
-	   (event-id    notification-event-id)
-	   (method      notification-method)
-	   (wire-schema notification-wire-schema)
-	   (payload     notification-data)
-	   (meta-data   notification-meta-data)
-	   (causes      notification-causes)) notification)
-	 ((&accessors-r/o
-	   (sender-id       event-id-sender-id)
-	   (sequence-number event-id-sequence-number)) event-id)
-	 (wire-schema (bytes->wire-schema wire-schema))
-	 (data        (rsb.converter:wire->domain
-		       converter payload wire-schema))
-	 (event       (make-instance
-		       'rsb:event
-		       :origin            (uuid:byte-array-to-uuid sender-id)
-		       :sequence-number   sequence-number
-		       :scope             (make-scope (bytes->string scope))
-		       :method            (unless (emptyp method)
-					    (bytes->keyword method))
-		       :causes            (map 'list #'event-id->cons causes)
-		       :data              data
-		       :create-timestamp? nil)))
+            (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
+                  (event-id-sequence-number event-id))))
+         ((&accessors-r/o
+           (scope       notification-scope)
+           (event-id    notification-event-id)
+           (method      notification-method)
+           (wire-schema notification-wire-schema)
+           (payload     notification-data)
+           (meta-data   notification-meta-data)
+           (causes      notification-causes)) notification)
+         ((&accessors-r/o
+           (sender-id       event-id-sender-id)
+           (sequence-number event-id-sequence-number)) event-id)
+         (wire-schema (bytes->wire-schema wire-schema))
+         (data        (rsb.converter:wire->domain
+                       converter payload wire-schema))
+         (event       (make-instance
+                       'rsb:event
+                       :origin            (uuid:byte-array-to-uuid sender-id)
+                       :sequence-number   sequence-number
+                       :scope             (make-scope (bytes->string scope))
+                       :method            (unless (emptyp method)
+                                            (bytes->keyword method))
+                       :causes            (map 'list #'event-id->cons causes)
+                       :data              data
+                       :create-timestamp? nil)))
 
     ;; "User infos" and timestamps
     (when meta-data
       ;; "User infos"
       (iter (for user-info in-vector (event-meta-data-user-infos meta-data))
-	    (setf (meta-data event (bytes->keyword
-				    (user-info-key user-info)))
-		  (bytes->string (user-info-value user-info))))
+            (setf (meta-data event (bytes->keyword
+                                    (user-info-key user-info)))
+                  (bytes->string (user-info-value user-info))))
 
       ;; Set :create timestamp, if present
       (unless (zerop (event-meta-data-create-time meta-data))
-	(setf (timestamp event :create)
-	      (unix-microseconds->timestamp
-	       (event-meta-data-create-time meta-data))))
+        (setf (timestamp event :create)
+              (unix-microseconds->timestamp
+               (event-meta-data-create-time meta-data))))
       ;; Set :send timestamp, if present
       (unless (zerop (event-meta-data-send-time meta-data))
-	(setf (timestamp event :send)
-	      (unix-microseconds->timestamp
-	       (event-meta-data-send-time meta-data))))
+        (setf (timestamp event :send)
+              (unix-microseconds->timestamp
+               (event-meta-data-send-time meta-data))))
       ;; Set :receive timestamp
       (setf (timestamp event :receive) (local-time:now))
 
       (iter (for user-time in-vector (event-meta-data-user-times meta-data))
-	    (setf (timestamp event (bytes->keyword
-				    (user-time-key user-time)))
-		  (unix-microseconds->timestamp
-		   (user-time-timestamp user-time)))))
+            (setf (timestamp event (bytes->keyword
+                                    (user-time-key user-time)))
+                  (unix-microseconds->timestamp
+                   (user-time-timestamp user-time)))))
 
     ;; When requested, store transport metrics as meta-data items.
     (when expose-wire-schema?
       (setf (rsb:meta-data event :rsb.transport.wire-schema)
-	    wire-schema))
+            wire-schema))
     (when expose-payload-size?
       (setf (rsb:meta-data event :rsb.transport.payload-size)
-	    (length payload)))
+            (length payload)))
 
     event))
 
-
 ;;; Event -> Notification
-;;
 
 (defun event->notification* (converter event)
   "Convert EVENT into one or more notifications. More than one
@@ -96,22 +92,20 @@ into one notification."
 
   ;; Put EVENT into one or more notifications.
   (let+ (((&accessors-r/o (origin          event-origin)
-			  (sequence-number event-sequence-number)
-			  (scope           event-scope)
-			  (method          event-method)
-			  (data            event-data)
-			  (meta-data       rsb:event-meta-data)
-			  (timestamps      event-timestamps)
-			  (causes          event-causes)) event)
-	 ((&values wire-data wire-schema)
-	  (rsb.converter:domain->wire converter data)))
+                          (sequence-number event-sequence-number)
+                          (scope           event-scope)
+                          (method          event-method)
+                          (data            event-data)
+                          (meta-data       rsb:event-meta-data)
+                          (timestamps      event-timestamps)
+                          (causes          event-causes)) event)
+         ((&values wire-data wire-schema)
+          (rsb.converter:domain->wire converter data)))
     (make-notification sequence-number origin scope method
-		       wire-schema wire-data
-		       meta-data timestamps causes)))
+                       wire-schema wire-data
+                       meta-data timestamps causes)))
 
-
 ;;; Utility functions
-;;
 
 (defvar *keyword-readtable*
   (let ((readtable (copy-readtable nil)))
@@ -122,28 +116,28 @@ get a natural mapping between Lisp keywords and corresponding strings
 for most cases.")
 
 (defun make-notification (sequence-number origin scope method
-			  wire-schema data
-			  meta-data timestamps causes)
+                          wire-schema data
+                          meta-data timestamps causes)
   "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
 SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA, TIMESTAMPS
 and CAUSES."
   (let* ((event-id     (make-instance
-			'rsb.protocol:event-id
-			:sender-id       (uuid:uuid-to-byte-array origin)
-			:sequence-number sequence-number))
-	 (meta-data1   (make-instance
-			'rsb.protocol:event-meta-data
-			:create-time (timestamp->unix-microseconds
-				      (getf timestamps :create))
-			:send-time   (timestamp->unix-microseconds
-				      (getf timestamps :send))))
-	 (notification (make-instance
-			'rsb.protocol:notification
-			:event-id        event-id
-			:scope           (string->bytes (scope-string scope))
-			:wire-schema     (wire-schema->bytes wire-schema)
-			:data            data
-			:meta-data       meta-data1)))
+                        'rsb.protocol:event-id
+                        :sender-id       (uuid:uuid-to-byte-array origin)
+                        :sequence-number sequence-number))
+         (meta-data1   (make-instance
+                        'rsb.protocol:event-meta-data
+                        :create-time (timestamp->unix-microseconds
+                                      (getf timestamps :create))
+                        :send-time   (timestamp->unix-microseconds
+                                      (getf timestamps :send))))
+         (notification (make-instance
+                        'rsb.protocol:notification
+                        :event-id        event-id
+                        :scope           (string->bytes (scope-string scope))
+                        :wire-schema     (wire-schema->bytes wire-schema)
+                        :data            data
+                        :meta-data       meta-data1)))
 
     ;; Store the method of the event in the new notification if the
     ;; event has one.
@@ -152,31 +146,31 @@ and CAUSES."
 
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)
-	  (vector-push-extend
-	   (make-instance 'user-info
-			  :key   (keyword->bytes key)
-			  :value (string->bytes value))
-	   (event-meta-data-user-infos meta-data1)))
+          (vector-push-extend
+           (make-instance 'user-info
+                          :key   (keyword->bytes key)
+                          :value (string->bytes value))
+           (event-meta-data-user-infos meta-data1)))
 
     ;; Add TIMESTAMPS.
     (iter (for (key value) on timestamps :by #'cddr)
-	  ;; Framework timestamps are stored in dedicated fields of
-	  ;; the notification.
-	  (unless (member key *framework-timestamps* :test #'eq)
-	    (vector-push-extend
-	     (make-instance 'user-time
-			    :key       (keyword->bytes key)
-			    :timestamp (timestamp->unix-microseconds value))
-	     (event-meta-data-user-times meta-data1))))
+          ;; Framework timestamps are stored in dedicated fields of
+          ;; the notification.
+          (unless (member key *framework-timestamps* :test #'eq)
+            (vector-push-extend
+             (make-instance 'user-time
+                            :key       (keyword->bytes key)
+                            :timestamp (timestamp->unix-microseconds value))
+             (event-meta-data-user-times meta-data1))))
 
     ;; Add CAUSES.
     (iter (for (origin-id . sequence-number) in causes)
-	  (vector-push-extend
-	   (make-instance 'rsb.protocol:event-id
-			  :sender-id       (uuid:uuid-to-byte-array
-					    origin-id)
-			  :sequence-number sequence-number)
-	   (notification-causes notification)))
+          (vector-push-extend
+           (make-instance 'rsb.protocol:event-id
+                          :sender-id       (uuid:uuid-to-byte-array
+                                            origin-id)
+                          :sequence-number sequence-number)
+           (notification-causes notification)))
 
     ;; Return the complete notification instance.
     notification))
@@ -191,7 +185,7 @@ integer which counts the number of microseconds since UNIX epoch."
   "Convert UNIX-MICROSECONDS to an instance of
 `local-time:timestamp'."
   (let+ (((&values unix-seconds microseconds)
-	  (floor unix-microseconds 1000000)))
+          (floor unix-microseconds 1000000)))
    (local-time:unix-to-timestamp
     unix-seconds :nsec (* 1000 microseconds))))
 
@@ -213,15 +207,15 @@ integer which counts the number of microseconds since UNIX epoch."
   (if (find #\: (symbol-name keyword))
       (string->bytes (symbol-name keyword))
       (let ((*readtable* *keyword-readtable*))
-	(string->bytes (princ-to-string keyword)))))
+        (string->bytes (princ-to-string keyword)))))
 
 (defun bytes->keyword (bytes)
   "Converter BYTES into a keyword."
   (if (find (char-code #\:) bytes)
       (intern (bytes->string bytes) (find-package :keyword))
       (let ((*package*   (find-package :keyword))
-	    (*readtable* *keyword-readtable*))
-	(read-from-string (bytes->string bytes)))))
+            (*readtable* *keyword-readtable*))
+        (read-from-string (bytes->string bytes)))))
 
 (defun wire-schema->bytes (wire-schema)
   "Convert WIRE-SCHEMA to an ASCII representation stored in an

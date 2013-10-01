@@ -47,88 +47,88 @@
   `(progn
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Test methods on `wire->domain?' for the `~(~A~)' converter."
-			converter))
+               :documentation
+               ,(format nil "Test methods on `wire->domain?' for the `~(~A~)' converter."
+                        converter))
        wire->domain-applicability
 
        (ensure-cases (wire-data wire-schema domain-object)
-	   ,cases
-	 (cond
-	   ((member wire-data '(:error :not-applicable)))
-	   ((eq domain-object :not-applicable)
-	    (let ((result (wire->domain? ,converter wire-data wire-schema)))
-	      (ensure-null result)))
-	   (t
-	    (let ((result (wire->domain? ,converter wire-data wire-schema)))
-	      (ensure-same result ,converter
-			   :ignore-multiple-values? t))))))
+           ,cases
+         (cond
+           ((member wire-data '(:error :not-applicable)))
+           ((eq domain-object :not-applicable)
+            (let ((result (wire->domain? ,converter wire-data wire-schema)))
+              (ensure-null result)))
+           (t
+            (let ((result (wire->domain? ,converter wire-data wire-schema)))
+              (ensure-same result ,converter
+                           :ignore-multiple-values? t))))))
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Test methods on `domain->wire?' for the `~(~A~)' converter."
-			converter))
+               :documentation
+               ,(format nil "Test methods on `domain->wire?' for the `~(~A~)' converter."
+                        converter))
        domain->wire-applicability
 
        (ensure-cases (wire-data wire-schema domain-object)
-	   ,cases
-	 (cond
-	   ((member domain-object '(:error :not-applicable)))
-	   ((eq wire-data :not-applicable)
-	    (let ((result (domain->wire? ,converter domain-object)))
-	      (ensure-null result)))
-	   (t
-	    (let ((result (domain->wire? ,converter domain-object)))
-	      (ensure-same result (values ,converter wire-schema)))))))
+           ,cases
+         (cond
+           ((member domain-object '(:error :not-applicable)))
+           ((eq wire-data :not-applicable)
+            (let ((result (domain->wire? ,converter domain-object)))
+              (ensure-null result)))
+           (t
+            (let ((result (domain->wire? ,converter domain-object)))
+              (ensure-same result (values ,converter wire-schema)))))))
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Test methods on `wire->domain' for the `~(~A~)' converter."
-			converter))
+               :documentation
+               ,(format nil "Test methods on `wire->domain' for the `~(~A~)' converter."
+                        converter))
        wire->domain-smoke
 
        (ensure-cases (wire-data wire-schema domain-object)
-	   ,cases
-	 (cond
-	   ((member wire-data '(:error :not-applicable)))
-	   ((member domain-object '(:error :not-applicable))
-	    (ensure-condition 'error
-	      (wire->domain ,converter wire-data wire-schema)))
-	   (t
-	    (let ((result (wire->domain ,converter wire-data wire-schema)))
-	      (ensure-same result domain-object
-			   :test (function ,domain-test)))))))
+           ,cases
+         (cond
+           ((member wire-data '(:error :not-applicable)))
+           ((member domain-object '(:error :not-applicable))
+            (ensure-condition 'error
+              (wire->domain ,converter wire-data wire-schema)))
+           (t
+            (let ((result (wire->domain ,converter wire-data wire-schema)))
+              (ensure-same result domain-object
+                           :test (function ,domain-test)))))))
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Test methods on `domain->wire' for the `~(~A~)' converter."
-			converter))
+               :documentation
+               ,(format nil "Test methods on `domain->wire' for the `~(~A~)' converter."
+                        converter))
        domain->wire-smoke
 
        (ensure-cases (wire-data wire-schema domain-object)
-	   ,cases
-	 (cond
-	   ((member domain-object '(:error :not-applicable)))
-	   ((member wire-data '(:error :not-applicable))
-	    (ensure-condition 'error
-	      (domain->wire ,converter domain-object)))
-	   (t
-	    (let ((result (domain->wire ,converter domain-object)))
-	      (ensure-same result (values wire-data wire-schema)
-			   :test #'equalp))))))
+           ,cases
+         (cond
+           ((member domain-object '(:error :not-applicable)))
+           ((member wire-data '(:error :not-applicable))
+            (ensure-condition 'error
+              (domain->wire ,converter domain-object)))
+           (t
+            (let ((result (domain->wire ,converter domain-object)))
+              (ensure-same result (values wire-data wire-schema)
+                           :test #'equalp))))))
 
      (addtest (,suite-name
-	       :documentation
-	       ,(format nil "Roundtrip test for the `~(~A~)' converter."
-			converter))
+               :documentation
+               ,(format nil "Roundtrip test for the `~(~A~)' converter."
+                        converter))
        roundtrip
 
        (ensure-cases (wire-data wire-schema domain-object)
-	   ,cases
-	 (unless (or (member wire-data '(:error :not-applicable))
-		     (member domain-object '(:error :not-applicable)))
-	   (let+ (((&values encoded encoded-wire-schema)
-		   (domain->wire ,converter domain-object))
-		  (decoded (wire->domain ,converter encoded encoded-wire-schema)))
-	     (ensure-same domain-object decoded
-			  :test (function ,domain-test))))))))
+           ,cases
+         (unless (or (member wire-data '(:error :not-applicable))
+                     (member domain-object '(:error :not-applicable)))
+           (let+ (((&values encoded encoded-wire-schema)
+                   (domain->wire ,converter domain-object))
+                  (decoded (wire->domain ,converter encoded encoded-wire-schema)))
+             (ensure-same domain-object decoded
+                          :test (function ,domain-test))))))))

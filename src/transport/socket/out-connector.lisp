@@ -10,8 +10,8 @@
   (find-class 'out-connector))
 
 (defclass out-connector (error-handling-sender-mixin
-			 restart-notification-sender-mixin
-			 connector)
+                         restart-notification-sender-mixin
+                         connector)
   ()
   (:metaclass connector-class)
   (:direction :out)
@@ -19,15 +19,15 @@
    "Out-direction connector for socket transport."))
 
 (defmethod handle ((connector out-connector)
-		   (event     event))
+                   (event     event))
   (send-notification connector (event->notification connector event)))
 
 (defmethod event->notification ((connector out-connector)
-				(event     event))
+                                (event     event))
   "Delegate conversion to `event->notifications'. The primary purpose
 of this method is performing the conversion with restarts installed."
   (event->notification* connector event))
 
 (defmethod send-notification ((connector    out-connector)
-			      (notification notification))
+                              (notification notification))
   (handle (connector-bus connector) notification))

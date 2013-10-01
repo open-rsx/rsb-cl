@@ -10,9 +10,9 @@
 
 (defclass transform-mixin ()
   ((transform :initarg  :transform
-	      :reader   processor-transform
-	      :documentation
-	      "Stores a transform (in the sense of being usable with
+              :reader   processor-transform
+              :documentation
+              "Stores a transform (in the sense of being usable with
 `transform!') that should be applied to all handled data."))
   (:default-initargs
    :transform (missing-required-initarg 'transform-mixin :transform))

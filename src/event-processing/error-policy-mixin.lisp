@@ -8,11 +8,11 @@
 
 (defclass error-policy-mixin ()
   ((error-policy :initarg  :error-policy
-		 :type     (or null function)
-		 :accessor processor-error-policy
-		 :initform nil
-		 :documentation
-		 "Stores the error policy that should be applied in
+                 :type     (or null function)
+                 :accessor processor-error-policy
+                 :initform nil
+                 :documentation
+                 "Stores the error policy that should be applied in
 case of errors. Nil or a function to be called in case of dispatch
 errors. Functions will be called with the condition object is sole
 argument.
@@ -23,7 +23,7 @@ threads simultaneously."))
 handle conditions according to a client-supplied policy."))
 
 (defmethod apply-error-policy ((processor error-policy-mixin)
-			       (condition t))
+                               (condition t))
   (if-let ((policy (processor-error-policy processor)))
     (funcall policy condition)
     (log1 :warn processor "Do not have a error handling policy installed; unwinding")))

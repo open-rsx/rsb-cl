@@ -14,4 +14,4 @@ reseeded at image startup thereby ensuring different pseudo random ids
 and such for subsequent program runs."
   #+sbcl
   (push (lambda () (setf *id-random-state* (make-random-state t)))
-	sb-ext:*init-hooks*))
+        sb-ext:*init-hooks*))

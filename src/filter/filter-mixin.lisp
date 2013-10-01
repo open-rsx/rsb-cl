@@ -13,7 +13,7 @@
    "This mixin makes instances of its subclasses funcallable."))
 
 (defmethod initialize-instance :after ((instance filter-mixin)
-				       &key)
+                                       &key)
   (closer-mop:set-funcallable-instance-function
    instance
    #'(lambda (event)

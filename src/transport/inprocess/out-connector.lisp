@@ -18,10 +18,10 @@
 process."))
 
 (defmethod handle :before ((connector out-connector)
-			   (event     event))
+                           (event     event))
   (setf (timestamp event :send) (local-time:now)))
 
 (defmethod handle ((connector out-connector) (event event))
   (iter (for super in (super-scopes (event-scope event)
-				    :include-self? t))
-	(handle (by-scope super) event)))
+                                    :include-self? t))
+        (handle (by-scope super) event)))

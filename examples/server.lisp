@@ -16,14 +16,14 @@
 (rsb.patterns:with-local-server (server "/example/clientserver")
   (rsb.patterns:with-methods (server)
       (("echo" (arg string)
-	 arg))))
+         arg))))
 ;; mark-end::with-local-server
 
 ;; mark-start::setf-method
 (rsb.patterns:with-local-server (server "/example/clientserver")
   (setf (rsb.patterns:server-method server "echo")
-	#'(lambda (arg)
-	    arg)))
+        #'(lambda (arg)
+            arg)))
 ;; mark-end::setf-method
 
 ;; Create a `local-server' instance that offers its methods under the
@@ -42,7 +42,7 @@
 
 (setf (rsb.patterns:server-method *local-server* "echo")
       #'(lambda (arg)
-	  arg))
+          arg))
 
 (rsb:detach *local-server*)
 ;; mark-end::variable

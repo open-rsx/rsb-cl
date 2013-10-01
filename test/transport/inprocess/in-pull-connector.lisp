@@ -7,7 +7,7 @@
 (cl:in-package :rsb.transport.inprocess.test)
 
 (deftestsuite in-pull-connector-root (transport-inprocess-root
-				      connector-suite)
+                                      connector-suite)
   ()
   (:documentation
    "Root unit tests suite for the `in-pull-connector' class."))

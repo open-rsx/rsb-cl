@@ -6,30 +6,26 @@
 
 (cl:in-package :rsb.transport.inprocess)
 
-
 ;;; Interface for the in-direction, pull-based connector
-;;
 
 (defgeneric connector-queue-count (connector)
   (:documentation
    "Return the number of messages currently queued in CONNECTOR."))
 
-
 ;;; `in-pull-connector' class
-;;
 
 (defmethod find-transport-class ((spec (eql :inprocess-in-pull)))
   (find-class 'in-pull-connector))
 
 (defclass in-pull-connector (connector
-			     broadcast-processor
-			     error-handling-dispatcher-mixin
-			     error-handling-pull-receiver-mixin)
+                             broadcast-processor
+                             error-handling-dispatcher-mixin
+                             error-handling-pull-receiver-mixin)
   ((queue :type     lparallel.queue:queue
-	  :reader   connector-queue
-	  :initform (lparallel.queue:make-queue)
-	  :documentation
-	  "Stores events as they arrive via the message bus."))
+          :reader   connector-queue
+          :initform (lparallel.queue:make-queue)
+          :documentation
+          "Stores events as they arrive via the message bus."))
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
@@ -37,31 +33,31 @@
 process."))
 
 (defmethod notify ((connector in-pull-connector)
-		   (scope     scope)
-		   (action    (eql :attached)))
+                   (scope     scope)
+                   (action    (eql :attached)))
   (log1 :info connector "Attaching to scope ~S" scope)
   (push connector (by-scope scope)))
 
 (defmethod notify ((connector in-pull-connector)
-		   (scope     scope)
-		   (action    (eql :detached)))
+                   (scope     scope)
+                   (action    (eql :detached)))
   (log1 :info connector "Detaching from scope ~S" scope)
   (removef (by-scope scope) connector :count 1))
 
 (defmethod handle ((connector in-pull-connector)
-		   (event     event))
+                   (event     event))
   "Put EVENT into the queue maintained by CONNECTOR."
   (lparallel.queue:push-queue event (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
-			    (block?    (eql nil)))
+                            (block?    (eql nil)))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, return
 nil."
   (lparallel.queue:try-pop-queue (connector-queue connector)))
 
 (defmethod receive-message ((connector in-pull-connector)
-			    (block?    t))
+                            (block?    t))
   "Extract and return one event from the queue maintained by
 CONNECTOR, if there are any. If there are no queued events, block."
   (lparallel.queue:pop-queue (connector-queue connector)))
@@ -75,7 +71,7 @@ CONNECTOR, if there are any. If there are no queued events, block."
 (defmethod print-object ((object in-pull-connector) stream)
   (print-unreadable-object (object stream :identity t)
     (format stream "~A ~A (~D)"
-	    (connector-direction object)
-	    (connector-relative-url object "/")
-	    (lparallel.queue:queue-count
-	     (connector-queue object)))))
+            (connector-direction object)
+            (connector-relative-url object "/")
+            (lparallel.queue:queue-count
+             (connector-queue object)))))
