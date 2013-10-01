@@ -28,7 +28,7 @@ handle conditions according to a client-supplied policy."))
     (funcall policy condition)
     (log1 :warn processor "Do not have a error handling policy installed; unwinding")))
 
-(defun invoke-with-error-policy (processor thunk)
+(defun call-with-error-policy (processor thunk)
   "Invoke THUNK with a handler that applies the error policy of
 PROCESSOR."
   (handler-bind
@@ -38,4 +38,4 @@ PROCESSOR."
 (defmacro with-error-policy ((processor) &body body)
   "Execute BODY with a condition handler that applies the error policy
 of processor."
-  `(invoke-with-error-policy ,processor (lambda () ,@body)))
+  `(call-with-error-policy ,processor (lambda () ,@body)))

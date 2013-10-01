@@ -91,7 +91,7 @@
 
   ;; Error handling
   (:export
-   #:invoke-with-restart-and-timeout
+   #:call-with-restart-and-timeout
    #:with-restart-and-timeout)
 
   ;; Meta data protocol

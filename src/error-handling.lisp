@@ -14,9 +14,9 @@
   "Non-nil when a timeout is active for the current thread, nil otherwise.")
 
 (declaim (ftype (function (positive-real function) *)
-                invoke-with-restart-and-timeout))
+                call-with-restart-and-timeout))
 
-(defun invoke-with-restart-and-timeout (timeout thunk)
+(defun call-with-restart-and-timeout (timeout thunk)
   "Call THUNK signaling a `bt:timeout' if it does not complete within
 TIMEOUT seconds. Install a `cl:continue' restart around the
 timeout/execution of THUNK which can be used to ignore errors and
@@ -48,4 +48,4 @@ timeouts.
 If `*in-timeout?*' indicates that some other timeout is already active
 for the current thread, install the restart but do not establish a
 timeout. This is intended to prevent recursive timeouts."
-  `(invoke-with-restart-and-timeout ,timeout (lambda () ,@body)))
+  `(call-with-restart-and-timeout ,timeout (lambda () ,@body)))

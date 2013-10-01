@@ -96,7 +96,7 @@
    #:error-policy-mixin
    #:processor-error-policy
    #:apply-error-policy
-   #:invoke-with-error-policy
+   #:call-with-error-policy
 
    #:with-error-policy)
 

@@ -15,11 +15,15 @@
   "A function that unconditionally signals an error."
   (restart-case
       (error "~@<I like to signal.~@:>")
-    (log      (condition) (declare (ignore condition)) nil)
-    (continue () nil)))
+    (log      (condition)
+      (declare (ignore condition))
+      nil)
+    (continue (&optional condition)
+      (declare (ignore condition))
+      nil)))
 
 (macrolet
-    ((define-smoke-test (name &body invoke-form)
+    ((define-smoke-test (name &body call-form)
        `(addtest (error-policy-mixin-root
                   :documentation
                   "Test basic error handling policies of the
@@ -29,20 +33,20 @@
           ;; Error policy nil means to just unwind.
           (setf (processor-error-policy simple-processor) nil)
           (ensure-condition 'simple-error
-            ,@invoke-form)
+            ,@call-form)
 
           ;; The error policy #'continue should prevent the error from
           ;; being signaled.
           (setf (processor-error-policy simple-processor) #'continue)
-          ,@invoke-form
+          ,@call-form
 
           ;; The error policy #'log-error should prevent the error
           ;; from being signaled.
           (setf (processor-error-policy simple-processor) #'log-error)
-          ,@invoke-form)))
+          ,@call-form)))
 
   (define-smoke-test smoke/function
-      (invoke-with-error-policy simple-processor #'signaling-function))
+      (call-with-error-policy simple-processor #'signaling-function))
 
   (define-smoke-test smoke/macro
       (with-error-policy (simple-processor) (signaling-function))))
