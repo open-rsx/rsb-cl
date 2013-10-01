@@ -33,7 +33,7 @@ the problem."))
               (assembly assembly-problem-assembly)
               (fragment assembly-problem-fragment)) condition))
       (format stream "~@<The fragment ~D of event ~/rsb::print-id/ ~
-caused a problem in assembly ~A.~@:>"
+                      caused a problem in assembly ~A.~@:>"
               (rsb.protocol::fragmented-notification-data-part fragment)
               (assembly-id assembly)
               assembly))))
@@ -50,7 +50,8 @@ fragment causes a problem in an assembly."))
               (assembly assembly-problem-assembly)
               (fragment assembly-problem-fragment)) condition))
        (format stream "~@<Received illegal fragment ~D of event ~
-~/rsb::print-id/ with ~D parts in assembly ~A.~@:>"
+                       ~/rsb::print-id/ with ~D parts in assembly ~
+                       ~A.~@:>"
                (rsb.protocol::fragmented-notification-data-part fragment)
                (assembly-id assembly)
                (length (assembly-fragments assembly))
@@ -68,7 +69,8 @@ with an invalid part id to an assembly."))
               (assembly assembly-problem-assembly)
               (fragment assembly-problem-fragment)) condition))
        (format stream "~@<Received fragment ~D of event ~
-~/rsb::print-id/ more than once in assembly ~A.~@:>"
+                       ~/rsb::print-id/ more than once in assembly ~
+                       ~A.~@:>"
                (rsb.protocol::fragmented-notification-data-part fragment)
                (assembly-id assembly)
                assembly))))
@@ -104,7 +106,7 @@ encountered."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Insufficient room (~:D byte~:P) for fragment ~
-requiring ~:D byte~:P.~@:>"
+                     requiring ~:D byte~:P.~@:>"
              (fragmentation-problem-available condition)
              (fragmentation-problem-required  condition))))
   (:documentation

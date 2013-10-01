@@ -12,7 +12,7 @@
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to connect to socket-based bus as ~
-automatically determined client or server~@:>")
+                     automatically determined client or server~@:>")
      (maybe-print-explanation stream condition)))
   (:documentation
    "This error is signaled when a an attempt to obtain a bus

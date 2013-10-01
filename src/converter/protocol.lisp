@@ -85,13 +85,14 @@ next `wire->domain' method."
       (retry ()
         :report (lambda (stream)
                   (format stream "~@<Retry converting ~S (in ~S ~
-schema) using converter ~A.~@:>"
+                                  schema) using converter ~A.~@:>"
                           wire-data wire-schema converter)) nil)
       (use-value (value)
         :report      (lambda (stream)
                        (format stream "~@<Supply a replacement value ~
-to use instead of converting ~S (in ~S schema) using converter ~
-~A.~@:>"
+                                       to use instead of converting ~
+                                       ~S (in ~S schema) using ~
+                                       converter ~A.~@:>"
                                wire-data wire-schema converter))
         :interactive (lambda ()
                        (format *query-io* "Enter replacement value (evaluated): ")
@@ -118,7 +119,8 @@ next `domain->wire' method."
       (use-value (value)
         :report      (lambda (stream)
                        (format stream "~@<Supply a replacement value ~
-to use instead of converting ~A using converter ~A.~@:>"
+                                       to use instead of converting ~A ~
+                                       using converter ~A.~@:>"
                                domain-object converter))
         :interactive (lambda ()
                        (format *query-io* "Enter replacement value (evaluated): ")

@@ -17,7 +17,7 @@ conversion would have converted."))
   (:report
    (lambda (condition stream)
      (format stream "~@<A conversion to or from wire-schema ~S~
-failed~/more-conditions::maybe-print-cause/~@:>"
+                     failed~/more-conditions:maybe-print-cause/~@:>"
              (conversion-error-wire-schema condition)
              condition)))
   (:documentation
@@ -43,9 +43,10 @@ been produced by a successful conversion."))
              (maybe-shorten-sequence
               (conversion-error-encoded condition))))
        (format stream "~@<The wire data ~S~:[~; ...~] (in ~S ~
-wire-schema) could not be converted to domain type ~
-~S~/more-conditions::maybe-print-cause/~@:>"
-               data shortened?
+                       wire-schema) could not be converted to domain ~
+                       type ~
+                       ~S~/more-conditions:maybe-print-cause/~@:>"
+                       data shortened?
                (conversion-error-wire-schema condition)
                (conversion-error-domain-type condition)
                condition))))
@@ -69,8 +70,9 @@ produced by a successful conversion."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The domain object ~S could not be converted to ~
-a wire-type ~S representation using the wire-schema ~
-~S~/more-conditions::maybe-print-cause/~@:> "
+                     a wire-type ~S representation using the ~
+                     wire-schema ~
+                     ~S~/more-conditions:maybe-print-cause/~@:> "
              (conversion-error-domain-object condition)
              (conversion-error-wire-type     condition)
              (conversion-error-wire-schema   condition)

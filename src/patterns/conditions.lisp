@@ -35,7 +35,7 @@ in the failed call."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to call method ~A with request ~
-~A~/more-conditions::maybe-print-cause/~:@>"
+                     ~A~/more-conditions:maybe-print-cause/~:@>"
              (remote-call-failed-method  condition)
              (remote-call-failed-request condition)
              condition)))
@@ -48,7 +48,8 @@ reason."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Remote method ~A failed to execute for ~
-request ~A~/more-conditions::maybe-print-cause/~:@>"
+                     request ~
+                     ~A~/more-conditions:maybe-print-cause/~:@>"
              (remote-call-failed-method  condition)
              (remote-call-failed-request condition)
              condition)))

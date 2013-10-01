@@ -138,7 +138,7 @@ BLOCK? is non-nil."
           (retry ()
             :report (lambda (stream)
                       (format stream "~@<Retry calling method ~A of ~
-server ~A with request ~A.~@:>"
+                                      server ~A with request ~A.~@:>"
                               method server request))))))
 
 ;;; `remote-server' class

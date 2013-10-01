@@ -137,7 +137,7 @@ provider and try to fall back to a client provider if that fails."
        (retry-as-client ()
          :report (lambda (stream)
                    (format stream "~@<Retry connecting to the bus at ~
-~A:~D as client.~@:>"
+                                   ~A:~D as client.~@:>"
                            host port))
          (%get-bus host port nil connector))))
 
@@ -148,7 +148,7 @@ provider and try to fall back to a client provider if that fails."
        (retry-as-server ()
          :report (lambda (stream)
                    (format stream "~@<Try to create a server for the ~
-bus at ~A:~D.~@:>"
+                                   bus at ~A:~D.~@:>"
                            host port))
          (%get-bus host port t connector))))
 
@@ -168,8 +168,9 @@ bus at ~A:~D.~@:>"
                           :var           client-condition
                           :cause-initarg nil)
                    :format-control "Failed to get socket-based bus as ~
-server:~&~<> ~@;~A~:>~&Failed to get socket-based bus as ~
-client:~&~<> ~@;~A~:>"
+                                    server:~&~<> ~@;~A~:>~&Failed to ~
+                                    get socket-based bus as ~
+                                    client:~&~<> ~@;~A~:>"
                    :format-arguments (list (list server-condition)
                                            (list client-condition))))
                (ensure-bus-client host port connector)))))))))

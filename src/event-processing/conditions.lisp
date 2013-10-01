@@ -22,7 +22,7 @@
   (:report
    (lambda (condition stream)
      (format stream "~@<Could not apply transform ~A to ~
-~A~/more-conditions::maybe-print-cause/~@:>"
+                     ~A~/more-conditions:maybe-print-cause/~@:>"
              (transform-error-transform condition)
              (transform-error-object    condition)
              condition)))

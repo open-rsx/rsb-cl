@@ -18,10 +18,11 @@
                        &allow-other-keys)
                       &body body)
 
-       ,(format nil "Execute BODY with VAR bound to a `~(~A~)' for ~
-the channel designated by SCOPE-OR-URI. The ~:*~(~A~) is destroyed ~
-when the execution of BODY ends normally or because of a control ~
-transfer."  kind)
+       ,(format nil "Execute BODY with VAR bound to a `~(~A~)' for the ~
+                     channel designated by SCOPE-OR-URI. The ~:*~(~A~) ~
+                     is destroyed when the execution of BODY ends ~
+                     normally or because of a control transfer."
+                kind)
        (declare (ignore transports converters transform))
        (check-type var symbol "a symbol")
 

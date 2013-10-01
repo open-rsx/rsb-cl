@@ -28,7 +28,8 @@ log message respectively. "
                 (typep condition '(not connection-closed)))
       :report (lambda (stream)
                 (format stream "~@<Log a message and ignore the failed ~
-sending attempt and continue with the next notification.~@:>"))
+                                sending attempt and continue with the ~
+                                next notification.~@:>"))
       (log1 :warn connector "Failed to send a notification~@[: ~_~A~]"
             condition)
       nil)
@@ -37,7 +38,8 @@ sending attempt and continue with the next notification.~@:>"))
                 (typep condition '(not connection-closed)))
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed sending attempt ~
-and continue with the next notification.~@:>"))
+                                and continue with the next ~
+                                notification.~@:>"))
       (declare (ignore condition))
       nil)))
 
@@ -51,14 +53,15 @@ emitting a log message respectively."
     (log (&optional condition)
       :report (lambda (stream)
                 (format stream "~@<Log a message and ignore the ~
-failed encoding and continue with the next event.~@:>"))
+                                failed encoding and continue with the ~
+                                next event.~@:>"))
       (log1 :warn connector "Failed to encode an event~@[: ~_~A~]"
             condition)
       nil)
     (continue (&optional condition)
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed encoding and ~
-continue with the next event.~@:>"))
+                                continue with the next event.~@:>"))
       (declare (ignore condition))
       nil)))
 
@@ -84,8 +87,9 @@ log message respectively. "
                       (typep condition '(not connection-closed)))
             :report (lambda (stream)
                       (format stream "~@<Log a message and ignore ~
-the failed receiving attempt and continue with the next ~
-notification.~@:>"))
+                                      the failed receiving attempt and ~
+                                      continue with the next ~
+                                      notification.~@:>"))
             (log1 :warn connector "Failed to receive a notification~@[: ~_~A~]" condition)
             nil)
           (continue (&optional condition)
@@ -93,7 +97,8 @@ notification.~@:>"))
                       (typep condition '(not connection-closed)))
             :report (lambda (stream)
                       (format stream "~@<Ignore the failed receiving ~
-attempt and continue with the next notification.~@:>"))
+                                      attempt and continue with the ~
+                                      next notification.~@:>"))
             (declare (ignore condition))
             nil))))
 
@@ -108,12 +113,13 @@ but with and without emitting a log message respectively."
     (log (&optional condition)
       :report (lambda (stream)
                 (format stream "~@<Log a message and ignore the ~
-failed decoding and continue with the next event.~@:>"))
+                                failed decoding and continue with the ~
+                                next event.~@:>"))
       (log1 :warn connector "Failed to decode a notification~@[: ~_~A~]" condition)
       nil)
     (continue (&optional condition)
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed decoding and ~
-continue with the next event.~@:>"))
+                                continue with the next event.~@:>"))
       (declare (ignore condition))
       nil)))

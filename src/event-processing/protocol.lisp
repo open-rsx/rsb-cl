@@ -78,13 +78,13 @@ and `use-value' restarts."
       (continue ()
         :report (lambda (stream)
                   (format stream "~@<Continue without transforming ~
-~A.~@:>"
+                                  ~A.~@:>"
                           event))
         event)
       (use-value (value)
         :report (lambda (stream)
                   (format stream "~@<Use a value instead of ~
-transforming ~A with ~A.~@:>"
+                                  transforming ~A with ~A.~@:>"
                           event transform))
         value))))
 

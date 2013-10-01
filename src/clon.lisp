@@ -153,7 +153,8 @@ strings."
 schemas SCHEMAS."
   (com.dvlsoft.clon:make-text
    :contents (format nil "This connector ~:[does not support any ~
-schemas~;supports the following schema~P: ~2:*~{~(~A~)~^, ~}~]."
+                          schemas~;supports the following schema~P: ~
+                          ~2:*~{~(~A~)~^, ~}~]."
                      schemas (length schemas))))
 
 (defun make-repeated-text (names)
@@ -161,7 +162,8 @@ schemas~;supports the following schema~P: ~2:*~{~(~A~)~^, ~}~]."
 have been excluded as a result of repeated occurrence."
   (com.dvlsoft.clon:make-text
    :contents (format nil "This connector also supports the following ~
-option~P which ~:[have~;has~] been described above: ~{~(~A~)~^, ~}."
+                          option~P which ~:[have~;has~] been described ~
+                          above: ~{~(~A~)~^, ~}."
                      (length names) (length= 1 names) names)))
 
 (defun make-options-for-connector-class (class)

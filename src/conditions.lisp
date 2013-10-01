@@ -42,8 +42,9 @@ to connect to the bus."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
-designated by ~
-~S~/rsb::maybe-print-transport-configuration/~/more-conditions::maybe-print-cause/~@:>"
+                     designated by ~
+                     ~S~/rsb::maybe-print-transport-configuration/~
+                     ~/more-conditions::maybe-print-cause/~@:>"
              (participation-failed-scope      condition)
              (participation-failed-transports condition)
              condition)))
@@ -55,7 +56,8 @@ implies participation in a channel) fails."))
   "Print the transport configuration TRANSPORTS to STREAM."
   (declare (ignore colon? at?))
   (format stream "~@[ using transport configuration~{~{~_+ ~@(~A~) ~
-transport with options~&~2T~@<~@;~@{~16S~^: ~S~^, ~_~}~:>~}~}~]"
+                  transport with options~
+                  ~&~2T~@<~@;~@{~16S~^: ~S~^, ~_~}~:>~}~}~]"
           transports))
 
 (define-condition listener-creation-failed (participation-failed)
@@ -80,8 +82,9 @@ fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to create RSB informer in the channel ~
-designated by ~S and type ~
-~S~/rsb::maybe-print-transport-configuration/~/more-conditions::maybe-print-cause/~@:>"
+                     designated by ~S and type ~
+                     ~S~/rsb::maybe-print-transport-configuration/~
+                     ~/more-conditions:maybe-print-cause/~@:>"
              (participation-failed-scope      condition)
              (informer-creation-failed-type   condition)
              (participation-failed-transports condition)
@@ -97,7 +100,8 @@ fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
-designated by ~S because no transports have been selected.~@:>"
+                     designated by ~S because no transports have been ~
+                     selected.~@:>"
              (scope-string (participation-failed-scope condition)))))
   (:documentation
    "This error is signaled when the creation of a participant fails
@@ -115,7 +119,7 @@ because an empty list of transports is supplied."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The event ~S was used in a context for which ~
-it is not valid.~:@>"
+                     it is not valid.~:@>"
              (invalid-event-event    condition)
              ;; (invalid-event-informer condition)
              )))
@@ -146,7 +150,7 @@ its type is unsuitable."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The scope ~A of the event ~S is not identical ~
-to or a sub-scope of the expected scope ~A.~:@>"
+                     to or a sub-scope of the expected scope ~A.~:@>"
              (event-scope (invalid-event-event condition))
              (invalid-event-event condition)
              (invalid-event-expected-scope condition))))

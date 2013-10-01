@@ -157,7 +157,7 @@ slot. Define the following accessors along with the class:
                       :documentation
 
                       ,(format nil "Stores the ~(~A~) items associated ~
-to the instance."
+                                    to the instance."
                                name)))
          (:documentation
           "This mixin adds storage for a plist of items and associated
@@ -178,7 +178,7 @@ accessors. See `define-plist-data-mixin' for a description."))
          (:documentation
 
           ,(format nil "Return a list of the keys of ~(~A~) items ~
-stored in OBJECT."
+                        stored in OBJECT."
                    name)))
 
        (defgeneric ,values-name (object)
@@ -188,7 +188,7 @@ stored in OBJECT."
                  (collect value)))
          (:documentation
           ,(format nil "Return a list of the values of ~(~A~) items ~
-stored in OBJECT."
+                        stored in OBJECT."
                    name)))
 
        (defgeneric ,plist-name (object)
@@ -196,7 +196,7 @@ stored in OBJECT."
            (slot-value object ',slot-name))
          (:documentation
           ,(format nil "Return a plist of the ~(~A~) items stored in ~
-OBJECT."
+                        OBJECT."
                    name)))
 
        (defgeneric ,alist-name (object)
@@ -204,7 +204,7 @@ OBJECT."
            (plist-alist (slot-value object ',slot-name)))
          (:documentation
           ,(format nil "Return an alist of the ~(~A~) items stored ~
-in OBJECT."
+                        in OBJECT."
                    name)))
 
        (defgeneric ,name (object key)
@@ -212,7 +212,7 @@ in OBJECT."
            (getf (slot-value object ',slot-name) key))
          (:documentation
           ,(format nil "Return the ~(~A~) item of OBJECT identified ~
-by KEY."
+                        by KEY."
                    name)))
 
        (defgeneric (setf ,name) (new-value object key)
@@ -221,7 +221,7 @@ by KEY."
          (:documentation
 
           ,(format nil "Associate NEW-VALUE to OBJECT as the ~(~A~)
-item identified by KEY."
+                        item identified by KEY."
                    name))))))
 
 ;;; Utility functions

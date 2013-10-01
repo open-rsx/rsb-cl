@@ -28,9 +28,10 @@ have been constructed.")
 been constructed."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to construct ~A connector for ~
-direction ~A~@[ with options~{~_~2T~16A~^: ~@<~@;~S~>~^,~}~].~
-~/more-conditions::maybe-print-cause/~@:>"
+     (format stream "~@<Failed to construct ~A connector for direction ~
+                     ~A~@[ with options~{~_~2T~16A~^: ~
+                     ~@<~@;~S~>~^,~}~].~
+                     ~/more-conditions:maybe-print-cause/~@:>"
              (connector-construction-failed-name      condition)
              (connector-construction-failed-direction condition)
              (connector-construction-failed-args      condition)
@@ -63,7 +64,7 @@ closed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The connection ~A has been closed ~
-unexpectedly.~/more-conditions::maybe-print-cause/~@:>"
+                     unexpectedly.~/more-conditions:maybe-print-cause/~@:>"
              (connection-closed-connection condition)
              condition)))
   (:documentation
@@ -90,9 +91,11 @@ form (WIRE-TYPE . CONVERTER)."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for direction ~
-~A~@[ with options~{~_~2T~16A: ~@<~@;~S~>~^,~}~]~_because no converter ~
-for wire-type ~S could be found ~:[without any candidates (empty ~
-converter list)~;~:*in candidate list ~{~A~^, ~_~}~].~@:>"
+                     ~A~@[ with options~{~_~2T~16A: ~
+                     ~@<~@;~S~>~^,~}~]~_because no converter for ~
+                     wire-type ~S could be found ~:[without any ~
+                     candidates (empty converter list)~;~:*in ~
+                     candidate list ~{~A~^, ~_~}~].~@:>"
              (connector-construction-failed-name       condition)
              (connector-construction-failed-direction  condition)
              (connector-construction-failed-args       condition)
@@ -116,8 +119,9 @@ contain a suitable one for the requested connector."))
      (let+ (((&values data shortened?)
              (maybe-shorten-sequence (decoding-error-encoded condition))))
        (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
-~_could not be decoded ~
-~/rsb::maybe-print-explanation/~/more-conditions::maybe-print-cause/~@:>"
+                       ~_could not be decoded~
+                       ~/rsb:maybe-print-explanation/~
+                       ~/more-conditions:maybe-print-cause/~@:>"
                (coerce data 'list) shortened?
                condition
                condition))))
@@ -135,7 +139,8 @@ into an `event' instance fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The event ~A could not be encoded into an ~
-octet-vector~/rsb::maybe-print-explanation/~/more-conditions::maybe-print-cause/~@:>"
+                     octet-vector~/rsb:maybe-print-explanation/~
+                     ~/more-conditions:maybe-print-cause/~@:>"
              (encoding-error-event      condition)
              condition
              condition)))

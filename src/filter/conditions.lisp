@@ -17,7 +17,8 @@ a filter instance failed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct filter based on ~
-specification ~S~/more-conditions::maybe-print-cause/~@:>"
+                     specification ~
+                     ~S~/more-conditions:maybe-print-cause/~@:>"
              (filter-construction-error-spec condition)
              condition)))
   (:documentation
