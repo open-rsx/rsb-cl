@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.patterns)
+(cl:in-package #:rsb.patterns)
 
 (define-condition no-such-method (rsb-error)
   ((name :initarg  :name

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.socket)
+(cl:in-package #:rsb.transport.socket)
 
 (defmethod find-transport-class ((spec (eql :socket-in-pull)))
   (find-class 'in-pull-connector))

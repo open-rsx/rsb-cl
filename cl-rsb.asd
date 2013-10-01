@@ -4,19 +4,19 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :cl-rsb-system
+(cl:defpackage #:cl-rsb-system
   (:use
-   :cl
-   :asdf)
+   #:cl
+   #:asdf)
 
   (:export
-   :version/list
-   :version/string)
+   #:version/list
+   #:version/string)
 
   (:export
-   :+optimization-fast+unsafe+))
+   #:+optimization-fast+unsafe+))
 
-(cl:in-package :cl-rsb-system)
+(cl:in-package #:cl-rsb-system)
 
 #+sbcl (asdf:load-system :sb-posix)
 

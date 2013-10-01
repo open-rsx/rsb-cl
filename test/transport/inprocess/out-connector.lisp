@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.inprocess.test)
+(cl:in-package #:rsb.transport.inprocess.test)
 
 (deftestsuite out-connector-root (transport-inprocess-root
                                       connector-suite)

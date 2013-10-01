@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.test)
+(cl:in-package #:rsb.test)
 
 (deftestsuite informer-root (root
                              participant-suite)

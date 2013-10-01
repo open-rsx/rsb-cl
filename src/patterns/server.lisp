@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.patterns)
+(cl:in-package #:rsb.patterns)
 
 ;;; `method1' class
 

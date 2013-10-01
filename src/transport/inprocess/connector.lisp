@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.inprocess)
+(cl:in-package #:rsb.transport.inprocess)
 
 ;;;
 

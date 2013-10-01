@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb)
+(cl:in-package #:rsb)
 
 (defun enable-id-random-state-reseed ()
   "Reseed the `random-state' stored in `*id-random-state*'.

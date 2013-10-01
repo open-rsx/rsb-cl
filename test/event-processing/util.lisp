@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.event-processing.test)
+(cl:in-package #:rsb.event-processing.test)
 
 (deftestsuite util-root (event-processing-root)
   ()

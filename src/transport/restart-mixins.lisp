@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport)
+(cl:in-package #:rsb.transport)
 
 ;;; Class `restart-notification-sender-mixin'
 

@@ -4,23 +4,23 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.event-processing.test
+(cl:defpackage #:rsb.event-processing.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :lift
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:lift
 
-   :rsb
-   :rsb.event-processing
+   #:rsb
+   #:rsb.event-processing
 
-   :rsb.test)
+   #:rsb.test)
 
   (:documentation
    "This package contains unit tests for the event-processing
 module"))
 
-(cl:in-package :rsb.event-processing.test)
+(cl:in-package #:rsb.event-processing.test)
 
 (deftestsuite event-processing-root (root)
   ()

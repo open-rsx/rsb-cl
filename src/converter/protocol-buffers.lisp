@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.converter)
+(cl:in-package #:rsb.converter)
 
 (defmethod wire->domain? ((converter   (eql :protocol-buffer))
                           (wire-data   simple-array)

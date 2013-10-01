@@ -4,95 +4,96 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.filter
+(cl:defpackage #:rsb.filter
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:more-conditions
 
-   :rsb)
+   #:rsb)
 
   ;; Conditions
   (:export
-   :filter-construction-error
-   :filter-construction-error-spec)
+   #:filter-construction-error
+   #:filter-construction-error-spec)
 
   ;; Filter protocol
   (:export
-   :matches?)
+   #:matches?)
 
   ;; Filter class family and construction
   (:export
-   :no-such-filter
-   :find-filter-class
-   :filter-classes
+   #:no-such-filter
+   #:find-filter-class
+   #:filter-classes
 
-   :make-filter)
+   #:make-filter)
 
   ;; `filter-mixin' class
   (:export
-   :filter-mixin)
+   #:filter-mixin)
 
+  ;; Composite filter protocol
   (:export
-   :composite-filter
-   :filter-children)
+   #:composite-filter
+   #:filter-children)
 
   ;; `conjoin-filter' class
   (:export
-   :conjoin-filter)
+   #:conjoin-filter)
 
   ;; `disjoin-filter' class
   (:export
-   :disjoin-filter)
+   #:disjoin-filter)
 
   ;; `fallback-policy-mixin' class
   (:export
-   :fallback-policy-mixin
-   :filter-fallback-policy)
+   #:fallback-policy-mixin
+   #:filter-fallback-policy)
 
   ;; `payload-matching-mixin' class
   (:export
-   :payload-matches?
-   :payload-matching-mixin)
+   #:payload-matches?
+   #:payload-matching-mixin)
 
   ;; `scope-filter' class
   (:export
-   :scope-filter
-   :filter-scope)
+   #:scope-filter
+   #:filter-scope)
 
   ;; `type-filter' class
   (:export
-   :type-filter
-   :filter-type)
+   #:type-filter
+   #:filter-type)
 
   ;; `origin-filter' class
   (:export
-   :origin-filter
-   :filter-origin)
+   #:origin-filter
+   #:filter-origin)
 
   ;; `regex-filter' class
   (:export
-   :regex-filter
-   :filter-regex
-   :filter-case-sensitive?
+   #:regex-filter
+   #:filter-regex
+   #:filter-case-sensitive?
 
-   :compile-regex)
+   #:compile-regex)
 
   ;; `method-filter' class
   (:export
-   :method-filter
-   :filter-method)
+   #:method-filter
+   #:filter-method)
 
   ;; `xpath-filter' class
   (:export
-   :xpath-filter
-   :filter-xpath
-   :filter-compiled-xpath)
+   #:xpath-filter
+   #:filter-xpath
+   #:filter-compiled-xpath)
 
   ;; DSL
   (:export
-   :filter)
+   #:filter)
 
   (:documentation
    "This package contains event filters. In general, filters are unary

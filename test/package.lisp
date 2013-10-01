@@ -4,42 +4,42 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.test
+(cl:defpackage #:rsb.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:more-conditions
 
-   :lift
+   #:lift
 
-   :rsb
-   :rsb.filter)
+   #:rsb
+   #:rsb.filter)
 
   ;; Root test suite
   (:export
-   :root)
+   #:root)
 
   ;; Test environment
   (:export
-   :spread-port)
+   #:spread-port)
 
   ;; Test utilities
   (:export
-   :check-print
+   #:check-print
 
-   :check-event
+   #:check-event
 
-   :participant-suite
-   :define-basic-participant-test-cases
+   #:participant-suite
+   #:define-basic-participant-test-cases
 
-   :define-restart-method-test-case)
+   #:define-restart-method-test-case)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
 
-(cl:in-package :rsb.test)
+(cl:in-package #:rsb.test)
 
 (deftestsuite root ()
   ()

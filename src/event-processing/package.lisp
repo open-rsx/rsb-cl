@@ -4,119 +4,119 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.event-processing
+(cl:defpackage #:rsb.event-processing
   (:nicknames
-   :rsb.ep)
+   #:rsb.ep)
 
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:more-conditions
 
-   :rsb)
+   #:rsb)
 
   ;; Conditions
   (:export
-   :transform-error
+   #:transform-error
 
-   :transform-error-transform
-   :transform-error-object)
+   #:transform-error-transform
+   #:transform-error-object)
 
   ;; Push source protocol
   (:export
-   :handlers)
+   #:handlers)
 
   ;; Pull source protocol
   (:export
-   :emit)
+   #:emit)
 
   ;; Sink protocol
   (:export
-   :handle)
+   #:handle)
 
   ;; Dispatching processor protocol
   (:export
-   :dispatch)
+   #:dispatch)
 
   ;; Transformation protocol
   (:export
-   :transform!)
+   #:transform!)
 
   ;; Notification protocol
   (:export
-   :notify)
+   #:notify)
 
   ;; Processor class family
   (:export
-   :make-processor-class
-   :ensure-processor-class
-   :clear-processor-classes
-   :processor-classes)
+   #:make-processor-class
+   #:ensure-processor-class
+   #:clear-processor-classes
+   #:processor-classes)
 
   ;; Configurator protocol
   (:export
-   :make-processor
-   :collect-processor-mixins)
+   #:make-processor
+   #:collect-processor-mixins)
 
   ;; `configurator' class
   (:export
-   :configurator
-   :configurator-scope
-   :configurator-direction
-   :configurator-processor
-   :configurator-connectors
-   :configurator-transform)
+   #:configurator
+   #:configurator-scope
+   #:configurator-direction
+   #:configurator-processor
+   #:configurator-connectors
+   #:configurator-transform)
 
   ;; `in-route-configurator' class
   (:export
-   :in-route-configurator
-   :configurator-filters)
+   #:in-route-configurator
+   #:configurator-filters)
 
   ;; `out-route-configurator' class
   (:export
-   :out-route-configurator)
+   #:out-route-configurator)
 
   ;; `broadcast-processor' class
   (:export
-   :broadcast-processor)
+   #:broadcast-processor)
 
   ;; `filtering-processor-mixin' class
   (:export
-   :filtering-processor-mixin
-   :processor-filters)
+   #:filtering-processor-mixin
+   #:processor-filters)
 
   ;; `deliver-timestamp-mixin' class
   (:export
-   :deliver-timestamp-mixin)
+   #:deliver-timestamp-mixin)
 
   ;; `error-policy-mixin' class
   (:export
-   :error-policy-mixin
-   :processor-error-policy
-   :apply-error-policy
-   :invoke-with-error-policy
+   #:error-policy-mixin
+   #:processor-error-policy
+   #:apply-error-policy
+   #:invoke-with-error-policy
 
-   :with-error-policy)
+   #:with-error-policy)
 
   ;; `error-handling-dispatcher-mixin' class
   (:export
-   :error-handling-dispatcher-mixin)
+   #:error-handling-dispatcher-mixin)
 
   ;; `transform-mixin' class
   (:export
-   :transform-mixin
-   :processor-transform)
+   #:transform-mixin
+   #:processor-transform)
 
   ;; `client' class and protocol
   (:export
-   :client
-   :client-configurator)
+   #:client
+   #:client-configurator)
 
   ;; Exported for unit test
   (:export
-   :merge-implementation-infos)
+   #:merge-implementation-infos)
 
   (:documentation
    "This package contains protocol, classes and methods for routing

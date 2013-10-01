@@ -4,24 +4,24 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.filter.test
+(cl:defpackage #:rsb.filter.test
   (:use
-   :cl
-   :alexandria
-   :lift
+   #:cl
+   #:alexandria
+   #:lift
 
-   :rsb
-   :rsb.filter
+   #:rsb
+   #:rsb.filter
 
-   :rsb.test)
+   #:rsb.test)
 
   (:export
-   :define-basic-filter-test-cases)
+   #:define-basic-filter-test-cases)
 
   (:documentation
    "This package contains unit tests for the filter module"))
 
-(cl:in-package :rsb.filter.test)
+(cl:in-package #:rsb.filter.test)
 
 (deftestsuite filter-root (root)
   ()

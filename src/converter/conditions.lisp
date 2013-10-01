@@ -1,10 +1,10 @@
-;;;; conditions.lisp ---
+;;;; conditions.lisp --- Conditions used in the converter module.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.converter)
+(cl:in-package #:rsb.converter)
 
 (define-condition conversion-error (rsb-error
                                     chainable-condition)

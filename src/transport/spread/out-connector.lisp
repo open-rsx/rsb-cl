@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.spread)
+(cl:in-package #:rsb.transport.spread)
 
 (defmethod find-transport-class ((spec (eql :spread-out)))
   (find-class 'out-connector))

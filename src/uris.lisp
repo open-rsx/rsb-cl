@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb)
+(cl:in-package #:rsb)
 
 (defun uri-transport (uri)
   "If URI specifies a transport configuration, return three values:

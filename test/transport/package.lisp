@@ -4,34 +4,34 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.transport.test
+(cl:defpackage #:rsb.transport.test
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :lift
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:lift
 
-   :rsb
-   :rsb.event-processing
-   :rsb.transport
+   #:rsb
+   #:rsb.event-processing
+   #:rsb.transport
 
-   :rsb.test)
-
-  (:export
-   :transport-root)
+   #:rsb.test)
 
   (:export
-   :connector-suite
-   :check-connector-class
-   :check-connector
+   #:transport-root)
 
-   :define-basic-connector-test-cases)
+  (:export
+   #:connector-suite
+   #:check-connector-class
+   #:check-connector
+
+   #:define-basic-connector-test-cases)
 
   (:documentation
    "This package contains unit tests for the transport module."))
 
-(cl:in-package :rsb.transport.test)
+(cl:in-package #:rsb.transport.test)
 
 (deftestsuite transport-root (root)
   ()

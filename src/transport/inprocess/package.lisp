@@ -4,30 +4,30 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.transport.inprocess
+(cl:defpackage #:rsb.transport.inprocess
   (:nicknames
-   :rsb.tp.inprocess
-   :rsb.tp.inproc)
+   #:rsb.tp.inprocess
+   #:rsb.tp.inproc)
 
   (:shadow
-   :connector)
+   #:connector)
 
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
 
-   :rsb
-   :rsb.event-processing
-   :rsb.filter
-   :rsb.transport)
+   #:rsb
+   #:rsb.event-processing
+   #:rsb.filter
+   #:rsb.transport)
 
   ;; Exported for unit tests
   (:export
-   :in-pull-connector
-   :in-push-connector
-   :out-connector)
+   #:in-pull-connector
+   #:in-push-connector
+   #:out-connector)
 
   (:documentation
    "This package contains a transport that delivers RSB events within

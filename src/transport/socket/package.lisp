@@ -4,33 +4,33 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.transport.socket
-  (:nicknames :rsb.tp.sock)
+(cl:defpackage #:rsb.transport.socket
+  (:nicknames #:rsb.tp.sock)
 
   (:shadow
-   :connector)
+   #:connector)
 
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:more-conditions
 
-   :nibbles
+   #:nibbles
 
-   :rsb
-   :rsb.event-processing
-   :rsb.transport
-   :rsb.protocol)
+   #:rsb
+   #:rsb.event-processing
+   #:rsb.transport
+   #:rsb.protocol)
 
-  (:shadowing-import-from :rsb
-   :event-id
-   :event-meta-data)
+  (:shadowing-import-from #:rsb
+   #:event-id
+   #:event-meta-data)
 
   ;; Conditions
   (:export
-   :socket-bus-auto-connection-error)
+   #:socket-bus-auto-connection-error)
 
   (:documentation
    "This package contains a transport implementation that uses

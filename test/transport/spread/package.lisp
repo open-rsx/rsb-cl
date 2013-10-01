@@ -4,56 +4,56 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.transport.spread.test
+(cl:defpackage #:rsb.transport.spread.test
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :more-conditions
-   :lift
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:more-conditions
+   #:lift
 
-   :nibbles
+   #:nibbles
 
-   :rsb
-   :rsb.transport
-   :rsb.transport.spread
+   #:rsb
+   #:rsb.transport
+   #:rsb.transport.spread
 
-   :rsb.test
-   :rsb.transport.test)
+   #:rsb.test
+   #:rsb.transport.test)
 
-  (:import-from :rsb.transport.spread
-   :assembly-complete?
-   :assembly-concatenated-data
+  (:import-from #:rsb.transport.spread
+   #:assembly-complete?
+   #:assembly-concatenated-data
 
-   :assembly-pool-count
-   :merge-fragment
+   #:assembly-pool-count
+   #:merge-fragment
 
-   :assembly-pool
-   :pruning-assembly-pool
+   #:assembly-pool
+   #:pruning-assembly-pool
 
-   :event->notifications
+   #:event->notifications
 
-   :*scope->groups-cache*
-   :*scope->groups-cache-max-size*
-   :scope->group
-   :scope->groups/no-cache
-   :scope->groups
+   #:*scope->groups-cache*
+   #:*scope->groups-cache-max-size*
+   #:scope->group
+   #:scope->groups/no-cache
+   #:scope->groups
 
-   :connection
+   #:connection
 
-   :in-connector
-   :message->event
+   #:in-connector
+   #:message->event
 
-   :in-pull-connector
+   #:in-pull-connector
 
-   :out-connector)
+   #:out-connector)
 
   (:documentation
    "This package contains unit tests for the transport.spread
 module"))
 
-(cl:in-package :rsb.transport.spread.test)
+(cl:in-package #:rsb.transport.spread.test)
 
 (deftestsuite transport-spread-root (transport-root)
   ((spread-port (asdf:component-property

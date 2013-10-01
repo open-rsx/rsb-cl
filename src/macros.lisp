@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb)
+(cl:in-package #:rsb)
 
 (defmacro define-with-participant-macro (kind &rest extra-args)
   (let ((name      (symbolicate "WITH-" kind))

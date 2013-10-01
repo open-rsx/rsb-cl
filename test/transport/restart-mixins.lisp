@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.test)
+(cl:in-package #:rsb.transport.test)
 
 ;;; Tests for `restart-message-receiver-mixin' class
 

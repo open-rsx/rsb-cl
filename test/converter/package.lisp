@@ -4,30 +4,30 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 
-(cl:defpackage :rsb.converter.test
+(cl:defpackage #:rsb.converter.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :lift
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:lift
 
-   :nibbles
+   #:nibbles
 
-   :rsb
-   :rsb.converter
+   #:rsb
+   #:rsb.converter
 
-   :rsb.test)
+   #:rsb.test)
 
   (:export
-   :converter-root
-   :octetify
+   #:converter-root
+   #:octetify
 
-   :define-basic-converter-test-cases)
+   #:define-basic-converter-test-cases)
 
   (:documentation
    "This package contains unit tests for the converter module."))
 
-(cl:in-package :rsb.converter.test)
+(cl:in-package #:rsb.converter.test)
 
 (deftestsuite converter-root (root)
   ()

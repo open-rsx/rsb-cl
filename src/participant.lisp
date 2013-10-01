@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb)
+(cl:in-package #:rsb)
 
 (defclass participant (uuid-mixin
                        scope-mixin)

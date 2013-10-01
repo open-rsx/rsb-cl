@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.converter)
+(cl:in-package #:rsb.converter)
 
 (defmethod find-converter-class ((spec (eql :force-wire-schema)))
   (find-class 'force-wire-schema))

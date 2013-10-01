@@ -4,74 +4,74 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsb.patterns
+(cl:defpackage #:rsb.patterns
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:more-conditions
 
-   :rsb)
+   #:rsb)
 
   ;; Types
   (:export
-   :method-name
+   #:method-name
 
-   :argument-style)
+   #:argument-style)
 
   ;; Conditions
   (:export
-   :no-such-method
-   :no-such-method-name
+   #:no-such-method
+   #:no-such-method-name
 
-   :remote-call-failed
-   :remote-call-failed-method
-   :remote-call-failed-request
+   #:remote-call-failed
+   #:remote-call-failed-method
+   #:remote-call-failed-request
 
-   :remote-method-execution-error)
+   #:remote-method-execution-error)
 
   ;; Future protocol
   (:export
-   :future-done?
-   :future-result
-   :future-error)
+   #:future-done?
+   #:future-result
+   #:future-error)
 
   ;; `future' class
   (:export
-   :future)
+   #:future)
 
   ;; Method protocol
   (:export
-   :method-server
-   :method-name)
+   #:method-server
+   #:method-name)
 
   ;; Remote method protocol
   (:export
-   :call)
+   #:call)
 
   ;; Server Protocol
   (:export
-   :server
-   :server-methods
-   :server-method)
+   #:server
+   #:server-methods
+   #:server-method)
 
   ;; `local-server' class
   (:export
-   :local-server
-   :make-local-server)
+   #:local-server
+   #:make-local-server)
 
   ;; `remove-server' class
   (:export
-   :remote-server
-   :make-remote-server)
+   #:remote-server
+   #:make-remote-server)
 
   ;; Convenience and utility macros
   (:export
-   :with-local-server
-   :with-methods
+   #:with-local-server
+   #:with-methods
 
-   :with-remote-server)
+   #:with-remote-server)
 
   (:documentation
    "This package contains implementations of communication patterns on

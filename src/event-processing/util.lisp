@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.event-processing)
+(cl:in-package #:rsb.event-processing)
 
 (defun merge-implementation-infos (&optional info1 info2)
   (cond

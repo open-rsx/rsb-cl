@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.filter)
+(cl:in-package #:rsb.filter)
 
 (defmethod find-filter-class ((spec (eql :type)))
   (find-class 'type-filter))

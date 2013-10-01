@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.event-processing.test)
+(cl:in-package #:rsb.event-processing.test)
 
 (deftestsuite error-policy-mixin-root (event-processing-root)
   ((simple-processor (make-instance 'error-policy-mixin)))

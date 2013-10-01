@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.socket)
+(cl:in-package #:rsb.transport.socket)
 
 (define-condition socket-bus-auto-connection-error (rsb-error
                                                     simple-error)

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsb.transport.socket)
+(cl:in-package #:rsb.transport.socket)
 
 (defvar *default-host* "localhost"
   "Default host used by the socket-based transport.")
