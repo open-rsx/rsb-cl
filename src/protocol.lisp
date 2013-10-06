@@ -113,10 +113,10 @@ the transport or transports it uses for this participation."))
 continuing in a best effort manner instead of signaling."
   (handler-bind
       (((or error bt:timeout)
-        #'(lambda (condition)
-            (warn "~@<Error during detaching of ~A: ~A~@:>"
-                  participant condition)
-            (continue))))
+        (lambda (condition)
+          (warn "~@<Error during detaching of ~A: ~A~@:>"
+                participant condition)
+          (continue))))
     (detach participant)))
 
 ;;; Default behavior

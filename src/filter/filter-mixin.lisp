@@ -15,6 +15,4 @@
 (defmethod initialize-instance :after ((instance filter-mixin)
                                        &key)
   (closer-mop:set-funcallable-instance-function
-   instance
-   #'(lambda (event)
-       (matches? instance event))))
+   instance (curry #'matches? instance)))

@@ -67,7 +67,7 @@ port. This helps ensuring proper cleanup.")
   smoke/client
 
   (ensure-cases (connector-class)
-      (mappend #'(lambda (class) (make-list 10 :initial-element class))
+      (mappend (lambda (class) (make-list 10 :initial-element class))
               '(in-pull-connector in-push-connector out-connector))
 
     (let* ((host        "localhost")
@@ -113,7 +113,7 @@ port. This helps ensuring proper cleanup.")
   smoke/server
 
   (ensure-cases (connector-class)
-      (mappend #'(lambda (class) (make-list 10 :initial-element class))
+      (mappend (lambda (class) (make-list 10 :initial-element class))
                '(in-pull-connector in-push-connector out-connector))
 
     (let* ((host        "localhost")

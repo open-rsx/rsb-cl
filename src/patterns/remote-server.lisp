@@ -34,10 +34,9 @@ server."))
 (defmethod initialize-instance :after ((instance remote-method)
                                        &key)
   (closer-mop:set-funcallable-instance-function
-   instance
-   #'(lambda (data-or-event &rest args)
-       (apply #'call (method-server instance) instance data-or-event
-              args))))
+   instance (lambda (data-or-event &rest args)
+              (apply #'call (method-server instance) instance data-or-event
+                     args))))
 
 (define-lazy-creation-method remote-method listener :return   ()  "reply")
 (define-lazy-creation-method remote-method informer :argument (t) "request")
@@ -48,32 +47,31 @@ server."))
 replies to method calls."
   (let+ (((&accessors-r/o (lock  %method-lock)
                           (calls %method-calls)) method))
-    (push #'(lambda (event)
-              ;; Check whether this is a direct call within a single
-              ;; thread.
-              (if *local-call*
-                  ;; If so, just store the result (unless that
-                  ;; happened already).
-                  (when (cdr *local-call*)
-                    (%call-result->future
-                     method (cadr *local-call*) event
-                     (cddr *local-call*) *local-call*)
-                    (setf (cdr *local-call*) nil))
-                  ;; Otherwise extract the call id, look up the call,
-                  ;; store the result and notify the caller.
-                  (let ((key  (%event-id->key
-                               (first (event-causes event))))
-                        (call))
-                    (when key
-                      ;; Remove the call.
-                      (bt:with-lock-held (lock)
-                        (when (setf call (gethash key calls))
-                          (remhash key calls)))
-                      ;; Store the received reply in the result
-                      ;; future.
-                      (when call
-                        (%call-result->future
-                         method (cadr call) event (cddr call) (car call)))))))
+    (push (lambda (event)
+            ;; Check whether this is a direct call within a single
+            ;; thread.
+            (if *local-call*
+                ;; If so, just store the result (unless that happened
+                ;; already).
+                (when (cdr *local-call*)
+                  (%call-result->future
+                   method (cadr *local-call*) event
+                   (cddr *local-call*) *local-call*)
+                  (setf (cdr *local-call*) nil))
+                ;; Otherwise extract the call id, look up the call,
+                ;; store the result and notify the caller.
+                (let ((key  (%event-id->key
+                             (first (event-causes event))))
+                      (call))
+                  (when key
+                    ;; Remove the call.
+                    (bt:with-lock-held (lock)
+                      (when (setf call (gethash key calls))
+                        (remhash key calls)))
+                    ;; Store the received reply in the result future.
+                    (when call
+                      (%call-result->future
+                       method (cadr call) event (cddr call) (car call)))))))
           (rsb.ep:handlers new-value))))
 
 (defmethod call ((server  t)

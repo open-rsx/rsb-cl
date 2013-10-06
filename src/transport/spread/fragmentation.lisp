@@ -198,17 +198,17 @@ MIN-AGE."))
   ;; Create a thread that periodically deletes partial assemblies.
   (setf (slot-value instance 'thread)
         (bt:make-thread
-         #'(lambda ()
-             (iter (until (slot-value instance 'stop?))
-                   (let ((age-limit (assembly-pool-age-limit instance)))
-                     (delete-partial-assemblies instance age-limit)
-                     (sleep (/ age-limit 4)))))))
+         (lambda ()
+           (iter (until (slot-value instance 'stop?))
+                 (let ((age-limit (assembly-pool-age-limit instance)))
+                   (delete-partial-assemblies instance age-limit)
+                   (sleep (/ age-limit 4)))))))
 
   ;; Terminate the thread that deletes partial assemblies.
-  (tg:finalize instance #'(lambda ()
-                            (with-slots (thread stop?) instance
-                              (setf stop? t)
-                              (bt:join-thread thread)))))
+  (tg:finalize instance (lambda ()
+                          (with-slots (thread stop?) instance
+                            (setf stop? t)
+                            (bt:join-thread thread)))))
 
 (defmethod assembly-pool-count :around ((pool pruning-assembly-pool))
   (bt:with-lock-held ((%assembly-pool-lock pool))

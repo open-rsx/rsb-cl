@@ -38,4 +38,4 @@ PROCESSOR."
 (defmacro with-error-policy ((processor) &body body)
   "Execute BODY with a condition handler that applies the error policy
 of processor."
-  `(invoke-with-error-policy ,processor #'(lambda () ,@body)))
+  `(invoke-with-error-policy ,processor (lambda () ,@body)))

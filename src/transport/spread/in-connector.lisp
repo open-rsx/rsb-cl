@@ -50,13 +50,13 @@ connector classes for Spread."))
     ;; Try to unpack MESSAGE into a `notification' instance. Signal
     ;; `decoding-error' if that fails.
     (handler-bind
-        ((error #'(lambda (condition)
-                    (error 'decoding-error
-                           :encoded          message
-                           :format-control   "~@<The data could not be ~
+        ((error (lambda (condition)
+                  (error 'decoding-error
+                         :encoded          message
+                         :format-control   "~@<The data could not be ~
 unpacked as a protocol buffer of kind ~S.~:@>"
-                           :format-arguments '(fragmented-notification)
-                           :cause            condition))))
+                         :format-arguments '(fragmented-notification)
+                         :cause            condition))))
       (setf notification (pb:unpack
                           buffer (make-instance 'fragmented-notification)
                           0 length)))
@@ -74,14 +74,14 @@ unpacked as a protocol buffer of kind ~S.~:@>"
     ;; 2. The notification does not form a complete event
     ;;    In this case, nil is returned.
     (handler-bind
-        ((error #'(lambda (condition)
-                    (error 'decoding-error
-                           :encoded          message
-                           :format-control   "~@<After unpacking, the ~
+        ((error (lambda (condition)
+                  (error 'decoding-error
+                         :encoded          message
+                         :format-control   "~@<After unpacking, the ~
 notification~_~A~_could not be converted into an event.~:@>"
-                           :format-arguments `(,(with-output-to-string (stream)
-                                                  (describe notification stream)))
-                           :cause            condition))))
+                         :format-arguments `(,(with-output-to-string (stream)
+                                                (describe notification stream)))
+                         :cause            condition))))
       (notification->event pool converter notification
                            :expose-wire-schema?  expose-wire-schema?
                            :expose-payload-size? expose-payload-size?))))

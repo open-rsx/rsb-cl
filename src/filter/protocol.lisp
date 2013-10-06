@@ -61,10 +61,10 @@ initarg. The value of this initarg is computed by recursively applying
                    &rest args
                    &key)
   (handler-bind
-      ((error #'(lambda (condition)
-                  (error 'filter-construction-error
-                         :spec  (cons spec args)
-                         :cause condition))))
+      ((error (lambda (condition)
+                (error 'filter-construction-error
+                       :spec  (cons spec args)
+                       :cause condition))))
     (apply #'make-filter spec args)))
 
 (defmethod filter ((spec list)

@@ -48,4 +48,4 @@ timeouts.
 If `*in-timeout?*' indicates that some other timeout is already active
 for the current thread, install the restart but do not establish a
 timeout. This is intended to prevent recursive timeouts."
-  `(invoke-with-restart-and-timeout ,timeout #'(lambda () ,@body)))
+  `(invoke-with-restart-and-timeout ,timeout (lambda () ,@body)))

@@ -76,8 +76,8 @@ connected to the bus."))
                                      (slot-names t)
                                      &key)
   (setf (%bus-proxy instance)
-        #'(lambda (connection data)
-            (handle instance (cons connection data)))))
+        (lambda (connection data)
+          (handle instance (cons connection data)))))
 
 ;;; State management
 
@@ -102,11 +102,11 @@ connected to the bus."))
               (log1 :info bus "Installing error policy for connection ~A"
                     connection)
               (setf (processor-error-policy connection)
-                    #'(lambda (condition)
-                        (declare (ignore condition))
-                        (log1 :info bus "Removing connection ~A after error policy" connection)
-                        (with-locked-bus (bus :connections? t)
-                          (removef (bus-connections bus) connection))))
+                    (lambda (condition)
+                      (declare (ignore condition))
+                      (log1 :info bus "Removing connection ~A after error policy" connection)
+                      (with-locked-bus (bus :connections? t)
+                        (removef (bus-connections bus) connection))))
 
               ;; Start the connection.
               (log1 :info bus "Starting connection ~A" connection)
@@ -167,10 +167,10 @@ connected to the bus."))
          (handlers (with-locked-bus (bus :connectors? t)
                      (copy-list (handlers bus))))
          (sinks    (remove-if-not
-                    #'(lambda (connector)
-                        (and (member (connector-direction connector)
-                                     '(:in-push :in-pull))
-                             (sub-scope? scope (connector-scope connector))))
+                    (lambda (connector)
+                      (and (member (connector-direction connector)
+                                   '(:in-push :in-pull))
+                           (sub-scope? scope (connector-scope connector))))
                     handlers)))
     (handle sinks data)))
 

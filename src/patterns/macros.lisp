@@ -43,20 +43,20 @@ variable."
                `(setf (server-method ,var ,name/string
                                      ,@(when (eq request-type :event)
                                          `(:argument :event)))
-                      #'(lambda (,@(when arg `(,arg-var)))
-                          (let (,@(when arg `((,arg ,arg-var))))
-                           ,@declarations
-                           ,@(when (and arg (not (eq request-type :event)))
-                                   `((check-type ,arg-var ,request-type)))
-                           ,@body)))
+                      (lambda (,@(when arg `(,arg-var)))
+                        (let (,@(when arg `((,arg ,arg-var))))
+                          ,@declarations
+                          ,@(when (and arg (not (eq request-type :event)))
+                              `((check-type ,arg-var ,request-type)))
+                          ,@body)))
                ;; Remove from server.
                `(when-let ((method (server-method ,var ,name/string :error? nil)))
                   (handler-bind
                       (((or error bt:timeout)
-                        #'(lambda (condition)
-                            (warn "~@<Error removing method ~S: ~A~@:>"
-                                  method condition)
-                            (continue))))
+                        (lambda (condition)
+                          (warn "~@<Error removing method ~S: ~A~@:>"
+                                method condition)
+                          (continue))))
                     (%remove-method-with-restart-and-timeout
                      ,var method)))))))
          (add-and-remove (mapcar #'process-one methods)))

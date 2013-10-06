@@ -33,17 +33,17 @@
   set-method
 
   (ensure-cases (name method args expected)
-      `(("foo"          ,#'(lambda ()) ()                   t)
-        ("foo"          ,#'(lambda ()) ()                   t)
+      `(("foo"          ,(lambda ()) ()                   t)
+        ("foo"          ,(lambda ()) ()                   t)
         ("foo"          nil            ()                   nil)
 
-        ("bar"          ,#'(lambda ()) (:argument :event)   t)
-        ("bar"          ,#'(lambda ()) (:argument :payload) t)
+        ("bar"          ,(lambda ()) (:argument :event)   t)
+        ("bar"          ,(lambda ()) (:argument :payload) t)
 
         ;; invalid method name => error
-        ("%invalidname" ,#'(lambda ()) ()                   :error)
+        ("%invalidname" ,(lambda ()) ()                   :error)
         ;; invalid argument style => error
-        ("bar"          ,#'(lambda ()) (:argument :foo)     :error))
+        ("bar"          ,(lambda ()) (:argument :foo)     :error))
 
     (if (eq expected :error)
         (ensure-condition 'type-error
@@ -66,12 +66,12 @@
 
   (let ((argument))
     (setf (server-method simple-server "echopayload")
-          #'(lambda (x) (setf argument x))
+          (lambda (x) (setf argument x))
           (server-method simple-server "echoevent"
                          :argument :event)
-          #'(lambda (x) (setf argument x) (event-data x))
+          (lambda (x) (setf argument x) (event-data x))
           (server-method simple-server "error")
-          #'(lambda (x) (error "intentional error")))
+          (lambda (x) (error "intentional error")))
 
     (ensure-cases (method arg expected-argument expected-result)
         '(("echopayload" "foo" "foo"  "foo")

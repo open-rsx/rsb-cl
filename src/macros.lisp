@@ -26,7 +26,7 @@ transfer."  kind)
        (check-type var symbol "a symbol")
 
        `(let ((,`,var (,',make-name ,`,scope-or-uri
-                                    ,,@(mapcar #'(lambda (arg) `,arg)
+                                    ,,@(mapcar (lambda (arg) `,arg)
                                                extra-args)
                                     ,@`,args)))
           (unwind-protect

@@ -51,7 +51,7 @@ instance.")
     (ensure-null (rsb.ep:handlers listener))
 
     ;; Test adding and removing a handler.
-    (let ((handler #'(lambda (event) (declare (ignore event)))))
+    (let ((handler (lambda (event) (declare (ignore event)))))
       (push handler (rsb.ep:handlers listener))
       (ensure-same (rsb.ep:handlers listener) (list handler)
                    :test #'equal)
@@ -75,7 +75,7 @@ instance.")
       (send-some informer)
 
       ;; Test receive with handlers
-      (push #'(lambda (event) (declare (ignore event)))
+      (push (lambda (event) (declare (ignore event)))
             (rsb.ep:handlers listener))
       (send-some informer))))
 

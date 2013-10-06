@@ -125,11 +125,11 @@ Return three values:
     ;; Setup the error hook of PARTICIPANT to be run for all errors
     ;; intercepted by CONFIGURATOR.
     (setf (rsb.ep:processor-error-policy configurator)
-          #'(lambda (condition)
-              (hooks:run-hook
-               (hooks:object-hook participant 'error-hook) condition)
-               ;; TODO(jmoringe): maybe (ignore-error) here?
-              ))
+          (lambda (condition)
+            (hooks:run-hook
+             (hooks:object-hook participant 'error-hook) condition)
+            ;; TODO(jmoringe): maybe (ignore-error) here?
+            ))
 
     (values participant configurator connectors)))
 

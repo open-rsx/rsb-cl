@@ -154,7 +154,7 @@ and bound to a variable named like the value of CLASS."
          (with-informer (informer ,scope t)
            ,@(maybe-wrap
               `(;; Install collecting error handler.
-                (push #'(lambda (condition) (push condition seen-errors) (continue))
+                (push (lambda (condition) (push condition seen-errors) (continue))
                       (hooks:hook-handlers (participant-error-hook ,class)))
                 ,@body))
            ;; Make sure the expected errors match the actually seen
@@ -212,13 +212,13 @@ certain code."))
                      (setf ,var-name t)
                      (handler-bind
                       ((restart-test-error
-                        #'(lambda (condition)
-                            (declare (ignore condition))
-                            (setf ,var-name nil)
-                            (invoke-restart
-                             (or (find-restart restart)
-                                 (error "~@<Restart ~S not found.~@:>"
-                                        restart))))))
-                           ,@body))))
+                        (lambda (condition)
+                          (declare (ignore condition))
+                          (setf ,var-name nil)
+                          (invoke-restart
+                           (or (find-restart restart)
+                               (error "~@<Restart ~S not found.~@:>"
+                                      restart))))))
+                       ,@body))))
              ,@(iter (for restart in restarts)
                      (collect `(do-one ',restart))))))))

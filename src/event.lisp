@@ -241,7 +241,7 @@ AT? is ignored."
          ((&flet make-printable (string)
             ;; Replace unprintable characters in STRING with ".".
             (substitute-if
-             #\. #'(lambda (char) (< (char-code char) 32)) string))))
+             #\. (lambda (char) (< (char-code char) 32)) string))))
     (format stream "~S~@[ (~D)~]"
             (etypecase data
               (string (make-printable

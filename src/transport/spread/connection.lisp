@@ -94,12 +94,12 @@ groups in which they are members."))
     ((with-spread-condition-translation (&body body)
        `(handler-bind
             ((network.spread:spread-error
-               #'(lambda (condition)
-                   (when (member (network.spread:spread-error-code condition)
-                                 '(:net-error-on-session :connection-closed))
-                     (error 'connection-unexpectedly-closed
-                            :connection connection
-                            :cause      condition)))))
+               (lambda (condition)
+                 (when (member (network.spread:spread-error-code condition)
+                               '(:net-error-on-session :connection-closed))
+                   (error 'connection-unexpectedly-closed
+                          :connection connection
+                          :cause      condition)))))
           ,@body)))
 
   (defmethod receive-message ((connection connection) (block? t))

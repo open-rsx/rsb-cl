@@ -175,12 +175,12 @@ construction fails due to the lack of a suitable converter, an error
 of the subtype `no-suitable-converter' is signaled."
   (handler-bind
       (((and error (not no-suitable-converter))
-        #'(lambda (condition)
-            (error 'connector-construction-failed
-                   :name      name
-                   :direction direction
-                   :args      args
-                   :cause     condition))))
+        (lambda (condition)
+          (error 'connector-construction-failed
+                 :name      name
+                 :direction direction
+                 :args      args
+                 :cause     condition))))
     (let* ((class     (find-connector-class name direction))
            (wire-type (connector-wire-type class))
            (converter (unless (eq wire-type t)
