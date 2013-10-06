@@ -11,7 +11,7 @@
 
 (defclass method-filter (filter-mixin)
   ((method :initarg  :method
-           :type     (or null string)
+           :type     (or null keyword)
            :reader   filter-method
            :documentation
            "Stores the method name to which the filter should restrict
@@ -27,12 +27,7 @@ method values are either strings which match events with identical
 method strings or NIL which matches events without methods."))
 
 (defmethod matches? ((filter method-filter) (event event))
-  (let ((filter-method (filter-method filter))
-        (event-method  (event-method event)))
-    (case filter-method
-      ((nil) (not event-method))
-      (t     (and event-method
-                  (string= event-method filter-method))))))
+  (eq (filter-method filter) (event-method event)))
 
 (defmethod print-object ((object method-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)
