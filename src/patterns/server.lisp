@@ -102,7 +102,7 @@ the scope of the created participant."
   ((transport-options :initarg  :transport-options
                       :type     list
                       :reader   server-transport-options
-                      :initform nil
+                      :initform '()
                       :documentation
                       "Stores the transport options that should be
 used by participants which implement the actual communication on

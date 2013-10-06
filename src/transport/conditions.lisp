@@ -120,7 +120,7 @@ contain a suitable one for the requested connector."))
              (maybe-shorten-sequence (decoding-error-encoded condition))))
        (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
                        ~_could not be decoded~
-                       ~/rsb:maybe-print-explanation/~
+                       ~/more-conditions:maybe-print-explanation/~
                        ~/more-conditions:maybe-print-cause/~@:>"
                (coerce data 'list) shortened?
                condition
@@ -139,7 +139,7 @@ into an `event' instance fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The event ~A could not be encoded into an ~
-                     octet-vector~/rsb:maybe-print-explanation/~
+                     octet-vector~/more-conditions:maybe-print-explanation/~
                      ~/more-conditions:maybe-print-cause/~@:>"
              (encoding-error-event      condition)
              condition

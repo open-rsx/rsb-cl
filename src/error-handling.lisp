@@ -28,7 +28,7 @@ timeout. This is intended to prevent recursive timeouts."
   (restart-case
       ;; Give THUNK TIMEOUT seconds to complete. If it takes longer,
       ;; allow continuing via the CONTINUE restart. If another timeout
-      ;; is active, call THUNK without timeout. This avoid race
+      ;; is active, call THUNK without timeout. This avoids race
       ;; conditions between timeouts and recursive timeout handling.
       (if *in-timeout?*
           (funcall thunk)

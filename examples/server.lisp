@@ -7,8 +7,8 @@
 ;; mark-start::body
 ;; For managing the lifetime of `local-server' instances (e.g. for
 ;; short-lived clients), the `with-local-server' macro can used. It
-;; will take care of disposing of the `remote-server' instance after
-;; it has been used, also in case of non-local exist.
+;; will take care of disposing of the `local-server' instance after it
+;; has been used, also in case of non-local exist.
 ;;
 ;; Methods can be managed similarly. After the `with-methods' form,
 ;; the methods are removed.

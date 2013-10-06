@@ -1,4 +1,4 @@
-;;;; variables.lisp ---
+;;;; variables.lisp --- Variables used in the patterns module.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;;;

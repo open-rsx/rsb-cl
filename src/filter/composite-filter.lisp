@@ -10,7 +10,7 @@
   ((children :initarg  :children
              :type     list
              :accessor filter-children
-             :initform nil
+             :initform '()
              :documentation
              "A list of subordinate filters."))
   (:metaclass closer-mop:funcallable-standard-class)

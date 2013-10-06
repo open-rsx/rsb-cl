@@ -1,4 +1,4 @@
-;;;; conditions.lisp --- Conditions used in the filter module of cl-rsb.
+;;;; conditions.lisp --- Conditions used in the filter module.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;;;
@@ -14,6 +14,8 @@
          :documentation
          "The filter specification for which the attempt to construct
 a filter instance failed."))
+  (:default-initargs
+   :spec (missing-required-initarg 'filter-construction-error :spec))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct filter based on ~

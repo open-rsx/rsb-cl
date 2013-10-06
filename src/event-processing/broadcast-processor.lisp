@@ -10,9 +10,10 @@
   ((handlers :initarg  :handlers
              :type     list
              :accessor handlers
-             :initform nil
+             :initform '()
              :documentation
-             ""))
+             "Stores a list of handlers to which events are dispatched
+              via `handle'."))
   (:documentation
    "Instances of this class maintain a list of handlers and dispatch
 events to these handlers. Methods on `handle' can be use to filter or

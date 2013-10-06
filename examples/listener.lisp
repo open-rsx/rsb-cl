@@ -14,7 +14,7 @@
 ;; macro can be used.
 ;; mark-start::with-listener
 (rsb:with-listener (listener "/example/informer")
-  (rsb::with-handler listener
+  (rsb:with-handler listener
       ((event)
        (format t "Received event: ~A~%" event))
     (sleep 20)))

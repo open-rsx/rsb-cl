@@ -86,8 +86,8 @@ connectors and processor."
 
     ;; Notify all connectors about the added filter. Unless all
     ;; connectors implemented the filter, add it to the processor.
-    (case (reduce #'merge-implementation-infos
-                  (map 'list (rcurry #'notify filter action) connectors))
+    (case (reduce #'merge-implementation-infos connectors
+                  :key (rcurry #'notify filter action))
       (:not-implemented
        (push filter (processor-filters processor))))
 

@@ -6,7 +6,7 @@
 
 (cl:in-package #:rsb.event-processing.test)
 
-(deftestsuite  rsb.event-processing.transform-mixin-root (event-processing-root)
+(deftestsuite rsb.event-processing.transform-mixin-root (event-processing-root)
   ()
   (:documentation
    "Unit tests for the `transform-mixin' processor mixin class.

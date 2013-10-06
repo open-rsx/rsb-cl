@@ -73,8 +73,7 @@ thread."))
                (handler-case
                    (bt:with-timeout (.1)
                      (bt:join-thread thread))
-                 (bt:timeout (condition)
-                   (declare (ignore condition))
+                 (bt:timeout ()
                    (log1 :warn connector "Interrupting receiver failed; retrying")))))))))
 
 (defmethod receive-messages :around ((connector threaded-receiver-mixin))
