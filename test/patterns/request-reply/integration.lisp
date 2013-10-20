@@ -83,10 +83,17 @@ execution.")
   (with-remote-server (remote-server url)
     ;; Invoke using `call' method
     (ensure-condition 'bt:timeout
+      (call remote-server "nosuchmethod" "does-not-matter"
+            :timeout .1))
+    (ensure-condition 'bt:timeout
       (future-result (call remote-server "nosuchmethod" "does-not-matter"
                            :block? nil)
                      :timeout .1))
+
     ;; Invoke using `funcall'
+    (ensure-condition 'bt:timeout
+      (funcall (server-method remote-server "nosuchmethod") "does-not-matter"
+               :timeout .1))
     (ensure-condition 'bt:timeout
       (future-result (funcall (server-method remote-server "nosuchmethod")
                               "does-not-matter"

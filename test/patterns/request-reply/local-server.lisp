@@ -6,6 +6,8 @@
 
 (cl:in-package #:rsb.patterns.request-reply.test)
 
+;;; `local-method' tests
+
 (deftestsuite local-method-root (patterns-request-reply-root)
   ()
   (:documentation
@@ -20,12 +22,27 @@
   (ensure-condition 'missing-required-initarg
     (make-instance 'local-method :scope (make-scope "/foo") :name "foo")))
 
-(deftestsuite local-server-root (patterns-request-reply-root)
+;;; `local-server' tests
+
+(deftestsuite local-server-root (patterns-request-reply-root
+                                 participant-suite)
   ((simple-server (make-instance 'local-server
                                  :scope             "/localserver"
                                  :transport-options '((:inprocess)))))
   (:documentation
    "Test suite for the `local-server' class."))
+
+(define-basic-participant-test-cases (:local-server
+                                      :check-transport-urls? nil)
+  '("/localserver/construction"
+    () () ()
+    "/localserver/construction")
+  '("inprocess://localhost/localserver/construction"
+    () () ()
+    "/localserver/construction")
+
+  ;; No transports => error
+  '("/" () () (:transports nil) error))
 
 (addtest (local-server-root
           :documentation
@@ -35,29 +52,24 @@
   (ensure-cases (name method args expected)
       `(("foo"          ,(lambda ()) ()                   t)
         ("foo"          ,(lambda ()) ()                   t)
-        ("foo"          nil            ()                   nil)
+        ("foo"          nil          ()                   nil)
 
         ("bar"          ,(lambda ()) (:argument :event)   t)
         ("bar"          ,(lambda ()) (:argument :payload) t)
 
-        ;; invalid method name => error
-        ("%invalidname" ,(lambda ()) ()                   :error)
-        ;; invalid argument style => error
-        ("bar"          ,(lambda ()) (:argument :foo)     :error))
+        ;; invalid method name => type-error
+        ("%invalidname" ,(lambda ()) ()                   type-error)
+        ;; invalid argument style => type-error
+        ("bar"          ,(lambda ()) (:argument :foo)     type-error))
 
-    (if (eq expected :error)
-        (ensure-condition 'type-error
-          (setf (apply #'server-method simple-server name args) method))
-        (let ((result-1 (setf (apply #'server-method simple-server name args) method))
-              (result-2 (server-method simple-server name
-                                       :error? nil)))
-          (if (eq expected t)
-              (progn
-                (ensure result-1)
-                (ensure result-2))
-              (progn
-                (ensure-same result-1 expected)
-                (ensure-same result-2 expected)))))))
+    (let+ (((&flet do-it ()
+              (values
+               (setf (apply #'server-method simple-server name args) method)
+               (server-method simple-server name :error? nil)))))
+      (case expected
+        (type-error (ensure-condition 'type-error (do-it)))
+        ((t)        (ensure (notany #'null (multiple-value-list (do-it)))))
+        (t          (ensure-same (do-it) (values expected expected)))))))
 
 (addtest (local-server-root
           :documentation
@@ -67,8 +79,7 @@
   (let ((argument))
     (setf (server-method simple-server "echopayload")
           (lambda (x) (setf argument x))
-          (server-method simple-server "echoevent"
-                         :argument :event)
+          (server-method simple-server "echoevent" :argument :event)
           (lambda (x) (setf argument x) (event-data x))
           (server-method simple-server "error")
           (lambda (x) (error "intentional error")))
@@ -79,9 +90,10 @@
           ("error"       "foo" :none  string))
 
       (setf argument :none)
-      (let* ((result      (call simple-server
+      (let* ((scope       (make-scope (list "localserver" method)))
+             (result      (call simple-server
                                 (server-method simple-server method)
-                                (make-event "/localserver" arg)))
+                                (make-event scope arg)))
              (result-data (event-data result)))
         (if (typep expected-argument '(and symbol (not keyword)))
             (ensure (typep argument expected-argument))

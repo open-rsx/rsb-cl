@@ -89,7 +89,9 @@ that test participant classes."))
    (puri:uri "inprocess:/rsbtest/participantcreation/restarts/error"))
   "A special URI used in test of participant creation restarts.")
 
-(defun check-participant (participant expected-kind scope)
+(defun check-participant (participant expected-kind scope
+                          &key
+                          (check-transport-urls? t))
   (ensure-same (participant-kind participant) expected-kind)
   (ensure-same (participant-scope participant) (make-scope scope)
                :test #'scope=)
@@ -97,19 +99,22 @@ that test participant classes."))
   ;; URI stuff
   (relative-url participant)
   (abstract-uri participant)
-  (let ((urls (transport-specific-urls participant)))
-    (ensure (length= 1 urls)
-            :report    "~@<The participant has ~D transport-specific ~
-                        URLs (~{~A~^, ~}), not ~D.~@:>"
-            :arguments ((length urls) urls 1))))
+  (when check-transport-urls?
+    (let ((urls (transport-specific-urls participant)))
+      (ensure (length= 1 urls)
+              :report    "~@<The participant has ~D transport-specific ~
+                          URLs (~{~A~^, ~}), not ~D.~@:>"
+              :arguments ((length urls) urls 1)))))
 
-(defmacro define-basic-participant-test-cases (class &body cases)
+(defmacro define-basic-participant-test-cases (class-and-options &body cases)
   "Define basic test cases for the participant subclass designated by
    CLASS."
-  (let ((suite-name (symbolicate class "-ROOT"))
-        (make-name  (symbolicate "MAKE-" class))
-        (with-name  (symbolicate "WITH-" class))
-        (kind       (make-keyword class)))
+  (let+ (((class &key (check-transport-urls? t))
+          (ensure-list class-and-options))
+         (suite-name (symbolicate class "-ROOT"))
+         (make-name  (symbolicate "MAKE-" class))
+         (with-name  (symbolicate "WITH-" class))
+         (kind       (make-keyword class)))
     `(progn
        (addtest (,suite-name
                  :documentation
@@ -126,7 +131,9 @@ that test participant classes."))
                (error (ensure-condition error
                         (detach/ignore-errors (do-it))))
                (t     (with-participant (participant (do-it))
-                        (check-participant participant ,kind expected-scope)))))))
+                        (check-participant
+                         participant ,kind expected-scope
+                         :check-transport-urls? ,check-transport-urls?)))))))
 
        (addtest (,suite-name
                  :documentation
@@ -143,7 +150,9 @@ that test participant classes."))
                (error (ensure-condition error
                         (detach/ignore-errors (do-it))))
                (t     (with-participant (participant (do-it))
-                        (check-participant participant ,kind expected-scope)))))))
+                        (check-participant
+                         participant ,kind expected-scope
+                         :check-transport-urls? ,check-transport-urls?)))))))
 
        (define-restart-method-test-case
            (,make-name ((scope-or-uri (eql +restart-test-scope+))

@@ -82,15 +82,16 @@
         ("foo"          ,simple-method ,simple-method)
         ("foo"          nil            nil)
 
-        ;; invalid method name => error
-        ("%invalidname" ,simple-method :error))
+        ;; invalid method name => type-error
+        ("%invalidname" ,simple-method type-error))
 
-    (if (eq expected :error)
-        (ensure-condition 'type-error
-          (setf (server-method simple-server name) method))
+    (case expected
+      (type-error
+       (ensure-condition 'type-error
+         (setf (server-method simple-server name) method)))
 
-        (let ((result-1 (setf (server-method simple-server name) method))
-              (result-2 (server-method simple-server name
-                                       :error? nil)))
-          (ensure-same result-1 expected)
-          (ensure-same result-2 expected)))))
+      (t
+       (let ((result-1 (setf (server-method simple-server name) method))
+             (result-2 (server-method simple-server name :error? nil)))
+         (ensure-same result-1 expected)
+         (ensure-same result-2 expected))))))

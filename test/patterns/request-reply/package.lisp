@@ -20,7 +20,8 @@
 
   (:import-from #:rsb.patterns.request-reply
    #:method1
-   #:local-method)
+   #:local-method
+   #:remote-method)
 
   (:documentation
    "This package contains unit tests for the patterns.request-reply

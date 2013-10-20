@@ -541,6 +541,8 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package"))
                               (:file       "local-server"
                                :depends-on ("package"))
+                              (:file       "remote-server"
+                               :depends-on ("package"))
                               (:file       "macros"
                                :depends-on ("package"))
 

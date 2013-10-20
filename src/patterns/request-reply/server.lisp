@@ -183,6 +183,9 @@ generic support for retrieving, adding and removing methods."))
                                          &rest args &key
                                          (transports (transport-options))
                                          (converters (default-converters)))
+  (unless transports
+    (error 'no-transports-error :scope scope))
+
   (apply #'call-next-method class prototype scope
          :converters        converters
          :transport-options transports
