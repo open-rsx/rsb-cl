@@ -30,8 +30,8 @@ log message respectively. "
                 (format stream "~@<Log a message and ignore the failed ~
                                 sending attempt and continue with the ~
                                 next notification.~@:>"))
-      (log1 :warn connector "Failed to send a notification~@[: ~_~A~]"
-            condition)
+      (log:warn "~@<~A failed to send a notification~@[: ~_~A~]~@:>"
+                connector condition)
       nil)
     (continue (&optional condition)
       :test   (lambda (condition)
@@ -55,8 +55,8 @@ emitting a log message respectively."
                 (format stream "~@<Log a message and ignore the ~
                                 failed encoding and continue with the ~
                                 next event.~@:>"))
-      (log1 :warn connector "Failed to encode an event~@[: ~_~A~]"
-            condition)
+      (log:warn "~@<~A failed to encode an event~@[: ~_~A~]~@:>"
+                connector condition)
       nil)
     (continue (&optional condition)
       :report (lambda (stream)
@@ -90,7 +90,8 @@ log message respectively. "
                                       the failed receiving attempt and ~
                                       continue with the next ~
                                       notification.~@:>"))
-            (log1 :warn connector "Failed to receive a notification~@[: ~_~A~]" condition)
+            (log:warn "~@<~A failed to receive a notification~@[: ~_~A~]~@:>"
+                      connector condition)
             nil)
           (continue (&optional condition)
             :test   (lambda (condition)
@@ -115,7 +116,8 @@ but with and without emitting a log message respectively."
                 (format stream "~@<Log a message and ignore the ~
                                 failed decoding and continue with the ~
                                 next event.~@:>"))
-      (log1 :warn connector "Failed to decode a notification~@[: ~_~A~]" condition)
+      (log:warn "~@<~A failed to decode a notification~@[: ~_~A~]~@:>"
+                connector condition)
       nil)
     (continue (&optional condition)
       :report (lambda (stream)

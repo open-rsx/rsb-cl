@@ -38,7 +38,7 @@ thread."))
            (control-mutex     connector-control-mutex)
            (control-condition connector-control-condition)) connector))
     ;; Launch the thread.
-    (log1 :info connector "Starting worker thread")
+    (log:info "~@<~A is starting worker thread~@:>" connector)
     (bt:make-thread (curry #'receive-messages connector)
                     :name (format nil "Worker for ~A" connector))
 
@@ -55,7 +55,7 @@ thread."))
         ;; If this is called from the receiver thread, there is no
         ;; need for an interruption. We can just unwind normally.
         ((eq thread (bt:current-thread))
-         (log1 :info connector "In receiver thread; aborting")
+         (log:info "~@<~A is in receiver thread; aborting~@:>" connector)
          (exit-receiver))
 
         ((bt:thread-alive-p thread)
@@ -63,18 +63,21 @@ thread."))
          ;; fails. Retry in such cases.
          (iter (while (bt:thread-alive-p thread))
                ;; Interrupt the receiver thread and abort.
-               (log1 :info connector "Interrupting receiver thread with abort")
+               (log:info "~@<~A is interrupting receiver thread with abort~@:>"
+                         connector)
                (ignore-errors
                 (bt:interrupt-thread thread #'exit-receiver))
 
                ;; The thread should be terminating or already have
                ;; terminated.
-               (log1 :info connector "Joining receiver thread")
+               (log:info "~@<~A is joining receiver thread~@:>"
+                         connector)
                (handler-case
                    (bt:with-timeout (.1)
                      (bt:join-thread thread))
                  (bt:timeout ()
-                   (log1 :warn connector "Interrupting receiver failed; retrying")))))))))
+                   (log:warn "~@<~A is interrupting receiver failed; retrying~@:>"
+                             connector)))))))))
 
 (defmethod receive-messages :around ((connector threaded-receiver-mixin))
   "Catch the 'terminate tag that is thrown to indicate interruption
@@ -89,11 +92,11 @@ requests."
          (bt:with-lock-held (control-mutex)
            (setf thread (bt:current-thread))
            (bt:condition-notify control-condition)))
-       (log1 :info connector "Entering receive loop")
+       (log:info "~@<~A is entering receive loop~@:>" connector)
        (call-next-method))
     (abort (&optional condition)
       (declare (ignore condition))))
-  (log1 :info connector "Left receive loop"))
+  (log:info "~@<~A left receive loop~@:>" connector))
 
 (defun exit-receiver ()
   "Cause a receiver thread to exit. Has to be called from the receiver

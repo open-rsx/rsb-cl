@@ -39,7 +39,8 @@ participant."))
 
     ;; Notify new connector regarding filters.
     (iter (for filter in filters)
-          (log1 :info configurator "Adding filter ~S to ~S" filter connector)
+          (log:trace "~@<~A is adding filter ~A to ~A~@:>"
+                     configurator filter connector)
           (unless (eq (notify connector filter :filter-added) :implemented)
             (pushnew filter (processor-filters processor))))
 
@@ -47,7 +48,8 @@ participant."))
     ;; CONNECTOR's handlers.
     (notify processor connector action)
 
-    (log1 :trace configurator "Connecting ~S -> ~S" connector processor)
+    (log:trace "~@<~A is connecting ~A -> ~A~@:>"
+               configurator connector processor)
     (push processor (handlers connector))))
 
 (defmethod notify ((configurator in-route-configurator)
@@ -58,14 +60,16 @@ participant."))
            (processor configurator-processor)) configurator))
     ;; Remove processor from connectors handlers and notify regarding
     ;; removed connector.
-    (log1 :trace configurator "Disconnecting ~S -> ~S" connector processor)
+    (log:trace "~@<~A is disconnecting ~A -> ~A~@:>"
+               configurator connector processor)
     (removef (handlers connector) processor)
 
     (notify processor connector action)
 
     ;; Notify remove connector regarding filters.
     (iter (for filter in filters)
-          (log1 :info configurator "Removing filter ~S from ~S" filter connector)
+          (log:trace "~@<~A is removing filter ~A from ~A~@:>"
+                     configurator filter connector)
           (notify connector filter :filter-removed))
 
     (call-next-method)))
@@ -121,12 +125,14 @@ connectors and processor."
                    (handler      t)
                    (action       (eql :handler-added)))
   (let ((processor (configurator-processor configurator)))
-    (log1 :trace configurator "Adding handler ~S to ~S" handler processor)
+    (log:trace "~@<~A is adding handler ~A to ~A~@:>"
+               configurator handler processor)
     (push handler (handlers processor))))
 
 (defmethod notify ((configurator in-route-configurator)
                    (handler      t)
                    (action       (eql :handler-removed)))
   (let ((processor (configurator-processor configurator)))
-    (log1 :trace configurator "Removing handler ~S from ~S" handler processor)
+    (log:trace "~@<~A is removing handler ~A from ~A~@:>"
+               configurator handler processor)
     (removef (handlers processor) handler)))

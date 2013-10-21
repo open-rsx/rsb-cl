@@ -26,7 +26,9 @@ handle conditions according to a client-supplied policy."))
                                (condition t))
   (if-let ((policy (processor-error-policy processor)))
     (funcall policy condition)
-    (log1 :warn processor "Do not have a error handling policy installed; unwinding")))
+    (log:warn "~@<~A does not have a error handling policy installed; ~
+              unwinding~@:>"
+              processor)))
 
 (defun call-with-error-policy (processor thunk)
   "Invoke THUNK with a handler that applies the error policy of

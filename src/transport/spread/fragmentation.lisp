@@ -75,7 +75,8 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
                           (fragment  fragmented-notification))
   (let+ (((&accessors-r/o (fragments assembly-fragments)) assembly)
          ((&accessors-r/o (id fragmented-notification-data-part)) fragment))
-    (log1 :trace assembly "Processing fragment ~D" id)
+    (log:trace "~@<~A is processing fragment ~D~@:>"
+               assembly id)
     (cond
       ;; Bounds check for fragment id.
       ((not (<= 0 id (1- (length fragments))))
@@ -229,7 +230,8 @@ delete them."
       (when-let ((old (remove min-age (hash-table-values assemblies)
                               :test #'>=
                               :key  #'assembly-age)))
-        (log1 :info string "Removing ~D partial assembl~:@P" (length old))
+        (log:info "~@<~A is removing ~D partial assembl~:@P~@:>"
+                  string (length old))
         (iter (for assembly in old)
               (remhash (assembly-id assembly) assemblies))))))
 

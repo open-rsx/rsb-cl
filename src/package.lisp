@@ -245,10 +245,6 @@
 
    #:with-informer)
 
-  ;; Logging
-  (:export
-   #:log1)
-
   ;; Utility functions and macros
   (:export
    #:print-id

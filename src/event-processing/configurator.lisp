@@ -60,13 +60,13 @@ participant instance as its \"client\"."))
                                                    (configurator configurator))
   (let+ (((&accessors-r/o (processor  configurator-processor)
                           (connectors configurator-connectors)) configurator))
-    (log1 :trace configurator "Installing new error policy ~S in processor ~S"
-          new-value processor)
+    (log:trace "~@<~A is installing new error policy ~A in processor ~A~@:>"
+               configurator new-value processor)
     (setf (processor-error-policy processor) new-value)
 
     (iter (for connector in connectors)
-          (log1 :trace configurator "Installing new error policy ~S in connector ~S"
-                new-value connector)
+          (log:trace "~@<~A is installing new error policy ~A in connector ~A~@:>"
+                     configurator new-value connector)
           (setf (processor-error-policy connector) new-value))
 
     (call-next-method)))
@@ -78,8 +78,8 @@ participant instance as its \"client\"."))
         (call-next-method)
       (let ((added   (set-difference new-value old-value))
             (removed (set-difference old-value new-value)))
-        (log1 :trace configurator "Added   connectors ~{~S~^, ~}" added)
-        (log1 :trace configurator "Removed connectors ~{~S~^, ~}" removed)
+        (log:trace "~@<~A added connectors ~{~A~^, ~}~@:>" configurator added)
+        (log:trace "~@<~A removed connectors ~{~A~^, ~}~@:>" configurator removed)
 
         (iter (for connector in added)
               (notify configurator connector :connector-added))
@@ -99,8 +99,8 @@ participant instance as its \"client\"."))
 
 (defmethod detach ((configurator configurator))
   "Detach all connectors from the scope of CONFIGURATOR."
-  (log1 :trace configurator "Detaching ~D connector~:P"
-        (length (configurator-connectors configurator)))
+  (log:trace "~@<~A is detaching ~D connector~:P~@:>"
+             configurator (length (configurator-connectors configurator)))
   (iter (for connector in (configurator-connectors configurator))
         ;; Give each connector ten seconds to detach. If one takes
         ;; longer, skip it.
@@ -115,15 +115,18 @@ participant instance as its \"client\"."))
   (let+ (((&accessors-r/o
            (scope        configurator-scope)
            (error-policy processor-error-policy)) configurator))
-    (log1 :trace configurator "Installing new error policy ~S in connector ~S" error-policy connector)
+    (log:trace "~@<~A is installing new error policy ~A in connector ~A~@:>"
+               configurator error-policy connector)
     (setf (processor-error-policy connector) error-policy)
 
-    (log1 :trace configurator "Attaching connector ~S to scope ~S" connector scope)
+    (log:trace "~@<~A is attaching connector ~A to scope ~A~@:>"
+               configurator connector scope)
     (notify connector scope :attached)))
 
 (defmethod notify ((configurator configurator)
                    (connector    t)
                    (action       (eql :connector-removed)))
   (let+ (((&accessors-r/o (scope configurator-scope)) configurator))
-    (log1 :trace configurator "Detaching connector ~S from ~S" connector scope)
+    (log:trace "~@<~A is detaching connector ~A from ~A~@:>"
+               configurator connector scope)
     (notify connector scope :detached)))

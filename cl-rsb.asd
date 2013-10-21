@@ -155,7 +155,7 @@ See `version/list' for details on keyword parameters."
                 :closer-mop
                 :cl-hooks
                 :cl-dynamic-classes
-                :log5
+                :log4cl
 
                 :nibbles
                 :puri

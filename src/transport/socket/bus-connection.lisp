@@ -96,7 +96,8 @@ after calling NEW-VALUE."
 
 (defun handshake (connection phase role)
   (let ((stream (usocket:socket-stream (connection-socket connection))))
-    (log1 :info connection "Performing ~A role of ~A handshake" role phase)
+    (log:info "~@<~A is performing ~A role of ~A handshake~@:>"
+              connection role phase)
     ;; TODO temp until we implement shutdown protocol
     (if (and (eq phase :shutdown) (eq role :send))
         (progn
@@ -111,9 +112,10 @@ after calling NEW-VALUE."
           (:receive
            (unless (zerop (read-ub32/le stream))
              (error "~@<Protocol error during ~A role of ~A handshake; ~
-expected four 0 bytes.~@:>"
+                     expected four 0 bytes.~@:>"
                     role phase)))))
-    (log1 :info connection "Performed ~A role of ~A handshake" role phase)))
+    (log:info "~@<~A performed ~A role of ~A handshake~@:>"
+              connection role phase)))
 
 ;;; Receiving
 
@@ -123,13 +125,16 @@ expected four 0 bytes.~@:>"
          (length (handler-case ; TODO temp until we implement shutdown protocol
                      (read-ub32/le stream)
                    (end-of-file ()
+                     (log:info "~@<~A received end-of-file; treating ~
+                                as shutdown request~@:>"
+                               connection)
                      (funcall (processor-error-policy connection)
                               (make-condition 'connection-shutdown-requested
                                               :connection connection))
                      (abort)))))
     (if (zerop length)
         (progn
-          (log1 :info connection "Received shutdown request")
+          (log:info "~@<~A received shutdown request~@:>" connection)
           (funcall (processor-error-policy connection)
                    (make-condition 'connection-shutdown-requested
                                    :connection connection))
@@ -162,7 +167,7 @@ expected four 0 bytes.~@:>"
         (((error decoding-error)
           :encoded          (subseq data 0 length)
           :format-control   "~@<The wire-data ~S could not be unpacked ~
-as a protocol buffer of kind ~S.~:@>"
+                             as a protocol buffer of kind ~S.~:@>"
           :format-arguments (list (subseq data 0 length) 'notification)))
       (pb:unpack data 'notification 0 length))))
 
@@ -173,7 +178,7 @@ as a protocol buffer of kind ~S.~:@>"
   (declare (type (cons octet-vector (unsigned-byte 32)) notification))
 
   (when (connection-%closing? connection)
-    (log1 :info connection "dropping a message since it is closing")
+    (log:info "~@<~A is dropping a message since it is closing~@:>" connection)
     (return-from send-notification))
   (let ((stream (usocket:socket-stream (connection-socket connection))))
     (write-ub32/le (cdr notification) stream)
@@ -186,8 +191,8 @@ as a protocol buffer of kind ~S.~:@>"
   (with-condition-translation
       (((error encoding-error)
         :event            event
-        :format-control   "~@<The event ~S could not ~
-be packed using protocol buffer serialization.~@:>"
+        :format-control "~@<The event ~S could not be packed using ~
+                         protocol buffer serialization.~@:>"
         :format-arguments (list event)))
     (let* ((length (pb:packed-size event))
            (buffer (%ensure-send-buffer connection length)))
@@ -216,7 +221,7 @@ be packed using protocol buffer serialization.~@:>"
       (when closing?
         ;; If `disconnect' is called with `handshake' :send, it waits
         ;; for being called with `handshake' :receive from another
-        ;; thread.p
+        ;; thread.
         (when (and (eq closing? :send) (eq handshake :receive))
           (setf closing? handshake))
         (return-from disconnect nil))
@@ -242,17 +247,17 @@ be packed using protocol buffer serialization.~@:>"
             (sleep .001))
       (unless (eq closing? :receive)
         (warn "~@<Did not receive acknowledgment of shutdown ~
-handshake.~@:>")))
+               handshake.~@:>")))
 
     ;; After the shutdown protocol has hopefully been completed, stop
     ;; the receiver and close the socket.
-    (log1 :info connection "Stopping receiver thread")
+    (log:info "~@<~A is stopping receiver thread~@:>" connection)
     (unwind-protect
          ;; If this is called from the receiver thread itself, it will
          ;; just abort and unwind at this point.
          (stop-receiver connection)
       (ignore-errors
-       (log1 :info connection "Closing socket")
+       (log:info "~@<~A is closing socket~@:>" connection)
        (usocket:socket-close socket)))
     ;; Return t to indicate that we actually closed the connection.
     t))
@@ -263,7 +268,8 @@ handshake.~@:>")))
   (let+ (((&accessors-r/o (socket   connection-socket)
                           (closing? connection-closing?)) object))
     (print-unreadable-object (object stream :type t)
-      (format stream "~:[open~;closing: ~:*~S~] ~/rsb.transport.socket::print-socket/"
+      (format stream "~:[open~;closing: ~:*~S~] ~
+                      ~/rsb.transport.socket::print-socket/"
               closing? socket))))
 
 ;;; Utility functions
@@ -275,8 +281,6 @@ CONNECTION when invoked. "
       ;; Closing CONNECTION can fail (or at least signal an error) for
       ;; various reasons. Make sure the installed error policy is
       ;; still called.
-      (log1 :info connection "Maybe closing and executing error policy ~A due to condition: ~A"
-            function condition)
       (unwind-protect ; needed because `disconnect' may unwind.
            (handler-case
                ;; `disconnect' returns nil if CONNECTION was already
@@ -284,11 +288,17 @@ CONNECTION when invoked. "
                ;; FUNCTION (because somebody else did/does) and can
                ;; abort the receiver thread right away.
                (let ((handshake (shutdown-handshake-for condition)))
+                 (log:info "~@<~A is maybe disconnecting ~
+                            ~:[without~;~:*with ~A role of~] shutdown ~
+                            handshake and executing error policy ~A ~
+                            due to condition: ~A~@:>"
+                           connection handshake function condition)
                  (when (not (disconnect connection :handshake handshake))
                    (setf function nil)))
              (error (condition)
-               (log1 :warn connection "When executing error policy, error closing connection: ~A"
-                     condition)))
+               (log:warn "~@<When ~A executed error policy, error ~
+                          closing connection: ~A~@:>"
+                         connection condition)))
         ;; If necessary, execute the original error policy, FUNCTION.
         (when function
           (funcall function condition)))))

@@ -24,13 +24,15 @@ event processor for sending of events."))
                    (action       (eql :connector-added)))
   (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
     (call-next-method)
-    (log1 :trace configurator "Connecting ~S -> ~S" processor connector)
+    (log:trace "~@<~A is connecting ~A -> ~A~@:>"
+               configurator processor connector)
     (push connector (handlers processor))))
 
 (defmethod notify ((configurator out-route-configurator)
                    (connector    t)
                    (action       (eql :connector-removed)))
   (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
-    (log1 :trace configurator "Disconnecting ~S -> ~S" processor connector)
+    (log:trace "~@<~A is disconnecting ~A -> ~A~@:>"
+               configurator processor connector)
     (removef (handlers processor) connector)
     (call-next-method)))

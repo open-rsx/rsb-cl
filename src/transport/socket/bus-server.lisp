@@ -20,8 +20,8 @@ endpoint designated by HOST and PORT and attach CONNECTOR to it.
 Attaching CONNECTOR marks the `bus-server' instance as being in use
 and protects it from being destroyed in a race condition situation."
   (setf host "0.0.0.0")
-  (log1 :trace "Trying to obtain bus server ~A:~D for ~A"
-        host port connector)
+  (log:trace "~@<Trying to obtain bus server ~A:~D for ~A~@:>"
+             host port connector)
   (let ((options (make-connection-options connector))
         (key     (cons host port)))
     (bt:with-recursive-lock-held (*bus-servers-lock*)
@@ -63,21 +63,21 @@ closed."))
   (setf (bus-%socket instance)
         (usocket:socket-listen host port
                                :element-type '(unsigned-byte 8)))
-  (log1 :info instance "Opened listen socket")
+  (log:info "~@<~A has opened listen socket~@:>" instance)
 
-  (log1 :info instance "Starting acceptor thread")
+  (log:info "~@<~A is starting acceptor thread~@:>" instance)
   (start-receiver instance))
 
 (defmethod notify ((bus     bus-server)
                    (subject (eql t))
                    (action  (eql :detached)))
   ;; First, stop the acceptor thread to prevent access to the socket.
-  (log1 :info bus "Stopping acceptor thread")
+  (log:info "~@<~A is stopping acceptor thread~@:>" bus)
   (unwind-protect
        (stop-receiver bus)
 
     ;; Close the listener socket to prevent new client connections.
-    (log1 :info bus "Closing listen socket")
+    (log:info "~@<~A is closing listen socket~@:>" bus)
     (usocket:socket-close (bus-socket bus))
 
     ;; Close existing connections.
@@ -107,8 +107,8 @@ closed."))
                            :handshake :send
                            options)
                     connections))
-            (log1 :info bus "Accepted bus client ~/rsb.transport.socket::print-socket/"
-                  client-socket)))))
+            (log:info "~@<~A accepted bus client ~/rsb.transport.socket::print-socket/~@:>"
+                      bus client-socket)))))
 
 ;;;
 

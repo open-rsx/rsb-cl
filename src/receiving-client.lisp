@@ -29,8 +29,8 @@ listeners."
         (call-next-method)
       (let ((added   (set-difference new-value old-value))
             (removed (set-difference old-value new-value)))
-        (log1 :info participant "Added   filters ~{~S~^, ~}" added)
-        (log1 :info participant "Removed filters ~{~S~^, ~}" removed)
+        (log:info "~@<~A added filters ~{~A~^, ~}~@:>" participant added)
+        (log:info "~@<~A Removed filters ~{~A~^, ~}~@:>" participant removed)
 
         (iter (for filter in added)
               (rsb.ep:notify configurator filter :filter-added))

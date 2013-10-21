@@ -34,13 +34,15 @@ on `handle' in the usual way."))
 (defmethod notify ((processor pull-processor)
                    (connector t)
                    (action    (eql :connector-added)))
-  (log1 :info processor "Storing added connector ~S" connector)
+  (log:trace "~@<~A is storing added connector ~A~@:>"
+             processor connector)
   (push connector (processor-connectors processor)))
 
 (defmethod notify ((processor pull-processor)
                    (connector t)
                    (action    (eql :connector-removed)))
-  (log1 :info processor "Deleting removed connector ~S" connector)
+  (log:trace "~@<~A is deleting removed connector ~A~@:>"
+             processor connector)
   (removef (processor-connectors processor) connector :count 1))
 
 (defmethod emit :before ((processor pull-processor)

@@ -75,17 +75,20 @@ groups in which they are members."))
 
 (defmethod ref-group ((connection connection) (group string))
   (when (= (incf (gethash group (slot-value connection 'groups) 0)) 1)
-    (log1 :info connection "Joining group ~S" group)
+    (log:info "~@<~A is joining group ~A~@:>"
+              connection group)
     (network.spread:join (slot-value connection 'connection) group)))
 
 (defmethod unref-group :around ((connection connection) (group string))
   (if (gethash group (slot-value connection 'groups))
       (call-next-method)
-      (log1 :warn connection "Was asked to unreference unknown group ~S" group)))
+      (log:warn "~@<~A was asked to unreference unknown group ~A~@:>"
+                connection group)))
 
 (defmethod unref-group ((connection connection) (group string))
   (when (zerop (decf (gethash group (slot-value connection 'groups) 0)))
-    (log1 :info connection "leaving group ~S" group)
+    (log:info "~@<~A is leaving group ~A~@:>"
+              connection group)
     (remhash group (slot-value connection 'groups))
     (network.spread:leave (slot-value connection 'connection) group)))
 

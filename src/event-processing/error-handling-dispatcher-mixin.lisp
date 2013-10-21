@@ -28,7 +28,8 @@ of PROCESSOR, if any."
                   (format stream "~@<Log a message and ignore the ~
                                   failure to dispatch event ~A.~@:>"
                           event))
-        (log1 :warn processor "Failed to dispatch the event ~A~@[: ~A~]" event condition)
+        (log:warn "~@<~A failed to dispatch the event ~A~@[: ~A~]~@:>"
+                  processor event condition)
         nil)
       (continue ()
         :report (lambda (stream)

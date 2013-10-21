@@ -100,8 +100,9 @@ connected to the bus."))
         (call-next-method)
       (let ((added   (set-difference new-value old-value))
             (removed (set-difference old-value new-value)))
-        (log1 :info bus "Added   connections ~{~S~^, ~}" added)
-        (log1 :info bus "Removed connections ~{~S~^, ~}" removed)
+        (log:info "~@<~A~:@_added   connections ~{~A~^, ~}~:@_removed ~
+                   connections ~{~A~^, ~}~@:>"
+                  bus added removed)
 
         ;; Install our handler and error policy in added connections.
         (iter (for connection in added)
@@ -109,25 +110,28 @@ connected to the bus."))
               (push (curry proxy connection) (handlers connection))
 
               ;; Install an error policy that removes the connection.
-              (log1 :info bus "Installing error policy for connection ~A"
-                    connection)
+              (log:info  "~@<~A is installing error policy for connection ~A~@:>"
+                         bus connection)
               (setf (processor-error-policy connection)
                     (lambda (condition)
                       (declare (ignore condition))
-                      (log1 :info bus "Removing connection ~A after error policy" connection)
+                      (log:info "~@<~A is removing connection ~A after error policy~@:>"
+                                 bus connection)
                       (with-locked-bus (bus :connections? t)
                         (removef (bus-connections bus) connection))
                       (close-removed-connections bus)))
 
               ;; Start the connection.
-              (log1 :info bus "Starting connection ~A" connection)
+              (log:info "~@<~A is starting connection ~A~@:>"
+                        bus connection)
               (start-receiver connection))
 
         ;; Close removed connections.
         (iter (for connection in removed)
               ;; Prevent the error handling from being executed
               ;; concurrently/recursively.
-              (log1 :info bus "Maybe closing connection ~A after remove" connection)
+              (log:info "~@<~A may be closing connection ~A after remove~@:>"
+                        bus connection)
               (setf (handlers connection) '())
               (lparallel.queue:push-queue
                connection (bus-%removed-connections bus)))))))
@@ -139,25 +143,25 @@ connected to the bus."))
         (call-next-method)
       (cond
         ((and old-value (not new-value))
-         (log1 :info bus "No more connectors")
+         (log:info "~@<~A has no more connectors~@:>" bus)
          (notify bus t :detached))
         ((and (not old-value) new-value)
-         (log1 :info bus "First connector")
+         (log:info "~@<~A got its first connector~@:>" bus)
          (notify bus t :attached))))))
 
 (defmethod notify ((connector rsb.transport:connector)
                    (bus       bus)
                    (action    (eql :attached)))
-  (log1 :info bus "Attaching connector ~A to bus provider ~A"
-        connector bus)
+  (log:info "~@<~A is attaching connector ~A to bus provider ~A~@:>"
+            bus connector bus)
   (with-locked-bus (bus)
     (push connector (bus-connectors bus))))
 
 (defmethod notify ((connector rsb.transport:connector)
                    (bus       bus)
                    (action    (eql :detached)))
-  (log1 :info bus "Detaching connector ~A from bus provider ~A"
-        connector bus)
+  (log:info "~@<~A is detaching connector ~A from bus provider ~A~@:>"
+            bus connector bus)
   (with-locked-bus (bus)
     (removef (bus-connectors bus) connector))
   (close-removed-connections bus))
@@ -173,13 +177,13 @@ connected to the bus."))
   (iter (for removed next (lparallel.queue:try-pop-queue
                            (bus-%removed-connections bus)))
         (while removed)
-        (log1 :info bus "Closing removed connection ~A" removed)
+        (log:info "~@<~A is closing removed connection ~A~@:>" bus removed)
         (handler-case (disconnect removed :handshake :send)
           (error (condition)
-            (log1 :warn bus "Encountered error closing ~
-                             connection ~A after remove: ~A"
-                  removed condition)))
-        (log1 :info bus "Closed removed connection ~A" removed)))
+            (log:warn "~@<~A encountered error closing ~
+                       connection ~A after remove: ~A~@:>"
+                      bus removed condition)))
+        (log:info "~@<~A closed removed connection ~A~@:>" bus removed)))
 
 ;;; Sending and receiving
 
