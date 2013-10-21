@@ -9,10 +9,33 @@
 (define-with-participant-macro remote-server)
 (define-with-participant-macro local-server)
 
-(defmacro with-methods ((var) methods &body body)
-  "Execute body with the methods defined by METHODS added to the
-server that is the value of VAR. METHODS is a list of items of the
-form
+(defun call-with-methods (server methods thunk)
+  (declare (type function thunk))
+  (let+ (((&flet+ add-one-method ((name request-type lambda))
+            (case request-type
+              (:event (setf (server-method server name :argument :event)
+                            lambda))
+              (t      (setf (server-method server name)
+                            lambda)))))
+         ((&flet+ remove-one-method ((name &ign &ign))
+            (when-let ((method (server-method server name :error? nil)))
+              (handler-bind
+                  (((or error bt:timeout)
+                     (lambda (condition)
+                       (warn "~@<Error removing method ~S: ~A~@:>"
+                             method condition)
+                       (continue))))
+                (%remove-method-with-restart-and-timeout
+                 server method))))))
+    (unwind-protect
+         (progn
+           (mapc #'add-one-method methods)
+           (funcall thunk))
+      (mapc #'remove-one-method methods))))
+
+(defmacro with-methods ((server) methods &body body)
+  "Execute body with the methods defined by METHODS added to
+SERVER. METHODS is a list of items of the form
 
   \(NAME ([ARG REQUEST-TYPE]) BODY)
 
@@ -27,41 +50,24 @@ the request event (instead of just the payload).
 If ARG and REQUEST-TYPE are omitted, the method does not accept
 arguments and consequently BODY cannot access any argument binding
 variable."
-  (check-type var symbol "a symbol")
-
   (let+ (((&flet+ process-one ((name (&optional arg (request-type t))
                                 &rest body))
-            (let+ ((name/string (string name))
-                   ((&values body declarations) (parse-body body))
-                   ((&with-gensyms arg-var)))
-              (check-type name/string  method-name "a valid method name")
-              (check-type arg          symbol      "a symbol")
-              (check-type request-type symbol      ":EVENT or a symbol naming a type")
+            (let+ ((name/thunk  (symbolicate name '#:-method-body))
+                   (name/string (string name))
+                   ((&with-gensyms arg-var))
+                   ((&values body declarations) (parse-body body)))
+              (check-type name/string  method-name      "a valid method name")
+              (check-type arg          symbol           "a symbol")
+              (check-type request-type (or symbol cons) ":EVENT or a type specifier")
 
-              (list
-               ;; Create method lambda and add to server.
-               `(setf (server-method ,var ,name/string
-                                     ,@(when (eq request-type :event)
-                                         `(:argument :event)))
-                      (lambda (,@(when arg `(,arg-var)))
-                        (let (,@(when arg `((,arg ,arg-var))))
-                          ,@declarations
-                          ,@(when (and arg (not (eq request-type :event)))
-                              `((check-type ,arg-var ,request-type)))
-                          ,@body)))
-               ;; Remove from server.
-               `(when-let ((method (server-method ,var ,name/string :error? nil)))
-                  (handler-bind
-                      (((or error bt:timeout)
-                        (lambda (condition)
-                          (warn "~@<Error removing method ~S: ~A~@:>"
-                                method condition)
-                          (continue))))
-                    (%remove-method-with-restart-and-timeout
-                     ,var method)))))))
-         (add-and-remove (mapcar #'process-one methods)))
-    `(unwind-protect
-          (progn
-            ,@(mapcar #'first add-and-remove)
-            ,@body)
-       ,@(mapcar #'second add-and-remove))))
+              `(list ,name/string ',request-type
+                     (named-lambda ,name/thunk (,@(when arg `(,arg-var)))
+                       ,@(when (and arg (not (member request-type '(:event t))))
+                           `((check-type ,arg-var ,request-type)))
+                       (let (,@(when arg `((,arg ,arg-var))))
+                         ,@declarations
+                         ,@body)))))))
+    `(flet ((with-methods-thunk () ,@body))
+       (declare (dynamic-extent #'with-methods-thunk))
+       (call-with-methods ,server (list ,@(mapcar #'process-one methods))
+                          #'with-methods-thunk))))

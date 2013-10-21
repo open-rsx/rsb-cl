@@ -26,10 +26,16 @@
         (("mymethod"     (foo string) foo)
          (:myothermethod (bar integer)
           (declare (ignore bar)))
-         ("noarg"        ()))
+         ("noarg"        ())
+         ("eventarg"     (baz :event)
+           (declare (ignore baz)))
+         ("notype"       (fez)
+           (declare (ignore fez))))
       (ensure (server-method server "mymethod"))
       (ensure (server-method server "MYOTHERMETHOD"))
-      (ensure (server-method server "noarg")))
+      (ensure (server-method server "noarg"))
+      (ensure (server-method server "eventarg"))
+      (ensure (server-method server "notype")))
     (ensure-null (server-methods server))))
 
 (addtest (with-methods-root
