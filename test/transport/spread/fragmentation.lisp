@@ -171,7 +171,7 @@ are added to an assembly.")
        count 1
        :test      #'=
        :report    "~@<After submitting a fragment, the count of the pool ~
-was ~D, not ~D.~@:>"
+                   was ~D, not ~D.~@:>"
        :arguments (count 1)))
     (sleep 2)
     (let ((count (assembly-pool-count pool)))
@@ -179,7 +179,7 @@ was ~D, not ~D.~@:>"
        count 0
        :test #'=
        :report    "~@<After submitting a fragment and waiting for it to ~
-get pruned, the count of the pool was ~D, not ~D.~@:>"
+                   get pruned, the count of the pool was ~D, not ~D.~@:>"
        :arguments (count 0)))))
 
 (addtest (pruning-assembly-pool-root

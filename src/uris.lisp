@@ -26,7 +26,7 @@ nil. If URI does not specify a transport, return nil."
           (let ((key (make-keyword (string-upcase name))))
             (if (member key '(:scheme :host :port) :test #'eq)
                 (warn "~@<Ignoring query-option ~S - use ~:*~(~A~) part ~
-of the URI instead.~@:>"
+                       of the URI instead.~@:>"
                       key)
                 (appending (list key value)))))))
 
@@ -67,7 +67,8 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)
       (error "~@<~S schema is not supported yet.~@:>"
              transport))
     (when fragment
-      (warn "~@<Ignoring fragment ~S in URI -> scope and options translation. URI was ~S~@:>"
+      (warn "~@<Ignoring fragment ~S in URI -> scope and options ~
+             translation. URI was ~S~@:>"
             fragment uri))
     (values (make-scope path)
             (mapcar (curry #'%merge-options uri-options)

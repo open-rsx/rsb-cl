@@ -54,7 +54,8 @@ connector classes for Spread."))
                   (error 'decoding-error
                          :encoded          message
                          :format-control   "~@<The data could not be ~
-unpacked as a protocol buffer of kind ~S.~:@>"
+                                            unpacked as a protocol ~
+                                            buffer of kind ~S.~:@>"
                          :format-arguments '(fragmented-notification)
                          :cause            condition))))
       (setf notification (pb:unpack
@@ -78,7 +79,9 @@ unpacked as a protocol buffer of kind ~S.~:@>"
                   (error 'decoding-error
                          :encoded          message
                          :format-control   "~@<After unpacking, the ~
-notification~_~A~_could not be converted into an event.~:@>"
+                                            notification~_~A~_could ~
+                                            not be converted into an ~
+                                            event.~:@>"
                          :format-arguments `(,(with-output-to-string (stream)
                                                 (describe notification stream)))
                          :cause            condition))))

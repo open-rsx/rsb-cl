@@ -61,7 +61,8 @@ queue received events for delivery."))
         (((error decoding-error)
           :encoded          (list notification) ; TODO(jmoringe): hack
           :format-control   "~@<After unpacking, the ~
-notification~_~A~_could not be converted into an event.~:@>"
+                             notification~_~A~_could not be converted ~
+                             into an event.~:@>"
           :format-arguments (list (with-output-to-string (stream)
                                     (describe notification stream)))))
       (notification->event

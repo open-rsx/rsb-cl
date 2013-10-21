@@ -81,7 +81,7 @@ socket. Should be incremented after each use.")
                    (ensure-same num expected
                                 :test      #'=
                                 :report    "~@<Bus was expected to have ~
-~D ~(~A~)~:P (not ~D)~:@>"
+                                            ~D ~(~A~)~:P (not ~D)~:@>"
                                 :arguments (expected title num)))))))
        ;; Ensure that connections of BUS match EXPECTED-CONNECTIONS.
        (check-thing :connection #'bus-connections expected-connections)

@@ -100,10 +100,12 @@
                      :compare-causes?           causes?
                      :data-test                 #'equal)
              expected
-             :report "~@<When compared ~:[without~;with~] sequence ~
-numbers, ~:[without~;with~] origins, ~:[without~;with~] timestamps and ~
-~:[without~;with~] causes, events ~A and ~A were ~:[not ~;~]equal, but ~
-expected ~:[not ~;~]to be.~@:>"
+             :report    "~@<When compared ~:[without~;with~] sequence ~
+                         numbers, ~:[without~;with~] origins, ~
+                         ~:[without~;with~] timestamps and ~
+                         ~:[without~;with~] causes, events ~A and ~A were ~
+                         ~:[not ~;~]equal, but expected ~:[not ~;~]to ~
+                         be.~@:>"
              :arguments (sequence-numbers? origins? timestamps? causes?
                          left right (not expected) expected))))))
 

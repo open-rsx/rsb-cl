@@ -113,7 +113,8 @@ next `domain->wire' method."
           (return (call-next-method)))
       (retry ()
         :report (lambda (stream)
-                  (format stream "~@<Retry converting ~A using converter ~A.~@:>"
+                  (format stream "~@<Retry converting ~A using ~
+                                  converter ~A.~@:>"
                           domain-object converter))
         nil)
       (use-value (value)

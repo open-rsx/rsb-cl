@@ -84,7 +84,7 @@
      (let ((urls (transport-specific-urls participant)))
        (ensure (length= 1 urls)
                :report    "~@<The participant has ~D transport-specific ~
-URLs (~{~A~^, ~}), not ~D.~@:>"
+                           URLs (~{~A~^, ~}), not ~D.~@:>"
                :arguments ((length urls) urls 1)))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
@@ -200,7 +200,7 @@ certain code."))
          (addtest (,suite-name
                    :documentation
                    ,(format nil "Smoke test for the :around method on ~
-`~(~A~)' provided by `~(~A~)'."
+                                 `~(~A~)' provided by `~(~A~)'."
                             method class))
            ,case-name
 

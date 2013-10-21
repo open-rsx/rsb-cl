@@ -17,12 +17,12 @@ connections associated to CONNECTOR."
   "Signal an error if the option plists BUS-OPTIONS and OPTIONS
 contain conflicting properties."
   (with-simple-restart (continue "~@<Ignore the incompatibility and ~
-use the existing bus object.~@:>")
+                                  use the existing bus object.~@:>")
     (iter (for (key value) on options :by #'cddr)
           (let ((bus-value (getf bus-options key)))
             (unless (equalp bus-value value)
               (error "~@<Incompatible values for option ~S: current ~
-bus uses value ~S; requested value is ~S.~@:>"
+                      bus uses value ~S; requested value is ~S.~@:>"
                      key bus-value value))))))
 
 ;;; Printing utility functions

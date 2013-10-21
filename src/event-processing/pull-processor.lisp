@@ -50,7 +50,7 @@ connectors properly."
   (when (and (> (length (processor-connectors processor)) 1)
              block?)
     (warn "~@<Requested blocking emit for multiple connectors; This ~
-does not work properly, yet.~@:>")))
+           does not work properly, yet.~@:>")))
 
 (defmethod emit ((processor pull-processor)
                  (block?    t))

@@ -110,5 +110,5 @@ from CLASS."
           ,@(when-let ((description (documentation slot t)))
               `(:description ,description))))
       (error "~@<~S specified for option ~S, but no slot with ~
-initarg ~:*~S in class ~S.~@:>"
+              initarg ~:*~S in class ~S.~@:>"
              '&slot name class)))

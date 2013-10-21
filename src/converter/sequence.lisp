@@ -37,7 +37,7 @@
   (let ((child (wire->domain? converter wire-data wire-schema)))
     (unless child
       (error "~@<No converter could handle the wire-data ~S (in ~S ~
-wire-schema). Tried ~{~A~^, ~_~}~@:>"
+              wire-schema). Tried ~{~A~^, ~_~}~@:>"
              wire-data wire-schema converter)) ; TODO(jmoringe): more precise condition
     (wire->domain child wire-data wire-schema)))
 
@@ -46,5 +46,6 @@ wire-schema). Tried ~{~A~^, ~_~}~@:>"
   (let ((child (domain->wire? converter domain-object)))
     (unless child
       (error "~@<No converter could handle the domain-object ~S. Tried ~
-~{~A~^, ~_~}~@:>" domain-object converter)) ; TODO(jmoringe): more precise condition
+              ~{~A~^, ~_~}~@:>"
+             domain-object converter)) ; TODO(jmoringe): more precise condition
     (domain->wire child domain-object)))

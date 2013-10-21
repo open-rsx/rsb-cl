@@ -69,7 +69,8 @@ tests for filters."))
            (let ((result (matches? simple-filter event)))
              (ensure-same result expected
                           :report    "~@<The filter ~S ~:[did not ~
-match~;matched~] the event ~S, but should~:[ not~;~].~@:>"
+                                      match~;matched~] the event ~S, ~
+                                      but should~:[ not~;~].~@:>"
                           :arguments (simple-filter result event expected)))))
 
        (addtest (,suite-name
@@ -82,14 +83,17 @@ match~;matched~] the event ~S, but should~:[ not~;~].~@:>"
              (map 'list #'list events ',matches)
            (let ((result (funcall simple-filter event)))
              (ensure-same result expected
-                          :report "~@<When called as a function, the ~
-filter ~S ~:[did not match~;matched~] the event ~S, but should~:[ ~
-not~;~].~@:>"
+                          :report    "~@<When called as a function, the ~
+                                      filter ~S ~:[did not ~
+                                      match~;matched~] the event ~S, ~
+                                      but should~:[ not~;~].~@:>"
                           :arguments (simple-filter result event expected)))))
 
        (addtest (,suite-name
                  :documentation
-                 ,(format nil "Test method on `print-object' for the `~(~A~)' filter class."
+
+                 ,(format nil "Test method on `print-object' for the ~
+                               `~(~A~)' filter class."
                           class))
          print
 

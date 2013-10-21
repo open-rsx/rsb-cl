@@ -121,7 +121,7 @@ connector class."
      (addtest (,suite-name
           :documentation
           ,(format nil "Test whether `find-connector-class' can find ~
-the ~A connector class."
+                        the ~A connector class."
                    class))
        find-connector-class
 
@@ -132,7 +132,7 @@ the ~A connector class."
      (addtest (,suite-name
                :documentation
                ,(format nil "Test basic properties of the ~A connector ~
-class."
+                             class."
                         class))
        class
 
@@ -145,7 +145,7 @@ class."
      (addtest (,suite-name
                :documentation
                ,(format nil "Test basic properties of a ~A connector ~
-instance."
+                             instance."
                         class))
        construct
 

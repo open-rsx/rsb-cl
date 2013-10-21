@@ -128,8 +128,8 @@ continuing in a best effort manner instead of signaling."
 converter."
   (or (call-next-method)
       (when error?
-        (error "~@<Participant ~A does not have a converter for
-wire-type ~A.~@:>"
+        (error "~@<Participant ~A does not have a converter for ~
+                wire-type ~A.~@:>"
                participant wire-type))))
 
 ;;; Common protocol for receiving participants

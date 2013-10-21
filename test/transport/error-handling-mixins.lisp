@@ -24,7 +24,7 @@
             (addtest (,suite-name
                       :documentation
                       `(format nil "Smoke test for the error handling ~
-performed by the `~(~A~)' class."
+                                    performed by the `~(~A~)' class."
                                class))
               smoke
 
