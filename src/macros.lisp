@@ -38,18 +38,28 @@
 (define-with-participant-macro reader)
 (define-with-participant-macro informer type)
 
+(defun call-with-handler (listener handler thunk)
+  "Call THUNK with HANDLER temporarily added to the handlers of
+   LISTENER."
+  (declare (type function handler thunk))
+  (unwind-protect
+       (progn
+         (push handler (rsb.ep:handlers listener))
+         (funcall thunk))
+    (removef (rsb.ep:handlers listener) handler
+             :test #'eq :count 1)))
+
 (defmacro with-handler (listener
                         ((event-var) &body handler-body)
                         &body body)
-  "Execute BODY with LISTENER enabled."
+  "Execute BODY with a handler executing HANDLER-BODY added to the
+   handlers of LISTENER. The handler is of the form
+
+     (lambda (EVENT-VAR) HANDLER-BODY)"
   (check-type event-var symbol "a symbol")
 
-  (once-only (listener)
-    (with-unique-names (handler-var)
-      `(let ((,handler-var (function (lambda (,event-var)
-                             ,@handler-body))))
-         (unwind-protect
-              (progn
-                (push ,handler-var (rsb.ep:handlers ,listener))
-                ,@body)
-           (removef (rsb.ep:handlers ,listener) ,handler-var))))))
+  `(flet ((with-handler-handler (,event-var) ,@handler-body)
+          (with-handler-thunk () ,@body))
+     (declare (dynamic-extent #'with-handler-handler #'with-handler-thunk))
+     (call-with-handler
+      ,listener #'with-handler-handler #'with-handler-thunk)))

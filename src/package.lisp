@@ -237,6 +237,7 @@
    #:with-reader
 
    #:with-listener
+   #:call-with-handler
    #:with-handler
 
    #:with-informer)

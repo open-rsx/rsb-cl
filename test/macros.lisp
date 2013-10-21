@@ -23,6 +23,19 @@
 
 (addtest (macros-root
           :documentation
+          "Smoke test for the `with-handler' macro.")
+  with-handler-smoke
+
+  (let ((received '()))
+    (with-listener (listener "inprocess:/withhandler")
+      (with-handler listener ((event) (push event received))
+        (ensure (typep listener 'listener))
+        (check-participant listener "/withhandler")
+        (with-informer (i "inprocess:/withhandler" t) (send i 1))))
+    (ensure-same (length received) 1)))
+
+(addtest (macros-root
+          :documentation
           "Smoke test for the `with-reader' macro.")
   with-reader-smoke
 
