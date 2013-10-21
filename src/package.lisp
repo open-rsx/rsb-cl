@@ -232,6 +232,9 @@
 
   ;; Macros
   (:export
+   #:call-with-participant
+   #:with-participant
+
    #:define-with-participant-macro
 
    #:with-reader

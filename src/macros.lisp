@@ -6,6 +6,22 @@
 
 (cl:in-package #:rsb)
 
+(defun call-with-participant (participant thunk)
+  "Call THUNK with PARTICIPANT as the sole argument. Deactivate
+   PARTICIPANT when THUNK returns or a control transfer occurs."
+  (declare (type function thunk))
+  (unwind-protect
+       (funcall thunk participant)
+    (detach/ignore-errors participant)))
+
+(defmacro with-participant ((var participant) &body body)
+  "Execute BODY with VAR bound to PARTICIPANT; Deactivate the
+   participant when the execution of BODY ends normally or because of
+   a control transfer."
+  `(flet ((with-participant-thunk (,var) ,@body))
+     (declare (dynamic-extent #'with-participant-thunk))
+     (call-with-participant ,participant #'with-participant-thunk)))
+
 (defmacro define-with-participant-macro (kind &rest extra-args)
   (let ((name      (symbolicate "WITH-" kind))
         (make-name (symbolicate "MAKE-" kind)))
@@ -26,13 +42,11 @@
        (declare (ignore transports converters transform))
        (check-type var symbol "a symbol")
 
-       `(let ((,`,var (,',make-name ,`,scope-or-uri
-                                    ,,@(mapcar (lambda (arg) `,arg)
-                                               extra-args)
-                                    ,@`,args)))
-          (unwind-protect
-               (progn ,@`,body)
-            (detach/ignore-errors ,`,var))))))
+       `(with-participant (,`,var (,',make-name ,`,scope-or-uri
+                                                ,,@(mapcar (lambda (arg) `,arg)
+                                                           extra-args)
+                                                ,@`,args))
+          ,@`,body))))
 
 (define-with-participant-macro listener)
 (define-with-participant-macro reader)
