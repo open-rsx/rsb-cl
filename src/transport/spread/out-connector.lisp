@@ -17,15 +17,11 @@
                       :reader   connector-max-fragment-size
                       :initform 100000
                       :documentation
-                      "Stores the maximum fragment size the connector
-should use."))
+                      "The maximum payload size that may be send in a single notification. The value of this options has to be chosen such that the combined sizes of payload and envelope data of notifications remain below the maximum message size allowed by spread."))
   (:metaclass connector-class)
   (:direction :out)
   (:options
-   (:max-fragment-size positive-fixnum
-    :default 100000
-    :description
-    "The maximum payload size that may be send in a single notification. The value of this options has to be chosen such that the combined sizes of payload and envelope data of notifications remain below the maximum message size allowed by spread."))
+   (:max-fragment-size &slot))
   (:documentation
    "A connector for sending data over spread."))
 
