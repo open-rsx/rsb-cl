@@ -53,10 +53,10 @@
   (effective-options
    (iter (for  line     in-stream stream :using #'read-line)
 	 (for  line-num :from     1)
-	 (with section  =         nil)
-	 (let+ ((content (subseq line 0 (position #\# line)))
-		((&flet trim (string)
-		   (string-trim '(#\Space) string))))
+	 (with section	=         nil)
+	 (let+ (((&flet trim (string)
+		   (string-trim '(#\Space #\Tab) string)))
+		(content (trim (subseq line 0 (position #\# line)))))
 	   (cond
 	     ;; Empty/comment-only line
 	     ((emptyp content))
@@ -66,10 +66,11 @@
 	      (setf section (string->option-name
 			     (subseq content 1 (1- (length content))))))
 	     ;; Value
-	     ((= (funcall #'count #\= content) 1) ;; iterate :(
-	      (let+ (((name value)
-		      (map 'list #'trim (split-sequence #\= content)))
-		     (name (string->option-name name)))
+	     ((find #\= content)
+	      (let+ ((index (position #\= content))
+		     (name  (string->option-name
+			     (trim (subseq content 0 index))))
+		     (value (trim (subseq content (1+ index)))))
 		(collect (cons (append section name) value))))
 	     ;; Invalid
 	     (t
