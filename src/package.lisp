@@ -31,6 +31,8 @@
 
   ;; Conditions
   (:export
+   #:rsb-condition
+
    #:rsb-error
 
    #:communication-error

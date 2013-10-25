@@ -106,7 +106,7 @@ the scope of the created participant."
                       :documentation
                       "Stores the transport options that should be
 used by participants which implement the actual communication on
-behalf of the server.")
+behalf of the server.") ; TODO(jmoringe, 2012-07-26): same problem in source/sink
    (rsb::transform    :type     transform-specification)
    (methods           :initarg  :methods
                       :type     hash-table

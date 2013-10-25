@@ -6,13 +6,20 @@
 
 (cl:in-package #:rsb)
 
-;;; RSB-specific errors
+;;; RSB-specific conditions
 
-(define-condition rsb-error (error)
+(define-condition rsb-condition (condition)
   ()
   (:documentation
    "This class should be mixed into all RSB-related condition
-classes."))
+    classes."))
+
+(define-condition rsb-error (rsb-condition
+                             error)
+  ()
+  (:documentation
+   "This class should be mixed into all RSB-related error condition
+    classes."))
 
 (define-condition communication-error (rsb-error)
   ()
