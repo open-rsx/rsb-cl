@@ -6,6 +6,8 @@
 
 (cl:in-package #:rsb.patterns.data-flow)
 
+;;; Data-flow conditions
+
 (define-condition flow-condition (rsb-condition)
   ()
   (:documentation
@@ -96,3 +98,16 @@
 
   (define-watermark-conditions high)
   (define-watermark-conditions low))
+
+;;; Data-flow participant condition
+
+(define-condition source-creation-error (informer-creation-failed)
+  ()
+  (:documentation
+   "This error is signaled when an attempt to create a source
+    fails."))
+
+(define-condition sink-creation-error (listener-creation-failed)
+  ()
+  (:documentation
+   "This error is signaled when an attempt to create a sink fails."))

@@ -14,6 +14,10 @@
 
    #:rsb)
 
+  ;; types
+  (:export
+   #:flow-state)
+
   ;; conditions
   (:export
    #:flow-condition

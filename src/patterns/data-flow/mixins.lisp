@@ -103,7 +103,10 @@
                                      transports)
   (let+ (((&accessors (informer %flow-informer)
                       (listener %flow-listener)) instance)
-         (flow-scope (merge-scopes scope "/__rsb/flow"))) ; TODO(jmoringe, 2012-10-18): define a constant
+         (flow-scope (merge-scopes scope "/__rsb/flow")))
+    ;; TODO(jmoringe, 2012-10-18): define a constant
+    ;; TODO can we append the "subject" scope to avoid n:m flow-event
+    ;; flooding?
     (setf informer (make-informer flow-scope t
                                   :converters converters
                                   :transports transports)
@@ -112,7 +115,7 @@
                                   :transports transports)) ; TODO(jmoringe, 2012-07-26): forward error hooks
     (push (curry #'handle-flow-event instance) (rsb.ep:handlers listener))))
 
-(defmethod detach :before ((participant flow-mixin))
+(defmethod detach :before ((participant flow-mixin)) ; TODO why :before instead of call-next-method?
   (let+ (((&flet detach-one (participant)
             (with-restart-and-timeout (10)
               (detach participant)))))

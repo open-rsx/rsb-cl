@@ -105,7 +105,8 @@ these methods are exposed for remote clients."))
                               (converters (default-converters))
                               transform)
   "Make and return a `local-server' instance that provides a service
-at the scope SCOPE."
+   at the scope SCOPE."
+  ;; TODO local-server-creation-failed?
   (make-instance 'local-server
                  :scope             scope
                  :converters        converters

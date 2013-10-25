@@ -185,6 +185,9 @@ call it."
                                (transports (transport-options))
                                (converters (default-converters))
                                transform)
+  "Make and return a `remote-server' instance that can use a service
+   provided at the scope SCOPE."
+  ;; TODO remote-server-creation-failed?
   (make-instance 'remote-server
                  :scope             scope
                  :converters        converters

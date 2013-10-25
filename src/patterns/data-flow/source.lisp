@@ -6,7 +6,7 @@
 
 (cl:in-package #:rsb.patterns.data-flow)
 
-(progn
+(progn ; TODO move to some other file
   (rsb.common:load-idl
    "package rsb.protocol; message HighWatermarkReached { required string which = 1; }"
    :proto
@@ -44,7 +44,7 @@
 (defmethod send :around ((informer source)
                          (event    event)
                          &key
-                         (if-suspended (lambda (condition) (declare (ignore condition)) (retry)))
+                         (if-suspended (lambda (condition) (declare (ignore condition)) (retry))) ; TODO don't cons up a lambda every time
                          &allow-other-keys)
   "Return two values: if DATA has been sent:
 
@@ -54,7 +54,9 @@
 
      nil nil
 
-   if EVENT has not been sent."
+   if EVENT has not been sent.
+
+   TODO IF-SUSPENDED"
   (with-flow-state (informer :running :if-suspended if-suspended)
     (values (call-next-method) t)))
 
@@ -68,20 +70,38 @@
             (hooks:run-hook
              (hooks:object-hook participant 'flow-hook)
              (make-watermark-condition condition-class)))))
-    (etypecase (event-data event)
+    (etypecase (event-data event) ; TODO dispatch properly
 
       (rsb.protocol:high-watermark-reached
+       ;; Establish restarts for all possible reactions to the remote
+       ;; high-watermark-reached condition:
+       ;;
+       ;; continue
+       ;;   Do nothing; PARTICIPANT continues sending.
+       ;;
+       ;; abort
+       ;;   TODO probably stops PARTICIPANT alltogether, right?
+       ;;
+       ;; suspend
+       ;;   Suspend PARTICIPANT. This may be reversed when a remote
+       ;;   low-watermark-reached condition is received.
+       ;;
+       ;; then let the handlers attached to the data-flow hook decide
+       ;; how to react.
        (restart-case
            (run-hooks 'high-watermark-reached/remote)
          (continue (&optional condition)
+           ;; TODO report
            (declare (ignore condition))
            )
 
          (abort (&optional condition)
+           ;; TODO report
            (declare (ignore condition))
            )
 
-         (suspend ()
+         (suspend () ; TODO export symbol
+           ;; TODO report
            (suspend participant))))
 
       (rsb.protocol:low-watermark-reached
@@ -90,7 +110,7 @@
          (resume ()
            (resume participant)))))))
 
-;;; `source' creation protocol
+;;; `source' creation
 
 (defmethod make-source ((scope scope)
                         (type  t)
@@ -101,7 +121,7 @@
   ;; Translate different kinds of errors into TODO condition
   ;; `informer-creation-failed' errors.
   (with-condition-translation
-      (((error informer-creation-failed) ; TODO source-creation-failed
+      (((error source-creation-failed)
         :scope      scope
         :transports transports
         :type       type))
@@ -109,11 +129,13 @@
             (make-participant 'source scope :out transports converters
                               :type       type
                               :transports transports)))
-      ;; Connect the processor of CONFIGURATOR to INFORMER as an event
+      ;; Connect the processor of CONFIGURATOR to SOURCE as an event
       ;; handler.
       (push (rsb.ep:configurator-processor configurator)
             (rsb.ep:handlers source))
 
+      ;; TODO this scheme should be available as a separate policy function
+      ;; TODO in this scheme, there should be a timeout mechanism in case a sink reaches its high watermark and then crashes
       (let ((high-watermarks (make-hash-table :test #'equalp)))
         (hooks:add-to-hook (hooks:object-hook source 'flow-hook)
                            (lambda (condition) ; TODO make proper dispatch

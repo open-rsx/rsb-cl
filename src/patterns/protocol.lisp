@@ -1,4 +1,4 @@
-;;;; protocol.lisp --- Protocols used in the pattern module.
+;;;; protocol.lisp --- Protocols used in the patterns module.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;;;
@@ -168,51 +168,3 @@ arguments and/or return values.
 
 If the server cannot be created, an error of type
 `local-server-creation-failed' is signaled."))
-
-;;; Source protocol
-
-(defgeneric make-source (scope-or-uri
-                         &key
-                         transports
-                         converters)
-  (:documentation
-   "TODO(jmoringe): document
-
-    TRANSPORTS determines the transport configuration that should be
-    used to make the provided methods available to other
-    participants. See `rsb.transport:make-connectors' for details
-    regarding acceptable values of TRANSPORTS.
-
-    CONVERTERS, if supplied, is an list that specifies a set of
-    converters for particular wire-types from which the converters
-    that are used in transports should be chosen. Items are of the
-    form (WIRE-TYPE . CONVERTER). If CONVERTERS is not supplied, a
-    default set of converters is derived from the default
-    configuration.
-
-    If the source cannot be created, an error of type
-    `source-creation-failed' is signaled."))
-
-;;; Sink protocol
-
-(defgeneric make-sink (scope-or-uri
-                       &key
-                       transports
-                       converters)
-  (:documentation
-   "TODO(jmoringe): document
-
-    TRANSPORTS determines the transport configuration that should be
-    used to make the provided methods available to other
-    participants. See `rsb.transport:make-connectors' for details
-    regarding acceptable values of TRANSPORTS.
-
-    CONVERTERS, if supplied, is an list that specifies a set of
-    converters for particular wire-types from which the converters
-    that are used in transports should be chosen. Items are of the
-    form (WIRE-TYPE . CONVERTER). If CONVERTERS is not supplied, a
-    default set of converters is derived from the default
-    configuration.
-
-    If the sink cannot be created, an error of type
-    `sink-creation-failed' is signaled."))
