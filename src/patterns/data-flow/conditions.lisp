@@ -13,11 +13,14 @@
   (:documentation
    "TODO(jmoringe): document"))
 
-(define-condition suspended (flow-condition)
+(define-condition participant-suspended (flow-condition)
   ((participant :initarg  :participant
-                :reader participant
+                :reader   participant
                 :documentation
                 ""))
+  (:default-initargs
+   :participant (missing-required-initarg
+                 'participant-suspended :participant))
   (:report
    (lambda (condition stream)
      (format stream "~@<An attempt was made to use the suspended ~
@@ -26,7 +29,8 @@
   (:documentation
    "TODO(jmoringe): document"))
 
-(define-condition send-while-suspended (suspended)
+;; TODO maybe delete this? not currently used
+(define-condition send-while-suspended (participant-suspended)
   ((event :initarg  :event
           :reader   event
           :documentation
@@ -55,6 +59,9 @@
   (:documentation
    "TODO(jmoringe): document"))
 
+(defmethod key append ((condition remote-flow-condition))
+  (list (uuid:uuid-to-byte-array (peer condition))))
+
 (define-condition watermark-condition (flow-condition)
   ((which :initarg  :which
           :type     keyword
@@ -70,12 +77,16 @@
   (:documentation
    "TODO(jmoringe): document"))
 
+(defmethod key append ((condition watermark-condition))
+  (list (which condition)))
+
 (macrolet
     ((define-watermark-conditions (name)
-       (let ((name/basic  (format-symbol *package* "~A-WATERMARK-REACHED" name))
+       (let ((name/base   (format-symbol *package* "~A-WATERMARK-REACHED" name))
+             (name/local  (format-symbol *package* "~A-WATERMARK-REACHED/LOCAL" name))
              (name/remote (format-symbol *package* "~A-WATERMARK-REACHED/REMOTE" name)))
          `(progn
-            (define-condition ,name/basic (watermark-condition)
+            (define-condition ,name/base (watermark-condition)
               ()
               (:report
                (lambda (condition stream)
@@ -84,7 +95,12 @@
               (:documentation
                "TODO(jmoringe): document"))
 
-            (define-condition ,name/remote (,name/basic
+            (define-condition ,name/local (,name/base)
+              ()
+              (:documentation
+               "TODO(jmoringe): document"))
+
+            (define-condition ,name/remote (,name/base
                                             remote-flow-condition)
               ()
               (:report

@@ -6,34 +6,6 @@
 
 (cl:in-package #:rsb.patterns.data-flow)
 
-(progn ; TODO move to some other file
-  (rsb.common:load-idl
-   "package rsb.protocol; message HighWatermarkReached { required string which = 1; }"
-   :proto
-   :purpose '(:packed-size :serializer :deserializer))
-
-  (defmethod which ((thing rsb.protocol:high-watermark-reached))
-    (rsb.protocol:high-watermark-reached-which thing))
-
-  (rsb.common:load-idl
-   "package rsb.protocol; message LowWatermarkReached { required string which = 1; }"
-   :proto
-   :purpose '(:packed-size :serializer :deserializer))
-
-  (defmethod which ((thing rsb.protocol:low-watermark-reached))
-    (rsb.protocol:low-watermark-reached-which thing)))
-
-(defgeneric key (condition)
-  (:method-combination append)
-  (:documentation
-   "TODO(jmoringe): document"))
-
-(defmethod key append ((condition watermark-condition))
-  (list (which condition)))
-
-(defmethod key append ((condition remote-flow-condition))
-  (list (uuid:uuid-to-byte-array (peer condition))))
-
 (defclass source (informer
                   suspendable-mixin
                   flow-mixin)
@@ -44,7 +16,7 @@
 (defmethod send :around ((informer source)
                          (event    event)
                          &key
-                         (if-suspended (lambda (condition) (declare (ignore condition)) (retry))) ; TODO don't cons up a lambda every time
+                         (if-suspended #'%retry-if-suspended)
                          &allow-other-keys)
   "Return two values: if DATA has been sent:
 
@@ -60,55 +32,56 @@
   (with-flow-state (informer :running :if-suspended if-suspended)
     (values (call-next-method) t)))
 
-(defmethod handle-flow-event ((participant source)
-                              (event       event))
-  (let+ (((&flet make-watermark-condition (class)
-            (make-condition class
-                            :which (which (event-data event))
-                            :peer  (event-origin event))))
-         ((&flet run-hooks (condition-class)
-            (hooks:run-hook
-             (hooks:object-hook participant 'flow-hook)
-             (make-watermark-condition condition-class)))))
-    (etypecase (event-data event) ; TODO dispatch properly
+;; TODO this could be equally applicable for local data-flow
+;; conditions signaled by out-direction connectors
+(defmethod handle-flow-condition ((participant source)
+                                  (condition   high-watermark-reached/remote))
+  (log:info "~@<~A received remote high watermark reached for ~A~@:>"
+            participant (which condition))
+  ;; We received a remote high-watermark-reached condition. Establish
+  ;; restarts for the possible reactions:
+  ;;
+  ;; continue
+  ;;   Do nothing; PARTICIPANT continues sending.
+  ;;
+  ;; abort
+  ;;   TODO probably stops PARTICIPANT alltogether, right?
+  ;;
+  ;; drop
+  ;;   TODO not implemented yet, but also a possible reaction. Or add
+  ;;   a :dropping state?
+  ;;
+  ;; suspend
+  ;;   Suspend PARTICIPANT. This may be reversed when a remote
+  ;;   low-watermark-reached condition is received.
+  ;;
+  ;; then let the handlers attached to the data-flow hook decide how
+  ;; to react.
+  (restart-case
+      (hooks:run-hook (hooks:object-hook participant 'flow-hook) condition)
+    (continue (&optional condition)
+      ;; TODO report
+      (declare (ignore condition))
+      )
 
-      (rsb.protocol:high-watermark-reached
-       ;; Establish restarts for all possible reactions to the remote
-       ;; high-watermark-reached condition:
-       ;;
-       ;; continue
-       ;;   Do nothing; PARTICIPANT continues sending.
-       ;;
-       ;; abort
-       ;;   TODO probably stops PARTICIPANT alltogether, right?
-       ;;
-       ;; suspend
-       ;;   Suspend PARTICIPANT. This may be reversed when a remote
-       ;;   low-watermark-reached condition is received.
-       ;;
-       ;; then let the handlers attached to the data-flow hook decide
-       ;; how to react.
-       (restart-case
-           (run-hooks 'high-watermark-reached/remote)
-         (continue (&optional condition)
-           ;; TODO report
-           (declare (ignore condition))
-           )
+    (abort (&optional condition)
+      ;; TODO report
+      (declare (ignore condition))
+      (log:error "not implemented")
+      )
 
-         (abort (&optional condition)
-           ;; TODO report
-           (declare (ignore condition))
-           )
+    (suspend ()                         ; TODO export symbol
+      ;; TODO report
+      (suspend participant))))
 
-         (suspend () ; TODO export symbol
-           ;; TODO report
-           (suspend participant))))
-
-      (rsb.protocol:low-watermark-reached
-       (restart-case
-           (run-hooks 'low-watermark-reached/remote)
-         (resume ()
-           (resume participant)))))))
+(defmethod handle-flow-condition ((participant source)
+                                  (condition   low-watermark-reached/remote))
+  (log:info "~@<~A received remote low watermark reached for ~A~@:>"
+            participant (which condition))
+  (restart-case
+      (hooks:run-hook (hooks:object-hook participant 'flow-hook) condition)
+    (resume ()
+      (resume participant))))
 
 ;;; `source' creation
 
@@ -116,17 +89,19 @@
                         (type  t)
                         &key
                         (transports (transport-options))
-                        (converters (default-converters)))
+                        (converters (default-converters))
+                        transform)
   "Make and return a `source' instance "
   ;; Translate different kinds of errors into TODO condition
   ;; `informer-creation-failed' errors.
   (with-condition-translation
-      (((error source-creation-failed)
+      (((error source-creation-error)
         :scope      scope
         :transports transports
         :type       type))
     (let+ (((&values source configurator)
-            (make-participant 'source scope :out transports converters
+            (make-participant 'source scope :out
+                              transports converters transform
                               :type       type
                               :transports transports)))
       ;; Connect the processor of CONFIGURATOR to SOURCE as an event
@@ -139,22 +114,36 @@
       (let ((high-watermarks (make-hash-table :test #'equalp)))
         (hooks:add-to-hook (hooks:object-hook source 'flow-hook)
                            (lambda (condition) ; TODO make proper dispatch
-                             (log:debug "~@<~A received condition~@:_~2@T~A~@:_high-watermarks~@:_~2@T~A~@:>"
+                             (log:info "~@<~A received condition~@:_~2@T~A~@:_high-watermarks~@:_~2@T~A~@:>"
                                         source condition high-watermarks)
                              (typecase condition
-                               (high-watermark-reached
-                                (setf (gethash (key condition) high-watermarks) t)
+                               (high-watermark-reached/remote
+                                (incf (gethash (key condition) high-watermarks 0))
                                 (when (= (hash-table-count high-watermarks) 1)
-                                  (log:info "~@<First peer of ~A reached high watermark; suspending~@:>"
-                                            source)
+                                  (log:info "~@<First remote structure ~
+                                             ~A:~A of ~A reached high ~
+                                             watermark; ~
+                                             suspending~@:>"
+                                            (peer condition) (which condition) source)
                                   (invoke-restart 'suspend)))
 
-                               (low-watermark-reached
-                                (remhash (key condition) high-watermarks)
-                                (when (zerop (hash-table-count high-watermarks))
-                                  (log:info "~@<Last peer of ~A reached low watermark; resuming~@:>"
-                                            source)
-                                  (invoke-restart 'resume)))
+                               (low-watermark-reached/remote
+                                (let+ ((key   (key condition))
+                                       (value (gethash key high-watermarks)))
+                                  (case value
+                                    ((nil)
+                                     (warn "~@<Received ~A for unknown key ~A; ignoring~@:>"
+                                           condition key))
+                                    (1
+                                     (remhash key high-watermarks))
+                                    (t
+                                     (setf (gethash key high-watermarks) (1- value))))
+                                 (when (zerop (hash-table-count high-watermarks))
+                                   (log:info "~@<Last remote structure ~
+                                             ~A:~A of ~A reached low ~
+                                             watermark; resuming~@:>"
+                                             (peer condition) (which condition) source)
+                                   (invoke-restart 'resume))))
 
                                (t
                                 (log:info "~@<~A received not a watermark condition: ~A; forwarding to error hook~@:>"

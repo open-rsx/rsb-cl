@@ -28,8 +28,14 @@
 
    #:water-mark-condition
 
-   #:high-watermark-reached #:high-watermark-reached/remote
-   #:low-watermark-reached  #:low-watermark-reached/remote)
+   #:high-watermark-reached        #:low-watermark-reached
+   #:high-watermark-reached/local  #:low-watermark-reached/local
+   #:high-watermark-reached/remote #:low-watermark-reached/remote)
+
+  ;; Source protocol
+  (:export
+   #:suspend
+   #:resume)
 
   ;; `source' participant class
   (:export
@@ -40,6 +46,11 @@
   (:export
    #:sink
    #:make-sink)
+
+  ;; macros
+  (:export
+   #:with-source
+   #:with-sink)
 
   (:documentation
    "This package contains data-flow-related patterns."))

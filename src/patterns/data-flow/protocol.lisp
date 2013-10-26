@@ -6,11 +6,24 @@
 
 (cl:in-package #:rsb.patterns.data-flow)
 
+;;; Flow-condition protocol
+
+(defgeneric key (condition)
+  (:method-combination append)
+  (:documentation
+   "TODO(jmoringe): document"))
+
 ;;; Flow-event handling protocol
 
-(defgeneric handle-flow-event (participant event) ; TODO merge with some other generic function?
+(defgeneric handle-flow-condition (participant condition) ; TODO merge with some other generic function?
   (:documentation
    "TODO"))
+
+(defmethod handle-flow-condition ((participant t) (condition event))
+  (handle-flow-condition participant (event-data condition)))
+
+(defmethod handle-flow-condition ((participant t) (condition t))
+  (hooks:run-hook (rsb:participant-error-hook participant) condition))
 
 ;;; Source protocol
 ;;;
@@ -34,10 +47,11 @@
 
     Only legal after `suspend' has been called PARTICIPANT."))
 
-(defgeneric make-source (scope-or-uri
+(defgeneric make-source (scope-or-uri type
                          &key
                          transports
-                         converters)
+                         converters
+                         transform)
   (:documentation
    "TODO(jmoringe): document
 
@@ -83,7 +97,8 @@
 (defgeneric make-sink (scope-or-uri
                        &key
                        transports
-                       converters)
+                       converters
+                       transform)
   (:documentation
    "TODO(jmoringe): document
 

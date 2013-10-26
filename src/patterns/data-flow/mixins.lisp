@@ -6,15 +6,11 @@
 
 (cl:in-package #:rsb.patterns.data-flow)
 
-(deftype flow-state () ; TODO move to types.lisp
-  "TODO"
-  '(member :suspended :running))
-
 ;;; `suspendable-mixin'
 
 (defclass suspendable-mixin ()
-  ((flow-state     :initarg  :flow-state
-                   :type     flow-state
+  ((flow-state     :initarg  :flow-state ; TODO name
+                   :type     suspension-state
                    :accessor flow-state
                    :initform :running
                    :documentation
@@ -46,35 +42,6 @@
       (setf state :running)
       (bt:condition-notify condition))))
 
-(defun call-with-flow-state (participant desired-state if-suspended thunk)
-  "TODO"
-  (let+ (((&accessors (current-state flow-state)
-                      (lock          %flow-lock)
-                      (condition     %flow-condition)) participant))
-    (bt:with-lock-held (lock)
-      (iter (until (eq current-state desired-state)) ; TODO(jmoringe, 2012-07-19): use normal error policy?
-            (when (eq current-state :suspended)
-              (restart-case ; TODO error-behavior-restart-case?
-                  (funcall if-suspended (make-condition 'suspended
-                                                        :participant participant))
-                (continue (&optional condition)
-                  (declare (ignore condition))
-                  (return-from call-with-flow-state nil))
-                (retry ()
-                  (bt:condition-wait condition lock)))))
-      (funcall thunk))))
-
-;; TODO move to macros.lisp?
-(defmacro with-flow-state ((participant desired-state
-                            &key
-                            (if-suspended '(lambda (condition)
-                                            (declare (ignore condition))
-                                            (retry))))
-                           &body body)
-  "TODO"
-  `(call-with-flow-state
-    ,participant ,desired-state ,if-suspended (lambda () ,@body)))
-
 ;;; `flow-mixin'
 
 (defclass flow-mixin () ; TODO better name
@@ -84,12 +51,10 @@
                   "Stores a list of functions to call in case of
                    flow-related events. Functions have to accept a
                    single argument, the flow event.")  ; TODO(jmoringe, 2012-07-19): unify with error-hook?
-   (flow-listener :reader   flow-listener
-                  :accessor %flow-listener
+   (flow-listener :accessor participant-%flow-listener
                   :documentation
                   "")
-   (flow-informer :reader   flow-informer
-                  :accessor %flow-informer
+   (flow-informer :accessor participant-%flow-informer
                   :documentation
                   ""))
   (:documentation
@@ -99,25 +64,24 @@
                                      (slot-names t)
                                      &key
                                      scope
-                                     converters
                                      transports)
-  (let+ (((&accessors (informer %flow-informer)
-                      (listener %flow-listener)) instance)
+  (let+ (((&accessors (informer participant-%flow-informer)
+                      (listener participant-%flow-listener)) instance)
          (flow-scope (merge-scopes scope "/__rsb/flow")))
     ;; TODO(jmoringe, 2012-10-18): define a constant
     ;; TODO can we append the "subject" scope to avoid n:m flow-event
     ;; flooding?
-    (setf informer (make-informer flow-scope t
-                                  :converters converters
+    (setf informer (make-informer flow-scope 'remote-flow-condition
+                                  :converters :data-flow
                                   :transports transports)
           listener (make-listener flow-scope
-                                  :converters converters
+                                  :converters :data-flow
                                   :transports transports)) ; TODO(jmoringe, 2012-07-26): forward error hooks
-    (push (curry #'handle-flow-event instance) (rsb.ep:handlers listener))))
+    (push (curry #'handle-flow-condition instance) (rsb.ep:handlers listener))))
 
 (defmethod detach :before ((participant flow-mixin)) ; TODO why :before instead of call-next-method?
   (let+ (((&flet detach-one (participant)
             (with-restart-and-timeout (10)
               (detach participant)))))
-    (detach-one (flow-listener participant))
-    (detach-one (flow-informer participant))))
+    (detach-one (participant-%flow-listener participant))
+    (detach-one (participant-%flow-informer participant))))
