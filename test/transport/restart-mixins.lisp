@@ -14,13 +14,16 @@
    "Unit tests for the `restart-message-receiver-mixin' class."))
 
 (define-restart-method-test-case
-    (restart-message-receiver-mixin
-     receive-message (connector (block? t)))
+    (receive-message ((connector restart-message-receiver-mixin)
+                      (block?    t))
+     :suite-name restart-message-receiver-mixin-root)
   (receive-message simple-connector t))
 
 (define-restart-method-test-case
-    (restart-message-receiver-mixin
-     message->event (connector (message t) (wire-schema t)))
+    (message->event ((connector   restart-message-receiver-mixin)
+                     (message     t)
+                     (wire-schema t))
+     :suite-name restart-message-receiver-mixin-root)
   (message->event simple-connector :does-not-matter :likewise))
 
 ;;; Tests for `restart-notification-sender-mixin' class
@@ -31,11 +34,13 @@
    "Unit tests for the `restart-notification-sender-mixin' class."))
 
 (define-restart-method-test-case
-    (restart-notification-sender-mixin
-     send-notification (connector (notification t)))
-    (send-notification simple-connector :ignored))
+    (send-notification ((connector    restart-notification-sender-mixin)
+                        (notification t))
+     :suite-name restart-notification-sender-mixin-root)
+  (send-notification simple-connector :ignored))
 
 (define-restart-method-test-case
-    (restart-notification-sender-mixin
-     event->notification (connector (notification t)))
-    (event->notification simple-connector :does-not-matter))
+    (event->notification ((connector    restart-notification-sender-mixin)
+                          (notification t))
+     :suite-name restart-notification-sender-mixin-root)
+  (event->notification simple-connector :does-not-matter))

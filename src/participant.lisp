@@ -179,42 +179,72 @@ Return three values:
                  (when converters-supplied?
                    (list :converters converters))))))))
 
+(defun call-with-participant-creation-restarts (participant-kind designator-kind
+                                                designator
+                                                normal-thunk args-changed-thunk)
+  (declare (type function normal-thunk args-changed-thunk))
+  ;; We use NORMAL-THUNK and ARGS-CHANGED-THUNK in order to implement
+  ;; the common case of not invoking any restarts efficiently.
+  (let+ ((designator designator)
+         ((&values label parser) (ecase designator-kind
+                                   (:uri   (values "URI"   #'puri:parse-uri))
+                                   (:scope (values "scope" #'make-scope))))
+         ((&labels read-new-value ()
+            (format *query-io* "Specify ~A (not evaluated): " label)
+            (force-output *query-io*)
+            (list (funcall parser (read-line *query-io*)))))
+         ((&labels report (stream)
+            (format stream "~@<Retry creating the ~(~A~) with a ~
+                            different ~A.~@:>"
+                    participant-kind label))))
+    (declare (dynamic-extent #'read-new-value #'report))
+    (iter (with thunk = normal-thunk)
+          (restart-case
+              (return (funcall thunk designator))
+            (retry ()
+              :report (lambda (stream)
+                        (format stream "~@<Retry creating the ~(~A~) ~
+                                        for ~(~A~) ~S~@:>"
+                                participant-kind designator-kind designator)))
+            (use-uri (new-value)
+              :test (lambda (condition)
+                      (declare (ignore condition))
+                      (eq designator-kind :uri))
+              :interactive read-new-value
+              :report report
+              (setf designator new-value
+                    thunk      args-changed-thunk))
+            (use-scope (new-value)
+              :test (lambda (condition)
+                      (declare (ignore condition))
+                      (eq designator-kind :scope))
+              :interactive read-new-value
+              :report report
+              (setf designator new-value
+                    thunk      args-changed-thunk))))))
+
 (defmacro define-participant-creation-restart-method (kind &rest args)
   "Emit an :around method on `make-KIND' that establishes restarts.
 KIND will usually be one of :informer, :listener and :reader. ARGS is
 a method lambda-list. The first argument is assumed to be designator
 that is the URI or scope."
-  (let* ((make-name       (symbolicate "MAKE-" kind))
+  (let* ((make-name       (symbolicate '#:make- kind))
          (arg-names       (mapcar (compose #'first #'ensure-list) args))
          (designator-arg  (first arg-names))
-         (designator-kind (make-keyword (second (first args))))
-         (restart-name    (symbolicate "USE-" designator-kind)))
+         (designator-kind (make-keyword (second (first args)))))
     (with-unique-names (args-var)
       `(defmethod ,make-name :around (,@args
                                       &rest ,args-var
                                       &key &allow-other-keys)
-         "Install restarts around the creation attempt."
-         (let (result)
-           (tagbody
-            retry
-              (restart-case
-                  (setf result (apply #'call-next-method ,@arg-names ,args-var))
-                (retry ()
-                  :report (lambda (stream)
-                            (format stream ,(format nil "~~@<Retry creating the ~(~A~) for ~(~A~) ~~S~~@:>"
-                                                    kind designator-kind)
-                                    ,designator-arg))
-                  (go retry))
-                (,restart-name (new-value)
-                  :interactive (lambda ()
-                                 (format *query-io* ,(format nil "Specify ~(~A~) (not evaluated): "
-                                                             designator-kind))
-                                 (force-output *query-io*)
-                                 (list ,(ecase designator-kind
-                                          (:uri   `(puri:parse-uri (read-line *query-io*)))
-                                          (:scope `(make-scope (read-line *query-io*))))))
-                  :report ,(format nil "Retry creating the ~(~A~) with a different ~(~A~)."
-                                   kind designator-kind)
-                  (setf ,designator-arg new-value)
-                  (go retry))))
-           result)))))
+         ;; Install restarts around the creation attempt.
+         (flet ((participant-creation-normal-thunk (,designator-arg)
+                  (declare (ignore ,designator-arg))
+                  (call-next-method))
+                (participant-creation-args-changed-thunk (,designator-arg)
+                  (apply #',make-name ,@arg-names ,args-var)))
+           (declare (dynamic-extent #'participant-creation-normal-thunk
+                                    #'participant-creation-args-changed-thunk))
+           (call-with-participant-creation-restarts
+            ',kind ,designator-kind ,designator-arg
+            #'participant-creation-normal-thunk
+            #'participant-creation-args-changed-thunk))))))

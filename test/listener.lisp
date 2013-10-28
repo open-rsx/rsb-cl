@@ -18,7 +18,7 @@
    "Unit tests for the `listener' class and `make-listener'
 function."))
 
-(define-basic-participant-test-cases :listener
+(define-basic-participant-test-cases listener
   '("/listener/construction"
     nil
     "/listener/construction")
@@ -38,7 +38,7 @@ function."))
   ;; No transports => error
   '("/listener/construction"
     (:transports nil)
-    :error))
+    error))
 
 (addtest (listener-root
           :documentation

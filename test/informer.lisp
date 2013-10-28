@@ -13,7 +13,7 @@
    "Unit tests for the `informer' class and `make-informer'
 function."))
 
-(define-basic-participant-test-cases :informer
+(define-basic-participant-test-cases informer
   '("/informer/construction"
     (t)
     "/informer/construction")
@@ -33,7 +33,7 @@ function."))
   ;; No transports => error
   '("/informer/construction"
     (t :transports nil)
-    :error))
+    error))
 
 (addtest (informer-root
           :documentation
