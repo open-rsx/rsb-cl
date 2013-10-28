@@ -8,8 +8,9 @@
 
 (defclass expose-transport-metrics-mixin ()
   ((expose :initarg  :expose
+           :type     list
            :accessor connector-expose
-           :initform nil
+           :initform '()
            :documentation
            "Controls which metrics of received notifications the
 connector should expose in events constructed from these
@@ -25,7 +26,7 @@ the events constructed from the notifications."))
 (defmethod shared-initialize :after ((instance   expose-transport-metrics-mixin)
                                      (slot-names t)
                                      &key
-                                     (expose nil expose-supplied?))
+                                     (expose '() expose-supplied?))
   (when expose-supplied?
     (setf (connector-expose instance) expose)))
 

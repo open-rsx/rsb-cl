@@ -13,27 +13,25 @@
                           restart-notification-sender-mixin
                           error-handling-sender-mixin)
   ((socket         :reader   connection-socket
-                   :writer   (setf %connection-socket)
+                   :writer   (setf connection-%socket)
                    :documentation
                    "Stores the socket through which access to he bus
 is implemented.")
-   (receive-buffer :initarg  :receive-buffer
-                   :type     (or null octet-vector)
-                   :accessor %connection-receiver-buffer
+   (receive-buffer :type     (or null octet-vector)
+                   :accessor connection-%receiver-buffer
                    :initform nil
                    :documentation
                    "Static (occasionally enlarged) buffer for
 receiving and unpacking serialized notifications.")
-   (send-buffer    :initarg  :send-buffer
-                   :type     (or null octet-vector)
-                   :accessor %connection-send-buffer
+   (send-buffer    :type     (or null octet-vector)
+                   :accessor connection-%send-buffer
                    :initform nil
                    :documentation
                    "Static (occasionally enlarged) buffer for packing
 and sending notifications.")
    (closing?       :type     (member nil t :send :receive)
                    :reader   connection-closing?
-                   :accessor %connection-closing?
+                   :accessor connection-%closing?
                    :initform nil
                    :documentation
                    "Indicates indicates whether the connection is
@@ -72,7 +70,7 @@ but shares these among participants in the process."))
   ;; Install error policy and socket (opening it, if specified via
   ;; HOST and PORT).
   (setf (processor-error-policy instance) error-policy
-        (%connection-socket instance)
+        (connection-%socket instance)
         (cond
           (socket)
           ((and host port)
@@ -205,7 +203,7 @@ be packed using protocol buffer serialization.~@:>"
   (check-type handshake (member nil :send :receive))
 
   (let+ (((&accessors (lock     connection-lock)
-                      (closing? %connection-closing?)
+                      (closing? connection-%closing?)
                       (socket   connection-socket)) connection))
     ;; Ensure that CONNECTION is not already closing or being closed.
     (bt:with-lock-held (lock)
@@ -304,5 +302,5 @@ it first, if necessary."
                 (setf (,accessor connection)
                       (make-octet-vector size)))))))
 
-  (define-ensure-buffer %ensure-receive-buffer %connection-receiver-buffer)
-  (define-ensure-buffer %ensure-send-buffer    %connection-send-buffer))
+  (define-ensure-buffer %ensure-receive-buffer connection-%receiver-buffer)
+  (define-ensure-buffer %ensure-send-buffer    connection-%send-buffer))

@@ -9,8 +9,8 @@
 (defclass receiving-client (participant
                             rsb.ep:client)
   ((filters :type     list
-            :initform nil
             :accessor receiver-filters
+            :initform '()
             :documentation
             "The list of filters that events have to match in order to
 be received by the participant."))

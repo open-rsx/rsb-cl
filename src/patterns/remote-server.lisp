@@ -10,16 +10,14 @@
 
 (defclass remote-method (method1
                          closer-mop:funcallable-standard-object)
-  ((lock  :initarg  :lock
+  ((lock  :reader   method-%lock
           :initform (bt:make-lock "Remote Method Lock")
-          :reader   %method-lock
           :documentation
           "Stores a lock which protects the table of in-progress calls
 from concurrent modification.")
-   (calls :initarg  :calls
-          :type     hash-table
+   (calls :type     hash-table
+          :reader   method-%calls
           :initform (make-hash-table :test #'equal)
-          :reader   %method-calls
           :documentation
           "Stores a mapping of request ids (as strings) to the
 associated call information which is represented as a cons cell
@@ -41,12 +39,12 @@ server."))
 (define-lazy-creation-method remote-method listener :return   ()  "reply")
 (define-lazy-creation-method remote-method informer :argument (t) "request")
 
-(defmethod (setf %method-listener) :after ((new-value t)
+(defmethod (setf method-%listener) :after ((new-value t)
                                            (method    remote-method))
   "After instantiating the listener for METHOD, install a handler for
 replies to method calls."
-  (let+ (((&accessors-r/o (lock  %method-lock)
-                          (calls %method-calls)) method))
+  (let+ (((&accessors-r/o (lock  method-%lock)
+                          (calls method-%calls)) method))
     (push (lambda (event)
             ;; Check whether this is a direct call within a single
             ;; thread.
@@ -87,8 +85,8 @@ data."
   (method-listener method) ;; force creation ; TODO(jmoringe): can we improve this?
 
   (let+ (((&accessors-r/o (informer method-informer)
-                          (lock     %method-lock)
-                          (calls    %method-calls)) method)
+                          (lock     method-%lock)
+                          (calls    method-%calls)) method)
          (*local-call* (cons nil (cons request return))))
     (handler-case
         ;; Send the request to the remote server(s) and register the

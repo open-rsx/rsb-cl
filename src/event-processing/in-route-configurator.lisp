@@ -8,8 +8,8 @@
 
 (defclass in-route-configurator (configurator)
   ((filters :type     list
-            :initform nil
             :accessor configurator-filters
+            :initform '()
             :documentation
             "Stores the list of filters installed by the client."))
   (:documentation

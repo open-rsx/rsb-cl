@@ -62,30 +62,20 @@ names."))
 
 ;;;
 
-(defmethod make-scope ((thing scope)
-                       &key
-                       intern?)
+(defmethod make-scope ((thing scope) &key intern?)
   (if intern?
       (intern-scope thing)
       thing))
 
-(defmethod make-scope ((thing list)
-                       &key
-                       intern?)
+(defmethod make-scope ((thing list) &key intern?)
   (check-type thing scope-components "a list of component strings")
 
-  (make-scope (make-instance 'scope
-                             :components thing)
-              :intern? intern?))
+  (make-scope (make-instance 'scope :components thing) :intern? intern?))
 
-(defmethod make-scope ((thing sequence)
-                       &key
-                       intern?)
+(defmethod make-scope ((thing sequence) &key intern?)
   (make-scope (coerce thing 'list) :intern? intern?))
 
-(defmethod make-scope ((thing string)
-                       &key
-                       intern?)
+(defmethod make-scope ((thing string) &key intern?)
   (let+ (((&values components separator-count)
           (split-sequence #\/ thing :remove-empty-subseqs t)))
     (when (zerop separator-count)
@@ -119,7 +109,7 @@ names."))
 non-nil, SCOPE is contained in the list. Otherwise, only proper
 superscopes are returned."
   (let ((components (reverse (scope-components scope))))
-    (cons (make-scope nil)
+    (cons (make-scope '())
           (iter (for current on (if include-self? components (rest components)))
                 (collect (make-instance 'scope
                                         :components (reverse current))
@@ -156,5 +146,4 @@ if it becomes or already is the canonical instance."
         interned)))
 
 (defmethod relative-url ((scope scope))
-  (make-instance 'puri:uri
-                 :path (scope-string scope)))
+  (make-instance 'puri:uri :path (scope-string scope)))

@@ -12,7 +12,7 @@
    (scope      :reader   participant-scope)
    (converters :initarg  :converters
                :type     list
-               :initform nil
+               :initform '()
                :reader   participant-converters
                :documentation
                "Stores a list of the converters available for use in
@@ -28,7 +28,7 @@ connectors of the participant. Each element is of the form
                "Stores the transform which should be applied to
 processed events.")
    (error-hook :type     list
-               :initform nil
+               :initform '()
                :documentation
                "Stores a list of functions to call in case of
 errors."))
@@ -92,8 +92,7 @@ Return three values:
 + the list of instantiated `rsb.transport:connectors'"
   ;; Signal an error if no transports have been supplied.
   (unless transports
-    (error 'no-transports
-           :scope scope))
+    (error 'no-transports :scope scope))
 
   ;; Replace &inherit marker in transport options with actual default
   ;; options for respective transports.
@@ -141,7 +140,7 @@ Return three values:
     ;; designators.
     (unless (eq (second (first args)) 'puri:uri)
       (error "~@<The specializer of the first parameter is ~S, but ~
-should be ~S.~@:>"
+              should be ~S.~@:>"
              (second (first args)) 'puri:uri))
 
     `(progn
@@ -186,8 +185,7 @@ KIND will usually be one of :informer, :listener and :reader. ARGS is
 a method lambda-list. The first argument is assumed to be designator
 that is the URI or scope."
   (let* ((make-name       (symbolicate "MAKE-" kind))
-         (arg-names       (map 'list (compose #'first #'ensure-list)
-                               args))
+         (arg-names       (mapcar (compose #'first #'ensure-list) args))
          (designator-arg  (first arg-names))
          (designator-kind (make-keyword (second (first args))))
          (restart-name    (symbolicate "USE-" designator-kind)))

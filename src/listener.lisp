@@ -10,7 +10,7 @@
   ((handlers :initarg  :handlers
              :type     list
              :accessor rsb.ep:handlers
-             :initform nil
+             :initform '()
              :documentation
              "Stores the list of handlers two which events received by
 this listener should be dispatched."))

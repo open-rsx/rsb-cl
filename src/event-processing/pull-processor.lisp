@@ -10,7 +10,7 @@
   ((connectors    :initarg  :connectors
                   :type     list
                   :accessor processor-connectors
-                  :initform nil
+                  :initform '()
                   :documentation
                   "A list of connector instances from which the
 processor retrieves events.")

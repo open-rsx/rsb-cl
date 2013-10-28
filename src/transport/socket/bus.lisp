@@ -30,7 +30,7 @@
 (defclass bus (broadcast-processor)
   ((connections      :type     list
                      :accessor bus-connections
-                     :initform nil
+                     :initform '()
                      :documentation
                      "Stores a list of connections to other processes
 using the bus.")
@@ -41,7 +41,7 @@ using the bus.")
 connection list of the bus from concurrent modification.")
    (connectors       :type     list
                      :accessor bus-connectors
-                     :initform nil
+                     :initform '()
                      :documentation
                      "Stores a list of local connectors connected to
 the bus.")
@@ -53,12 +53,12 @@ connector list of the bus from concurrent modification.")
    (options          :initarg  :options
                      :type     list
                      :accessor bus-options
-                     :initform nil
+                     :initform '()
                      :documentation
                      "Stores a plist of connection options which
 should be used by connections associated to the bus instance.")
    (proxy            :type     function
-                     :accessor %bus-proxy
+                     :accessor bus-%proxy
                      :documentation
                      "Stores a functions that is used as a handler for
 `bus-connection' instances."))
@@ -75,7 +75,7 @@ connected to the bus."))
 (defmethod shared-initialize :after ((instance   bus)
                                      (slot-names t)
                                      &key)
-  (setf (%bus-proxy instance)
+  (setf (bus-%proxy instance)
         (lambda (connection data)
           (handle instance (cons connection data)))))
 
@@ -84,7 +84,7 @@ connected to the bus."))
 (defmethod (setf bus-connections) :around ((new-value   list)
                                            (bus         bus))
   (let+ (((&accessors-r/o (old-value bus-connections)
-                          (proxy     %bus-proxy)) bus))
+                          (proxy     bus-%proxy)) bus))
     (declare (type function proxy))
     (prog1
         (call-next-method)

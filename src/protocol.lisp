@@ -76,7 +76,7 @@ reachability of COMPONENT in transport-specific way."))
 
 (defmethod transport-specific-urls ((component t))
   "For arbitrary COMPONENTs, location information is not available."
-  nil)
+  '())
 
 ;;; Common participant protocol
 

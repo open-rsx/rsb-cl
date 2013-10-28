@@ -13,8 +13,7 @@
               "A converter to which the actual conversion work is
 delegated."))
   (:default-initargs
-   :converter (missing-required-initarg
-               'conversion-mixin :converter))
+   :converter (missing-required-initarg 'conversion-mixin :converter))
   (:documentation
    "This mixin adds methods on `domain->wire' and `wire->domain' for
 the subclass which delegate the conversion tasks to a stored

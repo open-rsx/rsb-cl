@@ -30,7 +30,7 @@ case-sensitive matching."))
                     "Stores regular expression employed by the
 filter.")
    (scanner         :reader   filter-scanner
-                    :accessor %filter-scanner
+                    :writer   (setf filter-%scanner)
                     :documentation
                     "Stores the compiled scanner corresponding to the
 regular expression of the filter.")
@@ -72,14 +72,13 @@ unless otherwise requested using the :case-sensitive? initarg."))
 (defmethod compile-regex ((filter regex-filter) (regex string)
                           &key
                           case-sensitive?)
-  (setf (%filter-scanner filter)
+  (setf (filter-%scanner filter)
         (ppcre:create-scanner
          regex :case-insensitive-mode (not case-sensitive?))))
 
 (defmethod payload-matches? ((filter regex-filter) (payload string)
                              &key &allow-other-keys)
-  (let+ (((&accessors-r/o (scanner filter-scanner)) filter))
-    (ppcre:scan scanner payload)))
+  (ppcre:scan (filter-scanner filter) payload))
 
 (defmethod print-object ((object regex-filter) stream)
   (let+ (((&accessors-r/o (regex           filter-regex)

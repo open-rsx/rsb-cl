@@ -30,11 +30,9 @@ and thus need a fallback policy."))
   "Decide whether EVENT should match FILTER based on FILTER's fallback
 policy. This method is only called, if no more specific method on
 `matches?' made a decision."
-  (let+ (((&accessors-r/o
-           (fallback-policy filter-fallback-policy)) filter))
-    (ecase fallback-policy
-      (:match        t)
-      (:do-not-match nil))))
+  (ecase (filter-fallback-policy filter)
+    (:match        t)
+    (:do-not-match nil)))
 
 (defmethod print-object ((object fallback-policy-mixin) stream)
   (print-unreadable-object (object stream :type t :identity t)

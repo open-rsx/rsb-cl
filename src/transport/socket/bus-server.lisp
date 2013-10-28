@@ -43,7 +43,7 @@ and protects it from being destroyed in a race condition situation."
 (defclass bus-server (bus
                       threaded-receiver-mixin)
   ((socket :reader   bus-socket
-           :writer   (setf %bus-socket)
+           :writer   (setf bus-%socket)
            :documentation
            "Stores the listening socket which accepts client
 connections."))
@@ -60,7 +60,7 @@ closed."))
                                      host
                                      port)
   ;; Setup the listening socket.
-  (setf (%bus-socket instance)
+  (setf (bus-%socket instance)
         (usocket:socket-listen host port
                                :element-type '(unsigned-byte 8)))
   (log1 :info instance "Opened listen socket")

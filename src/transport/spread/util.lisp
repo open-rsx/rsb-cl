@@ -10,8 +10,7 @@
 
 (defun internal-real-time-in-seconds ()
   "Return the current \"internal\" time in seconds."
-  (/ (get-internal-real-time)
-     internal-time-units-per-second))
+  (/ (get-internal-real-time) internal-time-units-per-second))
 
 ;;; Scope -> spread group mapping
 

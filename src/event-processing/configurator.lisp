@@ -18,7 +18,7 @@ configurator is responsible for.")
    (connectors :initarg  :connectors
                :type     list
                :accessor configurator-connectors
-               :initform nil
+               :initform '()
                :documentation
                "Stores the list of connector instances the client uses
 to access the bus.")

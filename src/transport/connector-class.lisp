@@ -18,7 +18,7 @@ class.")
 class.")
    (schemas   :initarg  :schemas
               :type     list
-              :initform nil
+              :initform '()
               :documentation
               "Stores a list of schemas provided by the connector
 class.")

@@ -70,11 +70,11 @@ of CONNECTOR."
 
 (defmethod connector-schemas ((class class))
   "Default behavior is to claim to support no schemas."
-  nil)
+  '())
 
 (defmethod connector-options ((class class))
   "Default behavior is to claim to accept no options."
-  nil)
+  '())
 
 ;;; Message receiver protocol
 

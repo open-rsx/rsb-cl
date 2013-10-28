@@ -61,10 +61,9 @@ groups in which they are members."))
                                       connection
                                       name)
   (when (and name connection)
-    (error 'incompatible-initargs
-           :class      'connection
-           :parameters '(:name :connection)
-           :values     (list name connection))))
+    (incompatible-initargs 'connection
+                           :name       name
+                           :connection connection)))
 
 (defmethod shared-initialize :after ((instance   connection)
                                      (slot-names t)

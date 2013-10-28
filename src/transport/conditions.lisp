@@ -22,7 +22,7 @@ used.")
 have been constructed.")
    (args      :initarg  :args
               :type     list
-              :reader connector-construction-failed-args
+              :reader   connector-construction-failed-args
               :documentation
               "Arguments for the connector instance that should have
 been constructed."))

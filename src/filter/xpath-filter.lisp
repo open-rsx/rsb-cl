@@ -28,7 +28,7 @@ used with FILTER."))
 events.")
    (compiled-xpath :type     function
                    :reader   filter-compiled-xpath
-                   :writer   (setf %filter-compiled-xpath)
+                   :writer   (setf filter-%compiled-xpath)
                    :documentation
                    "A compiled version of the XPath of the filter."))
   (:metaclass closer-mop:funcallable-standard-class)
@@ -52,7 +52,7 @@ XML DOM objects and protocol buffer messages."))
 (defmethod (setf filter-xpath) :before ((new-value string)
                                         (filter    xpath-filter))
   "Compile the XPath."
-  (setf (%filter-compiled-xpath filter)
+  (setf (filter-%compiled-xpath filter)
         (compile-xpath filter new-value)))
 
 (defmethod compile-xpath ((filter xpath-filter)

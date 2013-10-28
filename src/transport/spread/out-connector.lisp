@@ -31,7 +31,7 @@ should use."))
 
 (defmethod handle ((connector out-connector) (event event))
   (let ((group-names   (scope->groups (event-scope event)))
-        (notifications (event->notification connector event))) ;; TODO only if group is populated?
+        (notifications (event->notification connector event))) ; TODO only if group is populated?
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
     (send-notification connector (cons group-names notifications))))

@@ -44,7 +44,7 @@ to connect to the bus."))
      (format stream "~@<Failed to participate in the channel ~
                      designated by ~
                      ~S~/rsb::maybe-print-transport-configuration/~
-                     ~/more-conditions::maybe-print-cause/~@:>"
+                     ~/more-conditions:maybe-print-cause/~@:>"
              (participation-failed-scope      condition)
              (participation-failed-transports condition)
              condition)))
@@ -96,7 +96,7 @@ fails."))
 (define-condition no-transports (participation-failed)
   ()
   (:default-initargs
-   :transports nil)
+   :transports '())
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~

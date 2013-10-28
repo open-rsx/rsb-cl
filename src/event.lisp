@@ -56,7 +56,7 @@ object\" (can be any Lisp object).")
    (causes          :initarg  :causes
                     :type     list
                     :accessor event-causes
-                    :initform nil
+                    :initform '()
                     :documentation
                     "Stores a list of `event-id's that identify events
 which somehow caused the event."))

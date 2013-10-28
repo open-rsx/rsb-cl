@@ -125,7 +125,7 @@ built from the complete assembly. Otherwise, return nil."))
 
 (defclass assembly-pool ()
   ((assemblies :type     hash-table
-               :reader   %assembly-pool-assemblies
+               :reader   assembly-pool-%assemblies
                :initform (make-hash-table :test #'equalp)
                :documentation
                "This hash-table maps event ids to `assembly'
@@ -136,12 +136,12 @@ necessary when fragments are submitted by calls to
 `merge-fragment'."))
 
 (defmethod assembly-pool-count ((pool assembly-pool))
-  (hash-table-count (%assembly-pool-assemblies pool)))
+  (hash-table-count (assembly-pool-%assemblies pool)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
                             (id   simple-array)
                             (size integer))
-  (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)) pool))
+  (let+ (((&accessors-r/o (assemblies assembly-pool-%assemblies)) pool))
     (or (gethash id assemblies)
         (setf (gethash id assemblies)
               (make-instance 'assembly
@@ -150,7 +150,7 @@ necessary when fragments are submitted by calls to
 
 (defmethod merge-fragment ((pool     assembly-pool)
                            (fragment fragmented-notification))
-    (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)) pool)
+    (let+ (((&accessors-r/o (assemblies assembly-pool-%assemblies)) pool)
            ((&accessors-r/o (notification fragmented-notification-notification)
                             (size         fragmented-notification-num-data-parts)) fragment)
            ((&accessors-r/o (id notification-event-id)) notification)
@@ -167,7 +167,7 @@ necessary when fragments are submitted by calls to
 ;;; Automatic pruning of old incomplete assemblies
 
 (defclass pruning-assembly-pool (assembly-pool)
-  ((lock      :reader   %assembly-pool-lock
+  ((lock      :reader   assembly-pool-%lock
               :initform (bt:make-lock "Assemblies Lock")
               :documentation
               "This lock protects the collection of `assembly'
@@ -211,19 +211,19 @@ MIN-AGE."))
                             (bt:join-thread thread)))))
 
 (defmethod assembly-pool-count :around ((pool pruning-assembly-pool))
-  (bt:with-lock-held ((%assembly-pool-lock pool))
+  (bt:with-lock-held ((assembly-pool-%lock pool))
     (call-next-method)))
 
 (defmethod merge-fragment :around ((pool         pruning-assembly-pool)
                                    (notification t))
-  (bt:with-lock-held ((%assembly-pool-lock pool))
+  (bt:with-lock-held ((assembly-pool-%lock pool))
     (call-next-method)))
 
 (defun delete-partial-assemblies (pool min-age)
   "Find `assembly' instance in POOL whose age is at least MIN-AGE and
 delete them."
-  (let+ (((&accessors-r/o (assemblies %assembly-pool-assemblies)
-                          (lock       %assembly-pool-lock)) pool)
+  (let+ (((&accessors-r/o (assemblies assembly-pool-%assemblies)
+                          (lock       assembly-pool-%lock)) pool)
          (string (princ-to-string pool)))
     (bt:with-lock-held (lock)
       (when-let ((old (remove min-age (hash-table-values assemblies)

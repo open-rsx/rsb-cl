@@ -12,7 +12,7 @@
   ((server   :initarg  :server
              :type     server
              :reader   method-server
-             :writer   (setf %method-server)
+             :writer   (setf method-%server)
              :documentation
              "Stores the server object to which the method belongs.")
    (name     :initarg  :name
@@ -22,8 +22,8 @@
              "Stores the name of the method.")
    (informer :initarg  :informer
              :type     (or null informer)
-             :reader   %method-informer ; without lazy creation
-             :writer   (setf %method-informer)
+             :reader   method-%informer ; without lazy creation
+             :writer   (setf method-%informer)
              :reader   method-informer  ; with lazy creation
              :initform nil
              :documentation
@@ -31,8 +31,8 @@
 method. The instance is created lazily when first used.")
    (listener :initarg  :listener
              :type     (or null listener)
-             :reader   %method-listener ; without lazy creation
-             :writer   (setf %method-listener)
+             :reader   method-%listener ; without lazy creation
+             :writer   (setf method-%listener)
              :reader   method-listener  ; with lazy creation
              :initform nil
              :documentation
@@ -52,8 +52,8 @@ classes."))
     (check-type name method-name "a legal method name")))
 
 (defmethod detach ((method method1))
-  (let+ (((&accessors-r/o (informer %method-informer)
-                          (listener %method-listener)) method))
+  (let+ (((&accessors-r/o (informer method-%informer)
+                          (listener method-%listener)) method))
     ;; For the sake of the `local-method' subclass: shutdown the
     ;; listener first. This will prevent new method calls from being
     ;; initiated and wait for in-progress calls to finish while still
@@ -79,7 +79,7 @@ transform is installed into the created participant.
 ARGS are passed to the creation function and SCOPE is used to compute
 the scope of the created participant."
   (let ((method-name (symbolicate "METHOD-" slot))
-        (writer-name (symbolicate "%METHOD-" slot))
+        (writer-name (symbolicate "METHOD-%" slot))
         (make-name   (symbolicate "MAKE-" slot)))
     `(defmethod ,method-name :before ((method ,class))
        ,(format nil "Lazily create the ~(~A~) when it is first requested."
@@ -110,7 +110,7 @@ behalf of the server.")
    (rsb::transform    :type     transform-specification)
    (methods           :initarg  :methods
                       :type     hash-table
-                      :reader   %server-methods
+                      :reader   server-%methods
                       :initform (make-hash-table :test #'equal)
                       :documentation
                       "Stores a mapping of method names to method
@@ -127,7 +127,7 @@ generic support for retrieving, adding and removing methods."))
   (check-type transform transform-specification))
 
 (defmethod server-methods ((server server))
-  (hash-table-values (%server-methods server)))
+  (hash-table-values (server-%methods server)))
 
 (defmethod server-method ((server server)
                           (name   string)
@@ -135,7 +135,7 @@ generic support for retrieving, adding and removing methods."))
                           (error? t))
   (check-type name method-name "a legal method name")
 
-  (or (gethash name (%server-methods server))
+  (or (gethash name (server-%methods server))
       (when error?
         (error 'no-such-method
                :name name))))
@@ -149,7 +149,7 @@ generic support for retrieving, adding and removing methods."))
 
   (check-type name method-name "a legal method name")
 
-  (let+ (((&accessors-r/o (methods %server-methods)) server))
+  (let+ (((&accessors-r/o (methods server-%methods)) server))
     ;; If SERVER already has a method named NAME, detach it cleanly
     ;; before replacing it.
     (when-let ((old (gethash name methods)))
@@ -157,7 +157,7 @@ generic support for retrieving, adding and removing methods."))
 
     ;; Install NEW-VALUE as new implementation of the method named
     ;; NAME.
-    (setf (%method-server new-value) server
+    (setf (method-%server new-value) server
           (gethash name methods)     new-value)))
 
 (defmethod (setf server-method) ((new-value (eql nil))
@@ -168,7 +168,7 @@ generic support for retrieving, adding and removing methods."))
   (declare (ignore argument))
 
   (detach (server-method server name))
-  (remhash name (%server-methods server))
+  (remhash name (server-%methods server))
   new-value)
 
 (defmethod detach ((server server))
@@ -179,7 +179,7 @@ generic support for retrieving, adding and removing methods."))
   (print-unreadable-id-object (object stream :type t)
     (format stream "~A (~D)"
             (scope-string (participant-scope object))
-            (hash-table-count (%server-methods object)))))
+            (hash-table-count (server-%methods object)))))
 
 ;;; Utility functions
 

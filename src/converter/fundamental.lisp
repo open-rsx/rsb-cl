@@ -18,13 +18,13 @@
 (define-simple-converter (:fundamental-void :void no-value
                           :wire-type       (simple-array (unsigned-byte 8) (0))
                           :data-type-class (eql +no-value+))
-    (+no-value+)
+  (+no-value+)
   ((make-array 0 :element-type '(unsigned-byte 8))))
 
 (define-simple-converter (:fundamental-null t t
                           :wire-type       t
                           :wire-type-class t)
-    (wire-data)
+  (wire-data)
   (domain-object))
 
 ;;; Numeric fundamental types
@@ -65,16 +65,16 @@
 
 (define-simple-converter
     (:fundamental-ascii-string :ascii-string string)
-    ((sb-ext:octets-to-string wire-data :external-format :ascii))
+  ((sb-ext:octets-to-string wire-data :external-format :ascii))
   ((sb-ext:string-to-octets domain-object :external-format :ascii)))
 
 (define-simple-converter
     (:fundamental-utf-8-string :utf-8-string string)
-    ((sb-ext:octets-to-string wire-data :external-format :utf-8))
+  ((sb-ext:octets-to-string wire-data :external-format :utf-8))
   ((sb-ext:string-to-octets domain-object :external-format :utf-8)))
 
 (define-simple-converter
     (:fundamental-bytes :bytes (vector (unsigned-byte 8))
      :data-type-class simple-array)
-    (wire-data)
+  (wire-data)
   ((coerce domain-object 'octet-vector)))

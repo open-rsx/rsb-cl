@@ -17,7 +17,7 @@
                               "Stores the type specifying the type of
 event payloads supported by the informer.")
    (sequence-number-generator :type     function
-                              :reader   %informer-sequence-number-generator
+                              :reader   informer-%sequence-number-generator
                               :initform (make-sequence-number-generator)
                               :documentation
                               "Stores a thread-safe sequence number
@@ -61,7 +61,7 @@ channel."))
   ;; Set EVENT's sequence number to our next sequence number and
   ;; origin to our id.
   (setf (event-sequence-number event)
-        (funcall (%informer-sequence-number-generator informer))
+        (funcall (informer-%sequence-number-generator informer))
         (event-origin event)
         (participant-id informer))
 
@@ -132,9 +132,9 @@ channel."))
       informer)))
 
 (define-participant-creation-uri-methods informer
-    (scope puri:uri) (type t))
+  (scope puri:uri) (type t))
 
 (define-participant-creation-restart-method informer
-    (scope scope) (type t))
+  (scope scope) (type t))
 (define-participant-creation-restart-method informer
-    (scope puri:uri) (type t))
+  (scope puri:uri) (type t))
