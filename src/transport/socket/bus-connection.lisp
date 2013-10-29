@@ -99,9 +99,11 @@ after calling NEW-VALUE."
     (log1 :info connection "Performing ~A role of ~A handshake" role phase)
     ;; TODO temp until we implement shutdown protocol
     (if (and (eq phase :shutdown) (eq role :send))
-        (sb-bsd-sockets:socket-shutdown
-         (usocket::socket (connection-socket connection))
-         :direction :output)
+        (progn
+          (finish-output stream)
+          (sb-bsd-sockets:socket-shutdown
+           (usocket::socket (connection-socket connection))
+           :direction :output))
         (ecase role
           (:send
            (write-ub32/le 0 stream)
