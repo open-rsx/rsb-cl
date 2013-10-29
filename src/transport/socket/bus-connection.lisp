@@ -170,6 +170,9 @@ as a protocol buffer of kind ~S.~:@>"
                               (notification cons))
   (declare (type (cons octet-vector (unsigned-byte 32)) notification))
 
+  (when (connection-%closing? connection)
+    (log1 :info connection "dropping a message since it is closing")
+    (return-from send-notification))
   (let ((stream (usocket:socket-stream (connection-socket connection))))
     (write-ub32/le (cdr notification) stream)
     (write-sequence (car notification) stream :end (cdr notification))
@@ -192,7 +195,8 @@ be packed using protocol buffer serialization.~@:>"
 
 (defmethod handle ((connection bus-connection)
                    (event      notification))
-  (send-notification connection (event->notification connection event)))
+  (bt:with-lock-held ((connection-lock connection))
+    (send-notification connection (event->notification connection event))))
 
 ;;; Shutdown
 

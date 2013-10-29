@@ -178,8 +178,9 @@ connected to the bus."))
                    (notification notification))
   "This method is used for outgoing notifications."
   ;; Send to remote peer(s).
-  (with-locked-bus (bus :connections? t)
-    (map nil (rcurry #'handle notification) (bus-connections bus)))
+  (mapc (rcurry #'handle notification)
+        (with-locked-bus (bus :connections? t)
+          (copy-list (bus-connections bus))))
 
   ;; Dispatch to our own connectors.
   (dispatch bus notification))
@@ -190,13 +191,13 @@ connected to the bus."))
   (let+ (((received-via . notification) data))
     ;; Dispatched to all connections except the one from which we
     ;; received the notification.
-    (with-locked-bus (bus :connections? t)
-      (iter (for connection in (bus-connections bus))
-            (unless (eq received-via connection)
-              ;; We can ignore errors here since we installed an error
-              ;; policy in CONNECTION that removes CONNECTION.
-              (ignore-errors
-                (handle connection notification)))))
+    (iter (for connection in (with-locked-bus (bus :connections? t)
+                               (copy-list (bus-connections bus))))
+          (unless (eq received-via connection)
+            ;; We can ignore errors here since we installed an error
+            ;; policy in CONNECTION that removes CONNECTION.
+            (ignore-errors
+             (handle connection notification))))
 
     ;; Dispatch to our own connectors.
     (dispatch bus notification)))
