@@ -46,40 +46,46 @@
 	   body)))))
 
 (defclass bus (broadcast-processor)
-  ((connections      :type     list
-		     :accessor bus-connections
-		     :initform nil
-		     :documentation
-		     "Stores a list of connections to other processes
-using the bus.")
-   (connections-lock :reader   bus-connections-lock
-		     :initform (bt:make-recursive-lock "Bus Connections Lock")
-		     :documentation
-		     "Stores a lock that can be used to protect the
+  ((connections         :type     list
+			:accessor bus-connections
+			:initform nil
+			:documentation
+			"Stores a list of connections to other
+processes using the bus.")
+   (connections-lock    :reader   bus-connections-lock
+			:initform (bt:make-recursive-lock "Bus Connections Lock")
+			:documentation
+			"Stores a lock that can be used to protect the
 connection list of the bus from concurrent modification.")
-   (connectors       :type     list
-		     :accessor bus-connectors
-		     :initform nil
-		     :documentation
-		     "Stores a list of local connectors connected to
-the bus.")
-   (connectors-lock  :reader   bus-connectors-lock
-		     :initform (bt:make-recursive-lock "Bus Connectors Lock")
-		     :documentation
-		     "Stores a lock that can be used to protect the
+   (connectors          :type     list
+			:accessor bus-connectors
+			:initform nil
+			:documentation
+			"Stores a list of local connectors connected
+to the bus.")
+   (connectors-lock     :reader   bus-connectors-lock
+			:initform (bt:make-recursive-lock "Bus Connectors Lock")
+			:documentation
+			"Stores a lock that can be used to protect the
 connector list of the bus from concurrent modification.")
-   (options          :initarg  :options
-		     :type     list
-		     :accessor bus-options
-		     :initform nil
-		     :documentation
-		     "Stores a plist of connection options which
+   (options             :initarg  :options
+			:type     list
+			:accessor bus-options
+			:initform nil
+			:documentation
+			"Stores a plist of connection options which
 should be used by connections associated to the bus instance.")
-   (proxy            :type     function
-		     :accessor %bus-proxy
-		     :documentation
-		     "Stores a functions that is used as a handler for
-`bus-connection' instances."))
+   (proxy               :type     function
+			:accessor %bus-proxy
+			:documentation
+			"Stores a functions that is used as a handler
+for `bus-connection' instances.")
+   (removed-connections :type     lparallel.queue:queue
+			:accessor bus-%removed-connections
+			:initform (lparallel.queue:make-queue)
+			:documentation
+			"Stores a list of connections queued for
+closing after having been removed from the bus."))
   (:default-initargs
    :host (missing-required-initarg 'in-connector :host)
    :port (missing-required-initarg 'in-connector :port))
@@ -125,7 +131,8 @@ connected to the bus."))
 			(declare (ignore condition))
 			(log1 :info bus "Removing connection ~A after error policy" connection)
 			(with-locked-bus (bus :connections? t)
-			  (removef (bus-connections bus) connection))))
+			  (removef (bus-connections bus) connection))
+			(close-removed-connections bus)))
 
 	      ;; Start the connection.
 	      (log1 :info bus "Starting connection ~A" connection)
@@ -136,10 +143,9 @@ connected to the bus."))
 	      ;; Prevent the error handling from being executed
 	      ;; concurrently/recursively.
 	      (log1 :info bus "Maybe closing connection ~A after remove" connection)
-	      (handler-case (disconnect connection :handshake :send)
-		(error (condition)
-		  (log1 :warn bus "Error closing connection ~A after remove: ~A"
-			connection condition))))))))
+	      (setf (handlers connection) '())
+	      (lparallel.queue:push-queue
+	       connection (bus-%removed-connections bus)))))))
 
 (defmethod (setf bus-connectors) :around ((new-value list)
 					  (bus       bus))
@@ -168,13 +174,25 @@ connected to the bus."))
   (log1 :info bus "Detaching connector ~A from bus provider ~A"
 	connector bus)
   (with-locked-bus (bus)
-    (removef (bus-connectors bus) connector)))
+    (removef (bus-connectors bus) connector))
+  (close-removed-connections bus))
 
 (defmethod notify ((bus     bus)
-		   (subject (eql t))
-		   (action  (eql :detached)))
+                   (subject (eql t))
+                   (action  (eql :detached)))
   "Remove connections when all connectors detach."
   (setf (bus-connections bus) nil))
+
+(defun close-removed-connections (bus)
+  (iter (for removed next (lparallel.queue:try-pop-queue
+			   (bus-%removed-connections bus)))
+	(while removed)
+	(log1 :info bus "Closing removed connection ~A" removed)
+	(handler-case (disconnect removed :handshake :send)
+	  (error (condition)
+	    (log1 :warn bus "Encountered error closing connection ~A after remove: ~A"
+		  removed condition)))
+	(log1 :info bus "Closed removed connection ~A" removed)))
 
 
 ;;; Sending and receiving
