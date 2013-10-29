@@ -30,12 +30,9 @@ contain conflicting properties."
 (defun print-socket (stream socket &optional colon? at?)
   "Print ENDPOINT to STREAM."
   (declare (ignore at?))
-  (format stream "~:[ADDRESS?~;~:*~A~]:~:[PORT?~;~:*~D~]"
-          (ignore-errors
-            (if colon?
-                (usocket:get-local-name socket)
-                (usocket:get-peer-name  socket)))
-          (ignore-errors
-            (if colon?
-                (usocket:get-local-port socket)
-                (usocket:get-peer-port  socket)))))
+  (format stream "~{~:[ADDRESS?~;~:*~A~]:~:[PORT?~;~:*~D~]~}"
+          (handler-case (multiple-value-list
+                         (if colon?
+                             (usocket:get-local-name socket)
+                             (usocket:get-peer-name  socket)))
+            (error () '(nil nil)))))
