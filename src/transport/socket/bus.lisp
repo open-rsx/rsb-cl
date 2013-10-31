@@ -66,7 +66,7 @@
                         "Stores a functions that is used as a handler
                          for `bus-connection' instances.")
    (removed-connections :type     lparallel.queue:queue
-                        :accessor bus-%removed-connections
+                        :reader   bus-%removed-connections
                         :initform (lparallel.queue:make-queue)
                         :documentation
                         "Stores a list of connections queued for
