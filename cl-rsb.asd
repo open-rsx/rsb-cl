@@ -1,6 +1,6 @@
 ;;;; cl-rsb.asd --- Common Lisp implementation of RSB.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -239,14 +239,6 @@ See `version/list' for details on keyword parameters."
 
                               (:file       "processor-mixins"
                                :depends-on ("package" "protocol"))
-                              (:file       "filtering-processor-mixin"
-                               :depends-on ("package" "protocol"))
-                              (:file       "deliver-timestamp-mixin"
-                               :depends-on ("package" "protocol"))
-                              (:file       "error-policy-mixin"
-                               :depends-on ("package" "protocol"))
-                              (:file       "error-handling-dispatcher-mixin"
-                               :depends-on ("package" "error-policy-mixin"))
 
                               (:file       "configurator"
                                :depends-on ("package"

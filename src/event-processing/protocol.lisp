@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocols provided by the event-processing module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -56,6 +56,16 @@ contained sink handle DATA."
   (:documentation
    "Dispatch EVENT in the manner implemented by PROCESSOR. This may
 mean to call some handlers, for example."))
+
+;;; Filterting processor protocol
+
+(defgeneric processor-filters (processor)
+  (:documentation
+   "Return the list of filters applied by PROCESSOR."))
+
+(defgeneric (setf processor-filters) (new-value processor)
+  (:documentation
+   "Set the list of filters applied by PROCESSOR to NEW-VALUE."))
 
 ;;; Transformation protocol
 
