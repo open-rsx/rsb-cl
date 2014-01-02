@@ -49,7 +49,8 @@ pattern (examples include \"request\", \"reply\", \"update\").")
                     "Stores the payload of the event as a \"domain
 object\" (can be any Lisp object).")
    (meta-data       :accessor event-meta-data)
-   (timestamp       :accessor event-timestamps)
+   (timestamp       :initarg  :timestamps
+                    :accessor event-timestamps)
    (causes          :initarg  :causes
                     :type     list
                     :accessor event-causes
@@ -178,17 +179,33 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
                    &key
                    method
                    causes
+                   timestamps
+                   (create-timestamp? t)
                    &allow-other-keys)
   "Construct an event addressed at SCOPE with payload DATA and,
-optionally, meta-data consisting of the keys and values in the plist
-META-DATA.
-CAUSES can be used to supply a list of causes."
+   optionally, meta-data consisting of the keys and values in the
+   plist META-DATA.
+
+   CAUSES can be used to supply a list of causes.
+
+   TIMESTAMPS is an alist with elements of the form
+
+     (KEY . TIMESTAMP)
+
+   where TIMESTAMP is a `local-time:timestamp' instance.
+
+   CREATE-TIMESTAMP? controls whether a :create timestamp for the
+   current time is added to the event."
   (make-instance 'event
-                 :scope     (make-scope scope)
-                 :method    method
-                 :data      data
-                 :meta-data (remove-from-plist meta-data :method :causes)
-                 :causes    causes))
+                 :scope             (make-scope scope)
+                 :method            method
+                 :data              data
+                 :meta-data         (remove-from-plist
+                                     meta-data :method :causes :timestamps
+                                               :create-timestamp?)
+                 :causes            causes
+                 :timestamp         timestamps
+                 :create-timestamp? create-timestamp?))
 
 ;;; Utility functions
 

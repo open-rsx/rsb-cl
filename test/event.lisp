@@ -1,6 +1,6 @@
 ;;;; event.lisp --- Unit tests for the event class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,6 +15,49 @@
           :documentation
           "Test construction of `event' instances.")
   construction
+
+  (ensure-cases (initargs expected)
+      `(;; Cannot have an `event' without scope
+        (() missing-required-initarg)
+
+        ;; These are OK
+        ((:scope ,(make-scope "/") :data "foo") ("/"        "foo" (:create)))
+        ((:scope "/"               :data "foo") ("/"        "foo" (:create)))
+        ((:scope ("foo" "bar")     :data "foo") ("/foo/bar" "foo" (:create)))
+
+        ((:scope "/baz"            :data "bar" :create-timestamp? nil)
+         ("/baz/" "bar" ((not :create))))
+
+        ((:scope "/"               :data "foo" :timestamps (:foo ,(local-time:now)))
+         ("/" "foo" (:create :foo))))
+
+    (let+ (((&flet via-make-instance ()
+              (apply #'make-instance 'event initargs)))
+           ((&flet via-make-event (scope data initargs)
+              (apply #'make-event scope data initargs))))
+      (case expected
+        (missing-required-initarg
+         (ensure-condition 'missing-required-initarg
+           (via-make-instance)))
+        (t
+         (let+ (((expected-scope expected-payload expected-timestamps)
+                 expected)
+                ((&flet check (event)
+                   (check-event event expected-scope expected-payload)
+                   (dolist (expected-timestamp expected-timestamps)
+                     (typecase expected-timestamp
+                       (keyword
+                        (ensure (typep (timestamp event expected-timestamp)
+                                       'local-time:timestamp)))
+                       ((cons (eql not) (cons keyword null))
+                        (ensure-null
+                         (timestamp event (second expected-timestamp)))))))))
+           (check (via-make-instance))
+           (when-let ((scope (getf initargs :scope))
+                      (data  (getf initargs :data)))
+             (check
+              (via-make-event
+               scope data (remove-from-plist initargs :scope :data)))))))))
 
   ;; Cannot have an `event' without scope
   (ensure-condition 'missing-required-initarg
@@ -31,7 +74,14 @@
                               :data              "bar"
                               :create-timestamp? nil)))
     (check-event event "/baz/" "bar")
-    (ensure-null (timestamp event :create))))
+    (ensure-null (timestamp event :create)))
+
+  (let ((event (make-instance 'event
+                              :scope (make-scope "/")
+                              :data  "foo"
+                              :timestamps `(:foo ,(local-time:now)))))
+    (check-event event "/" "foo")
+    (ensure (typep (timestamp event :foo) 'local-time:timestamp))))
 
 (addtest (event-root
           :documentation
