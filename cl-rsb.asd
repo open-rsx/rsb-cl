@@ -198,28 +198,24 @@ See `version/list' for details on keyword parameters."
                               (:file       "protocol"
                                :depends-on ("package"))
 
-                              (:file       "filter-mixin"
+                              (:file       "filter-mixins"
                                :depends-on ("package" "protocol"))
                               (:file       "composite-filter"
                                :depends-on ("package" "protocol"
-                                            "filter-mixin"))
-                              (:file       "fallback-policy-mixin"
-                               :depends-on ("package" "types" "protocol"))
-                              (:file       "payload-matching-mixin"
-                               :depends-on ("package" "protocol"))
+                                            "filter-mixins"))
 
                               (:file       "scope-filter"
                                :depends-on ("package" "protocol"
-                                            "filter-mixin"))
+                                            "filter-mixins"))
                               (:file       "type-filter"
                                :depends-on ("package" "protocol"
-                                            "filter-mixin"))
+                                            "filter-mixins"))
                               (:file       "origin-filter"
                                :depends-on ("package" "protocol"
-                                            "filter-mixin"))
+                                            "filter-mixins"))
                               (:file       "method-filter"
                                :depends-on ("package" "protocol"
-                                            "filter-mixin"))))
+                                            "filter-mixins"))))
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
