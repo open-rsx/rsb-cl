@@ -1,6 +1,6 @@
 ;;;; receiving-client.lisp --- Superclass for receiving, filtering clients.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -29,8 +29,8 @@ listeners."
         (call-next-method)
       (let ((added   (set-difference new-value old-value))
             (removed (set-difference old-value new-value)))
-        (log:info "~@<~A added filters ~{~A~^, ~}~@:>" participant added)
-        (log:info "~@<~A Removed filters ~{~A~^, ~}~@:>" participant removed)
+        (log:debug "~@<~A added filters ~{~A~^, ~}~@:>" participant added)
+        (log:debug "~@<~A Removed filters ~{~A~^, ~}~@:>" participant removed)
 
         (iter (for filter in added)
               (rsb.ep:notify configurator filter :filter-added))

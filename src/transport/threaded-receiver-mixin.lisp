@@ -1,6 +1,6 @@
 ;;;; threaded-receiver-mixin.lisp --- A mixin for threaded receiving connectors.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,7 +38,7 @@ thread."))
            (control-mutex     connector-control-mutex)
            (control-condition connector-control-condition)) connector))
     ;; Launch the thread.
-    (log:info "~@<~A is starting worker thread~@:>" connector)
+    (log:debug "~@<~A is starting worker thread~@:>" connector)
     (bt:make-thread (curry #'receive-messages connector)
                     :name (format nil "Worker for ~A" connector))
 
@@ -55,7 +55,7 @@ thread."))
         ;; If this is called from the receiver thread, there is no
         ;; need for an interruption. We can just unwind normally.
         ((eq thread (bt:current-thread))
-         (log:info "~@<~A is in receiver thread; aborting~@:>" connector)
+         (log:debug "~@<~A is in receiver thread; aborting~@:>" connector)
          (exit-receiver))
 
         ((bt:thread-alive-p thread)
@@ -63,15 +63,15 @@ thread."))
          ;; fails. Retry in such cases.
          (iter (while (bt:thread-alive-p thread))
                ;; Interrupt the receiver thread and abort.
-               (log:info "~@<~A is interrupting receiver thread with abort~@:>"
-                         connector)
+               (log:debug "~@<~A is interrupting receiver thread with abort~@:>"
+                          connector)
                (ignore-errors
                 (bt:interrupt-thread thread #'exit-receiver))
 
                ;; The thread should be terminating or already have
                ;; terminated.
-               (log:info "~@<~A is joining receiver thread~@:>"
-                         connector)
+               (log:debug "~@<~A is joining receiver thread~@:>"
+                          connector)
                (handler-case
                    (bt:with-timeout (.1)
                      (bt:join-thread thread))
@@ -92,11 +92,11 @@ requests."
          (bt:with-lock-held (control-mutex)
            (setf thread (bt:current-thread))
            (bt:condition-notify control-condition)))
-       (log:info "~@<~A is entering receive loop~@:>" connector)
+       (log:debug "~@<~A is entering receive loop~@:>" connector)
        (call-next-method))
     (abort (&optional condition)
       (declare (ignore condition))))
-  (log:info "~@<~A left receive loop~@:>" connector))
+  (log:debug "~@<~A left receive loop~@:>" connector))
 
 (defun exit-receiver ()
   "Cause a receiver thread to exit. Has to be called from the receiver

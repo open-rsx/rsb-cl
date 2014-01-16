@@ -1,6 +1,6 @@
 ;;;; bus.lisp --- Superclass for bus provider classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -152,7 +152,7 @@ connected to the bus."))
 (defmethod notify ((connector rsb.transport:connector)
                    (bus       bus)
                    (action    (eql :attached)))
-  (log:info "~@<~A is attaching connector ~A to bus provider ~A~@:>"
+  (log:debug "~@<~A is attaching connector ~A to bus provider ~A~@:>"
             bus connector bus)
   (with-locked-bus (bus)
     (push connector (bus-connectors bus))))
@@ -160,7 +160,7 @@ connected to the bus."))
 (defmethod notify ((connector rsb.transport:connector)
                    (bus       bus)
                    (action    (eql :detached)))
-  (log:info "~@<~A is detaching connector ~A from bus provider ~A~@:>"
+  (log:debug "~@<~A is detaching connector ~A from bus provider ~A~@:>"
             bus connector bus)
   (with-locked-bus (bus)
     (removef (bus-connectors bus) connector))

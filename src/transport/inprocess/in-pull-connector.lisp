@@ -1,6 +1,6 @@
 ;;;; in-pull-connector.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -35,13 +35,13 @@ process."))
 (defmethod notify ((connector in-pull-connector)
                    (scope     scope)
                    (action    (eql :attached)))
-  (log:info "~@<~A is attaching to scope ~A~@:>" connector scope)
+  (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
   (push connector (by-scope scope)))
 
 (defmethod notify ((connector in-pull-connector)
                    (scope     scope)
                    (action    (eql :detached)))
-  (log:info "~@<~A is detaching from scope ~A~@:>" connector scope)
+  (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
   (removef (by-scope scope) connector :count 1))
 
 (defmethod handle ((connector in-pull-connector)

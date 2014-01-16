@@ -1,6 +1,6 @@
 ;;;; listener.lisp --- Listeners receive events that are broadcast on a bus.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,8 +26,8 @@ a mechanism for dispatching matching events to these handlers."))
          (removed      (set-difference old-value new-value)))
     (prog1
         (call-next-method)
-      (log:info "~@<~A added handlers ~{~A~^, ~}~@:>" listener added)
-      (log:info "~@<~A removed handlers ~{~A~^, ~}~@:>" listener removed)
+      (log:debug "~@<~A added handlers ~{~A~^, ~}~@:>" listener added)
+      (log:debug "~@<~A removed handlers ~{~A~^, ~}~@:>" listener removed)
       (iter (for handler in added)
             (rsb.ep:notify configurator handler :handler-added))
       (iter (for handler in removed)
