@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+# Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -161,8 +161,12 @@ function(test NAME SYSTEM)
              COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake")
 endfunction()
 
-test(test               ${SYSTEM_NAME})
-test(test-introspection rsb-introspection)
+test(test                  ${SYSTEM_NAME})
+
+test(test-transport-socket rsb-transport-socket)
+test(test-transport-spread rsb-transport-spread)
+
+test(test-introspection    rsb-introspection)
 
 # Installation
 file(GLOB ASD_FILES
