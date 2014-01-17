@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.filter)
 
-(defmethod find-filter-class ((spec (eql :origin)))
-  (find-class 'origin-filter))
-
 (defclass origin-filter (funcallable-filter-mixin)
   ((origin :type     uuid:uuid
            :accessor filter-origin
@@ -19,6 +16,9 @@
    :origin (missing-required-initarg 'origin-filter :origin))
   (:documentation
    "This filter discriminates based on the origin id of events."))
+
+(service-provider:register-provider/class 'filter :origin
+  :class 'origin-filter)
 
 (defmethod shared-initialize :after ((instance   origin-filter)
                                      (slot-names t)

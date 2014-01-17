@@ -18,9 +18,6 @@ case-sensitive matching."))
 
 ;;; `regex-filter' class
 
-(defmethod find-filter-class ((spec (eql :regex)))
-  (find-class 'regex-filter))
-
 (defclass regex-filter (funcallable-filter-mixin
                         payload-matching-mixin
                         fallback-policy-mixin)
@@ -48,6 +45,9 @@ regular expression is matched in case insensitive mode."))
 are strings against a given regular expression. For payloads of other
 types, the fallback policy is applied. Matching is case sensitive
 unless otherwise requested using the :case-sensitive? initarg."))
+
+(service-provider:register-provider/class 'filter :regex
+  :class 'regex-filter)
 
 (defmethod shared-initialize :after ((instance   regex-filter)
                                      (slot-names t)

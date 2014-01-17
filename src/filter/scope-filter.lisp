@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.filter)
 
-(defmethod find-filter-class ((spec (eql :scope)))
-  (find-class 'scope-filter))
-
 (defclass scope-filter (funcallable-filter-mixin
                         scope-mixin)
   ((rsb::scope :accessor filter-scope
@@ -27,6 +24,9 @@
     on whether exact matches are requested, event scopes match the
     scope of the filter, either if they are identical or if they are
     identical or sub-scopes."))
+
+(service-provider:register-provider/class 'filter :scope
+  :class 'scope-filter)
 
 (defmethod matches? ((filter scope-filter) (event event))
   "EVENT is matched by comparing its scope to the scope of FILTER."

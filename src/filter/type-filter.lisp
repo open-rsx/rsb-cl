@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.filter)
 
-(defmethod find-filter-class ((spec (eql :type)))
-  (find-class 'type-filter))
-
 (defclass type-filter (funcallable-filter-mixin)
   ((type :initarg  :type
          :type     (or list symbol)
@@ -21,6 +18,9 @@
   (:documentation
    "Instances of this filter class discriminate based on the type of
 events."))
+
+(service-provider:register-provider/class 'filter :type
+  :class 'type-filter)
 
 (defmethod matches? ((filter type-filter) (event event))
   (typep (event-data event) (filter-type filter)))

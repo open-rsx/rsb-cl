@@ -15,9 +15,6 @@ used with FILTER."))
 
 ;;; `xpath-filter' class
 
-(defmethod find-filter-class ((spec (eql :xpath)))
-  (find-class 'xpath-filter))
-
 (defclass xpath-filter (funcallable-filter-mixin
                         payload-matching-mixin
                         fallback-policy-mixin)
@@ -39,6 +36,9 @@ events.")
 applicable to payloads for which an implementation of the XPath
 interface is available. Examples include strings (via XML parsing),
 XML DOM objects and protocol buffer messages."))
+
+(service-provider:register-provider/class 'filter :xpath
+  :class 'xpath-filter)
 
 (defmethod shared-initialize :after ((instance   xpath-filter)
                                      (slot-names t)

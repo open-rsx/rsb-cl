@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol for event filtering.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -27,16 +27,17 @@
 
 ;;; Filter class family
 
-(dynamic-classes:define-findable-class-family filter
-    "The classes in this family implement event filtering strategies
-by providing methods on the `matches?' function. Filter instances
-should also be funcallable. Filter instances are usually constructed
-using the `make-filter' and `filter' functions.")
+(service-provider:define-service filter
+  (:documentation
+   "Providers of this service implement event filtering strategies by
+    via methods on the `matches?' generic function.
+
+    Filter instances should also be funcallable."))
 
 (defun make-filter (name &rest args)
   "Construct an instance of the filter class designated by NAME using
-ARGS as initargs."
-  (apply #'make-instance (find-filter-class name) args))
+   ARGS as initargs."
+  (apply #'service-provider:make-provider 'filter name args))
 
 ;;; Filter construction mini-DSL
 

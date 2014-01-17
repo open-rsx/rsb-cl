@@ -22,12 +22,8 @@
   (:export
    #:matches?)
 
-  ;; Filter class family and construction
+  ;; Filter construction
   (:export
-   #:no-such-filter
-   #:find-filter-class
-   #:filter-classes
-
    #:make-filter)
 
   ;; `funcallable-filter-mixin' class

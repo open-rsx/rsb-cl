@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.filter)
 
-(defmethod find-filter-class ((spec (eql :method)))
-  (find-class 'method-filter))
-
 (defclass method-filter (funcallable-filter-mixin)
   ((method :initarg  :method
            :type     (or null keyword)
@@ -25,6 +22,9 @@ methods."))
    "This filter discriminates based on the method of events. Valid
 method values are either strings which match events with identical
 method strings or NIL which matches events without methods."))
+
+(service-provider:register-provider/class 'filter :method
+  :class 'method-filter)
 
 (defmethod matches? ((filter method-filter) (event event))
   (eq (filter-method filter) (event-method event)))

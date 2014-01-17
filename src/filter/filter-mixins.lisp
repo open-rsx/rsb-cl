@@ -21,9 +21,6 @@
 
 ;;; `fallback-policy-mixin'
 
-(defmethod find-filter-class ((spec (eql :constant)))
-  (find-class 'fallback-policy-mixin))
-
 (defclass fallback-policy-mixin ()
   ((fallback-policy :initarg  :always
                     :initarg  :fallback-policy
@@ -39,6 +36,9 @@ applicable to an event."))
    "This mixin class is intended to be mixed into filter classes that
 cannot process all events using their primary discrimination method
 and thus need a fallback policy."))
+
+(service-provider:register-provider/class 'filter :constant
+  :class 'fallback-policy-mixin)
 
 (defmethod matches? ((filter fallback-policy-mixin)
                      (event  t))

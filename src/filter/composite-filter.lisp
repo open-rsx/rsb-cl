@@ -1,4 +1,4 @@
-;;;; composite-filter.lisp --- Composite filter classes.
+;;;; composite-filter.lisp --- Composite filters.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
@@ -26,12 +26,6 @@ rather than subclasses."))
 
 ;;; Class `complement-filter'
 
-(defmethod find-filter-class ((spec (eql :complement)))
-  (find-class 'complement-filter))
-
-(defmethod find-filter-class ((spec (eql :not)))
-  (find-class 'complement-filter))
-
 (defclass complement-filter (composite-filter)
   ()
   (:metaclass closer-mop:funcallable-standard-class)
@@ -41,6 +35,12 @@ rather than subclasses."))
    "Instances of this class make filtering decisions by forming the
     logical complement of the decisions made by their single
     subordinate filter."))
+
+(service-provider:register-provider/class
+ 'filter :complement :class 'complement-filter)
+
+(service-provider:register-provider/class
+ 'filter :not :class 'complement-filter)
 
 (defmethod shared-initialize :before ((instance   complement-filter)
                                       (slot-names t)
@@ -53,38 +53,32 @@ rather than subclasses."))
 (defmethod matches? ((filter complement-filter) (event t))
   (not (matches? (first (filter-children filter)) event)))
 
-;;; Class `conjoin-filter'
+;;; Classes `conjoin-filter' and `disjoin-filter'
 
-(defmethod find-filter-class ((spec (eql :conjoin)))
-  (find-class 'conjoin-filter))
+(macrolet
+    ((define-composite-filter ((name &rest designators)
+                               operation operation-name)
+       `(progn
+          (defclass ,name (composite-filter)
+            ()
+            (:metaclass closer-mop:funcallable-standard-class)
+            (:documentation
+             ,(format nil "Instances of this class make filtering ~
+                           decisions by forming the logical ~A of the ~
+                           decisions made by their subordinate ~
+                           filters."
+                      operation-name)))
 
-(defmethod find-filter-class ((spec (eql :and)))
-  (find-class 'conjoin-filter))
+          ,@(mapcar
+             (lambda (designator)
+               `(service-provider:register-provider/class 'filter ,designator
+                  :class ',name))
+             designators)
 
-(defclass conjoin-filter (composite-filter)
-  ()
-  (:metaclass closer-mop:funcallable-standard-class)
-  (:documentation
-   "Instances of this class make filtering decisions by forming the
-logical and of the decisions made by their subordinate filters."))
+          (defmethod matches? ((filter ,name) (event t))
+            (,operation (rcurry #'matches? event) (filter-children filter))))))
 
-(defmethod matches? ((filter conjoin-filter) (event t))
-  (every (rcurry #'matches? event) (filter-children filter)))
-
-;;; Class `disjoin-filter'
-
-(defmethod find-filter-class ((spec (eql :disjoin)))
-  (find-class 'disjoin-filter))
-
-(defmethod find-filter-class ((spec (eql :or)))
-  (find-class 'disjoin-filter))
-
-(defclass disjoin-filter (composite-filter)
-  ()
-  (:metaclass closer-mop:funcallable-standard-class)
-  (:documentation
-   "Instances of this class make filtering decisions by forming the
-logical or of the decisions made by their subordinate filters."))
-
-(defmethod matches? ((filter disjoin-filter) (event t))
-  (some (rcurry #'matches? event) (filter-children filter)))
+  (define-composite-filter (conjoin-filter :conjoin :and)
+    every "and")
+  (define-composite-filter (disjoin-filter :disjoin :or)
+    some "or"))
