@@ -21,16 +21,14 @@
              :documentation
              "Stores the name of the method.")
    (informer :type     (or null informer)
-             :reader   method-%informer ; without lazy creation
-             :writer   (setf method-%informer)
+             :accessor method-%informer ; without lazy creation
              :reader   method-informer  ; with lazy creation
              :initform nil
              :documentation
              "Stores the `informer' instance associated to the
 method. The instance is created lazily when first used.")
    (listener :type     (or null listener)
-             :reader   method-%listener ; without lazy creation
-             :writer   (setf method-%listener)
+             :accessor method-%listener ; without lazy creation
              :reader   method-listener  ; with lazy creation
              :initform nil
              :documentation
@@ -77,17 +75,16 @@ transform is installed into the created participant.
 ARGS are passed to the creation function and SCOPE is used to compute
 the scope of the created participant."
   (let ((method-name (symbolicate "METHOD-" slot))
-        (writer-name (symbolicate "METHOD-%" slot))
+        (accessor-name (symbolicate "METHOD-%" slot))
         (make-name   (symbolicate "MAKE-" slot)))
     `(defmethod ,method-name :before ((method ,class))
        ,(format nil "Lazily create the ~(~A~) when it is first requested."
                 slot)
-       (unless (slot-value method ',slot)
-         (let+ (((&accessors-r/o (server method-server)
-                                 (name   method-name)) method)
+       (unless (,accessor-name method)
+         (let+ (((&structure-r/o method- server name) method)
                 (transform
                  (cdr (assoc ,transform (participant-transform server)))))
-           (setf (,writer-name method)
+           (setf (,accessor-name method)
                  (,make-name (%make-scope server ,scope name) ,@args
                              :transports (server-transport-options server)
                              :converters (participant-converters server)
