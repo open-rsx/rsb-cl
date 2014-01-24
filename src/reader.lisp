@@ -25,7 +25,8 @@ receiving events."))
                         &key
                         (transports (transport-options))
                         (converters (default-converters))
-                        transform)
+                        transform
+                        error-policy)
   ;; Translate different kinds of errors into `reader-creation-error'
   ;; errors.
   (with-condition-translation
@@ -33,7 +34,7 @@ receiving events."))
         :scope      scope
         :transports transports))
     (make-participant 'reader scope :in-pull
-                      transports converters transform)))
+                      transports converters transform error-policy)))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))
 

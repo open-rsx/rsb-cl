@@ -82,14 +82,16 @@ the scope of the created participant."
                 slot)
        (unless (,accessor-name method)
          (let+ (((&structure-r/o method- server name) method)
-                (transform
-                 (cdr (assoc ,transform (participant-transform server)))))
+                ((&structure-r/o participant- transform error-hook) server)
+                (transform (cdr (assoc ,transform transform))))
            (setf (,accessor-name method)
                  (,make-name (%make-scope server ,scope name) ,@args
-                             :transports (server-transport-options server)
-                             :converters (participant-converters server)
-                             :transform  transform)))))))
-;; TODO(jmoringe): override configured error policy
+                             :transports   (server-transport-options server)
+                             :converters   (participant-converters server)
+                             :transform    transform
+                             :error-policy (lambda (condition)
+                                             (hooks:run-hook
+                                              error-hook condition)))))))))
 
 ;;; `server' class
 

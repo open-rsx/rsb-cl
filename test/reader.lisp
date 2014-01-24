@@ -1,6 +1,6 @@
 ;;;; reader.lisp --- Unit tests for the reader class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -30,6 +30,9 @@
     "/reader/construction")
   '("inprocess:/reader/construction"
     nil
+    "/reader/construction")
+  `("inprocess:/reader/construction"
+    (:error-policy ,#'continue)
     "/reader/construction")
 
   ;; No transports => error

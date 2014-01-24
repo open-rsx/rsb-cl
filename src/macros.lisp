@@ -1,6 +1,6 @@
 ;;;; marcos.lisp --- Convenience marcos for RSB-related functionality.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,6 +31,7 @@
                        transports
                        converters
                        transform
+                       error-policy
                        &allow-other-keys)
                       &body body)
 
@@ -39,7 +40,7 @@
                      is destroyed when the execution of BODY ends ~
                      normally or because of a control transfer."
                 kind)
-       (declare (ignore transports converters transform))
+       (declare (ignore transports converters transform error-policy))
        (check-type var symbol "a symbol")
 
        `(with-participant (,`,var (,',make-name ,`,scope-or-uri

@@ -117,14 +117,18 @@ these methods are exposed for remote clients."))
                               &key
                               (transports (transport-options))
                               (converters (default-converters))
-                              transform)
+                              transform
+                              error-policy)
   "Make and return a `local-server' instance that provides a service
 at the scope SCOPE."
-  (make-instance 'local-server
-                 :scope             scope
-                 :converters        converters
-                 :transport-options transports
-                 :transform         transform))
+  (let ((server (make-instance 'local-server
+                               :scope             scope
+                               :converters        converters
+                               :transport-options transports
+                               :transform         transform)))
+    (when error-policy
+      (hooks:add-to-hook (participant-error-hook server) error-policy))
+    server))
 
 (define-participant-creation-uri-methods local-server (scope puri:uri))
 

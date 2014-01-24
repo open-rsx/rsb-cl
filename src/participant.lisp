@@ -27,7 +27,7 @@ connectors of the participant. Each element is of the form
                :documentation
                "Stores the transform which should be applied to
 processed events.")
-   (error-hook :type     list
+   (error-hook :type     list #|of function|#
                :initform '()
                :documentation
                "Stores a list of functions to call in case of
@@ -69,7 +69,7 @@ of PARTICIPANT."
 ;; TODO(jmoringe): infer direction?
 
 (defun make-participant (class scope direction
-                         transports converters transform
+                         transports converters transform error-policy
                          &rest args)
   "Make and return a participant instance of CLASS that participates
 in the channel designated by SCOPE.
@@ -84,12 +84,15 @@ items of the form (WIRE-TYPE . CONVERTER).
 When non-nil, TRANSFORM is a transform object usable with
 `rsb.event-processing:transform!'.
 
+ERROR-POLICY has to be nil or a function to be installed in the error
+hook of the created participant.
+
 ARGS are arguments for the created CLASS instance.
 
 Return three values:
-+ the `participant' instance
-+ the associated `rsb.event-processing:configurator' instance
-+ the list of instantiated `rsb.transport:connectors'"
+1) the `participant' instance
+2) the associated `rsb.event-processing:configurator' instance
+2) the list of instantiated `rsb.transport:connector's"
   ;; Signal an error if no transports have been supplied.
   (unless transports
     (error 'no-transports-error :scope scope))
@@ -116,7 +119,8 @@ Return three values:
                               :scope        scope
                               :converters   converters
                               :configurator configurator
-                              args)))
+                              args))
+         (error-hook   (participant-error-hook participant)))
 
     ;; Associate constructed CONNECTORS to CONFIGURATOR instance.
     (setf (rsb.ep:configurator-connectors configurator) connectors)
@@ -125,10 +129,11 @@ Return three values:
     ;; intercepted by CONFIGURATOR.
     (setf (rsb.ep:processor-error-policy configurator)
           (lambda (condition)
-            (hooks:run-hook
-             (hooks:object-hook participant 'error-hook) condition)
+            (hooks:run-hook error-hook condition)
             ;; TODO(jmoringe): maybe (ignore-error) here?
             ))
+    (when error-policy
+      (hooks:add-to-hook error-hook error-policy))
 
     (values participant configurator connectors)))
 
@@ -152,13 +157,15 @@ Return three values:
                          :exclude-disabled?
                          (not (uri-transport ,designator-arg))))
             (converters (default-converters))
-            transform)
+            transform
+            error-policy)
          (let+ (((&values scope options)
                  (uri->scope-and-options ,designator-arg transports)))
            (,make-name scope ,@(rest arg-names)
-                       :transports options
-                       :converters converters
-                       :transform  transform)))
+                       :transports   options
+                       :converters   converters
+                       :transform    transform
+                       :error-policy error-policy)))
 
        ;; This method operates on strings which it turns into either
        ;; URIs (if the string contains a colon) or scopes.
@@ -166,13 +173,15 @@ Return three values:
                               &key
                               (transports nil transports-supplied?)
                               (converters nil converters-supplied?)
-                              transform)
+                              transform
+                              error-policy)
          (apply #',make-name
                 (if (find #\: ,designator-arg)
                     (puri:parse-uri ,designator-arg)
                     (make-scope ,designator-arg))
                 ,@(rest arg-names)
-                :transform transform
+                :transform    transform
+                :error-policy error-policy
                 (append
                  (when transports-supplied?
                    (list :transports transports))

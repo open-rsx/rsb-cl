@@ -29,6 +29,9 @@ function."))
   '("inprocess:/informer/construction"
     (t)
     "/informer/construction")
+  `("inprocess:/informer/construction"
+    (t :error-policy ,#'continue)
+    "/informer/construction")
 
   ;; No transports => error
   '("/informer/construction"

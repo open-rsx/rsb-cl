@@ -11,15 +11,12 @@
   (:documentation
    "Root test suite for tests of macros in the patterns module."))
 
-(deftestsuite with-methods-root (macros-root)
-  ()
-  (:documentation
-   "Test suite for the `with-methods' macro."))
+;;; Local server-related macros
 
-(addtest (with-methods-root
+(addtest (macros-root
           :documentation
           "Smoke test for the `with-methods' macro.")
-  smoke
+  with-methods/smoke
 
   (with-local-server (server "inprocess:")
     (with-methods (server)
@@ -38,10 +35,10 @@
       (ensure (server-method server "notype")))
     (ensure-null (server-methods server))))
 
-(addtest (with-methods-root
+(addtest (macros-root
           :documentation
           "Test macroexpansion behavior of `with-methods' macro.")
-  macroexpand
+  with-methods/macroexpand
 
   (ensure-cases (method expected)
       '(;; Some invalid constructions.
@@ -62,3 +59,69 @@
       (type-error (ensure-condition 'type-error
                     (macroexpand `(with-methods (server) (,method)))))
       (t          (macroexpand `(with-methods (server) (,method)))))))
+
+(addtest (macros-root
+          :documentation
+          "Test handling of error-policy keyword parameter in
+           `with-local-server' macro.")
+  with-local-server/error-policy
+
+  (let ((calls '()))
+    (macrolet
+        ((test-case (&optional policy)
+           `(with-local-server (local-server
+                                "socket:"
+                                :transform `((:argument . ,#'mock-transform/error))
+                                ,@(when policy `(:error-policy ,policy)))
+              (with-methods (local-server) (("echo" (arg) arg))
+                (with-remote-server (remote-server "socket:")
+                  (call remote-server "echo" 1))))))
+
+      ;; Without an error policy, the transform error should just be
+      ;; signaled.
+      (ensure-condition remote-call-error
+        (test-case))
+
+      ;; With `continue' error policy, calling the method should
+      ;; proceed without the failing transformation.
+      #+TODO-enable-when-fixed
+      (let ((result (test-case (lambda (condition)
+                                 (push condition calls)
+                                 (continue condition)))))
+        (ensure-same result 1)
+        (ensure-same (length calls) 1)
+        (ensure (typep (first calls) 'rsb.event-processing:transform-error))))))
+
+;;; Remote server-related macros
+
+(addtest (macros-root
+          :documentation
+          "Test handling of error-policy keyword parameter in
+           `with-remote-server' macro.")
+  with-remote-server/error-policy
+
+  (let ((calls '()))
+    (macrolet
+        ((test-case (&optional policy)
+           `(with-remote-server (remote-server
+                                 "socket:"
+                                 :transform `((:return . ,#'mock-transform/error))
+                                 ,@(when policy `(:error-policy ,policy)))
+              (with-local-server (local-server "socket:")
+                (with-methods (local-server) (("echo" (arg) arg))
+                  (call remote-server "echo" 1))))))
+
+      ;; Without an error policy, the transform error should just be
+      ;; signaled.
+      (ensure-condition remote-call-error
+        (test-case))
+
+      ;; With `continue' error policy, calling the method should
+      ;; proceed without the failing transformation.
+      #+TODO-enable-when-fixed
+      (let ((result (test-case (lambda (condition)
+                                 (push condition calls)
+                                 (continue condition)))))
+        (ensure-same result 1)
+        (ensure-same (length calls) 1)
+        (ensure (typep (first calls) 'rsb.event-processing:transform-error))))))

@@ -34,7 +34,9 @@
    #:participant-suite
    #:define-basic-participant-test-cases
 
-   #:define-restart-method-test-case)
+   #:define-restart-method-test-case
+
+   #:mock-transform/error)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
@@ -257,3 +259,9 @@ and bound to a variable named like the value of CLASS."
          ,@(iter (for restart in restarts)
                  (let+ (((name &rest args) (ensure-list restart)))
                    (collect `(do-one (list ',name ,@args)))))))))
+
+;;; Utilities
+
+(defun mock-transform/error  (event)
+  (declare (ignore event))
+  (error "Intentional error in transformation"))

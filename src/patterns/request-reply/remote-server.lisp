@@ -177,12 +177,16 @@ call it."
                                &key
                                (transports (transport-options))
                                (converters (default-converters))
-                               transform)
-  (make-instance 'remote-server
-                 :scope             scope
-                 :converters        converters
-                 :transport-options transports
-                 :transform         transform))
+                               transform
+                               error-policy)
+  (let ((server (make-instance 'remote-server
+                               :scope             scope
+                               :converters        converters
+                               :transport-options transports
+                               :transform         transform)))
+    (when error-policy
+      (hooks:add-to-hook (participant-error-hook server) error-policy))
+    server))
 
 (define-participant-creation-uri-methods remote-server (scope puri:uri))
 

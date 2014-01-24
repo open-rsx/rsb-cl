@@ -1,6 +1,6 @@
 ;;;; listener.lisp --- Unit tests for listener.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,8 +31,11 @@ function."))
   `("/listener/construction"
     (:transform ,#'1+)
     "/listener/construction")
-  '("inprocess://localhost/listener/construction"
+  '("inprocess:/listener/construction"
     nil
+    "/listener/construction")
+  `("inprocess:/listener/construction"
+    (:error-policy ,#'continue)
     "/listener/construction")
 
   ;; No transports => error

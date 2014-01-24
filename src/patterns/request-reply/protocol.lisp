@@ -116,7 +116,8 @@ event or just its payload respectively."))
                                 &key
                                 transports
                                 converters
-                                transform)
+                                transform
+                                error-policy)
   (:documentation
    "Make and return a `remote-server' instance that calls methods
 provided by servers on the scope SCOPE-OR-URI.
@@ -136,6 +137,9 @@ When non-nil, TRANSFORM is a specification of type
 work with `rsb.event-processing:transform!') that should be applied to
 arguments and/or return values.
 
+ERROR-POLICY has to be nil or a function to be installed in the error
+hook of the created remote server.
+
 If the server cannot be created, an error of type
 `participant-creation-error' is signaled."))
 
@@ -145,7 +149,8 @@ If the server cannot be created, an error of type
                                &key
                                transports
                                converters
-                               transform)
+                               transform
+                               error-policy)
   (:documentation
    "Make and return a `local-server' instance that provides methods on
 the scope SCOPE-OR-URI for other participants to call.
@@ -165,6 +170,9 @@ When non-nil, TRANSFORM is a specification of type
 `transform-specification' describing transform objects (which have to
 work with `rsb.event-processing:transform!') that should be applied to
 arguments and/or return values.
+
+ERROR-POLICY has to be nil or a function to be installed in the error
+hook of the created local server.
 
 If the server cannot be created, an error of type
 `participant-creation-error' is signaled."))

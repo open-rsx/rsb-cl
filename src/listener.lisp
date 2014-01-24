@@ -39,7 +39,8 @@ a mechanism for dispatching matching events to these handlers."))
                           &key
                           (transports (transport-options))
                           (converters (default-converters))
-                          transform)
+                          transform
+                          error-policy)
   ;; Translate different kinds of errors into
   ;; `listener-creation-error' errors.
   (with-condition-translation
@@ -47,7 +48,7 @@ a mechanism for dispatching matching events to these handlers."))
         :scope      scope
         :transports transports))
     (make-participant 'listener scope :in-push
-                      transports converters transform)))
+                      transports converters transform error-policy)))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))
 

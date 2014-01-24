@@ -152,7 +152,8 @@ RECEIVER to NEW-VALUE."))
                            &key
                            transports
                            converters
-                           transform)
+                           transform
+                           error-policy)
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
@@ -170,7 +171,10 @@ converters is derived from the default configuration.
 
 When non-nil, TRANSFORM is a transform object, usable with
 `rsb.event-processing:transform!', that should be applied to received
-events."))
+events.
+
+ERROR-POLICY has to be nil or a function to be installed in the error
+hook of the created `listener'."))
 
 ;;; Reader protocol
 
@@ -178,7 +182,8 @@ events."))
                          &key
                          transports
                          converters
-                         transform)
+                         transform
+                         error-policy)
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
@@ -197,6 +202,9 @@ converters is derived from the default configuration.
 When non-nil, TRANSFORM is a transform object, usable with
 `rsb.event-processing:transform!', that should be applied to received
 events.
+
+ERROR-POLICY has to be nil or a function to be installed in the error
+hook of the created `reader'.
 
 The resulting `reader' instance can be used to receive data in
 \"pull\" manner using the `receive' function."))
@@ -217,7 +225,8 @@ nil is returned."))
                            &key
                            transports
                            converters
-                           transform)
+                           transform
+                           error-policy)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
@@ -235,7 +244,10 @@ converters is derived from the default configuration.
 
 When non-nil, TRANSFORM is a transform object, usable with
 `rsb.event-processing:transform!', that should be applied to sent
-events."))
+events.
+
+ERROR-POLICY has to be nil or a function to be installed in the error
+hook of the created `informer'."))
 
 (defgeneric send (informer data
                   &rest meta-data
