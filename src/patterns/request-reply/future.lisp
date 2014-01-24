@@ -40,14 +40,12 @@ distinguish them from regular results.")
               "Stores the result of the operation associated to the
 future. Remains unbound until the operation completes successfully or
 fails.")
-   (lock      :initarg  :lock
-              :reader   %future-lock
+   (lock      :reader   %future-lock
               :initform (bt:make-lock "Future lock")
               :documentation
               "Stores the lock that protects access to the result
 slot.")
-   (condition :initarg  :condition
-              :reader   %future-condition
+   (condition :reader   %future-condition
               :initform (bt:make-condition-variable
                          :name "Future condition")
               :documentation

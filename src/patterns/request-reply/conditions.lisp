@@ -13,6 +13,8 @@
          :documentation
          "Stores the name of the method that was specified but could
 not be found."))
+  (:default-initargs
+   :name (missing-required-initarg 'no-such-method :name))
   (:report
    (lambda (condition stream)
      (format stream "~@<The specified method ~S does not exist.~@:>"
@@ -32,6 +34,9 @@ not be found."))
             :documentation
             "Stores the request object that was passed to the method
 in the failed call."))
+  (:default-initargs
+   :method  (missing-required-initarg 'remote-call-failed :method)
+   :request (missing-required-initarg 'remote-call-failed :request))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to call method ~A with request ~

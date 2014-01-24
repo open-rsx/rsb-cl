@@ -20,8 +20,7 @@
              :reader   method-name
              :documentation
              "Stores the name of the method.")
-   (informer :initarg  :informer
-             :type     (or null informer)
+   (informer :type     (or null informer)
              :reader   method-%informer ; without lazy creation
              :writer   (setf method-%informer)
              :reader   method-informer  ; with lazy creation
@@ -29,8 +28,7 @@
              :documentation
              "Stores the `informer' instance associated to the
 method. The instance is created lazily when first used.")
-   (listener :initarg  :listener
-             :type     (or null listener)
+   (listener :type     (or null listener)
              :reader   method-%listener ; without lazy creation
              :writer   (setf method-%listener)
              :reader   method-listener  ; with lazy creation
@@ -108,8 +106,7 @@ the scope of the created participant."
 used by participants which implement the actual communication on
 behalf of the server.")
    (rsb::transform    :type     transform-specification)
-   (methods           :initarg  :methods
-                      :type     hash-table
+   (methods           :type     hash-table
                       :reader   server-%methods
                       :initform (make-hash-table :test #'equal)
                       :documentation
