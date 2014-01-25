@@ -46,8 +46,8 @@ bus to which the connector provides access.")
              :documentation
              "Controls whether decreased throughput should be traded for reduced latency by the connector. For TCP connections this means the TCP_NODELAY option should be set on the socket implementing the bus connection."))
   (:default-initargs
-   :host (missing-required-initarg 'in-connector :host)
-   :port (missing-required-initarg 'in-connector :port))
+   :host (missing-required-initarg 'connector :host)
+   :port (missing-required-initarg 'connector :port))
   (:metaclass connector-class)
   (:wire-type octet-vector)
   (:schemas   :socket)
