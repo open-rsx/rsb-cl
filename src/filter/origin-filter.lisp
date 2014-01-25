@@ -1,6 +1,6 @@
 ;;;; origin-filter.lisp --- Event filtering based on origin id.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,7 +9,7 @@
 (defmethod find-filter-class ((spec (eql :origin)))
   (find-class 'origin-filter))
 
-(defclass origin-filter (filter-mixin)
+(defclass origin-filter (funcallable-filter-mixin)
   ((origin :type     uuid:uuid
            :accessor filter-origin
            :documentation

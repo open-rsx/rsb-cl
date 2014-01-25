@@ -1,6 +1,6 @@
 ;;;; method-filter.lisp --- Event filtering based on method.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,7 +9,7 @@
 (defmethod find-filter-class ((spec (eql :method)))
   (find-class 'method-filter))
 
-(defclass method-filter (filter-mixin)
+(defclass method-filter (funcallable-filter-mixin)
   ((method :initarg  :method
            :type     (or null keyword)
            :reader   filter-method

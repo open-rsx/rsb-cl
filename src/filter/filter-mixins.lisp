@@ -6,15 +6,15 @@
 
 (cl:in-package #:rsb.filter)
 
-;;; `filter-mixin'
+;;; `funcallable-filter-mixin'
 
-(defclass filter-mixin ()
+(defclass funcallable-filter-mixin ()
   ()
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This mixin makes instances of its subclasses funcallable."))
 
-(defmethod initialize-instance :after ((instance filter-mixin)
+(defmethod initialize-instance :after ((instance funcallable-filter-mixin)
                                        &key)
   (closer-mop:set-funcallable-instance-function
    instance (curry #'matches? instance)))

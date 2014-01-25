@@ -1,6 +1,6 @@
 ;;;; regex-filter.lisp --- Regular expression filter for event payloads.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -21,7 +21,7 @@ case-sensitive matching."))
 (defmethod find-filter-class ((spec (eql :regex)))
   (find-class 'regex-filter))
 
-(defclass regex-filter (filter-mixin
+(defclass regex-filter (funcallable-filter-mixin
                         payload-matching-mixin
                         fallback-policy-mixin)
   ((regex           :type     string

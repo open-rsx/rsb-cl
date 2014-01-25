@@ -1,6 +1,6 @@
 ;;;; type-filter.lisp --- A filter that discriminates event based on their type.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,7 +9,7 @@
 (defmethod find-filter-class ((spec (eql :type)))
   (find-class 'type-filter))
 
-(defclass type-filter (filter-mixin) ;; TODO typed-mixin?
+(defclass type-filter (funcallable-filter-mixin)
   ((type :initarg  :type
          :type     (or list symbol)
          :accessor filter-type

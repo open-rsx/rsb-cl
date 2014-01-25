@@ -9,7 +9,7 @@
 (defmethod find-filter-class ((spec (eql :scope)))
   (find-class 'scope-filter))
 
-(defclass scope-filter (filter-mixin
+(defclass scope-filter (funcallable-filter-mixin
                         scope-mixin)
   ((rsb::scope :accessor filter-scope
                :documentation

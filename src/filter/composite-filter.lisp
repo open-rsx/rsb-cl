@@ -6,7 +6,7 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass composite-filter (filter-mixin)
+(defclass composite-filter (funcallable-filter-mixin)
   ((children :initarg  :children
              :type     list
              :accessor filter-children

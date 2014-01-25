@@ -30,9 +30,9 @@
 
    #:make-filter)
 
-  ;; `filter-mixin' class
+  ;; `funcallable-filter-mixin' class
   (:export
-   #:filter-mixin)
+   #:funcallable-filter-mixin)
 
   ;; Composite filter protocol
   (:export
