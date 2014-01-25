@@ -16,6 +16,8 @@
          :documentation
          "The type of matching events."))
   (:metaclass closer-mop:funcallable-standard-class)
+  (:default-initargs
+   :type (missing-required-initarg 'type-filter :type))
   (:documentation
    "Instances of this filter class discriminate based on the type of
 events."))
