@@ -1,13 +1,10 @@
 ;;;; force-wire-schema.lisp --- A converter that sets a given wire-schema.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter)
-
-(defmethod find-converter-class ((spec (eql :force-wire-schema)))
-  (find-class 'force-wire-schema))
 
 (defclass force-wire-schema ()
   ((wire-schema :initarg  :wire-schema
@@ -21,6 +18,9 @@ performing domain->wire \"conversions\"."))
    "Instances of this class do not perform any changes when converting
 between wire-data and domain-data but set a given wire-schema when
 producing wire-data, wire-schema pairs."))
+
+(service-provider:register-provider/class 'converter :force-wire-schema
+  :class 'force-wire-schema)
 
 (defmethod wire->domain? ((converter   force-wire-schema)
                           (wire-data   t)

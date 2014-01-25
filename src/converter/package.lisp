@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for converter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -37,12 +37,6 @@
 
    #:domain->wire
    #:wire->domain)
-
-  ;; Converter class family
-  (:export
-   #:no-such-converter
-   #:find-converter-class
-   #:converter-classes)
 
   ;; void converter
   (:export

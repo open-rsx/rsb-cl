@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Wire <-> domain conversion protocol.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -130,5 +130,6 @@ next `domain->wire' method."
 
 ;;; Converter implementations
 
-(dynamic-classes:define-findable-class-family converter
-    "Converters are things that do something.")
+(service-provider:define-service converter
+  (:documentation
+   "Providers convert payload to a particular wire-type."))
