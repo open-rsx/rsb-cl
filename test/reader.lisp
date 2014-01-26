@@ -19,7 +19,7 @@
   '("/reader/construction"
     (:transports ((:inprocess &inherit)))
     "/reader/construction")
-  '("/reader/construction"
+  #+disabled '("/reader/construction"
     (:transports ((t) (:inprocess &inherit)))
     "/reader/construction")
   '("/reader/construction"
