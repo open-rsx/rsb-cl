@@ -276,8 +276,8 @@ See `version/list' for details on keyword parameters."
                 (:module     "transport"
                  :pathname   "src/transport"
                  :depends-on ("src-early"
-                              "event-processing" ;; for error-policy-mixin
-                              "converter")       ;; for conversion-mixin
+                              "event-processing" ; for error-policy-mixin
+                              "converter")       ; for conversion-mixin
                  :components ((:file       "package")
                               (:file       "variables"
                                :depends-on ("package"))
@@ -291,23 +291,8 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package" "protocol"
                                             "connector-class"))
 
-                              (:file       "conversion-mixin"
-                               :depends-on ("package"))
-                              (:file       "timestamping-receiver-mixin"
-                               :depends-on ("package" "protocol"))
-                              (:file       "threaded-receiver-mixin"
-                               :depends-on ("package" "protocol"))
-                              (:file       "error-handling-mixins"
-                               :depends-on ("package"))
-                              (:file       "restart-mixins"
-                               :depends-on ("package" "protocol"))
-                              (:file       "threaded-message-receiver-mixin"
-                               :depends-on ("package" "threaded-receiver-mixin"))
-                              (:file       "sometimes-interruptible-mixin"
-                               :depends-on ("package" "protocol"))
-                              (:file       "expose-transport-metrics-mixin"
-                               :depends-on ("package" "protocol"
-                                            "connector-class"))))
+                              (:file       "connector-mixins"
+                               :depends-on ("package" "protocol" "connector-class"))))
 
                 (:module      "src"
                  :depends-on  ("src-early"
