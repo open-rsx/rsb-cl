@@ -1,12 +1,12 @@
 ;;;; integration.lisp --- Integration test for local and remote servers.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns.test)
+(cl:in-package #:rsb.patterns.request-reply.test)
 
-(deftestsuite integration-root (patterns-root)
+(deftestsuite integration-root (patterns-request-reply-root)
   ((url "inprocess:/rsbtest/server/integration"))
   (:documentation
    "Integration test for `local-server' and `remote-server'

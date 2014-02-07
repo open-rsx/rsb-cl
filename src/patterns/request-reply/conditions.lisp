@@ -1,10 +1,10 @@
-;;;; conditions.lisp --- Conditions used in the patterns module.
+;;;; conditions.lisp --- Conditions used in the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns)
+(cl:in-package #:rsb.patterns.request-reply)
 
 (define-condition no-such-method (rsb-error)
   ((name :initarg  :name

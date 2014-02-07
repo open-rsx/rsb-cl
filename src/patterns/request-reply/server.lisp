@@ -1,10 +1,10 @@
 ;;;; server.lisp --- A superclass for local and remote server classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns)
+(cl:in-package #:rsb.patterns.request-reply)
 
 ;;; `method1' class
 

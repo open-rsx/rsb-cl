@@ -1,10 +1,10 @@
-;;;; types.lisp --- Type definitions used the patterns module.
+;;;; types.lisp --- Type definitions used the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns)
+(cl:in-package #:rsb.patterns.request-reply)
 
 (deftype method-name ()
   "Instances of this type are strings which are legal as method

@@ -1,6 +1,6 @@
 ;;;; server.lisp --- An example program demonstrating the local server.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,15 +13,15 @@
 ;; Methods can be managed similarly. After the `with-methods' form,
 ;; the methods are removed.
 ;; mark-start::with-local-server
-(rsb.patterns:with-local-server (server "/example/clientserver")
-  (rsb.patterns:with-methods (server)
+(rsb.patterns.request-reply:with-local-server (server "/example/clientserver")
+  (rsb.patterns.request-reply:with-methods (server)
       (("echo" (arg string)
          arg))))
 ;; mark-end::with-local-server
 
 ;; mark-start::setf-method
-(rsb.patterns:with-local-server (server "/example/clientserver")
-  (setf (rsb.patterns:server-method server "echo")
+(rsb.patterns.request-reply:with-local-server (server "/example/clientserver")
+  (setf (rsb.patterns.request-reply:server-method server "echo")
         (lambda (arg) arg)))
 ;; mark-end::setf-method
 
@@ -37,9 +37,10 @@
 ;; until they are garbage collected or explicitly detached using the
 ;; `detach' function.
 ;; mark-start::variable
-(defvar *local-server* (rsb.patterns:make-local-server "/example/clientserver"))
+(defvar *local-server* (rsb.patterns.request-reply:make-local-server
+                        "/example/clientserver"))
 
-(setf (rsb.patterns:server-method *local-server* "echo")
+(setf (rsb.patterns.request-reply:server-method *local-server* "echo")
       (lambda (arg) arg))
 
 (rsb:detach *local-server*)

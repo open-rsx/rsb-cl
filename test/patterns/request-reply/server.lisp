@@ -1,12 +1,12 @@
 ;;;; server.lisp --- Unit tests for the method1 and server classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns.test)
+(cl:in-package #:rsb.patterns.request-reply.test)
 
-(deftestsuite method1-root (patterns-root)
+(deftestsuite method1-root (patterns-request-reply-root)
   ()
   (:documentation
    "Test suite for `method1' class."))

@@ -1,12 +1,12 @@
 ;;;; macros.lisp --- Unit tests for macros of the patterns module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns.test)
+(cl:in-package #:rsb.patterns.request-reply.test)
 
-(deftestsuite macros-root (patterns-root)
+(deftestsuite macros-root (patterns-request-reply-root)
   ()
   (:documentation
    "Root test suite for tests of macros in the patterns module."))

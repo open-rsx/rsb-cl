@@ -339,6 +339,11 @@ See `version/list' for details on keyword parameters."
                 (:module     "patterns"
                  :pathname   "src/patterns"
                  :depends-on ("src")
+                 :components ((:file       "package")))
+
+                (:module     "patterns-request-reply"
+                 :pathname   "src/patterns/request-reply"
+                 :depends-on ("src" "patterns")
                  :components ((:file       "package")
                               (:file       "types"
                                :depends-on ("package"))
@@ -482,22 +487,6 @@ See `version/list' for details on keyword parameters."
                               (:file       "restart-mixins"
                                :depends-on ("package"))))
 
-                (:module     "patterns"
-                 :pathname   "test/patterns"
-                 :depends-on ("test")
-                 :components ((:file       "package")
-                              (:file       "future"
-                               :depends-on ("package"))
-                              (:file       "server"
-                               :depends-on ("package"))
-                              (:file       "local-server"
-                               :depends-on ("package"))
-                              (:file       "macros"
-                               :depends-on ("package"))
-
-                              (:file       "integration"
-                               :depends-on ("package"))))
-
                 (:module     "inprocess"
                  :pathname   "test/transport/inprocess"
                  :depends-on ("test" "transport")
@@ -529,6 +518,27 @@ See `version/list' for details on keyword parameters."
                               (:file       "connection"
                                :depends-on ("package"))
                               (:file       "connectors"
+                               :depends-on ("package"))))
+
+                (:module     "patterns"
+                 :pathname   "test/patterns"
+                 :depends-on ("test")
+                 :components ((:file       "package")))
+
+                (:module     "patterns-request-reply"
+                 :pathname   "test/patterns/request-reply"
+                 :depends-on ("test" "patterns")
+                 :components ((:file       "package")
+                              (:file       "future"
+                               :depends-on ("package"))
+                              (:file       "server"
+                               :depends-on ("package"))
+                              (:file       "local-server"
+                               :depends-on ("package"))
+                              (:file       "macros"
+                               :depends-on ("package"))
+
+                              (:file       "integration"
                                :depends-on ("package")))))
 
   :in-order-to ((test-op (load-op :cl-rsb-test))))

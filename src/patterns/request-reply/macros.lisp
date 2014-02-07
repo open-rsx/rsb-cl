@@ -1,10 +1,10 @@
-;;;; macros.lisp --- Convenience macros provided by the patterns module.
+;;;; macros.lisp --- Convenience macros provided by the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.patterns)
+(cl:in-package #:rsb.patterns.request-reply)
 
 (define-with-participant-macro remote-server)
 (define-with-participant-macro local-server)
