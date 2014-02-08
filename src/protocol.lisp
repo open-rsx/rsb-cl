@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Main client-facing protocol provided by cl-rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -42,6 +42,24 @@
     "Signal a warning instead of the original condition and continue
 processing."
     :function-name signal-warning))
+
+;;; Scope protocol
+
+(defgeneric scope-components (scope)
+  (:documentation
+   "Return a list containing the components of SCOPE."))
+
+(defgeneric scope-string (scope)
+  (:documentation
+   "Return a string representation of SCOPE."))
+
+(defgeneric make-scope (thing
+                        &key
+                        intern?)
+  (:documentation
+   "Parse string and return a `scope' instance."))
+
+(declaim (ftype (function (scope) (values scope &optional)) intern-scope))
 
 ;;; Event protocol
 
