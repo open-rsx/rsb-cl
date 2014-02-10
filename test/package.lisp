@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition cl-rsb unit tests.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -72,7 +72,8 @@
   (:dynamic-variables
    (*default-configuration* '(((:transport :inprocess :enabled) . "1"))))
   (:function
-   (check-participant (participant scope)
+   (check-participant (participant expected-kind scope)
+     (ensure-same (participant-kind participant) expected-kind)
      (ensure-same
       (participant-scope participant) (make-scope scope)
       :test #'scope=)
@@ -104,7 +105,8 @@ that test participant classes."))
    CLASS."
   (let ((suite-name (symbolicate class "-ROOT"))
         (make-name  (symbolicate "MAKE-" class))
-        (with-name  (symbolicate "WITH-" class)))
+        (with-name  (symbolicate "WITH-" class))
+        (kind       (make-keyword class)))
     `(progn
        (addtest (,suite-name
                  :documentation
@@ -120,7 +122,7 @@ that test participant classes."))
                       (apply #',make-name uri args)))
              (t     (let ((participant (apply #',make-name uri args)))
                       (unwind-protect
-                           (check-participant participant expected-scope)
+                           (check-participant participant ,kind expected-scope)
                         (detach/ignore-errors participant)))))))
 
        (define-restart-method-test-case

@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Unit tests for macros.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,7 +19,7 @@
 
   (with-listener (listener "/listener")
     (ensure (typep listener 'listener))
-    (check-participant listener "/listener")))
+    (check-participant listener :listener "/listener")))
 
 (addtest (macros-root
           :documentation
@@ -30,7 +30,7 @@
     (with-listener (listener "inprocess:/withhandler")
       (with-handler listener ((event) (push event received))
         (ensure (typep listener 'listener))
-        (check-participant listener "/withhandler")
+        (check-participant listener :listener "/withhandler")
         (with-informer (i "inprocess:/withhandler" t) (send i 1))))
     (ensure-same (length received) 1)))
 
@@ -41,7 +41,7 @@
 
   (with-reader (reader "/reader")
     (ensure (typep reader 'reader))
-    (check-participant reader "/reader")))
+    (check-participant reader :reader "/reader")))
 
 (addtest (macros-root
           :documentation
@@ -50,4 +50,4 @@
 
   (with-informer (informer "/informer" t)
     (ensure (typep informer 'informer))
-    (check-participant informer "/informer")))
+    (check-participant informer :informer "/informer")))

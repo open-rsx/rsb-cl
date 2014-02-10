@@ -98,6 +98,10 @@ reachability of COMPONENT in transport-specific way."))
 
 ;;; Common participant protocol
 
+(defgeneric participant-kind (participant)
+  (:documentation
+   "Return a keyword designating the kind of PARTICIPANT."))
+
 (defgeneric participant-id (participant)
   (:documentation
    "Return the unique id of PARTICIPANT."))
@@ -138,6 +142,9 @@ continuing in a best effort manner instead of signaling."
     (detach participant)))
 
 ;;; Default behavior
+
+(defmethod participant-kind ((participant t))
+  (values (make-keyword (type-of participant))))
 
 (defmethod participant-converter :around ((participant t) (wire-type t)
                                           &key

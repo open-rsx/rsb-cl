@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Main package definition for the rsb system.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -172,6 +172,7 @@
    #:detach #:detach/ignore-errors
 
    #:participant
+   #:participant-kind
    #:participant-id
    #:participant-scope
    #:participant-converters
