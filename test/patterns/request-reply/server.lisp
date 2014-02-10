@@ -26,7 +26,9 @@
         ;; These are valid.
         ((:name "legal-name")   t))
 
-    (let+ (((&flet do-it () (apply #'make-instance 'method1 initargs))))
+    (let+ (((&flet do-it ()
+              (apply #'make-instance 'method1
+                     :scope (make-scope "/") initargs))))
       (case expected
         (missing-required-initarg
          (ensure-condition 'missing-required-initarg (do-it)))
@@ -37,7 +39,9 @@
 
 (deftestsuite server-root (patterns-root)
   ((simple-server (make-instance 'server :scope "/server"))
-   (simple-method (make-instance 'method1 :name "foo")))
+   (simple-method (make-instance 'method1
+                                 :scope (make-scope "/server/foo")
+                                 :name  "foo")))
   (:documentation
    "Test suite for the `server' class."))
 

@@ -106,6 +106,8 @@ these methods are exposed for remote clients."))
 
   (setf (server-method server name)
         (make-instance 'local-method
+                       :scope    (merge-scopes
+                                  (list name) (participant-scope server))
                        :server   server
                        :name     name
                        :callback new-value

@@ -18,7 +18,7 @@
 
   ;; Missing :callback initarg
   (ensure-condition 'missing-required-initarg
-    (make-instance 'local-method :name "foo")))
+    (make-instance 'local-method :scope (make-scope "/foo") :name "foo")))
 
 (deftestsuite local-server-root (patterns-root)
   ((simple-server (make-instance 'local-server

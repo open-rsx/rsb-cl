@@ -8,7 +8,7 @@
 
 ;;; `method1' class
 
-(defclass method1 ()
+(defclass method1 (participant)
   ((server   :initarg  :server
              :type     server
              :reader   method-server
@@ -82,12 +82,12 @@ the scope of the created participant."
                 slot)
        (unless (,accessor-name method)
          (let+ (((&structure-r/o method- server name) method)
-                ((&structure-r/o participant- transform error-hook) server)
+                ((&structure-r/o participant- scope converters transform error-hook) server)
                 (transform (cdr (assoc ,transform transform))))
            (setf (,accessor-name method)
-                 (,make-name (%make-scope server ,scope name) ,@args
+                 (,make-name (%make-scope scope ,scope name) ,@args
                              :transports   (server-transport-options server)
-                             :converters   (participant-converters server)
+                             :converters   converters
                              :transform    transform
                              :error-policy (lambda (condition)
                                              (hooks:run-hook
@@ -179,11 +179,9 @@ generic support for retrieving, adding and removing methods."))
 
 ;;; Utility functions
 
-(defun %make-scope (participant &rest components)
-  "Return a scope that extends the scope of PARTICIPANT with
-COMPONENTS."
-  (merge-scopes (format nil "~{/~A~}" components)
-                (participant-scope participant)))
+(defun %make-scope (base &rest components)
+  "Return a scope that extends the BASE scope with COMPONENTS."
+  (merge-scopes (format nil "~{/~A~}" components) base))
 
 (defun %remove-method-with-restart-and-timeout (server method)
   "Remove METHOD from SERVER with a CONTINUE restart in place to allow

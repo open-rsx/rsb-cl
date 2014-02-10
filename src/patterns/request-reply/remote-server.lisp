@@ -149,7 +149,9 @@ allows calling methods on them as if they were local."))
   (or (call-next-method server name :error? error?)
       (setf (server-method server name)
             (make-instance 'remote-method
-                           :name name))))
+                           :scope (merge-scopes
+                                   (list name) (participant-scope server))
+                           :name  name))))
 
 (defmethod call ((server  remote-server)
                  (method  string)
