@@ -1,6 +1,6 @@
-;;;; util.lisp --- Unit tests for utility classes and functions.
+;;;; mixins.lisp --- Unit tests for mixins classes.
 ;;;;
-;;;; Copyright (C) 2013 Jan Moringen
+;;;; Copyright (C) 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

@@ -1,6 +1,6 @@
 ;;;; event.lisp --- RSB event class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,9 +8,6 @@
 
 ;; forward declaration
 (declaim (special *framework-timestamps*))
-
-(define-plist-data-mixin meta-data)
-(define-plist-data-mixin timestamp)
 
 (defclass event (scope-mixin
                  plist-meta-data-mixin

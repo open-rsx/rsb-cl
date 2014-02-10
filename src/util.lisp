@@ -1,6 +1,6 @@
 ;;;; util.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,84 +66,41 @@ identity."
            (write-char #\Space stream)
            (print-id ,stream ,id-var nil nil))))))
 
-;;; UUID mixin
+;;; Utility functions
 
-(defclass uuid-mixin ()
-  ((id :type     uuid:uuid
-       :documentation
-       "Stores the unique id of the object."))
-  (:documentation
-   "This class can be mixed into classes that need a uuid in there
-instances."))
+(defun maybe-shorten-sequence (thing)
+  (if (typep thing 'sequence)
+      (let ((length (length thing)))
+        (values (subseq thing 0 (min length 200)) (> length 200)))
+      (values thing nil)))
 
-(defmethod shared-initialize :after ((instance  uuid-mixin)
-                                     (slot-name t)
-                                     &key
-                                     id)
-  (cond
-    ;; If ID has been supplied, set the slot value to it.
-    (id
-     (setf (slot-value instance 'id)
-           (if (stringp id) (uuid:make-uuid-from-string id) id)))
-    ;; If ID has not been supplied and the slot is unbound, set
-    ;; it. Use the value of `*id-random-state*' to give clients
-    ;; control over the generated ids.
-    ((not (slot-boundp instance 'id))
-     (setf (slot-value instance 'id)
-           (let ((uuid::*uuid-random-state* *id-random-state*))
-             (uuid:make-v4-uuid))))))
-
-;;; Scope mixin
-
-(defclass scope-mixin ()
-  ((scope :type     scope
-          :documentation
-          "Stores the scope that is associated to the instance. For
-long-lived and reused objects, interned scopes should be stored."))
-  (:default-initargs
-   :scope (missing-required-initarg 'scope-mixin :scope))
-  (:documentation
-   "This mixin class is intended to be mixed into classes instances of
-which have a mandatory associated scope."))
-
-(defmethod shared-initialize :after ((instance   scope-mixin)
-                                     (slot-names t)
-                                     &key
-                                     scope
-                                     (intern-scope? t))
-  (when scope
-    (setf (slot-value instance 'scope)
-          (make-scope scope :intern? intern-scope?))))
-
-;;; URI mixin
-
-(defclass uri-mixin ()
-  ((uri :type     puri:uri
-        :documentation
-        "Stores the URI of the object."))
-  (:documentation
-   "This mixin class is intended to be mixed into classes instance of
-which have an associated URI."))
-
-(defmethod shared-initialize :after ((instance   uri-mixin)
-                                     (slot-names t)
-                                     &key
-                                     uri)
-  (when uri
-    (setf (slot-value instance 'uri) (puri:uri uri))))
-
-;;; Plist meta data mixin
+;;; plist-mixin
 
 (defmacro define-plist-data-mixin (name
                                    &key
                                    (slot-name name))
   "Define a class `plist-NAME-mixin' which manages a plist in a
-slot. Define the following accessors along with the class:
-+ `NAME-count' :: Return number of items.
-+ `NAME-keys' :: Return item keys.
-+ `NAME-values' :: Return item values.
-+ `NAME-plist' :: Return items as plist.
-+ `NAME-alist' :: Return items as alist."
+   slot. Define the following accessors along with the class:
+
+   `NAME-count'
+
+     Return number of items.
+
+   `NAME-keys'
+
+     Return item keys.
+
+   `NAME-values'
+
+     Return item values.
+
+   `NAME-plist'
+
+     Return items as plist.
+
+   `NAME-alist'
+
+     Return items as alist."
   (let+ ((class-name (symbolicate "PLIST-" name "-MIXIN"))
          (initarg    (make-keyword slot-name))
          ((count-name keys-name values-name plist-name alist-name)
@@ -155,17 +112,16 @@ slot. Define the following accessors along with the class:
                       :type     list
                       :initform nil
                       :documentation
-
                       ,(format nil "Stores the ~(~A~) items associated ~
                                     to the instance."
                                name)))
          (:documentation
           "This mixin adds storage for a plist of items and associated
-accessors. See `define-plist-data-mixin' for a description."))
+           accessors. See `define-plist-data-mixin' for a description."))
 
        (defgeneric ,count-name (object)
          (:method ((object ,class-name))
-           (ash (length (slot-value object ',slot-name)) -1))
+           (/ (length (slot-value object ',slot-name)) 2))
          (:documentation
           ,(format nil "Return the number of ~(~A~) items stored in OBJECT."
                    name)))
@@ -176,7 +132,6 @@ accessors. See `define-plist-data-mixin' for a description."))
                       :by #'cddr)
                  (collect key)))
          (:documentation
-
           ,(format nil "Return a list of the keys of ~(~A~) items ~
                         stored in OBJECT."
                    name)))
@@ -219,15 +174,6 @@ accessors. See `define-plist-data-mixin' for a description."))
          (:method ((new-value t) (object ,class-name) (key t))
            (setf (getf (slot-value object ',slot-name) key) new-value))
          (:documentation
-
           ,(format nil "Associate NEW-VALUE to OBJECT as the ~(~A~)
                         item identified by KEY."
                    name))))))
-
-;;; Utility functions
-
-(defun maybe-shorten-sequence (thing)
-  (if (typep thing 'sequence)
-      (let ((length (length thing)))
-        (values (subseq thing 0 (min length 200)) (> length 200)))
-      (values thing nil)))

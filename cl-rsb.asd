@@ -173,17 +173,22 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package"))
                               (:file       "variables"
                                :depends-on ("package"))
+                              (:file       "util"
+                               :depends-on ("package" "types" "protocol"
+                                            "variables"))
 
                               (:file       "scope"
                                :depends-on ("package" "types" "protocol"))
-                              (:file       "event"
-                               :depends-on ("package" "types" "util"))
                               (:file       "uris"
                                :depends-on ("package" "scope"))
 
-                              (:file       "util"
-                               :depends-on ("package" "types" "scope"
-                                            "protocol" "variables"))
+                              (:file       "mixins"
+                               :depends-on ("package" "types" "protocol"
+                                            "scope"))
+                              (:file       "event"
+                               :depends-on ("package" "types" "util"
+                                            "mixins"))
+
                               (:file       "error-handling"
                                :depends-on ("package"))))
 
@@ -408,7 +413,7 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package"))
                               (:file       "uris"
                                :depends-on ("package"))
-                              (:file       "util"
+                              (:file       "mixins"
                                :depends-on ("package"))
                               (:file       "participant"
                                :depends-on ("package"))
