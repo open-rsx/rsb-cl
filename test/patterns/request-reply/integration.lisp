@@ -21,7 +21,9 @@ classes."))
   (with-participant (local-server :local-server url)
     (with-methods (local-server)
         (("echo" (arg string)
-            arg))
+           arg)
+         ("nop" ()
+           (values)))
       (with-participant (remote-server :remote-server url)
         (ensure-random-cases 100 ((s a-string))
 
@@ -38,7 +40,10 @@ classes."))
 
           ;; Invoke with event result using `funcall'
           (funcall (server-method remote-server "echo") s
-                   :return :event))))))
+                   :return :event))
+
+        ;; Invoke without argument using `funcall'
+        (funcall (server-method remote-server "nop"))))))
 
 (addtest (integration-root
           :documentation

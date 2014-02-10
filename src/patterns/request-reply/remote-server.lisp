@@ -38,7 +38,8 @@
                                        &key
                                        server)
   (closer-mop:set-funcallable-instance-function
-   instance (lambda (data-or-event &rest args)
+   instance (lambda (&optional (data-or-event rsb.converter:+no-value+)
+                     &rest args)
               (apply #'call server instance data-or-event args))))
 
 (defmethod make-child-initargs ((participant remote-method)
