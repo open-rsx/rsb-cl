@@ -40,19 +40,25 @@ and send the reply using the informer."
 (define-lazy-creation-method local-method listener :argument ()  "request")
 (define-lazy-creation-method local-method informer :return   (t) "reply")
 
+(defmethod call :around ((server  t)
+                         (method  local-method)
+                         (request event)
+                         &key &allow-other-keys)
+  (if (eq *local-call* t)
+      (bt:make-thread (lambda ()
+                        (let ((*local-call* nil))
+                          (call-next-method))))
+      (call-next-method)))
+
 (defmethod call ((server  t)
                  (method  local-method)
                  (request event)
                  &key &allow-other-keys)
-  "Invoke the call back function of METHOD with the payload of
-REQUEST. Send the result or an error notification back to the caller."
-  (let+ (((&accessors-r/o (informer method-informer)
-                          (callback method-callback)
-                          (argument method-argument)) method)
-         ;; If we got here via direct function calls within a single
-         ;; thread, the event id-based mechanism is not required.
-         (causes (unless *local-call*
-                   (list (event-id/opaque request)))))
+  ;; Invoke the call back function of METHOD with the payload of
+  ;; REQUEST. Send the result or an error notification back to the
+  ;; caller.
+  (let+ (((&structure-r/o method- informer callback argument) method)
+         (causes (list (event-id/opaque request))))
     (handler-case
         (let* ((maybe-result (multiple-value-list
                               (cond

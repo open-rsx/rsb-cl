@@ -41,72 +41,63 @@ server."))
 
 (defmethod (setf method-%listener) :after ((new-value t)
                                            (method    remote-method))
-  "After instantiating the listener for METHOD, install a handler for
-replies to method calls."
+  ;; After instantiating the listener for METHOD, install a handler
+  ;; for replies to method calls.
   (let+ (((&accessors-r/o (lock  method-%lock)
-                          (calls method-%calls)) method))
-    (push (lambda (event)
-            ;; Check whether this is a direct call within a single
-            ;; thread.
-            (if *local-call*
-                ;; If so, just store the result (unless that happened
-                ;; already).
-                (when (cdr *local-call*)
-                  (%call-result->future
-                   method (cadr *local-call*) event
-                   (cddr *local-call*) *local-call*)
-                  (setf (cdr *local-call*) nil))
-                ;; Otherwise extract the call id, look up the call,
-                ;; store the result and notify the caller.
-                (let ((key  (%event-id->key
-                             (first (event-causes event))))
-                      (call))
-                  (when key
-                    ;; Remove the call.
-                    (bt:with-lock-held (lock)
-                      (when (setf call (gethash key calls))
-                        (remhash key calls)))
-                    ;; Store the received reply in the result future.
-                    (when call
+                          (calls method-%calls)) method)
+         ((&flet handle-reply (event)
+            (let+ (((&flet update-call (call)
                       (%call-result->future
-                       method (cadr call) event (cddr call) (car call)))))))
-          (rsb.ep:handlers new-value))))
+                       method (cadr call) event (cddr call) (car call)))))
+              (cond
+                ((when-let ((local-call *local-call*))
+                   (when (consp local-call)
+                     (update-call local-call)
+                     (setf (car local-call) t))))
+                (t
+                 ;; Extract the call id, look up the call, store the
+                 ;; result and notify the caller.
+                 (when-let* ((key (%event-id->key (first (event-causes event))))
+                             ;; Find and maybe remove the call. Then
+                             ;; store the received reply in the result
+                             ;; future.
+                             (call (bt:with-lock-held (lock)
+                                     (when-let ((call (gethash key calls)))
+                                       (remhash key calls)
+                                       call))))
+                   (update-call call))))))))
+    (push #'handle-reply (rsb.ep:handlers new-value))))
 
 (defmethod call ((server  t)
                  (method  remote-method)
                  (request event)
                  &key
                  (return :payload)
+                 (block? t)
                  &allow-other-keys)
-  "Call the remote method of METHOD transmitting REQUEST as request
-data."
+  ;; Call the remote method of METHOD transmitting REQUEST as request
+  ;; data.
   (check-type return return-style "either :payload or :event")
 
-  (method-listener method) ;; force creation ; TODO(jmoringe): can we improve this?
+  (method-listener method) ; force creation
 
   (let+ (((&accessors-r/o (informer method-informer)
                           (lock     method-%lock)
                           (calls    method-%calls)) method)
-         (*local-call* (cons nil (cons request return))))
+         (future       (make-instance 'future))
+         (call         (cons future (cons request return)))
+         (*local-call* (if block? call t)))
     (handler-case
         ;; Send the request to the remote server(s) and register the
         ;; method call. We hold the lock the entire time to prevent
         ;; the reply from arriving before we registered the call.
         (bt:with-lock-held (lock)
-          ;; Method has to be "REQUEST" for remote method calls.
           (setf (event-method request) :|request|
                 request                (send informer request))
-
-          ;; If we already received the result via direct function
-          ;; calls, we do not have to generate an id and store the
-          ;; call.
-          (if (null (cdr *local-call*))
-              *local-call*
-              (let ((future (make-instance 'future))
-                    (key    (%event-id->key (event-id/opaque request))))
-                (setf (gethash key calls)
-                      (cons future (cons request return)))
-                future)))
+          (unless (and block? (eq (car call) t))
+            (let ((key (%event-id->key (event-id/opaque request))))
+              (setf (gethash key calls) call)))
+          future)
       (error (condition)
         (error 'remote-call-failed
                :method  method

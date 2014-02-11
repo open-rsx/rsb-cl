@@ -8,10 +8,21 @@
 
 ;;; Direct call mechanism
 
-(declaim (special *local-call*))
-
 (defvar *local-call* nil
   "The value of this special variable can be used to determine whether
-a reply is received via direct function calls within a single
-thread. If so, this variable is bound to the call in question and the
-result can be stored directly.")
+   a reply is received via direct function calls within a single
+   thread. If so, this variable is bound to a value of one of the
+   following forms
+
+     t
+
+       Indicates that a non-blocking local call is in progress.
+
+     (FUTURE . (REQUEST . RETURN))
+
+       Indicates that a blocking local call initiated by REQUEST is in
+       progress. RETURN indicates the desired return value processing
+       and FUTURE is the `future' instance for the call.
+
+   which allow to decide whether to proceed normally, spawn a thread
+   or store the result directly.")
