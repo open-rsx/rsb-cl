@@ -164,7 +164,7 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
                (funcall data-test (event-data left) (event-data right))))))
 
 (defmethod print-object ((object event) stream)
-  (%maybe-set-event-id object) ;; force id computation
+  (%maybe-set-event-id object) ; force id computation
   (print-unreadable-id-object (object stream :type t)
     (format stream "~@<~@[~A ~]~A ~:/rsb::print-event-data/~@:>"
             (event-method object)
@@ -197,8 +197,9 @@ CAUSES can be used to supply a list of causes."
 (defun event-id= (left right)
   "Return non-nil if the event ids LEFT and RIGHT refer to the same
 event."
-  (and (= (cdr left) (cdr right))
-       (uuid:uuid= (car left) (car right))))
+  (or (eq left right)
+      (and (= (cdr left) (cdr right))
+           (uuid:uuid= (car left) (car right)))))
 
 (declaim (ftype (function (event-id) uuid:uuid) event-id->uuid)
          (inline event-id->uuid))

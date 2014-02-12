@@ -41,7 +41,7 @@ START."
 
 ;;; UUID utility functions
 
-(defun print-id (stream id colon? at?)
+(defun print-id (stream id &optional colon? at?)
   "Print the UUID ID to STREAM. If COLON? is non-nil, all components
 of ID are printed. Otherwise, just a block of 8 digits is printed.  "
   (declare (ignore at?))
@@ -59,12 +59,10 @@ of ID are printed. Otherwise, just a block of 8 digits is printed.  "
 `print-unreadable-object' but use the `id' slot of OBJECT as object
 identity."
   (once-only (object stream)
-    (with-unique-names (id-var)
-      `(let ((,id-var (slot-value ,object 'id)))
-         (print-unreadable-object (,object ,stream :type ,type)
-           ,@body
-           (write-char #\Space stream)
-           (print-id ,stream ,id-var nil nil))))))
+    `(print-unreadable-object (,object ,stream :type ,type)
+       ,@body
+       (write-char #\Space stream)
+       (print-id ,stream (slot-value ,object 'id)))))
 
 ;;; Utility functions
 
