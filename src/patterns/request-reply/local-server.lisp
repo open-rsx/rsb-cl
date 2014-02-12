@@ -32,13 +32,21 @@ invoking arbitrary user-supplied functions."))
 (defmethod shared-initialize :after ((instance   local-method)
                                      (slot-names t)
                                      &key)
-  "Install a handler on the request listener that calls the callback
-and send the reply using the informer."
-  (setf (rsb.ep:handlers (method-listener instance))
-        (list (curry #'call (method-server instance) instance))))
+  (method-listener instance)) ; force creation
 
 (define-lazy-creation-method local-method listener :argument ()  "request")
 (define-lazy-creation-method local-method informer :return   (t) "reply")
+
+(defmethod (setf method-%listener) :after ((new-value t)
+                                           (method    local-method))
+  ;; Ignore events which do have a suitable method to be considered
+  ;; requests.
+  (pushnew *request-filter* (receiver-filters new-value))
+
+  ;; Install a handler on the request listener that calls the callback
+  ;; and sends the reply using the informer.
+  (push (curry #'call (method-server method) method)
+        (rsb.ep:handlers new-value)))
 
 (defmethod call :around ((server  t)
                          (method  local-method)

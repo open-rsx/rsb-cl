@@ -41,6 +41,10 @@ server."))
 
 (defmethod (setf method-%listener) :after ((new-value t)
                                            (method    remote-method))
+  ;; Ignore events which do have a suitable method to be considered
+  ;; replies.
+  (pushnew *reply-filter* (receiver-filters new-value))
+
   ;; After instantiating the listener for METHOD, install a handler
   ;; for replies to method calls.
   (let+ (((&accessors-r/o (lock  method-%lock)

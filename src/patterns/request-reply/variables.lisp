@@ -26,3 +26,15 @@
 
    which allow to decide whether to proceed normally, spawn a thread
    or store the result directly.")
+
+;;; Request and reply filters
+
+(defvar *request-filter*
+  (rsb.filter:make-filter :method :method :|request|)
+  "A filter which only accepts events which can be considered
+   requests.")
+
+(defvar *reply-filter*
+  (rsb.filter:make-filter :method :method :|reply|)
+  "A filter which only accepts events which can be considered
+   replies.")
