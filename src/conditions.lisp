@@ -1,18 +1,40 @@
 ;;;; conditions.lisp --- Conditions used in cl-rsb.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb)
 
-;;; RSB-specific errors
+;;; Generic RSB conditions
 
-(define-condition rsb-error (error)
+(define-condition rsb-condition (condition)
   ()
   (:documentation
    "This class should be mixed into all RSB-related condition
-classes."))
+    classes."))
+
+(define-condition rsb-problem-condition (rsb-condition)
+  ()
+  (:documentation
+   "This class should be mixed into all RSB-related problem
+    condition (i.e. warnings and errors) classes."))
+
+(define-condition rsb-warning (warning
+                               rsb-problem-condition)
+  ()
+  (:documentation
+   "This class should be mixed into all RSB-related warning condition
+    classes."))
+
+(define-condition rsb-error (error
+                             rsb-problem-condition)
+  ()
+  (:documentation
+   "This class should be mixed into all RSB-related error condition
+    classes."))
+
+;;; Communication related conditions
 
 (define-condition communication-error (rsb-error)
   ()
