@@ -35,18 +35,18 @@
 
    #:communication-error
 
-   #:participation-failed
-   #:participation-failed-scope
-   #:participation-failed-transports
+   #:participant-creation-error
+   #:participant-creation-error-scope
+   #:participant-creation-error-transports
 
-   #:listener-creation-failed
+   #:listener-creation-error
 
-   #:reader-creation-failed
+   #:reader-creation-error
 
-   #:informer-creation-failed
-   #:informer-creation-failed-type
+   #:informer-creation-error
+   #:informer-creation-error-type
 
-   #:no-transports
+   #:no-transports-error
 
    #:event-error
    #:event-error-event

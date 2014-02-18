@@ -179,7 +179,7 @@ RECEIVER to NEW-VALUE."))
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
-`listener-creation-failed' is signaled.
+`listener-creation-error' is signaled.
 
 TRANSPORTS determines the transport configuration that is used to
 participate in the channel. See `rsb.transport:make-connectors' for
@@ -205,7 +205,7 @@ events."))
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
-`reader-creation-failed' is signaled.
+`reader-creation-error' is signaled.
 
 TRANSPORTS determines the transport configuration that is used to
 participate in the channel. See `rsb.transport:make-connectors' for
@@ -244,7 +244,7 @@ nil is returned."))
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
-an error of type `informer-creation-failed' is signaled.
+an error of type `informer-creation-error' is signaled.
 
 TRANSPORTS determines the transport configuration that is used to
 participate in the channel. See `rsb.transport:make-connectors' for

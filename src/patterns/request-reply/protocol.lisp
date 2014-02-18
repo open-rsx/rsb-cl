@@ -137,7 +137,7 @@ work with `rsb.event-processing:transform!') that should be applied to
 arguments and/or return values.
 
 If the server cannot be created, an error of type
-`remote-server-creation-failed' is signaled."))
+`participant-creation-error' is signaled."))
 
 ;;; Local server protocol
 
@@ -167,4 +167,4 @@ work with `rsb.event-processing:transform!') that should be applied to
 arguments and/or return values.
 
 If the server cannot be created, an error of type
-`local-server-creation-failed' is signaled."))
+`participant-creation-error' is signaled."))

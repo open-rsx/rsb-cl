@@ -41,9 +41,9 @@ a mechanism for dispatching matching events to these handlers."))
                           (converters (default-converters))
                           transform)
   ;; Translate different kinds of errors into
-  ;; `listener-creation-failed' errors.
+  ;; `listener-creation-error' errors.
   (with-condition-translation
-      (((error listener-creation-failed)
+      (((error listener-creation-error)
         :scope      scope
         :transports transports))
     (make-participant 'listener scope :in-push

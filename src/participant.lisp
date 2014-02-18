@@ -1,6 +1,6 @@
 ;;;; participant.lisp --- A superclass for participant classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -92,7 +92,7 @@ Return three values:
 + the list of instantiated `rsb.transport:connectors'"
   ;; Signal an error if no transports have been supplied.
   (unless transports
-    (error 'no-transports :scope scope))
+    (error 'no-transports-error :scope scope))
 
   ;; Replace &inherit marker in transport options with actual default
   ;; options for respective transports.

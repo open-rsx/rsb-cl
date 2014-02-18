@@ -113,9 +113,9 @@ channel."))
                           (converters (default-converters))
                           transform)
   ;; Translate different kinds of errors into
-  ;; `informer-creation-failed' errors.
+  ;; `informer-creation-error' errors.
   (with-condition-translation
-      (((error informer-creation-failed)
+      (((error informer-creation-error)
         :scope      scope
         :transports transports
         :type       type))

@@ -51,7 +51,7 @@ connection.")
 
   ;; Has to signal an error since the incompatible options are
   ;; supplied for a single host-port combination.
-  (ensure-condition reader-creation-failed
+  (ensure-condition reader-creation-error
     (with-reader (r1 (make-socket-url t nil))
       (with-reader (r2 (make-socket-url nil '("tcpnodelay" "0")))
         (with-reader (r3 (make-socket-url nil nil))

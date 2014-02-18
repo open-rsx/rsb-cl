@@ -25,35 +25,35 @@ classes."))
 
 ;;; Participant-related errors
 
-(define-condition participation-failed (rsb-error
-                                        chainable-condition)
+(define-condition participant-creation-error (rsb-error
+                                              chainable-condition)
   ((scope      :initarg  :scope
                :type     (or puri:uri scope)
-               :reader   participation-failed-scope
+               :reader   participant-creation-error-scope
                :documentation
                "The scope of the channel in which the participant
 would have participated.")
    (transports :initarg  :transports
                :type     list
-               :reader   participation-failed-transports
+               :reader   participant-creation-error-transports
                :documentation
                "A list of transports the participant would have used
 to connect to the bus."))
   (:default-initargs
-   :scope      (missing-required-initarg 'participation-failed :scope)
-   :transports (missing-required-initarg 'participation-failed :transports))
+   :scope      (missing-required-initarg 'participant-creation-error :scope)
+   :transports (missing-required-initarg 'participant-creation-error :transports))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
                      designated by ~
                      ~S~/rsb::maybe-print-transport-configuration/~
                      ~/more-conditions:maybe-print-cause/~@:>"
-             (participation-failed-scope      condition)
-             (participation-failed-transports condition)
+             (participant-creation-error-scope      condition)
+             (participant-creation-error-transports condition)
              condition)))
   (:documentation
    "This error is signaled when the creation of a participant (which
-implies participation in a channel) fails."))
+    implies participation in a channel) fails."))
 
 (defun maybe-print-transport-configuration (stream transports &optional colon? at?)
   "Print the transport configuration TRANSPORTS to STREAM."
@@ -63,22 +63,22 @@ implies participation in a channel) fails."))
                   ~&~2T~@<~@;~@{~16S~^: ~S~^, ~_~}~:>~}~}~]"
           transports))
 
-(define-condition listener-creation-failed (participation-failed)
+(define-condition listener-creation-error (participant-creation-error)
   ()
   (:documentation
    "This error is signaled when an attempt to create a listener
-fails."))
+    fails."))
 
-(define-condition reader-creation-failed (participation-failed)
+(define-condition reader-creation-error (participant-creation-error)
   ()
   (:documentation
    "This error is signaled when an attempt to create a reader
-fails."))
+    fails."))
 
-(define-condition informer-creation-failed (participation-failed)
+(define-condition informer-creation-error (participant-creation-error)
   ((type :initarg  :type
          :type     (or list symbol)
-         :reader   informer-creation-failed-type
+         :reader   informer-creation-error-type
          :initform nil
          :documentation
          "The type of the informer for which the creation failed."))
@@ -88,15 +88,15 @@ fails."))
                      designated by ~S and type ~
                      ~S~/rsb::maybe-print-transport-configuration/~
                      ~/more-conditions:maybe-print-cause/~@:>"
-             (participation-failed-scope      condition)
-             (informer-creation-failed-type   condition)
-             (participation-failed-transports condition)
+             (participant-creation-error-scope      condition)
+             (informer-creation-error-type          condition)
+             (participant-creation-error-transports condition)
              condition)))
   (:documentation
    "This error is signaled when an attempt to create an informer
-fails."))
+    fails."))
 
-(define-condition no-transports (participation-failed)
+(define-condition no-transports-error (participant-creation-error)
   ()
   (:default-initargs
    :transports '())
@@ -105,10 +105,10 @@ fails."))
      (format stream "~@<Failed to participate in the channel ~
                      designated by ~S because no transports have been ~
                      selected.~@:>"
-             (scope-string (participation-failed-scope condition)))))
+             (scope-string (participant-creation-error-scope condition)))))
   (:documentation
    "This error is signaled when the creation of a participant fails
-because an empty list of transports is supplied."))
+    because an empty list of transports is supplied."))
 
 ;;; Event sending conditions
 
