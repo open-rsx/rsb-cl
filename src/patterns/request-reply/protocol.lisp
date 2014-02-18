@@ -67,7 +67,7 @@ string or a list of the form (CONDITION-CLASS-NAME KW1 VALUE1
   (:documentation
    "Call METHOD of SERVER with argument REQUEST and return the result
 of the method call. If a remote call fails for some reason, an error
-of type `remote-call-failed' is signaled.
+of type `remote-call-error' is signaled.
 
 If BLOCK? is non-nil, the call blocks until a result is available or
 an error occurs. Otherwise, an object implementing the future protocol

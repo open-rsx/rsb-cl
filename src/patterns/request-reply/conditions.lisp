@@ -22,43 +22,43 @@ not be found."))
   (:documentation
    "This error is signaled when a specified method does not exist."))
 
-(define-condition remote-call-failed (rsb-error
-                                      chainable-condition)
+(define-condition remote-call-error (rsb-error
+                                     chainable-condition)
   ((method  :initarg  :method
             :type     method
-            :reader   remote-call-failed-method
+            :reader   remote-call-error-method
             :documentation
             "Stores the method of the failed call.")
    (request :initarg  :request
-            :reader   remote-call-failed-request
+            :reader   remote-call-error-request
             :documentation
             "Stores the request object that was passed to the method
 in the failed call."))
   (:default-initargs
-   :method  (missing-required-initarg 'remote-call-failed :method)
-   :request (missing-required-initarg 'remote-call-failed :request))
+   :method  (missing-required-initarg 'remote-call-error :method)
+   :request (missing-required-initarg 'remote-call-error :request))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to call method ~A with request ~
                      ~A~/more-conditions:maybe-print-cause/~:@>"
-             (remote-call-failed-method  condition)
-             (remote-call-failed-request condition)
+             (remote-call-error-method  condition)
+             (remote-call-error-request condition)
              condition)))
   (:documentation
    "This error is signaled when a remote method call fails for some
-reason."))
+    reason."))
 
-(define-condition remote-method-execution-error (remote-call-failed)
+(define-condition remote-method-execution-error (remote-call-error)
   ()
   (:report
    (lambda (condition stream)
      (format stream "~@<Remote method ~A failed to execute for ~
                      request ~
                      ~A~/more-conditions:maybe-print-cause/~:@>"
-             (remote-call-failed-method  condition)
-             (remote-call-failed-request condition)
+             (remote-call-error-method  condition)
+             (remote-call-error-request condition)
              condition)))
   (:documentation
-   "Error of this class are raised when a call to a remote method
-succeeds in calling the method on the remote side but fails in the
-actual remote method."))
+   "This error is signaled when a call to a remote method succeeds in
+    calling the method on the remote side but fails in the actual
+    remote method."))

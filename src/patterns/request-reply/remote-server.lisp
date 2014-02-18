@@ -103,7 +103,7 @@ server."))
               (setf (gethash key calls) call)))
           future)
       (error (condition)
-        (error 'remote-call-failed
+        (error 'remote-call-error
                :method  method
                :request request
                :cause   condition)))))

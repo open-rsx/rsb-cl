@@ -25,9 +25,9 @@
    #:no-such-method
    #:no-such-method-name
 
-   #:remote-call-failed
-   #:remote-call-failed-method
-   #:remote-call-failed-request
+   #:remote-call-error
+   #:remote-call-error-method
+   #:remote-call-error-request
 
    #:remote-method-execution-error)
 
