@@ -39,6 +39,9 @@ would have participated.")
                :documentation
                "A list of transports the participant would have used
 to connect to the bus."))
+  (:default-initargs
+   :scope      (missing-required-initarg 'participation-failed :scope)
+   :transports (missing-required-initarg 'participation-failed :transports))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to participate in the channel ~
@@ -147,6 +150,8 @@ its type is unsuitable."))
                    :reader     invalid-event-expected-scope
                    :documentation
                    "The scope the invalid event was expected to have."))
+  (:default-initargs
+   :expected-scope (missing-required-initarg 'invalid-event-scope :expected-scope))
   (:report
    (lambda (condition stream)
      (format stream "~@<The scope ~A of the event ~S is not identical ~
