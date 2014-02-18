@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- Unit tests for informer class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -118,7 +118,7 @@ function."))
       (send informer 5))
     ;; In this case, the event is not compatible with the informer's
     ;; type.
-    (ensure-condition 'invalid-event-type
+    (ensure-condition 'event-type-error
       (send informer (make-event "/informer/send/check-type" 5)))
 
     ;; The following are compatible.
@@ -137,7 +137,7 @@ function."))
 
     ;; Scope is not identical to or a subscope of the informer's
     ;; scope.
-    (ensure-condition 'invalid-event-scope
+    (ensure-condition 'event-scope-error
       (send informer (make-event "/informer/send/wrong-scope" "foo")))))
 
 (addtest (informer-root

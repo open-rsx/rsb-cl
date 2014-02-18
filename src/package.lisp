@@ -48,13 +48,13 @@
 
    #:no-transports
 
-   #:invalid-event
-   #:invalid-event-event
+   #:event-error
+   #:event-error-event
 
-   #:invalid-event-type
+   #:event-type-error
 
-   #:invalid-event-scope
-   #:invalid-event-expected-scope)
+   #:event-scope-error
+   #:event-error-expected-scope)
 
   ;; Restarts
   (:export

@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- Informers put events onto a bus.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -40,7 +40,7 @@ channel."))
                           (type  informer-type)) informer))
     ;; Ensure that the type of DATA is a subtype of INFORMER's type.
     (unless (typep (event-data data) type)
-      (error 'invalid-event-type
+      (error 'event-type-error
              :event         data
              :datum         data
              :expected-type type))
@@ -48,7 +48,7 @@ channel."))
     ;; Ensure that the destination scope of DATA is identical to
     ;; INFORMER's scope.
     (unless (sub-scope? (event-scope data) scope)
-      (error 'invalid-event-scope
+      (error 'event-scope-error
              :event          data
              :expected-scope scope))))
 

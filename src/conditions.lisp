@@ -112,53 +112,48 @@ because an empty list of transports is supplied."))
 
 ;;; Event sending conditions
 
-(define-condition invalid-event (rsb-error)
-  ((event    :initarg  :event
-             :reader   invalid-event-event
-             :documentation
-             "The invalid event."))
+(define-condition event-error (rsb-error)
+  ((event :initarg  :event
+          :reader   event-error-event
+          :documentation
+          "The invalid event."))
   (:default-initargs
-   :event (missing-required-initarg 'invalid-event :event))
+   :event (missing-required-initarg 'event-error :event))
   (:report
    (lambda (condition stream)
      (format stream "~@<The event ~S was used in a context for which ~
                      it is not valid.~:@>"
-             (invalid-event-event    condition)
-             ;; (invalid-event-informer condition)
-             )))
+             (event-error-event condition))))
   (:documentation
-   "Instances of this error condition and its subclasses are signaled
-when an attempt is made to use an event in a context for which it is
-not valid."))
+   "This error and its subclasses are signaled when an attempt is made
+    to use an event in a context for which it is not valid."))
 
-(define-condition invalid-event-type (type-error
-                                      invalid-event)
+(define-condition event-type-error (type-error
+                                    event-error)
   ()
   (:report
    (lambda (condition stream)
-     (format stream "~@<The type ~S of event ~S is not ~S.~@:>"
-             (type-of (event-data (type-error-datum condition)))
-             (type-error-datum condition)
-             (type-error-expected-type condition))))
+     (let+ (((&structure-r/o type-error- datum expected-type) condition))
+       (format stream "~@<The type ~S of event ~S is not ~S.~@:>"
+               (type-of (event-data datum)) datum expected-type))))
   (:documentation
    "This error is signaled when an event is used in a context in which
-its type is unsuitable."))
+    its type is unsuitable."))
 
-(define-condition invalid-event-scope (invalid-event)
+(define-condition event-scope-error (event-error)
   ((expected-scope :initarg    :expected-scope
                    :type       scope
-                   :reader     invalid-event-expected-scope
+                   :reader     event-error-expected-scope
                    :documentation
                    "The scope the invalid event was expected to have."))
   (:default-initargs
-   :expected-scope (missing-required-initarg 'invalid-event-scope :expected-scope))
+   :expected-scope (missing-required-initarg 'event-scope-error :expected-scope))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The scope ~A of the event ~S is not identical ~
+     (let+ (((&structure-r/o event-error- event expected-scope) condition))
+      (format stream "~@<The scope ~A of the event ~S is not identical ~
                      to or a sub-scope of the expected scope ~A.~:@>"
-             (event-scope (invalid-event-event condition))
-             (invalid-event-event condition)
-             (invalid-event-expected-scope condition))))
+              (event-scope event) event expected-scope))))
   (:documentation
    "This error is signaled when an event is used in a context in which
-its scope is not valid."))
+    its scope is not valid."))
