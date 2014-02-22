@@ -216,7 +216,7 @@ and bound to a variable named like the value of CLASS."
                                             &key
                                             (suite-name (missing-required-argument :suite-name))
                                             (case-name  (symbolicate generic-function '#:/restart))
-                                            (restarts   '(log continue))
+                                            (restarts   '(continue))
                                             (var-name   '*signal-error-for-restart-test?*))
                                            &body body)
   `(progn
@@ -256,4 +256,4 @@ and bound to a variable named like the value of CLASS."
                    ,@body))))
          ,@(iter (for restart in restarts)
                  (let+ (((name &rest args) (ensure-list restart)))
-                  (collect `(do-one (list ',name ,@args)))))))))
+                   (collect `(do-one (list ',name ,@args)))))))))

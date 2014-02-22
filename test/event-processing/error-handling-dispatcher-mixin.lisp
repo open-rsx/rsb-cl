@@ -1,6 +1,6 @@
 ;;;; error-handling-dispatcher-mixin.lisp --- Unit tests for the error-handling-dispatcher-mixin class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,9 +34,4 @@
   ;; The error policy #'continue should prevent the error from being
   ;; signaled.
   (setf (processor-error-policy simple-processor) #'continue)
-  (handle simple-processor simple-event)
-
-  ;; The error policy #'log-error should prevent the error from being
-  ;; signaled.
-  (setf (processor-error-policy simple-processor) #'log-error)
   (handle simple-processor simple-event))

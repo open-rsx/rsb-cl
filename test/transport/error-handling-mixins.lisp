@@ -1,6 +1,6 @@
 ;;;; error-handling-mixins.lisp --- Unit tests for the transport-related error handling mixins.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,12 +33,7 @@
               (ensure-condition 'simple-error
                 ,@invoke)
 
-              (setf (processor-error-policy simple-handler)
-                    #'continue)
-              ,@invoke
-
-              (setf (processor-error-policy simple-handler)
-                    #'log-error)
+              (setf (processor-error-policy simple-handler) #'continue)
               ,@invoke)))))
 
   (define-error-handling-mixin-tests
@@ -46,8 +41,9 @@
       (emit ((block? t))
             (restart-case
                 (error "~@<emit signaled an error.~@:>")
-              (log      (condition) (declare (ignore condition)) nil)
-              (continue ()          nil)))
+              (continue (&optional condition)
+                (declare (ignore condition))
+                nil)))
 
     (emit simple-handler t))
 
@@ -56,8 +52,9 @@
       (receive-messages ()
             (restart-case
                 (error "~@<receive-messages signaled an error.~@:>")
-              (log      (condition) (declare (ignore condition)) nil)
-              (continue ()          nil)))
+              (continue (&optional condition)
+                (declare (ignore condition))
+                nil)))
 
     (receive-messages simple-handler))
 
@@ -66,7 +63,8 @@
       (handle ((event event))
             (restart-case
                 (error "~@<handle signaled an error.~@:>")
-              (log      (condition) (declare (ignore condition)) nil)
-              (continue ()          nil)))
+              (continue (&optional condition)
+                (declare (ignore condition))
+                nil)))
 
     (handle simple-handler (make-event "/" "bla"))))

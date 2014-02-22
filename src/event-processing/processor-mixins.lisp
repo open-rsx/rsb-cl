@@ -57,25 +57,18 @@ function."))
 
 (defmethod dispatch :around ((processor error-handling-dispatcher-mixin)
                              (event     event))
-  "Install log and ignore restarts around a call to the next
-`dispatch' method. In case of an error, call the error-policy function
-of PROCESSOR, if any."
+  ;; Establish `continue' restart around call to the next `dispatch'
+  ;; method. In case of an error, call the error-policy function of
+  ;; PROCESSOR, if any.
   (with-error-policy (processor)
     (restart-case
         (call-next-method)
-      (log (&optional condition)
-        :report (lambda (stream)
-                  (format stream "~@<Log a message and ignore the ~
-                                  failure to dispatch event ~A.~@:>"
-                          event))
-        (log:warn "~@<~A failed to dispatch the event ~A~@[: ~A~]~@:>"
-                  processor event condition)
-        nil)
-      (continue ()
+      (continue (&optional condition)
         :report (lambda (stream)
                   (format stream "~@<Ignore the failure to dispatch ~
                                   event ~A.~@:>"
                           event))
+        (declare (ignore condition))
         nil))))
 
 ;;; Mixin class `filtering-processor-mixin'

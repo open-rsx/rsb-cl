@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,13 +28,11 @@
       `(;; In these cases, protocol buffer unpacking fails.
         (,a-string           :foo (:error-policy nil)          decoding-error)
         (,a-string           :foo (:error-policy ,#'continue)  nil)
-        (,a-string           :foo (:error-policy ,#'log-error) nil)
 
         ;; Protocol buffer unpacking succeeds, but conversion to event
         ;; fails.
         (,empty-notification :foo (:error-policy nil)          decoding-error)
-        (,empty-notification :foo (:error-policy ,#'continue)  nil)
-        (,empty-notification :foo (:error-policy ,#'log-error) nil))
+        (,empty-notification :foo (:error-policy ,#'continue)  nil))
 
     (let+ ((connector (apply #'make-instance 'in-pull-connector ; TODO(jmoringe): class
                              (append common-args connector-args)))

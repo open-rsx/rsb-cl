@@ -7,41 +7,18 @@
 (cl:in-package #:rsb)
 
 ;;; Error handling
-;;;
-;;; Not invoking any restart says processing should be aborted and the
-;;; stack should be unwound.
 
-(macrolet
-    ((define-restart (name (&rest args) doc
-                      &key
-                      (function-name name))
-       `(progn
-          (defmethod documentation ((thing (eql ',name)) (kind (eql 'restart)))
-            ,doc)
+(defun retry ()
+  "Invoke the `retry' restart."
+  (if-let ((restart (find-restart 'retry)))
+    (invoke-restart restart)
+    (warn "~@<Restart ~S not found; Doing nothing.~@:>" 'retry)))
 
-          (defun ,function-name (,@args)
-            ,(format nil "Invoke the ~A restart; ~A" name doc)
-            (if-let ((restart (find-restart ',name)))
-              (invoke-restart restart ,@args)
-              (warn "~@<Restart ~S not found; Doing nothing.~@:>" ',name))))))
+;; use-value restart and function are provided by CL.
 
-  (define-restart retry ()
-    "Retry the failed operation.")
+;; continue restart and function are provided by CL.
 
-  ;; use-value restart and function are provided by CL.
-
-  ;; continue restart and function are provided by CL.
-
-  ;; abort restart and function are provided by CL.
-
-  (define-restart log (condition)
-    "Log the error and continue processing."
-    :function-name log-error)
-
-  (define-restart warn (condition)
-    "Signal a warning instead of the original condition and continue
-processing."
-    :function-name signal-warning))
+;; abort restart and function are provided by CL.
 
 ;;; Scope protocol
 

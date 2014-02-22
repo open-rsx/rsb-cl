@@ -65,21 +65,10 @@ in a `event->notification' method."))
 
 (defmethod send-notification :around ((connector    restart-notification-sender-mixin)
                                       (notification t))
-  "Call the next method with log and ignore restarts installed that
-will both retry sending NOTIFICATION, but with and without emitting a
-log message respectively. "
+  ;; Call the next method with `continue' restart established which
+  ;; discards NOTIFICATION.
   (restart-case
       (call-next-method)
-    (log (&optional condition)
-      :test   (lambda (condition)
-                (typep condition '(not connection-closed)))
-      :report (lambda (stream)
-                (format stream "~@<Log a message and ignore the failed ~
-                                sending attempt and continue with the ~
-                                next notification.~@:>"))
-      (log:warn "~@<~A failed to send a notification~@[: ~_~A~]~@:>"
-                connector condition)
-      nil)
     (continue (&optional condition)
       :test   (lambda (condition)
                 (typep condition '(not connection-closed)))
@@ -92,19 +81,10 @@ log message respectively. "
 
 (defmethod event->notification :around ((connector    restart-notification-sender-mixin)
                                         (notification t))
-  "Call the next method with log and ignore restarts installed that
-with both cause NOTIFICATION to be discarded, but with and without
-emitting a log message respectively."
+  ;; Call the next method with `continue' restart established that
+  ;; causes NOTIFICATION to be discarded.
   (restart-case
       (call-next-method)
-    (log (&optional condition)
-      :report (lambda (stream)
-                (format stream "~@<Log a message and ignore the ~
-                                failed encoding and continue with the ~
-                                next event.~@:>"))
-      (log:warn "~@<~A failed to encode an event~@[: ~_~A~]~@:>"
-                connector condition)
-      nil)
     (continue (&optional condition)
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed encoding and ~
@@ -124,22 +104,10 @@ events in a `message->event' method."))
 
 (defmethod receive-message :around ((connector restart-message-receiver-mixin)
                                     (block?    t))
-  "Call the next method with log and ignore restarts installed that
-will both retry receiving a message, but with and without emitting a
-log message respectively. "
+  ;; Call the next method with `continue' restart established that
+  ;; retries receiving a message.
   (iter (restart-case
             (return-from receive-message (call-next-method))
-          (log (&optional condition)
-            :test   (lambda (condition)
-                      (typep condition '(not connection-closed)))
-            :report (lambda (stream)
-                      (format stream "~@<Log a message and ignore ~
-                                      the failed receiving attempt and ~
-                                      continue with the next ~
-                                      notification.~@:>"))
-            (log:warn "~@<~A failed to receive a notification~@[: ~_~A~]~@:>"
-                      connector condition)
-            nil)
           (continue (&optional condition)
             :test   (lambda (condition)
                       (typep condition '(not connection-closed)))
@@ -153,19 +121,10 @@ log message respectively. "
 (defmethod message->event :around ((connector   restart-message-receiver-mixin)
                                    (message     t)
                                    (wire-schema t))
-  "Call the next method with log and ignore restarts installed that
-with both cause the call to return nil instead of an `event' instance,
-but with and without emitting a log message respectively."
+  ;; Call the next method with `continue' restart established that
+  ;; causes the call to return nil instead of an `event' instance.
   (restart-case
       (call-next-method)
-    (log (&optional condition)
-      :report (lambda (stream)
-                (format stream "~@<Log a message and ignore the ~
-                                failed decoding and continue with the ~
-                                next event.~@:>"))
-      (log:warn "~@<~A failed to decode a notification~@[: ~_~A~]~@:>"
-                connector condition)
-      nil)
     (continue (&optional condition)
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed decoding and ~

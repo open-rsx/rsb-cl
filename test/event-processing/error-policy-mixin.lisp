@@ -1,6 +1,6 @@
 ;;;; error-policy-mixin.lisp --- Unit tests for the error-policy-mixin class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,9 +15,6 @@
   "A function that unconditionally signals an error."
   (restart-case
       (error "~@<I like to signal.~@:>")
-    (log      (condition)
-      (declare (ignore condition))
-      nil)
     (continue (&optional condition)
       (declare (ignore condition))
       nil)))
@@ -38,11 +35,6 @@
           ;; The error policy #'continue should prevent the error from
           ;; being signaled.
           (setf (processor-error-policy simple-processor) #'continue)
-          ,@call-form
-
-          ;; The error policy #'log-error should prevent the error
-          ;; from being signaled.
-          (setf (processor-error-policy simple-processor) #'log-error)
           ,@call-form)))
 
   (define-smoke-test smoke/function

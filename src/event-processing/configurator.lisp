@@ -1,6 +1,6 @@
 ;;;; configurator.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,8 +33,6 @@ outgoing events.")
                :documentation
                "Stores the transform which should be applied to
 processed events."))
-  (:default-initargs
-   :error-policy #'log-error)
   (:documentation
    "This class is intended to be used as a superclass of configurator
 classes for specific directions. Every configurator instance has a

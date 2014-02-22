@@ -62,15 +62,9 @@
   ;; Restarts
   (:export
    #:retry
-
    ;; continue provided by CL
    ;; use-value likewise
-
-   ;; log is in CL
-   #:log-error
-
-   ;; warn is in CL
-   #:signal-warning
+   ;; abort likewise
 
    #:use-scope
    #:use-uri)
