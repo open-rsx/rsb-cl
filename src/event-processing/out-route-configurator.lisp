@@ -1,6 +1,6 @@
 ;;;; out-route-configurator.lisp --- Configurator class for out-direction processing.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,7 +22,7 @@ event processor for sending of events."))
 (defmethod notify ((configurator out-route-configurator)
                    (connector    t)
                    (action       (eql :connector-added)))
-  (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
+  (let+ (((&structure-r/o configurator- processor) configurator))
     (call-next-method)
     (log:trace "~@<~A is connecting ~A -> ~A~@:>"
                configurator processor connector)
@@ -31,8 +31,8 @@ event processor for sending of events."))
 (defmethod notify ((configurator out-route-configurator)
                    (connector    t)
                    (action       (eql :connector-removed)))
-  (let+ (((&accessors-r/o (processor configurator-processor)) configurator))
+  (let+ (((&structure-r/o configurator- processor) configurator))
     (log:trace "~@<~A is disconnecting ~A -> ~A~@:>"
                configurator processor connector)
-    (removef (handlers processor) connector)
+    (removef (handlers processor) connector :count 1)
     (call-next-method)))

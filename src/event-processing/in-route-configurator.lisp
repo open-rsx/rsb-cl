@@ -1,6 +1,6 @@
 ;;;; in-route-configurator.lisp --- Configurator for incoming event route.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,8 +33,7 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
                    (connector    t)
                    (action       (eql :connector-added)))
-  (let+ (((&accessors-r/o (filters   configurator-filters)
-                          (processor configurator-processor)) configurator))
+  (let+ (((&structure-r/o configurator- filters processor) configurator))
     (call-next-method)
 
     ;; Notify new connector regarding filters.
@@ -55,18 +54,16 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
                    (connector    t)
                    (action       (eql :connector-removed)))
-  (let+ (((&accessors-r/o
-           (filters   configurator-filters)
-           (processor configurator-processor)) configurator))
-    ;; Remove processor from connectors handlers and notify regarding
-    ;; removed connector.
+  (let+ (((&structure-r/o configurator- filters processor) configurator))
+    ;; Remove processor from CONNECTOR's handler list and notify
+    ;; processor regarding removed CONNECTOR.
     (log:trace "~@<~A is disconnecting ~A -> ~A~@:>"
                configurator connector processor)
-    (removef (handlers connector) processor)
+    (removef (handlers connector) processor :count 1)
 
     (notify processor connector action)
 
-    ;; Notify remove connector regarding filters.
+    ;; Notify CONNECTOR regarding removed filters.
     (iter (for filter in filters)
           (log:trace "~@<~A is removing filter ~A from ~A~@:>"
                      configurator filter connector)
@@ -79,12 +76,10 @@ participant."))
 (defmethod notify ((configurator in-route-configurator)
                    (filter       t)
                    (action       (eql :filter-added)))
-  "Add FILTER from CONFIGURATOR's filter list and notify its
-connectors and processor."
-  (let+ (((&accessors
-           (connectors configurator-connectors)
-           (processor  configurator-processor)
-           (filters    configurator-filters)) configurator))
+  ;; Add FILTER to CONFIGURATOR's filter list and notify its
+  ;; connectors and processor.
+  (let+ (((&structure configurator- connectors processor filters)
+          configurator))
     ;; Add FILTER to the filter list of CONFIGURATOR.
     (push filter filters)
 
@@ -101,21 +96,19 @@ connectors and processor."
 (defmethod notify ((configurator in-route-configurator)
                    (filter       t)
                    (action       (eql :filter-removed)))
-  "Remove FILTER from CONFIGURATOR's filter list and notify its
-connectors and processor."
-  (let+ (((&accessors
-           (connectors configurator-connectors)
-           (processor  configurator-processor)
-           (filters    configurator-filters)) configurator))
-    ;; Remove FILTER from PROCESSORS filter list.
+  ;; Remove FILTER from CONFIGURATOR's filter list and notify its
+  ;; connectors and processor.
+  (let+ (((&structure configurator- connectors processor filters)
+          configurator))
+    ;; Remove FILTER from PROCESSOR's filter list.
     (removef (processor-filters processor) filter)
 
-    ;; Notify all connectors about the removed filter. Implementation
+    ;; Notify all connectors about the removed FILTER. Implementation
     ;; info do not matter in this case.
     (map nil (rcurry #'notify filter action) connectors)
 
     ;; Remove FILTER from the filter list of CONFIGURATOR.
-    (removef filters filter)
+    (removef filters filter :count 1)
 
     :implemented))
 

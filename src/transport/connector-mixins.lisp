@@ -163,9 +163,9 @@ stored in CONNECTOR."
 (defmethod print-object ((object conversion-mixin) stream)
   (let+ (((&accessors-r/o (converter connector-converter)) object)
          (sequence? (typep converter 'sequence)))
-        (print-unreadable-object (object stream :type t :identity t)
-          (format stream "~:[~S~;(~D)~]"
-                  sequence? (if sequence? (length converter) converter)))))
+    (print-unreadable-object (object stream :type t :identity t)
+      (format stream "~:[~S~;(~D)~]"
+              sequence? (if sequence? (length converter) converter)))))
 
 ;;; Mixin class `timestamping-receiver-mixin'
 

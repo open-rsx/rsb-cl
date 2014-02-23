@@ -87,8 +87,7 @@ groups in which they are members."))
 
 (defmethod unref-group ((connection connection) (group string))
   (when (zerop (decf (gethash group (slot-value connection 'groups) 0)))
-    (log:info "~@<~A is leaving group ~A~@:>"
-              connection group)
+    (log:info "~@<~A is leaving group ~A~@:>" connection group)
     (remhash group (slot-value connection 'groups))
     (network.spread:leave (slot-value connection 'connection) group)))
 

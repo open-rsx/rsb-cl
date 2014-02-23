@@ -1,4 +1,4 @@
-;;;; configurator-client.lisp --- A client that knows its configurator.
+;;;; client.lisp --- A client that knows its configurator.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;

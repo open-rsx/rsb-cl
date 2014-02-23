@@ -33,6 +33,8 @@ outgoing events.")
                :documentation
                "Stores the transform which should be applied to
 processed events."))
+  (:default-initargs
+   :direction (missing-required-initarg 'configurator :direction))
   (:documentation
    "This class is intended to be used as a superclass of configurator
 classes for specific directions. Every configurator instance has a
@@ -54,10 +56,9 @@ participant instance as its \"client\"."))
   (setf (processor-error-policy instance)
         (processor-error-policy instance)))
 
-(defmethod (setf processor-error-policy) :around  ((new-value    t)
-                                                   (configurator configurator))
-  (let+ (((&accessors-r/o (processor  configurator-processor)
-                          (connectors configurator-connectors)) configurator))
+(defmethod (setf processor-error-policy) :around ((new-value    t)
+                                                  (configurator configurator))
+  (let+ (((&structure-r/o configurator- processor connectors) configurator))
     (log:trace "~@<~A is installing new error policy ~A in processor ~A~@:>"
                configurator new-value processor)
     (setf (processor-error-policy processor) new-value)
@@ -124,7 +125,7 @@ participant instance as its \"client\"."))
 (defmethod notify ((configurator configurator)
                    (connector    t)
                    (action       (eql :connector-removed)))
-  (let+ (((&accessors-r/o (scope configurator-scope)) configurator))
+  (let+ (((&structure-r/o configurator- scope) configurator))
     (log:trace "~@<~A is detaching connector ~A from ~A~@:>"
                configurator connector scope)
     (notify connector scope :detached)))
