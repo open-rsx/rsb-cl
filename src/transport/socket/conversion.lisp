@@ -1,6 +1,6 @@
 ;;;; conversion.lisp --- Event <-> notification conversion for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,10 +8,10 @@
 
 ;;; Notification -> Event
 
-(defun notification->event (converter notification
-                            &key
-                            expose-wire-schema?
-                            expose-payload-size?)
+(defun notification->event* (converter notification
+                             &key
+                             expose-wire-schema?
+                             expose-payload-size?)
   "Convert NOTIFICATION to an `event' instance using CONVERTER for the
 payload. Return the decoded event. The optional parameter DATA can be
 used to supply encoded data that should be used instead of the data

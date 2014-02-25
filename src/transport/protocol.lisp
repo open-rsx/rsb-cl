@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol of the transport module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -76,23 +76,26 @@ of CONNECTOR."
   "Default behavior is to claim to accept no options."
   '())
 
-;;; Message receiver protocol
+;;; Notification receiver protocol
 
-(defgeneric receive-message (connector block?)
+(defgeneric receive-notification (connector block?)
   (:documentation
-   "Receive and return one message via CONNECTOR. If BLOCK? is nil,
-only return a message, if one is immediately available, otherwise
-return nil. If BLOCK? is non-nil, wait for a message if no message is
-immediately available. If something has been received, return two
-values: the received message and a symbol designating the
-wire-schema of the received data."))
+   "Receive and return one notification via CONNECTOR.
 
-(defgeneric message->event (connector message wire-schema)
+If BLOCK? is nil, only return a notification if one is immediately
+available, otherwise return nil. If BLOCK? is non-nil, wait for a
+notification if none is immediately available.
+
+If something has been received, return two values: the received
+notification and a symbol designating the wire-schema of the received
+data."))
+
+(defgeneric notification->event (connector notification wire-schema)
   (:documentation
-   "Convert MESSAGE with wire-schema WIRE-SCHEMA into an `event'
-instance and return the event. If message cannot be converted into an
-event, return nil instead. Signal a `decoding-error' if something goes
-wrong."))
+   "Convert NOTIFICATION with wire-schema WIRE-SCHEMA into an `event'
+instance and return the event. If NOTIFICATION cannot be converted
+into an event, return nil instead. Signal a `decoding-error' if
+something goes wrong."))
 
 ;;; Notification sender protocol
 

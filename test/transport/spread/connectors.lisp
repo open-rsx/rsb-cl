@@ -21,8 +21,8 @@
 
 (addtest (in-connector-root
           :documentation
-          "Test `message->event' method.")
-  message->event
+          "Test `notification->event' method.")
+  notification->event
 
   (ensure-cases (notification wire-schema connector-args expected)
       `(;; In these cases, protocol buffer unpacking fails.
@@ -38,7 +38,7 @@
                              (append common-args connector-args)))
            ((&flet do-it ()
               (rsb.ep:with-error-policy (connector)
-                (message->event connector notification wire-schema)))))
+                (notification->event connector notification wire-schema)))))
       (case expected
         (decoding-error (ensure-condition 'decoding-error (do-it)))
         ((nil           (ensure-null (do-it))))))))

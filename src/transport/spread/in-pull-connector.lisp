@@ -1,6 +1,6 @@
 ;;;; in-pull-connector.lisp --- An in-direction, pull-based connector for spread.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,9 +22,9 @@ transport."))
   ;; Maybe block until a notification is received. Try to convert into
   ;; an event and return the event in case of success. In blocking
   ;; mode, wait for the next notification.
-  (iter (let* ((notification (receive-message connector block?))
+  (iter (let* ((notification (receive-notification connector block?))
                (event (when notification
-                        (message->event
+                        (notification->event
                          connector notification :undetermined))))
 
           ;; Due to fragmentation of large events into multiple

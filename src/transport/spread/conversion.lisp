@@ -1,6 +1,6 @@
 ;;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,10 +8,10 @@
 
 ;;; Notification -> Event
 
-(defun notification->event (pool converter notification
-                            &key
-                            expose-wire-schema?
-                            expose-payload-size?)
+(defun notification->event* (pool converter notification
+                             &key
+                             expose-wire-schema?
+                             expose-payload-size?)
   "Try to convert NOTIFICATION into an event. This may not be possible
 in a single step since NOTIFICATION can be a part of an event that has
 been fragmented into multiple notifications."

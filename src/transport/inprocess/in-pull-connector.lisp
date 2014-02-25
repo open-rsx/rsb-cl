@@ -10,7 +10,7 @@
 
 (defgeneric connector-queue-count (connector)
   (:documentation
-   "Return the number of messages currently queued in CONNECTOR."))
+   "Return the number of notifications currently queued in CONNECTOR."))
 
 ;;; `in-pull-connector' class
 
@@ -49,21 +49,22 @@ process."))
   "Put EVENT into the queue maintained by CONNECTOR."
   (lparallel.queue:push-queue event (connector-queue connector)))
 
-(defmethod receive-message ((connector in-pull-connector)
-                            (block?    (eql nil)))
-  "Extract and return one event from the queue maintained by
-CONNECTOR, if there are any. If there are no queued events, return
-nil."
+(defmethod receive-notification ((connector in-pull-connector)
+                                 (block?    (eql nil)))
+  ;; Extract and return one event from the queue maintained by
+  ;; CONNECTOR, if there are any. If there are no queued events,
+  ;; return nil.
   (lparallel.queue:try-pop-queue (connector-queue connector)))
 
-(defmethod receive-message ((connector in-pull-connector)
-                            (block?    t))
-  "Extract and return one event from the queue maintained by
-CONNECTOR, if there are any. If there are no queued events, block."
+(defmethod receive-notification ((connector in-pull-connector)
+                                 (block?    t))
+  ;; Extract and return one event from the queue maintained by
+  ;; CONNECTOR, if there are any. If there are no queued events,
+  ;; block.
   (lparallel.queue:pop-queue (connector-queue connector)))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
-  (when-let ((event (receive-message connector block?)))
+  (when-let ((event (receive-notification connector block?)))
     (setf (timestamp event :receive) (local-time:now))
     (dispatch connector event)
     t))

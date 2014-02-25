@@ -1,6 +1,6 @@
 ;;;; in-push-connector.lisp --- In-direction, push-style socket connector.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,4 +22,4 @@ a socket."))
 (defmethod handle ((connector in-push-connector)
                    (data      notification))
   ;; TODO(jmoringe): condition translation?
-  (dispatch connector (message->event connector data :undetermined)))
+  (dispatch connector (notification->event connector data :undetermined)))

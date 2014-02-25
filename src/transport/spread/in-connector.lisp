@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- Superclass for in-direction connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
 
 (defclass in-connector (connector
                         timestamping-receiver-mixin
-                        restart-message-receiver-mixin
+                        restart-notification-receiver-mixin
                         broadcast-processor
                         assembly-mixin
                         expose-transport-metrics-mixin)
@@ -30,29 +30,29 @@ connector classes for Spread."))
                    (action    (eql :detached)))
   (unref-group (connector-connection connector) (scope->group scope)))
 
-(defmethod receive-message ((connector in-connector)
-                            (block?    t))
-  "Delegate receiving a message to the connection of CONNECTOR."
+(defmethod receive-notification ((connector in-connector)
+                                 (block?    t))
+  ;; Delegate receiving a notification to the connection of CONNECTOR.
   (let+ (((&values buffer length)
           (receive-message (connector-connection connector) block?)))
-   (values (cons buffer length) :undetermined)))
+    (values (cons buffer length) :undetermined)))
 
-(defmethod message->event ((connector   in-connector)
-                           (message     cons)
-                           (wire-schema t))
+(defmethod notification->event ((connector    in-connector)
+                                (notification cons)
+                                (wire-schema  t))
   (let+ (((&accessors-r/o (pool      connector-assembly-pool)
                           (converter connector-converter)) connector)
-         ((buffer . length)    message)
+         ((buffer . length)    notification)
          (expose-wire-schema?  (connector-expose? connector :rsb.transport.wire-schema))
          (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
          notification)
 
-    ;; Try to unpack MESSAGE into a `notification' instance. Signal
-    ;; `decoding-error' if that fails.
+    ;; Try to unpack NOTIFICATION into a `notification'
+    ;; instance. Signal `decoding-error' if that fails.
     (handler-bind
         ((error (lambda (condition)
                   (error 'decoding-error
-                         :encoded          message
+                         :encoded          notification
                          :format-control   "~@<The data could not be ~
                                             unpacked as a protocol ~
                                             buffer of kind ~S.~:@>"
@@ -62,7 +62,7 @@ connector classes for Spread."))
                           buffer (make-instance 'fragmented-notification)
                           0 length)))
 
-    ;; If message could be unpacked into a `notification' instance,
+    ;; If NOTIFICATION could be unpacked into a `notification' instance,
     ;; try to convert it, and especially its payload, into an `event'
     ;; instance and an event payload. There are three possible
     ;; outcomes:
@@ -77,7 +77,7 @@ connector classes for Spread."))
     (handler-bind
         ((error (lambda (condition)
                   (error 'decoding-error
-                         :encoded          message
+                         :encoded          notification
                          :format-control   "~@<After unpacking, the ~
                                             notification~_~A~_could ~
                                             not be converted into an ~
@@ -85,6 +85,6 @@ connector classes for Spread."))
                          :format-arguments `(,(with-output-to-string (stream)
                                                 (describe notification stream)))
                          :cause            condition))))
-      (notification->event pool converter notification
-                           :expose-wire-schema?  expose-wire-schema?
-                           :expose-payload-size? expose-payload-size?))))
+      (notification->event* pool converter notification
+                            :expose-wire-schema?  expose-wire-schema?
+                            :expose-payload-size? expose-payload-size?))))

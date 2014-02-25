@@ -92,22 +92,22 @@ in a `event->notification' method."))
       (declare (ignore condition))
       nil)))
 
-;;; Mixin class `restart-message-receiver-mixin'
+;;; Mixin class `restart-notification-receiver-mixin'
 
-(defclass restart-message-receiver-mixin ()
+(defclass restart-notification-receiver-mixin ()
   ()
   (:documentation
    "This class is intended to be mixed into connector classes that
-have to provide the usual restarts when receiving messages in a
-`receive-message' method and converting the received messages to
-events in a `message->event' method."))
+have to provide the usual restarts when receiving notifications in a
+`receive-notification' method and converting the received
+notifications to events in a `notification->event' method."))
 
-(defmethod receive-message :around ((connector restart-message-receiver-mixin)
-                                    (block?    t))
+(defmethod receive-notification :around ((connector restart-notification-receiver-mixin)
+                                         (block?    t))
   ;; Call the next method with `continue' restart established that
-  ;; retries receiving a message.
+  ;; retries receiving a notification.
   (iter (restart-case
-            (return-from receive-message (call-next-method))
+            (return-from receive-notification (call-next-method))
           (continue (&optional condition)
             :test   (lambda (condition)
                       (typep condition '(not connection-closed)))
@@ -118,9 +118,9 @@ events in a `message->event' method."))
             (declare (ignore condition))
             nil))))
 
-(defmethod message->event :around ((connector   restart-message-receiver-mixin)
-                                   (message     t)
-                                   (wire-schema t))
+(defmethod notification->event :around ((connector    restart-notification-receiver-mixin)
+                                        (notification t)
+                                        (wire-schema  t))
   ;; Call the next method with `continue' restart established that
   ;; causes the call to return nil instead of an `event' instance.
   (restart-case
@@ -174,18 +174,17 @@ stored in CONNECTOR."
   (:documentation
    "This mixin class is intended to be mixed into connector classes
 that perform two tasks:
-+ receive messages
-+ decode received messages
++ receive notifications
++ decode received notifications
 The associated protocol is designed to be
 direction-agnostic (i.e. should work for both push and pull)."))
 
-(defmethod message->event :around ((connector   timestamping-receiver-mixin)
-                                   (message     t)
-                                   (wire-schema t))
-  "Add a :receive timestamp to the generated event, if any."
-  (let ((event (call-next-method)))
-    (when event
-      (setf (timestamp event :receive) (local-time:now)))
+(defmethod notification->event :around ((connector    timestamping-receiver-mixin)
+                                        (notification t)
+                                        (wire-schema  t))
+  ;; Add a :receive timestamp to the generated event, if any.
+  (when-let ((event (call-next-method)))
+    (setf (timestamp event :receive) (local-time:now))
     event))
 
 ;;; `expose-transport-metrics-mixin'
@@ -391,11 +390,11 @@ thread."))
   "Receive a message that can be decoded into an event. Return the
 event."
   (iter (let+ (((&values notification wire-schema)
-                (receive-message connector t))
+                (receive-notification connector t))
                ;; Try to convert NOTIFICATION into one or zero events
                ;; (in the latter case, EVENT is nil).
                (event (when notification
-                        (message->event connector notification wire-schema))))
+                        (notification->event connector notification wire-schema))))
               ;; Due to fragmentation of large events into multiple
               ;; notifications and error handling policies, we may not
               ;; obtain an `event' instance from the notification.

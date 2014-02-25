@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the transport module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -82,10 +82,10 @@
    #:conversion-mixin
    #:connector-converter)
 
-  ;; Message receiver protocol
+  ;; Notification receiver protocol
   (:export
-   #:receive-message
-   #:message->event)
+   #:receive-notification
+   #:notification->event)
 
   ;; Notification sender protocol
   (:export
@@ -116,9 +116,9 @@
 
    #:error-handling-sender-mixin)
 
-  ;; `restart-message-receiver-mixin' class
+  ;; `restart-notification-receiver-mixin' class
   (:export
-   #:restart-message-receiver-mixin)
+   #:restart-notification-receiver-mixin)
 
   ;; `restart-notification-sender-mixin' class
   (:export

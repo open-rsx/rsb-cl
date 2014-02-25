@@ -1,6 +1,6 @@
 ;;;; bus-connection.lisp --- Connection class used by bus provider.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,7 +8,7 @@
 
 (defclass bus-connection (broadcast-processor
                           threaded-message-receiver-mixin
-                          restart-message-receiver-mixin
+                          restart-notification-receiver-mixin
                           error-handling-push-receiver-mixin
                           restart-notification-sender-mixin
                           error-handling-sender-mixin)
@@ -119,8 +119,8 @@ after calling NEW-VALUE."
 
 ;;; Receiving
 
-(defmethod receive-message ((connection bus-connection)
-                            (block?     t))
+(defmethod receive-notification ((connection bus-connection)
+                                 (block?     t))
   (let* ((stream (usocket:socket-stream (connection-socket connection)))
          (length (handler-case ; TODO temp until we implement shutdown protocol
                      (read-ub32/le stream)
@@ -146,23 +146,23 @@ after calling NEW-VALUE."
                    length received))
           (values (cons buffer length) :undetermined)))))
 
-(defmethod receive-message ((connection bus-connection)
-                            (block?     (eql nil)))
+(defmethod receive-notification ((connection bus-connection)
+                                 (block?     (eql nil)))
   ;; Check whether reading would block and only continue if not.
   (let ((stream (usocket:socket-stream (connection-socket connection))))
     (when (or block? (listen stream))
       (call-next-method))))
 
-(defmethod message->event ((connection  bus-connection)
-                           (message     cons)
-                           (wire-schema t))
+(defmethod notification->event ((connection   bus-connection)
+                                (notification cons)
+                                (wire-schema  t))
   ;; The whole static buffer and the length of the relevant
   ;; subsequence.
-  (declare (type (cons octet-vector (unsigned-byte 32)) message))
+  (declare (type (cons octet-vector (unsigned-byte 32)) notification))
 
-  ;; Try to unpack MESSAGE into a `notification' instance. Signal
+  ;; Try to unpack NOTIFICATION into a `notification' instance. Signal
   ;; `decoding-error' if that fails.
-  (let+ (((data . length) message))
+  (let+ (((data . length) notification))
     (with-condition-translation
         (((error decoding-error)
           :encoded          (subseq data 0 length)

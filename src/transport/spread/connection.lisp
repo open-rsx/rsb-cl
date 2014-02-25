@@ -1,6 +1,6 @@
 ;;;; connection.lisp --- Spread connections with membership management.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,10 +18,17 @@ GROUP in case of a 0 -> 1 transition."))
    "Decrease the reference count of GROUP, causing CONNECTION to leave
 GROUP in case of a 1 -> 0 transition."))
 
+(defgeneric receive-message (connection block?)
+  (:documentation
+   "Receive and return a message from CONNECTION.
+
+    BLOCK? controls whether the call should block until a message has
+    been received."))
+
 (defgeneric send-message (connection destination payload)
   (:documentation
    "Send the PAYLOAD to DESTINATION via CONNECTION in a Spread
-message."))
+    message."))
 
 ;;; `connection' class
 

@@ -1,6 +1,6 @@
 ;;;; in-pull-connector.lisp --- In-direction, pull-style socket connector.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -27,26 +27,27 @@ a socket."))
   "Put DATA into the queue of CONNECTOR for later retrieval."
   (lparallel.queue:push-queue data (connector-queue connector)))
 
-(defmethod receive-message ((connector in-pull-connector)
+(defmethod receive-notification ((connector in-pull-connector)
                             (block?    (eql nil)))
-  "Extract and return one event from the queue maintained by
-CONNECTOR, if there are any. If there are no queued events, return
-nil."
+  ;; Extract and return one event from the queue maintained by
+  ;; CONNECTOR, if there are any. If there are no queued events,
+  ;; return nil.
   (lparallel.queue:try-pop-queue (connector-queue connector)))
 
-(defmethod receive-message ((connector in-pull-connector)
-                            (block?    t))
-  "Extract and return one event from the queue maintained by
-CONNECTOR, if there are any. If there are no queued events, block."
+(defmethod receive-notification ((connector in-pull-connector)
+                                 (block?    t))
+  ;; Extract and return one event from the queue maintained by
+  ;; CONNECTOR, if there are any. If there are no queued events,
+  ;; block.
   (lparallel.queue:pop-queue (connector-queue connector)))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
   ;; Maybe block until a notification is received. Try to convert into
   ;; an event and return the event in case of success. In blocking
   ;; mode, wait for the next notification.
-  (iter (let* ((payload (receive-message connector block?))
+  (iter (let* ((payload (receive-notification connector block?))
                (event   (when payload
-                          (message->event
+                          (notification->event
                            connector payload :undetermined))))
 
           ;; Due to non-blocking receive mode and error handling

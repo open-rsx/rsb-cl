@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- In-direction connector for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,7 +8,7 @@
 
 (defclass in-connector (connector
                         timestamping-receiver-mixin
-                        restart-message-receiver-mixin
+                        restart-notification-receiver-mixin
                         broadcast-processor
                         expose-transport-metrics-mixin)
   ((scope :type     scope
@@ -36,18 +36,17 @@ queue received events for delivery."))
     (removef (handlers (connector-bus connector)) connector))
   (call-next-method))
 
-(defmethod message->event ((connector    in-connector)
-                           (notification notification)
-                           (wire-schema  t))
+(defmethod notification->event ((connector    in-connector)
+                                (notification notification)
+                                (wire-schema  t))
   (let+ (((&accessors-r/o (converter connector-converter)) connector)
          (expose-wire-schema?  (connector-expose?
                                 connector :rsb.transport.wire-schema))
          (expose-payload-size? (connector-expose?
                                 connector :rsb.transport.payload-size)))
-
-    ;; If message could be unpacked into a `notification' instance,
-    ;; try to convert it, and especially its payload, into an `event'
-    ;; instance and an event payload. There are three possible
+    ;; NOTIFICATION has been unpacked into a `notification' instance,
+    ;; now try to convert it, and especially its payload, into an
+    ;; `event' instance and an event payload. There are three possible
     ;; outcomes:
     ;; 1. The notification (maybe in conjunction with previously
     ;;    received notifications) forms a complete event
@@ -65,7 +64,7 @@ queue received events for delivery."))
                              into an event.~:@>"
           :format-arguments (list (with-output-to-string (stream)
                                     (describe notification stream)))))
-      (notification->event
+      (notification->event*
        converter notification
        :expose-wire-schema?  expose-wire-schema?
        :expose-payload-size? expose-payload-size?))))
