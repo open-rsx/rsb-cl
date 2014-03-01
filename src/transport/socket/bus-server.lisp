@@ -1,6 +1,6 @@
 ;;;; bus-server.lisp --- A class that accepts connections from bus clients.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -46,7 +46,13 @@ and protects it from being destroyed in a race condition situation."
            :writer   (setf bus-%socket)
            :documentation
            "Stores the listening socket which accepts client
-connections."))
+            connections.")
+   (state  :type     (member :active :shutdown)
+           :accessor bus-state
+           :initform :active
+           :documentation
+           "Stores the state of the bus server. Currently only used
+            during shutdown."))
   (:documentation
    "An instance of this class provides access to a bus through a
 listening socket to which bus clients connect. Each client connection
@@ -71,30 +77,44 @@ closed."))
 (defmethod notify ((bus     bus-server)
                    (subject (eql t))
                    (action  (eql :detached)))
-  ;; First, stop the acceptor thread to prevent access to the socket.
-  (log:info "~@<~A is stopping acceptor thread~@:>" bus)
+  ;; Close the listen socket to prevent new client connections and
+  ;; interrupt the accept loop.
+  (log:info "~@<~A is closing listen socket~@:>" bus)
   (unwind-protect
-       (stop-receiver bus)
+       (let+ (((&structure bus- socket state) bus))
+         (setf state :shutdown)
+         #+sbcl (sb-bsd-sockets:socket-shutdown
+                 (usocket:socket socket) :direction :io)
+         (usocket:socket-close socket)) ; TODO ignore errors?
 
-    ;; Close the listener socket to prevent new client connections.
-    (log:info "~@<~A is closing listen socket~@:>" bus)
-    (usocket:socket-close (bus-socket bus))
+    ;; Wait for the acceptor thread to exit.
+    (log:info "~@<~A is stopping acceptor thread~@:>" bus)
+    (unwind-protect
+         (stop-receiver bus)
 
-    ;; Close existing connections.
-    (call-next-method)))
+      ;; Close existing connections.
+      (call-next-method))))
 
 ;;; Accepting clients
 
 (defmethod receive-messages ((bus bus-server))
-  (let+ (((&accessors (server-socket bus-socket)
-                      (connections   bus-connections)
-                      (options       bus-options)) bus))
+  (let+ (((&structure bus- connections options (server-socket socket) state) bus)
+         ((&flet accept ()
+            ;; Try to accept a client. In case of an error, check
+            ;; whether the bus socket has been removed, indicating
+            ;; orderly shutdown..
+            (handler-bind ((usocket:socket-error
+                            (lambda (condition)
+                              (log:debug "~@<~A encountered a socket ~
+                                          error while accepting: ~A~@:>"
+                                         bus condition)
+                              (when (eq state :shutdown)
+                                (exit-receiver)))))
+              (usocket:socket-accept
+               server-socket :element-type '(unsigned-byte 8))))))
     ;; Main processing loop. Wait for activity on the server socket.
-    ;; The loop is terminated by external interruption.
-    ;; TODO(jmoringe): we can leak the socket if we are interrupted here
-    (iter (let ((client-socket (usocket:socket-accept
-                                server-socket
-                                :element-type '(unsigned-byte 8))))
+    (log:debug "~@<~A is starting to accept connections~:@>" bus)
+    (iter (when-let ((client-socket (accept)))
             ;; Since we create and add the new connection with the bus
             ;; lock held, all events published on BUS after the
             ;; handshake of the new connection completes are
@@ -107,14 +127,14 @@ closed."))
                            :handshake :send
                            options)
                     connections))
-            (log:info "~@<~A accepted bus client ~/rsb.transport.socket::print-socket/~@:>"
+            (log:info "~@<~A accepted bus client ~
+                       ~/rsb.transport.socket::print-socket/~@:>"
                       bus client-socket)))))
 
 ;;;
 
 (defmethod print-object ((object bus-server) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "(S ~D) (C ~D) ~:/rsb.transport.socket::print-socket/"
-            (length (bus-connections object))
-            (length (bus-connectors  object))
-            (bus-socket object))))
+    (let+ (((&structure-r/o bus- connections connectors socket state) object))
+     (format stream "~A (S ~D) (C ~D) ~:/rsb.transport.socket::print-socket/"
+             state (length connections) (length connectors) socket))))
