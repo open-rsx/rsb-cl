@@ -85,15 +85,15 @@ participant instance as its \"client\"."))
               (notify configurator connector :connector-removed))))))
 
 (defmethod collect-processor-mixins append ((configurator configurator))
-  (let+ (((&accessors-r/o (transform configurator-transform)) configurator))
-    (append '(error-policy-mixin) (when transform '(transform-mixin)))))
+  (append '(error-policy-mixin)
+          (when (configurator-transform configurator) '(transform-mixin))))
 
 (defmethod make-processor ((configurator configurator)
                            &rest args
                            &key &allow-other-keys)
-  (apply #'make-instance
-         (ensure-processor-class (collect-processor-mixins configurator))
-         args))
+  (let ((class (ensure-processor-class
+                (collect-processor-mixins configurator))))
+    (apply #'make-instance class args)))
 
 (defmethod detach ((configurator configurator))
   "Detach all connectors from the scope of CONFIGURATOR."

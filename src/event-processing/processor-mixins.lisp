@@ -96,8 +96,8 @@ further processing unless they match all filters."))
   (setf (rsb.filter:filter-children (processor-%filter processor))
         new-value))
 
-(defmethod handle ((processor filtering-processor-mixin)
-                   (event     event))
+(defmethod handle :around ((processor filtering-processor-mixin)
+                           (event     event))
   "Terminate processing of EVENT unless it matches PROCESSOR's
 filters."
   (when (rsb.filter:matches? (processor-%filter processor) event)
