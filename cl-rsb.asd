@@ -14,6 +14,9 @@
    #:version/string)
 
   (:export
+   #:+protocol-directory+)
+
+  (:export
    #:+optimization-fast+unsafe+))
 
 (cl:in-package #:cl-rsb-system)
