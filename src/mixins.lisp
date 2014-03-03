@@ -33,6 +33,10 @@
           (let ((uuid::*uuid-random-state* *id-random-state*))
             (uuid:make-v4-uuid))))))
 
+(defmethod print-items:print-items append ((object uuid-mixin))
+  (let+ (((&slots-r/o id) object))
+    `((:id ,id "~/rsb::print-id/"))))
+
 ;;; `scope-mixin'
 
 (defclass scope-mixin ()
