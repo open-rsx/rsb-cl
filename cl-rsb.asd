@@ -442,9 +442,7 @@ See `version/list' for details on keyword parameters."
                  :components ((:file       "package")
                               (:file       "protocol"
                                :depends-on ("package"))
-                              (:file       "disjoin-filter"
-                               :depends-on ("package"))
-                              (:file       "conjoin-filter"
+                              (:file       "composite-filter"
                                :depends-on ("package"))
                               (:file       "scope-filter"
                                :depends-on ("package"))

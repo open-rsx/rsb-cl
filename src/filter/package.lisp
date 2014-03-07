@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition filter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -42,6 +42,10 @@
   ;; `conjoin-filter' class
   (:export
    #:conjoin-filter)
+
+  ;; `complement-filter' class
+  (:export
+   #:complement-filter)
 
   ;; `disjoin-filter' class
   (:export
