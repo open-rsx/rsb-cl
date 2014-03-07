@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the filter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -50,13 +50,14 @@ tests for filters."))
          (ensure-cases (args expected)
              ,construct-cases
 
-           (if (eq expected :error)
-               (ensure-condition error
-                 (apply #'make-instance ',class args))
-               (progn
-                 (apply #'make-instance ',class args)
-                 (apply #'make-filter ,spec args)
-                 (apply #'filter ,spec args)))))
+           (case expected
+             (error
+              (ensure-condition error
+                (apply #'make-instance ',class args)))
+             (t
+              (apply #'make-instance ',class args)
+              (apply #'make-filter ,spec args)
+              (apply #'filter ,spec args)))))
 
        (addtest (,suite-name
                  :documentation

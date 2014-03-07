@@ -16,7 +16,7 @@
 (define-basic-filter-test-cases (method-filter :method)
     ;; Construct cases
     '(;; missing :method initarg
-      (()                  :error)
+      (()                  error)
 
       ;; these are ok
       ((:method nil)       t)

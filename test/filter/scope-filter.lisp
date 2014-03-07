@@ -1,6 +1,6 @@
 ;;;; scope-filter.lisp --- Unit tests for the scope-filter class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,8 +15,8 @@
 (define-basic-filter-test-cases (scope-filter :scope)
     ;; construct cases
     '(;; errors
-      (()              :error) ;; missing required initargs
-      ((:scope "<>!")  :error) ;; invalid scope
+      (()              error) ; missing required initargs
+      ((:scope "<>!")  error) ; invalid scope
 
       ;; these are ok
       ((:scope "/foo") t))
