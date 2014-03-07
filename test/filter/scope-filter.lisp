@@ -15,10 +15,12 @@
 (define-basic-filter-test-cases (scope-filter :scope)
     ;; construct cases
     '(;; errors
-      (()              error) ; missing required initargs
-      ((:scope "<>!")  error) ; invalid scope
+      (()                          error) ; missing required initargs
+      ((:scope "<>!")              error) ; invalid scope
 
       ;; these are ok
-      ((:scope "/foo") t))
+      ((:scope "/foo")             t)
+      ((:scope "/foo" :exact? nil) t)
+      ((:scope "/foo" :exact? t)   t))
 
     nil t t t)
