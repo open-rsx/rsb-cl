@@ -8,28 +8,29 @@
 
 ;;; `scope' class
 
-(defclass scope ()
-  ((components :initarg  :components
-               :type     scope-components
-               :reader   scope-components
-               :documentation
-               "The name components of the scope.")
-   (interned?  :initarg  :interned?
-               :type     boolean
-               :accessor scope-interned?
-               :initform nil
-               :documentation
-               "Non-nil if the scope has been interned.")
-   (%string    :type     (or null string)
-               :accessor scope-%string
-               :initform nil
-               :documentation
-               "Caches the string representation of the scope."))
-  (:default-initargs
-   :components (missing-required-initarg 'scope :components))
-  (:documentation
-   "Instances of this class consist of a hierarchy of zero or more
-    names."))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defclass scope ()
+    ((components :initarg  :components
+                 :type     scope-components
+                 :reader   scope-components
+                 :documentation
+                 "The name components of the scope.")
+     (interned?  :initarg  :interned?
+                 :type     boolean
+                 :accessor scope-interned?
+                 :initform nil
+                 :documentation
+                 "Non-nil if the scope has been interned.")
+     (%string    :type     (or null string)
+                 :accessor scope-%string
+                 :initform nil
+                 :documentation
+                 "Caches the string representation of the scope."))
+    (:default-initargs
+     :components (missing-required-initarg 'scope :components))
+    (:documentation
+     "Instances of this class consist of a hierarchy of zero or more
+      names.")))
 
 (defmethod scope-string ((scope scope))
   (or (scope-%string scope)
@@ -42,12 +43,25 @@
     (format stream "~A~:[~; !~]"
             (scope-string object) (scope-interned? object))))
 
+(defconstant +root-scope+
+  (if (boundp '+root-scope+)
+      (symbol-value '+root-scope+)
+      (make-instance 'scope
+                     :components '()
+                     :interned?  t))
+  "The singleton instance of the root scope.")
+
 ;;;
 
 (defmethod make-scope ((thing scope) &key intern?)
   (if intern?
       (intern-scope thing)
       thing))
+
+(defmethod make-scope ((thing null) &key intern?)
+  (if intern?
+      +root-scope+
+      (call-next-method)))
 
 (defmethod make-scope ((thing list) &key intern?)
   (check-type thing scope-components "a list of component strings")
@@ -93,7 +107,7 @@
 non-nil, SCOPE is contained in the list. Otherwise, only proper
 superscopes are returned."
   (let ((components (reverse (scope-components scope))))
-    (cons (make-scope '())
+    (cons +root-scope+
           (iter (for current on (if include-self? components (rest components)))
                 (collect (make-instance 'scope
                                         :components (reverse current))
@@ -110,7 +124,9 @@ components of THING1 and THING2."
 
 ;;; Interning scopes
 
-(defvar *scopes* (make-hash-table :test #'equal)
+(defvar *scopes* (let ((table (make-hash-table :test #'equal)))
+                   (setf (gethash '() table) +root-scope+)
+                   table)
   "Maps scope strings to canonical `scope' instances.")
 
 (defvar *scopes-lock* (bt:make-lock "scopes lock")
