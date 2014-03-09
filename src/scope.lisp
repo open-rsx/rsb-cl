@@ -21,7 +21,7 @@
                :documentation
                "Non-nil if the scope has been interned.")
    (%string    :type     (or null string)
-               :accessor %scope-string
+               :accessor scope-%string
                :initform nil
                :documentation
                "Caches the string representation of the scope."))
@@ -29,11 +29,11 @@
    :components (missing-required-initarg 'scope :components))
   (:documentation
    "Instances of this class consist of a hierarchy of zero or more
-names."))
+    names."))
 
 (defmethod scope-string ((scope scope))
-  (or (%scope-string scope)
-      (setf (%scope-string scope)
+  (or (scope-%string scope)
+      (setf (scope-%string scope)
             (with-output-to-string (stream)
               (format stream "/~{~A/~}" (scope-components scope))))))
 
