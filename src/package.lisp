@@ -71,6 +71,8 @@
 
   ;; (Special) Variables
   (:export
+   #:*reserved-scope*
+
    #:*framework-timestamps*
 
    #:*id-random-state*

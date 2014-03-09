@@ -175,16 +175,16 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package"))
                               (:file       "protocol"
                                :depends-on ("package"))
-                              (:file       "variables"
-                               :depends-on ("package"))
-                              (:file       "util"
-                               :depends-on ("package" "types" "protocol"
-                                            "variables"))
 
                               (:file       "scope"
                                :depends-on ("package" "types" "protocol"))
                               (:file       "uris"
                                :depends-on ("package" "scope"))
+                              (:file       "variables"
+                               :depends-on ("package" "scope"))
+                              (:file       "util"
+                               :depends-on ("package" "types" "protocol"
+                                            "variables"))
 
                               (:file       "mixins"
                                :depends-on ("package" "types" "protocol"

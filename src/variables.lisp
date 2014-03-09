@@ -1,10 +1,19 @@
 ;;;; variables.lisp --- Global and special variables used within RSB.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb)
+
+;;; Framework scopes
+
+(declaim (type scope *reserved-scope*))
+
+(defvar *reserved-scope*
+  (make-scope "/__rsb/" :intern? t)
+  "All sub-scopes of this scope should be considered reserved for
+   private implementation purposes.")
 
 ;;; Framework timestamps
 
