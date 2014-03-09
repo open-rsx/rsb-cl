@@ -129,9 +129,9 @@
    #:scope-string
    #:scope-interned?
 
-   #:scope=
-   #:sub-scope?
-   #:super-scope?
+   #:scope=       #:scope=/no-coerce
+   #:sub-scope?   #:sub-scope?/no-coerce
+   #:super-scope? #:super-scope?/no-coerce
 
    #:make-scope
    #:super-scopes

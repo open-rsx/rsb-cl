@@ -21,7 +21,6 @@
                :documentation
                "Do events have to have exactly the specified scope or
                 are sub-scopes permitted?"))
-
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This filter discriminates based on the scopes of events. Depending
@@ -33,8 +32,8 @@
   "EVENT is matched by comparing its scope to the scope of FILTER."
   (let+ (((&structure-r/o filter- scope exact?) filter))
     (if exact?
-        (scope= (event-scope event) scope)
-        (sub-scope? (event-scope event) scope))))
+        (scope=/no-coerce (event-scope event) scope)
+        (sub-scope?/no-coerce (event-scope event) scope))))
 
 (defmethod print-object ((object scope-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)

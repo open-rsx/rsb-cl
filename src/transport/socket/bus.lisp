@@ -198,7 +198,8 @@ connected to the bus."))
                     (lambda (connector)
                       (and (member (connector-direction connector)
                                    '(:in-push :in-pull))
-                           (sub-scope? scope (connector-scope connector))))
+                           (sub-scope?/no-coerce
+                            scope (connector-scope connector))))
                     handlers)))
     (handle sinks data)))
 

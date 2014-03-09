@@ -51,7 +51,7 @@
                      :interned?  t))
   "The singleton instance of the root scope.")
 
-;;;
+;; scope methods
 
 (defmethod make-scope ((thing scope) &key intern?)
   (if intern?
@@ -79,22 +79,40 @@
                   "a positive number of \"/\"-separators"))
     (make-scope components :intern? intern?)))
 
+(declaim (ftype (function (t) (values scope &rest nil)) ensure-scope)
+         (inline ensure-scope))
+(defun ensure-scope (thing)
+  (if (typep thing 'scope)
+      thing
+      (the (values scope &rest nil) (make-scope thing))))
+
+(declaim (ftype (function (scope scope) (values * &rest nil)) scope=/no-coerce)
+         (inline scope=/no-coerce))
+(defun scope=/no-coerce (scope1 scope2)
+  (or (eq scope1 scope2)
+      (and (not (and (scope-interned? scope1) (scope-interned? scope2)))
+           (equal (scope-components scope1) (scope-components scope2)))))
+
 (defun scope= (thing1 thing2)
   "Return non-nil if THING1 is the same scope as THING2."
-  (let ((scope1 (make-scope thing1))
-        (scope2 (make-scope thing2)))
-    (or (eq scope1 scope2)
-        (equal (scope-components scope1) (scope-components scope2)))))
+  (scope=/no-coerce (ensure-scope thing1) (ensure-scope thing2)))
+
+(declaim (ftype (function (scope scope) (values * &rest nil)) sub-scope?/no-coerce)
+         (inline sub-scope?/no-coerce))
+(defun sub-scope?/no-coerce (scope1 scope2)
+  (or (eq scope1 scope2)
+      (values (starts-with-subseq
+               (scope-components scope2) (scope-components scope1)
+               :test 'string=))))
 
 (defun sub-scope? (sub super)
   "Return non-nil if SUB is a sub-scope of SUPER."
-  (let ((scope1 (make-scope sub))
-        (scope2 (make-scope super)))
-    (or (eq scope1 scope2)
-        (values
-         (starts-with-subseq (scope-components scope2)
-                             (scope-components scope1)
-                             :test 'string=)))))
+  (sub-scope?/no-coerce (ensure-scope sub) (ensure-scope super)))
+
+(declaim (ftype (function (scope scope) (values * &rest nil)) super-scope?/no-coerce)
+         (inline super-scope?/no-coerce))
+(defun super-scope?/no-coerce (super sub)
+  (sub-scope?/no-coerce sub super))
 
 (defun super-scope? (super sub)
   "Return non-nil if SUPER is a super-scope of SUB."
@@ -104,23 +122,29 @@
                      &key
                      include-self?)
   "Return the list of superscopes of SCOPE. If INCLUDE-SELF? is
-non-nil, SCOPE is contained in the list. Otherwise, only proper
-superscopes are returned."
+   non-nil, SCOPE is contained in the list. Otherwise, only proper
+   superscopes are returned."
   (let ((components (reverse (scope-components scope))))
-    (cons +root-scope+
-          (iter (for current on (if include-self? components (rest components)))
-                (collect (make-instance 'scope
-                                        :components (reverse current))
-                  :at :start)))))
+    (list* +root-scope+
+           (iter (for current on (if include-self? components (rest components)))
+                 (collect (make-instance 'scope
+                                         :components (reverse current))
+                   :at :start)))))
 
 (defun merge-scopes (thing1 thing2)
   "Return a `scope' instance that consists of the concatenated
-components of THING1 and THING2."
-  (let ((scope1 (make-scope thing1))
-        (scope2 (make-scope thing2)))
-    (make-instance 'scope
-                   :components (append (scope-components scope2)
-                                       (scope-components scope1)))))
+   components of THING1 and THING2."
+  (let+ (((&flet make-result (scope1 scope2)
+            (make-instance 'scope
+                           :components (append (scope-components scope2)
+                                               (scope-components scope1))))))
+   (cond
+     ((eq thing1 +root-scope+)
+      thing2)
+     ((eq thing2 +root-scope+)
+      thing1)
+     (t
+      (make-result (ensure-scope thing1) (ensure-scope thing2))))))
 
 ;;; Interning scopes
 
@@ -134,7 +158,7 @@ components of THING1 and THING2."
 
 (defun intern-scope (scope)
   "Return the canonical `scope' instance for SCOPE. May return SCOPE,
-if it becomes or already is the canonical instance."
+   if it becomes or already is the canonical instance."
   (if (scope-interned? scope)
       scope
       (let+ (((&values interned found?)
