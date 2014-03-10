@@ -1,6 +1,6 @@
-;;;; configuration.lisp ---
+;;;; configuration.lisp --- Configuration of RSB participants.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
 
 (defun options-from-environment ()
   "Obtain configuration options from environment variables."
-  #+(and sbcl (not win32))
+  #+sbcl
   (let+ (((&flet name->option-name (name)
             (when (starts-with-subseq "RSB_" name)
               (string->option-name (subseq name 4) #\_))))
@@ -19,10 +19,7 @@
                    (name (name->option-name name)))
               (when name
                 (cons name value))))))
-    (remove-if #'null (map 'list #'variable->option
-                           (sb-impl::posix-environ))))
-  #-(and sbcl (not win32))
-  nil)
+    (remove-if #'null (mapcar #'variable->option (sb-ext:posix-environ)))))
 
 ;;; Configuration file
 
