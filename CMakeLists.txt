@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011, 2012, 2013 Jan Moringen
+# Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -112,7 +112,7 @@ endfunction()
 # Project definition (version is grovelled from asd system definition,
 # possibly in combination with version.sexp file written below).
 set(SYSTEM_NAME "cl-rsb")
-project(${SYSTEM_NAME})
+project(${SYSTEM_NAME} NONE)
 
 # Determine at least major and minor version components.
 set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.1.err\"")
