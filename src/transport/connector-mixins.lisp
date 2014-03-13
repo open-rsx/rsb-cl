@@ -1,6 +1,6 @@
 ;;;; connector-mixins.lisp --- Mixin for connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -158,7 +158,7 @@ stored in CONNECTOR."
   (wire->domain (connector-converter connector) wire-data wire-schema))
 
 (defmethod print-object ((object conversion-mixin) stream)
-  (let+ (((&accessors-r/o (converter connector-converter)) object)
+  (let+ (((&structure-r/o connector- converter) object)
          (sequence? (typep converter 'sequence)))
     (print-unreadable-object (object stream :type t :identity t)
       (format stream "~:[~S~;(~D)~]"
@@ -314,18 +314,17 @@ class takes care of managing the starting and joining of the
 thread."))
 
 (defmethod start-receiver ((connector threaded-receiver-mixin))
-  (let+ (((&accessors
-           (control-mutex     connector-control-mutex)
-           (control-condition connector-control-condition)) connector))
-        ;; Launch the thread.
-        (log:debug "~@<~A is starting worker thread~@:>" connector)
-        (bt:make-thread (curry #'receive-messages connector)
-                        :name (format nil "Worker for ~A" connector))
+  (let+ (((&structure connector- started? control-mutex control-condition)
+          connector))
+    ;; Launch the thread.
+    (log:debug "~@<~A is starting worker thread~@:>" connector)
+    (bt:make-thread (curry #'receive-messages connector)
+                    :name (format nil "Worker for ~A" connector))
 
-        ;; Wait until the thread has entered `receive-messages'.
-        (bt:with-lock-held (control-mutex)
-          (iter (until (connector-started? connector))
-                (bt:condition-wait control-condition control-mutex)))))
+    ;; Wait until the thread has entered `receive-messages'.
+    (bt:with-lock-held (control-mutex)
+      (iter (until started?)
+            (bt:condition-wait control-condition control-mutex)))))
 
 (defmethod stop-receiver ((connector threaded-receiver-mixin))
   (let+ (((&structure connector- thread control-mutex) connector))
@@ -365,17 +364,16 @@ thread."))
 requests."
   ;; Notify the thread which is waiting in `start-receiver'.
   (restart-case
-      (progn
-        (let+ (((&accessors
-                 (thread            connector-thread)
-                 (control-mutex     connector-control-mutex)
-                 (control-condition connector-control-condition)) connector))
-              (bt:with-lock-held (control-mutex)
-                (setf thread (bt:current-thread))
-                (bt:condition-notify control-condition)))
+      (let+ (((&structure connector- thread control-mutex control-condition)
+              connector))
+        (bt:with-lock-held (control-mutex)
+          (setf thread (bt:current-thread))
+          (bt:condition-notify control-condition))
         (log:debug "~@<~A is entering receive loop~@:>" connector)
         (call-next-method))
     (abort (&optional condition)
+      :report (lambda (stream)
+                (format stream "~@<Abort processing for ~A~@:>" connector))
       (declare (ignore condition))))
   (log:debug "~@<~A left receive loop~@:>" connector))
 
