@@ -65,15 +65,14 @@ classes."))
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~S" (method-name object))))
 
-(defmacro define-lazy-creation-method (class slot transform args scope)
+(defmacro define-lazy-creation-method (class slot transform args)
   "Define a :before method on the reader function for SLOT of CLASS
 that lazily creates the slot value.
 
 TRANSFORM has to be either :argument or :return and the corresponding
 transform is installed into the created participant.
 
-ARGS are passed to the creation function and SCOPE is used to compute
-the scope of the created participant."
+ARGS are passed to the creation function."
   (let ((method-name (symbolicate "METHOD-" slot))
         (accessor-name (symbolicate "METHOD-%" slot))
         (make-name   (symbolicate "MAKE-" slot)))
@@ -81,11 +80,12 @@ the scope of the created participant."
        ,(format nil "Lazily create the ~(~A~) when it is first requested."
                 slot)
        (unless (,accessor-name method)
-         (let+ (((&structure-r/o method- server name) method)
-                ((&structure-r/o participant- scope converters transform error-hook) server)
+         (let+ (((&accessors-r/o (scope  participant-scope) ; TODO all this is not quite right yet
+                                 (server method-server)) method)
+                ((&structure-r/o participant- converters transform error-hook) server)
                 (transform (cdr (assoc ,transform transform))))
            (setf (,accessor-name method)
-                 (,make-name (%make-scope scope ,scope name) ,@args
+                 (,make-name scope ,@args
                              :transports   (server-transport-options server)
                              :converters   converters
                              :transform    transform
@@ -178,10 +178,6 @@ generic support for retrieving, adding and removing methods."))
             (hash-table-count (server-%methods object)))))
 
 ;;; Utility functions
-
-(defun %make-scope (base &rest components)
-  "Return a scope that extends the BASE scope with COMPONENTS."
-  (merge-scopes (format nil "~{/~A~}" components) base))
 
 (defun %remove-method-with-restart-and-timeout (server method)
   "Remove METHOD from SERVER with a CONTINUE restart in place to allow

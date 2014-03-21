@@ -34,8 +34,8 @@ invoking arbitrary user-supplied functions."))
                                      &key)
   (method-listener instance)) ; force creation
 
-(define-lazy-creation-method local-method listener :argument ()  "request")
-(define-lazy-creation-method local-method informer :return   (t) "reply")
+(define-lazy-creation-method local-method listener :argument ())
+(define-lazy-creation-method local-method informer :return   (t))
 
 (defmethod (setf method-%listener) :after ((new-value t)
                                            (method    local-method))
