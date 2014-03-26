@@ -245,17 +245,19 @@ and bound to a variable named like the value of CLASS."
 
        (let+ (((&flet+ do-one ((restart &rest args))
                  (setf ,var-name t)
-                 (handler-bind
-                     ((restart-test-error
-                        (lambda (condition)
-                          (declare (ignore condition))
-                          (setf ,var-name nil)
-                          (apply #'invoke-restart
-                                 (or (find-restart restart)
-                                     (error "~@<Restart ~S not found.~@:>"
-                                            restart))
-                                 args))))
-                   ,@body))))
+                 (unwind-protect
+                      (handler-bind
+                          ((restart-test-error
+                            (lambda (condition)
+                              (declare (ignore condition))
+                              (setf ,var-name nil)
+                              (apply #'invoke-restart
+                                     (or (find-restart restart)
+                                         (error "~@<Restart ~S not found.~@:>"
+                                                restart))
+                                     args))))
+                        ,@body)
+                   (setf ,var-name nil)))))
          ,@(iter (for restart in restarts)
                  (let+ (((name &rest args) (ensure-list restart)))
                    (collect `(do-one (list ',name ,@args)))))))))
