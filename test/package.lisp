@@ -124,10 +124,11 @@ that test participant classes."))
 
            (let+ (((&flet do-it () (apply #',make-name uri
                                           (append args common-initargs)))))
-            (case expected-scope
-              (error (ensure-condition error (do-it)))
-              (t     (with-participant (participant (do-it))
-                       (check-participant participant ,kind expected-scope)))))))
+             (case expected-scope
+               (error (ensure-condition error
+                        (detach/ignore-errors (do-it))))
+               (t     (with-participant (participant (do-it))
+                        (check-participant participant ,kind expected-scope)))))))
 
        (addtest (,suite-name
                  :documentation
@@ -141,7 +142,8 @@ that test participant classes."))
            (let+ (((&flet do-it () (apply #'make-participant ,kind uri
                                           (append initargs common-initargs)))))
              (case expected-scope
-               (error (ensure-condition error (do-it)))
+               (error (ensure-condition error
+                        (detach/ignore-errors (do-it))))
                (t     (with-participant (participant (do-it))
                         (check-participant participant ,kind expected-scope)))))))
 
@@ -152,7 +154,8 @@ that test participant classes."))
                         :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
                         :suite-name ,suite-name
                         :case-name  ,(symbolicate make-name '#:/restart/scope))
-         (,make-name +restart-test-scope+ ,@(when (eq class 'informer) '(t))))
+         (detach/ignore-errors
+          (,make-name +restart-test-scope+ ,@(when (eq class 'informer) '(t)))))
 
        (define-restart-method-test-case
            (,make-name ((scope-or-uri (eql +restart-test-uri+))
@@ -161,7 +164,8 @@ that test participant classes."))
                         :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
                         :suite-name ,suite-name
                         :case-name  ,(symbolicate make-name '#:/restart/uri))
-         (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t))))
+         (detach/ignore-errors
+          (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t)))))
 
        (addtest (,suite-name
                  :documentation
