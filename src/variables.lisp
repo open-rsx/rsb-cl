@@ -56,7 +56,8 @@ of random IDs and similar things requiring pseudo randomness.")
 
 (declaim (special *default-configuration*))
 
-(defvar *default-configuration* nil
+(defvar *default-configuration*
+  '((:transport :socket :enabled) . "1")
   "DOC")
 
 ;;; Participant lifecycle hooks
