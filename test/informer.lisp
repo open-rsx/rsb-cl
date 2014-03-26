@@ -14,27 +14,27 @@
 function."))
 
 (define-basic-participant-test-cases informer
-  '("/informer/construction"
+  '("/rsbtest/informer/construction"
     (t)
-    "/informer/construction")
-  '("/informer/construction"
+    "/rsbtest/informer/construction")
+  '("/rsbtest/informer/construction"
     (t :transports ((:inprocess &inherit)))
-    "/informer/construction")
-  '("/informer/construction"
+    "/rsbtest/informer/construction")
+  '("/rsbtest/informer/construction"
     (t :converters ((t . :foo)))
-    "/informer/construction")
-  `("/informer/construction"
+    "/rsbtest/informer/construction")
+  `("/rsbtest/informer/construction"
     (t :transform ,#'1+)
-    "/informer/construction")
-  '("inprocess:/informer/construction"
+    "/rsbtest/informer/construction")
+  '("inprocess:/rsbtest/informer/construction"
     (t)
-    "/informer/construction")
-  `("inprocess:/informer/construction"
+    "/rsbtest/informer/construction")
+  `("inprocess:/rsbtest/informer/construction"
     (t :error-policy ,#'continue)
-    "/informer/construction")
+    "/rsbtest/informer/construction")
 
   ;; No transports => error
-  '("/informer/construction"
+  '("/rsbtest/informer/construction"
     (t :transports nil)
     error))
 
@@ -43,7 +43,7 @@ function."))
           "Test sending data.")
   send/data
 
-  (with-informer (informer "/informer/send" t)
+  (with-informer (informer "/rsbtest/informer/send" t)
     (iter (repeat 100)
           (send informer "<foo/>")
           (send informer "<bar/>"))))
@@ -53,37 +53,37 @@ function."))
           "Test sending data.")
   send/event
 
-  (with-informer (informer "/informer/send/event" t)
+  (with-informer (informer "/rsbtest/informer/send/event" t)
     (ensure-cases (scope data args
                    expected-meta-data expected-method expected-timestamps
                    expected-causes)
         `(;; Some invalid cases.
-          ("/informer/send/event" "foo" (:foo foo) ; invalid meta-data item
+          ("/rsbtest/informer/send/event" "foo" (:foo foo) ; invalid meta-data item
            type-error nil nil nil)
-          ("/informer/send/event" "foo" (:timestamps (:foo 1)) ; invalid timestamp
+          ("/rsbtest/informer/send/event" "foo" (:timestamps (:foo 1)) ; invalid timestamp
            type-error nil nil nil)
 
           ;; These are valid
-          ("/informer/send/event" "foo" ()
+          ("/rsbtest/informer/send/event" "foo" ()
            () nil () ())
 
-          ("/informer/send/event" "foo" (:method :bar)
+          ("/rsbtest/informer/send/event" "foo" (:method :bar)
            () :bar () ())
 
-          ("/informer/send/event" "foo" (:foo "baz")
+          ("/rsbtest/informer/send/event" "foo" (:foo "baz")
            ((:foo . "baz")) nil () ())
-          ("/informer/send/event" "foo" (:foo 1)
+          ("/rsbtest/informer/send/event" "foo" (:foo 1)
            ((:foo . 1)) nil () ())
-          ("/informer/send/event" "foo" (:foo :baz)
+          ("/rsbtest/informer/send/event" "foo" (:foo :baz)
            ((:foo . :baz)) nil () ())
 
-          ("/informer/send/event" "foo"
+          ("/rsbtest/informer/send/event" "foo"
            (:timestamps (:foo ,(local-time:parse-timestring
                                 "2013-03-27T14:12:32.062533+01:00")))
            () nil ((:foo . ,(local-time:parse-timestring
                              "2013-03-27T14:12:32.062533+01:00"))) ())
 
-          ("/informer/send/event" "foo" (:causes ((,(uuid:make-null-uuid) . 1)))
+          ("/rsbtest/informer/send/event" "foo" (:causes ((,(uuid:make-null-uuid) . 1)))
            () nil () ((,(uuid:make-null-uuid) . 1))))
 
       (let+ (((&flet do-it ()
@@ -115,33 +115,33 @@ function."))
           "Test the type check employed by the `send' method.")
   send/check-type
 
-  (with-informer (informer "/informer/send/check-type" 'sequence)
+  (with-informer (informer "/rsbtest/informer/send/check-type" 'sequence)
     ;; In this case, the event cannot be constructed from the payload.
     (ensure-condition 'type-error
       (send informer 5))
     ;; In this case, the event is not compatible with the informer's
     ;; type.
     (ensure-condition 'event-type-error
-      (send informer (make-event "/informer/send/check-type" 5)))
+      (send informer (make-event "/rsbtest/informer/send/check-type" 5)))
 
     ;; The following are compatible.
     (send informer '(1 2))
-    (send informer (make-event "/informer/send/check-type" "bla"))))
+    (send informer (make-event "/rsbtest/informer/send/check-type" "bla"))))
 
 (addtest (informer-root
           :documentation
           "Test the scope check employed by the `send' method.")
   send/check-scope
 
-  (with-informer (informer "/informer/send/check-scope" t)
+  (with-informer (informer "/rsbtest/informer/send/check-scope" t)
     ;; Identical scope and subscopes are allowed
-    (send informer (make-event "/informer/send/check-scope" "foo"))
-    (send informer (make-event "/informer/send/check-scope/subscope" "foo"))
+    (send informer (make-event "/rsbtest/informer/send/check-scope" "foo"))
+    (send informer (make-event "/rsbtest/informer/send/check-scope/subscope" "foo"))
 
     ;; Scope is not identical to or a subscope of the informer's
     ;; scope.
     (ensure-condition 'event-scope-error
-      (send informer (make-event "/informer/send/wrong-scope" "foo")))))
+      (send informer (make-event "/rsbtest/informer/send/wrong-scope" "foo")))))
 
 (addtest (informer-root
           :documentation
@@ -149,19 +149,19 @@ function."))
 method.")
   send/unckecked
 
-  (with-informer (informer "/informer/send/unckecked" 'string)
+  (with-informer (informer "/rsbtest/informer/send/unckecked" 'string)
     ;; Arbitrary scopes should be accepted.
-    (send informer (make-event "/informer/send/unchecked" "foo")
+    (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
           :unchecked? t)
-    (send informer (make-event "/informer/send/unchecked/subscope" "foo")
+    (send informer (make-event "/rsbtest/informer/send/unchecked/subscope" "foo")
           :unchecked? t)
-    (send informer (make-event "/informer/send/wrong-scope" "foo")
+    (send informer (make-event "/rsbtest/informer/send/wrong-scope" "foo")
           :unchecked? t)
 
     ;; Arbitrary data types should accepted.
-    (send informer (make-event "/informer/send/unchecked" "foo")
+    (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
           :unchecked? t)
-    (send informer (make-event "/informer/send/unchecked" 1)
+    (send informer (make-event "/rsbtest/informer/send/unchecked" 1)
           :unchecked? t)))
 
 (define-error-hook-test-case (informer :participant? nil)

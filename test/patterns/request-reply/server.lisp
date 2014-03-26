@@ -38,9 +38,9 @@
          (do-it))))))
 
 (deftestsuite server-root (patterns-request-reply-root)
-  ((simple-server (make-instance 'server :scope "/server"))
+  ((simple-server (make-instance 'server :scope "/rsbtest/patterns/request-reply/server-root/server"))
    (simple-method (make-instance 'method1
-                                 :scope (make-scope "/server/foo")
+                                 :scope (make-scope "/rsbtest/patterns/request-reply/server-root/server/foo")
                                  :name  "foo")))
   (:documentation
    "Test suite for the `server' class."))

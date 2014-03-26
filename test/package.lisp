@@ -169,7 +169,7 @@ PARTICIPANT? controls whether a participant of class CLASS is created
 and bound to a variable named like the value of CLASS."
   (let+ ((suite-name (format-symbol *package* "~A-ROOT" class))
          (with-macro (format-symbol :rsb "WITH-~A" class))
-         (scope      (format nil "/~(~A~)/errorhook" class))
+         (scope      (format nil "/rsbtest/~(~A~)/errorhook" class))
          ((&flet maybe-wrap (body)
             (if participant?
                 `((,with-macro (,class ,scope) ,@body))

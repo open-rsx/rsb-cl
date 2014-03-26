@@ -13,30 +13,30 @@
    "Unit tests for the `reader' class and `make-reader' function."))
 
 (define-basic-participant-test-cases reader
-  '("/reader/construction"
+  '("/rsbtest/reader/construction"
     nil
-    "/reader/construction")
-  '("/reader/construction"
+    "/rsbtest/reader/construction")
+  '("/rsbtest/reader/construction"
     (:transports ((:inprocess &inherit)))
-    "/reader/construction")
-  '("/reader/construction"
+    "/rsbtest/reader/construction")
+  '("/rsbtest/reader/construction"
     (:transports ((t) (:inprocess &inherit)))
-    "/reader/construction")
-  '("/reader/construction"
+    "/rsbtest/reader/construction")
+  '("/rsbtest/reader/construction"
     (:converters ((t . :foo)))
-    "/reader/construction")
-  `("/reader/construction"
+    "/rsbtest/reader/construction")
+  `("/rsbtest/reader/construction"
     (:transform ,#'1+)
-    "/reader/construction")
-  '("inprocess:/reader/construction"
+    "/rsbtest/reader/construction")
+  '("inprocess:/rsbtest/reader/construction"
     nil
-    "/reader/construction")
-  `("inprocess:/reader/construction"
+    "/rsbtest/reader/construction")
+  `("inprocess:/rsbtest/reader/construction"
     (:error-policy ,#'continue)
-    "/reader/construction")
+    "/rsbtest/reader/construction")
 
   ;; No transports => error
-  '("/reader/construction"
+  '("/rsbtest/reader/construction"
     (:transports nil)
     error))
 
@@ -46,12 +46,12 @@
 mode.")
   receive/blocking
 
-  (with-informer (informer "/reader/receive/blocking" t)
-    (with-reader (reader "/reader/receive/blocking")
+  (with-informer (informer "/rsbtest/reader/receive/blocking" t)
+    (with-reader (reader "/rsbtest/reader/receive/blocking")
       (ensure-random-cases 32 ((data a-string))
         (send informer data)
         (check-event (receive reader :block? t)
-                     "/reader/receive/blocking" data)))))
+                     "/rsbtest/reader/receive/blocking" data)))))
 
 (addtest (reader-root
           :documentation
@@ -59,8 +59,8 @@ mode.")
 mode.")
   receive/non-blocking
 
-  (with-informer (informer "/reader/receive/non-blocking" t)
-    (with-reader (reader "/reader/receive/non-blocking")
+  (with-informer (informer "/rsbtest/reader/receive/non-blocking" t)
+    (with-reader (reader "/rsbtest/reader/receive/non-blocking")
       (ensure-random-cases 32 ((data a-string))
         (send informer data)
         (let ((received
@@ -68,7 +68,7 @@ mode.")
                      (when received
                        (return received)))))
           (check-event received
-                       "/reader/receive/non-blocking" data))))))
+                       "/rsbtest/reader/receive/non-blocking" data))))))
 
 (define-error-hook-test-case (reader)
   ;; Force an error during dispatch by injecting a signaling

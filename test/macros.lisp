@@ -19,9 +19,9 @@
           "Smoke test for the `with-listener' macro.")
   with-listener/smoke
 
-  (with-listener (listener "/listener")
+  (with-listener (listener "/rsbtest/macros-root/with-listener/smoke")
     (ensure (typep listener 'listener))
-    (check-participant listener :listener "/listener")))
+    (check-participant listener :listener "/rsbtest/macros-root/with-listener/smoke")))
 
 (addtest (macros-root
           :documentation
@@ -33,11 +33,11 @@
         (received '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-listener (listener "inprocess:"
+           `(with-listener (listener "inprocess:/rsbtest/macros-root/with-listener/error-policy"
                                      :transform #'mock-transform/error
                                      ,@(when policy `(:error-policy ,policy)))
               (with-handler listener ((event) (push event received))
-                (with-informer (informer "inprocess" t)
+                (with-informer (informer "inprocess:/rsbtest/macros-root/with-listener/error-policy" t)
                   (send informer 1))))))
 
       ;; Without an error policy, the transform error should just be
@@ -61,11 +61,11 @@
   with-handler/smoke
 
   (let ((received '()))
-    (with-listener (listener "inprocess:/withhandler")
+    (with-listener (listener "inprocess:/rsbtest/macros-root/with-handler/smoke")
       (with-handler listener ((event) (push event received))
         (ensure (typep listener 'listener))
-        (check-participant listener :listener "/withhandler")
-        (with-informer (i "inprocess:/withhandler" t) (send i 1))))
+        (check-participant listener :listener "/rsbtest/macros-root/with-handler/smoke")
+        (with-informer (i "inprocess:/rsbtest/macros-root/with-handler/smoke" t) (send i 1))))
     (ensure-same (length received) 1)))
 
 ;;; Reader-related macros
@@ -75,9 +75,9 @@
           "Smoke test for the `with-reader' macro.")
   with-reader/smoke
 
-  (with-reader (reader "/reader")
+  (with-reader (reader "/rsbtest/macros-root/with-reader/smoke")
     (ensure (typep reader 'reader))
-    (check-participant reader :reader "/reader")))
+    (check-participant reader :reader "/rsbtest/macros-root/with-reader/smoke")))
 
 (addtest (macros-root
           :documentation
@@ -88,10 +88,11 @@
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-reader (reader "socket:"
+           `(with-reader (reader "socket:/rsbtest/macros-root/with-reader/error-policy"
                                  :transform #'mock-transform/error
                                  ,@(when policy `(:error-policy ,policy)))
-              (with-informer (informer "socket:" t) (send informer 1))
+              (with-informer (informer "socket:/rsbtest/macros-root/with-reader/error-policy" t)
+                (send informer 1))
               (receive reader))))
 
       ;; Without an error policy, the transform error should just be
@@ -115,9 +116,9 @@
           "Smoke test for the `with-informer' macro.")
   with-informer/smoke
 
-  (with-informer (informer "/informer" t)
+  (with-informer (informer "/rsbtest/macros-root/with-informer/smoke" t)
     (ensure (typep informer 'informer))
-    (check-participant informer :informer "/informer")))
+    (check-participant informer :informer "/rsbtest/macros-root/with-informer/smoke")))
 
 (addtest (macros-root
           :documentation
@@ -128,7 +129,7 @@
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-informer (informer "socket:" t
+           `(with-informer (informer "socket:/rsbtest/macros-root/with-informer/error-policy" t
                                      :transform #'mock-transform/error
                                      ,@(when policy `(:error-policy ,policy)))
               (send informer 1))))

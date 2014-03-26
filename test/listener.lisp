@@ -19,27 +19,27 @@
 function."))
 
 (define-basic-participant-test-cases listener
-  '("/listener/construction"
+  '("/rsbtest/listener/construction"
     nil
-    "/listener/construction")
-  '("/listener/construction"
+    "/rsbtest/listener/construction")
+  '("/rsbtest/listener/construction"
     (:transports ((:inprocess &inherit)))
-    "/listener/construction")
-  '("/listener/construction"
+    "/rsbtest/listener/construction")
+  '("/rsbtest/listener/construction"
     (:converters ((t . :foo)))
-    "/listener/construction")
-  `("/listener/construction"
+    "/rsbtest/listener/construction")
+  `("/rsbtest/listener/construction"
     (:transform ,#'1+)
-    "/listener/construction")
-  '("inprocess:/listener/construction"
+    "/rsbtest/listener/construction")
+  '("inprocess:/rsbtest/listener/construction"
     nil
-    "/listener/construction")
-  `("inprocess:/listener/construction"
+    "/rsbtest/listener/construction")
+  `("inprocess:/rsbtest/listener/construction"
     (:error-policy ,#'continue)
-    "/listener/construction")
+    "/rsbtest/listener/construction")
 
   ;; No transports => error
-  '("/listener/construction"
+  '("/rsbtest/listener/construction"
     (:transports nil)
     error))
 
@@ -67,8 +67,8 @@ instance.")
           "Test receiving data sent by an informer.")
   receive
 
-  (with-informer (informer "/foo" t)
-    (with-listener (listener "/foo")
+  (with-informer (informer "/rsbtest/listener/receive" t)
+    (with-listener (listener "/rsbtest/listener/receive")
       ;; Test receive
       (send-some informer)
 

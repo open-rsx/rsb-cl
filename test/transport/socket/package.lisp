@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -67,7 +67,7 @@ socket. Should be incremented after each use.")
      *next-port*))
   (:function
    (make-socket-url (server? options)
-     (format nil "socket://localhost:~D~@[?~{~A=~A~^&~}~]"
+     (format nil "socket://localhost:~D/rsbtest/transport/socket~@[?~{~A=~A~^&~}~]"
              *next-port* (append (when server? (list "server" "1")) options))))
   (:function
    (check-bus (bus expected-connections expected-connectors)

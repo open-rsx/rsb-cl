@@ -18,7 +18,7 @@
           "Smoke test for the `with-methods' macro.")
   with-methods/smoke
 
-  (with-local-server (server "inprocess:")
+  (with-local-server (server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-methods/smoke")
     (with-methods (server)
         (("mymethod"     (foo string) foo)
          (:myothermethod (bar integer)
@@ -104,10 +104,10 @@
     (macrolet
         ((test-case (&optional policy)
            `(with-remote-server (remote-server
-                                 "socket:"
+                                 "socket:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
                                  :transform `((:return . ,#'mock-transform/error))
                                  ,@(when policy `(:error-policy ,policy)))
-              (with-local-server (local-server "socket:")
+              (with-local-server (local-server "socket:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy")
                 (with-methods (local-server) (("echo" (arg) arg))
                   (call remote-server "echo" 1))))))
 
