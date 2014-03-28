@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the transport module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -131,11 +131,6 @@
   ;; `threaded-message-receiver-mixin' class
   (:export
    #:threaded-message-receiver-mixin)
-
-  ;; `sometimes-interruptible-mixin' class
-  (:export
-   #:sometimes-interruptible-mixin
-   #:connector-interruptible?)
 
   ;; `expose-transport-metrics-mixin' class
   (:export

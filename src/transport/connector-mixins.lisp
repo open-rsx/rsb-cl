@@ -244,48 +244,6 @@ the events constructed from the notifications."))
   (setf (connector-expose connector) (list new-value))
   new-value)
 
-;;; Mixin class `sometimes-interruptible-mixin'
-
-(defclass sometimes-interruptible-mixin ()
-  ((interruptible? :initarg  :interruptible?
-                   :accessor connector-interruptible?
-                   :initform (cons :interruptible nil)
-                   :documentation
-                   "Stores the interruptibility state of the
-receiver. One of interruptible, uninterruptible and interrupting."))
-  (:documentation
-   "This class is intended to be mixed into threaded receiver classes
-that cannot always be interrupted."))
-
-(defmethod connector-interruptible? ((connector sometimes-interruptible-mixin))
-  (car (slot-value connector 'interruptible?)))
-
-(defmethod (setf connector-interruptible?) ((new-value symbol)
-                                            (connector sometimes-interruptible-mixin))
-  (let ((precondition (ecase new-value
-                        (:interruptible   :uninterruptible)
-                        (:uninterruptible :interruptible)
-                        (:interrupting    :interruptible)))
-        (cell         (slot-value connector 'interruptible?)))
-    (iter (until (eq (sb-ext:compare-and-swap
-                      (car cell) precondition new-value)
-                     precondition))))
-  new-value)
-
-(defmethod stop-receiver :around ((connector sometimes-interruptible-mixin))
-  (unwind-protect
-       (progn
-         (setf (connector-interruptible? connector) :interrupting)
-         (call-next-method))
-    (setf (car (slot-value connector 'interruptible?)) :interruptible)))
-
-(defmethod handle :around ((connector sometimes-interruptible-mixin)
-                           (event     t))
-  (prog2
-      (setf (connector-interruptible? connector) :uninterruptible)
-      (call-next-method)
-    (setf (connector-interruptible? connector) :interruptible)))
-
 ;;; Mixin class `threaded-receiver-mixin'
 
 (defclass threaded-receiver-mixin ()

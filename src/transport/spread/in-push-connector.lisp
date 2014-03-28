@@ -1,6 +1,6 @@
 ;;;; in-push-connector.lisp --- An in-direction, push-based connector for spread.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,8 +13,7 @@
 
 (defclass in-push-connector (in-connector
                              threaded-message-receiver-mixin
-                             error-handling-push-receiver-mixin
-                             sometimes-interruptible-mixin)
+                             error-handling-push-receiver-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
