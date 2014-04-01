@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Unit tests for scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,35 +74,32 @@ strings.")
           "Test relations between `scope' instances.")
   relations
 
-  (ensure-cases (left right relation equality)
-      '(("/foo"     "/foo"     (:sub :super) :=)
-        ("/foo/"    "/foo"     (:sub :super) :=)
-        ("/foo/bar" "/foo"     :sub          :/=)
-        ("/foo/bar" "/foo/baz" :none         :/=)
-        ("/"        "/foo"     :super        :/=)
-        ("/bar"     "/baz"     :none         :/=))
+  (ensure-cases (left right relations equality)
+      '(("/foo"     "/foo"     (:sub :super) =)
+        ("/foo/"    "/foo"     (:sub :super) =)
+        ("/foo/bar" "/foo"     :sub          /=)
+        ("/foo/bar" "/foo/baz" :none         /=)
+        ("/"        "/foo"     :super        /=)
+        ("/bar"     "/baz"     :none         /=))
 
-    (let ((left     (make-scope left))
-          (right    (make-scope right))
-          (relation (ensure-list relation)))
+    (let ((left      (make-scope left))
+          (right     (make-scope right))
+          (relations (ensure-list relations)))
       ;; Test sub/super relation.
-      (cond
-        ((member :sub relation)
-         (ensure (sub-scope?   left right))
-         (ensure (super-scope? right left)))
-        ((member :super relation)
-         (ensure (super-scope? left right))
-         (ensure (sub-scope?   right left)))
-        ((member :none relation)
-         (ensure (not (sub-scope?   left right)))
-         (ensure (not (super-scope? left right)))))
+      (when (member :sub relations)
+        (ensure (sub-scope?   left right))
+        (ensure (super-scope? right left)))
+      (when (member :super relations)
+        (ensure (super-scope? left right))
+        (ensure (sub-scope?   right left)))
+      (when (member :none relations)
+        (ensure (not (sub-scope?   left right)))
+        (ensure (not (super-scope? left right))))
 
       ;; Test equality relation.
       (ecase equality
-        (:=
-         (ensure (scope= left right)))
-        (:/=
-         (ensure (not (scope= left right))))))))
+        (=  (ensure (scope= left right)))
+        (/= (ensure (not (scope= left right))))))))
 
 (addtest (scope-root
           :documentation
