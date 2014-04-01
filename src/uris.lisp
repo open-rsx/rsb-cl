@@ -1,6 +1,6 @@
 ;;;; uris.lisp --- URI-related functions used in cl-rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -63,9 +63,6 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)
                           (uri-options uri-options)) uri)
          (transport-options
           (%transport-options transport defaults host port)))
-    (when (eq transport :rsb)
-      (error "~@<~S schema is not supported yet.~@:>"
-             transport))
     (when fragment
       (warn "~@<Ignoring fragment ~S in URI -> scope and options ~
              translation. URI was ~S~@:>"
@@ -80,7 +77,7 @@ RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)
   "Extract options for TRANSPORT from DEFAULTS if TRANSPORT is not
 nil. If HOST and PORT are not nil, replace the host and port options
 in the extracted transport options. Return the resulting options."
-  (if (and transport (not (eq transport :rsb)))
+  (if transport
       (list (%merge-options
              (append (when host (list :host host))
                      (when port (list :port port))
