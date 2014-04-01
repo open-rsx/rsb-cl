@@ -69,16 +69,18 @@
   "Return non-nil if THING1 is the same scope as THING2."
   (let ((scope1 (make-scope thing1))
         (scope2 (make-scope thing2)))
-    (equal (scope-components scope1) (scope-components scope2))))
+    (or (eq scope1 scope2)
+        (equal (scope-components scope1) (scope-components scope2)))))
 
 (defun sub-scope? (sub super)
   "Return non-nil if SUB is a sub-scope of SUPER."
   (let ((scope1 (make-scope sub))
         (scope2 (make-scope super)))
-    (values
-     (starts-with-subseq (scope-components scope2)
-                         (scope-components scope1)
-                         :test 'string=))))
+    (or (eq scope1 scope2)
+        (values
+         (starts-with-subseq (scope-components scope2)
+                             (scope-components scope1)
+                             :test 'string=)))))
 
 (defun super-scope? (super sub)
   "Return non-nil if SUPER is a super-scope of SUB."
