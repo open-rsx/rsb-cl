@@ -21,7 +21,7 @@
 the participant sending the event.")
    (id              :type     (or null uuid:uuid)
                     :reader   event-id
-                    :writer   (setf %event-id)
+                    :writer   (setf event-%id)
                     :documentation
                     "Stores a unique id that is lazily computed from
 the unique id of the participant sending the event (stored in the
@@ -78,7 +78,7 @@ listeners. An event is a composite structure consisting of
                                      &key
                                      (create-timestamp? t))
   ;; Initialize or invalidate id.
-  (setf (%event-id instance) nil)
+  (setf (event-%id instance) nil)
 
   ;; Maybe set create timestamp.
   (when create-timestamp?
@@ -93,10 +93,10 @@ listeners. An event is a composite structure consisting of
   (%maybe-set-event-id event))
 
 (defmethod (setf event-sequence-number) :after ((new-value t) (event event))
-  (setf (%event-id event) nil))
+  (setf (event-%id event) nil))
 
 (defmethod (setf event-origin) :after ((new-value t) (event event))
-  (setf (%event-id event) nil))
+  (setf (event-%id event) nil))
 
 (defun event= (left right
                &key
@@ -217,7 +217,7 @@ origin id of EVENT and the sequence number of EVENT. If EVENT does not
 have an origin, do nothing."
   (unless (slot-value event 'id)
     (when-let ((id (event-id/opaque event)))
-      (setf (%event-id event) (event-id->uuid id)))))
+      (setf (event-%id event) (event-id->uuid id)))))
 
 (defun print-event-data (stream data &optional colon? at?)
   "Print the event payload DATA to stream in a type-dependent manner.
