@@ -324,40 +324,59 @@ thread."))
     ;; Wait until the thread has entered `receive-messages'.
     (bt:with-lock-held (control-mutex)
       (iter (until started?)
-            (bt:condition-wait control-condition control-mutex)))))
+            (bt:condition-wait control-condition control-mutex)))
+    (log:debug "~@<~A started worker thread~@:>" connector)))
 
 (defmethod stop-receiver ((connector threaded-receiver-mixin))
   (let+ (((&structure connector- thread control-mutex) connector))
     (bt:with-lock-held (control-mutex)
       (cond
+        ;; If there is no thread, do nothing.
+        ((not thread))
+
         ;; If this is called from the receiver thread, there is no
         ;; need for an interruption. We can just unwind normally.
         ((eq thread (bt:current-thread))
          (log:debug "~@<~A is in receiver thread; aborting~@:>" connector)
          (exit-receiver))
 
-        ((bt:thread-alive-p thread)
-         ;; On very rare occasions, interrupting the thread
-         ;; fails. Retry in such cases.
+        ;; If a second thread is trying to stop the receiver thread,
+        ;; try joining and fall back to interrupting.
+        (t
          (iter (while (bt:thread-alive-p thread))
-               ;; Interrupt the receiver thread and abort.
-               (log:debug "~@<~A is interrupting receiver thread with abort~@:>"
-                          connector)
-               (ignore-errors
-                 (bt:interrupt-thread thread #'exit-receiver))
-
                ;; The thread should be terminating or already have
                ;; terminated.
-               (log:debug "~@<~A is joining receiver thread~@:>"
-                          connector)
+               (log:debug "~@<~A is joining receiver thread~@:>" connector)
                (handler-case
-                   (bt:with-timeout (.1)
-                     (bt:join-thread thread))
-                 (bt:timeout ()
-                   (log:warn "~@<~A is interrupting receiver failed; retrying~@:>"
-                             connector))))))
-      ;; This is necessary to allow restarting the connector.
-      (setf thread nil))))
+                   (when
+                       #-sbcl (bt:with-timeout (2) (bt:join-thread thread) t)
+                       #+sbcl (not (eq (sb-thread:join-thread
+                                        thread :timeout 2 :default :timeout)
+                                       :timeout))
+                       (return))
+                 #-sbcl (bt:timeout ())
+                 (error (condition)
+                   (log:warn "~@<~A failed to join receiver thread ~A: ~
+                              ~A Giving up~@:>"
+
+                             connector thread condition)
+                   (return)))
+               (log:warn "~@<~A timed out joining receiver thread ~
+                          ~A. Interrupting~@:>"
+                         thread connector)
+
+               ;; Interrupt the receiver thread and abort.
+               (log:debug "~@<~A is interrupting receiver thread ~A ~
+                           with abort~@:>"
+                          connector thread)
+               (handler-case
+                   (bt:interrupt-thread thread #'exit-receiver)
+                 (error (condition)
+                   (log:warn "~@<~A failed to interrupt receiver ~
+                              thread ~A: ~A Retrying~@:>"
+                             connector thread condition)))))))
+    ;; This is necessary to allow restarting the connector.
+    (setf thread nil)))
 
 (defmethod receive-messages :around ((connector threaded-receiver-mixin))
   "Catch the 'terminate tag that is thrown to indicate interruption

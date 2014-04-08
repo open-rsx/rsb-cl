@@ -1,6 +1,6 @@
 ;;;; threaded-receiver-mixin.lisp --- Unit tests for the threaded-receive-mixin class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,7 +32,7 @@
 
   ;; We try attaching and detaching with different timing behaviors.
   (let ((receiver (make-instance 'mock-receiver)))
-    (iter (repeat 100)
+    (iter (repeat 4)
           (start-receiver receiver)
           (stop-receiver receiver)
           (ensure-null (connector-thread receiver))
