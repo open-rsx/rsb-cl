@@ -31,7 +31,7 @@
           :documentation
           "Test constructing `scope' instances from lists of component
 strings.")
-  construction/from-conponents
+  construction/from-components
 
   (ensure-cases (input expected-components)
       `(;; Some invalid cases
