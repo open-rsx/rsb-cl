@@ -15,6 +15,20 @@
 
 (addtest (scope-root
           :documentation
+          "Test function `derive-scope-component'.")
+  derive-scope-component
+
+  (ensure-cases (input expected)
+      '(("foo"  "foo")
+        ("/foo" "_foo")
+        ("foo/" "foo_")
+        ("!@"   "__")
+        ("_foo" "_foo")
+        ("foo_" "foo_"))
+    (ensure-same (derive-scope-component input) expected :test #'string=)))
+
+(addtest (scope-root
+          :documentation
           "Test constructing `scope' instances from lists of component
 strings.")
   construction/from-conponents

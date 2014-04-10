@@ -41,6 +41,11 @@
    or a `scope' instance."
   '(or string scope-components scope))
 
+(declaim (ftype (function (string) scope-component) derive-scope-component))
+(defun derive-scope-component (string)
+  "Return a legal scope component string based on STRING."
+  (substitute-if-not #\_ #'scope-component-character? string))
+
 ;;; Event-related types
 
 (deftype sequence-number ()

@@ -21,6 +21,8 @@
    #:scope-components          #:scope-components?
    #:scope-designator
 
+   #:derive-scope-component
+
    #:sequence-number
    #:timestamp-designator
    #:meta-data-designator
