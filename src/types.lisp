@@ -8,27 +8,37 @@
 
 ;;; Scope-related types
 
-(deftype scope-component ()
-  '(and string (satisfies scope-component?)))
+(declaim (inline scope-component-character?))
+(defun scope-component-character? (character)
+  "Non-nil when character is valid within a scope component."
+  (or (char<= #\a character #\z)
+      (char<= #\A character #\Z)
+      (char<= #\0 character #\9)
+      (char= character #\_) (char= character #\-)))
+(declaim (notinline scope-component-character?))
 
-(deftype scope-components ()
-  '(or null
-       (cons scope-component t)))
+(deftype scope-component-character ()
+  '(and character (satisfies scope-component-character?)))
 
 (defun scope-component? (string)
   "Non-nil when STRING is a valid scope component."
-  (let+ (((&flet valid-char? (char)
-            (or (char<= #\a char #\z)
-                (char<= #\A char #\Z)
-                (char<= #\0 char #\9)
-                (char= char #\_) (char= char #\-)))))
-    (declare (dynamic-extent #'valid-char?))
-    (and (stringp string) (not (emptyp string))
-         (every #'valid-char? string))))
+  (locally (declare (inline scope-component-character?))
+    (and (stringp string)
+         (plusp (length string))
+         (every #'scope-component-character? string))))
+
+(deftype scope-component ()
+  '(and string (satisfies scope-component?)))
+
+(defun scope-components? (sequence)
+  (every #'scope-component? sequence))
+
+(deftype scope-components ()
+  '(and sequence (satisfies scope-components?)))
 
 (deftype scope-designator ()
   "A scope can be designated by a string, a list of scope components
-or a `scope' instance."
+   or a `scope' instance."
   '(or string scope-components scope))
 
 ;;; Event-related types

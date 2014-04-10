@@ -21,10 +21,12 @@ strings.")
 
   (ensure-cases (input expected-components)
       `(;; Some invalid cases
-        (("/foo ")            type-error) ; invalid character: space
-        (("/!@#/+1")          type-error) ; invalid characters: !@#+
+        (("foo ")             type-error) ; invalid character: space
+        (("!@#+1")            type-error) ; invalid characters: !@#+
+        (("foo" "+1")         type-error) ; in second component
         (#("!@#" "foo")       type-error) ; likewise for vector
         (#("/")               type-error)
+        (#("foo" "+1")        type-error)
         (("")                 type-error) ; empty component
 
         ;; These are valid
@@ -49,6 +51,7 @@ strings.")
       '(;; Some invalid cases.
         ("/foo "       type-error) ; invalid character: space
         ("/!@#/+1"     type-error) ; invalid characters: !@#+
+        ("/foo/+1"     type-error) ; in second component
         (""            type-error) ; empty string
 
         ;; These are valid.

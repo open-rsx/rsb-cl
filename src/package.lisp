@@ -16,6 +16,9 @@
 
   ;; Types
   (:export
+   #:scope-component-character #:scope-component-character?
+   #:scope-component           #:scope-component?
+   #:scope-components          #:scope-components?
    #:scope-designator
 
    #:sequence-number
