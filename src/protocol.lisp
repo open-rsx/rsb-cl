@@ -514,3 +514,15 @@ UNCHECKED? controls whether the compatibility of INFORMER and DATA
 should be validated. This mainly applies if data is an `event'
 instance since properties like the scope of the event may conflict
 with properties of INFORMER."))
+
+;;; Timed executor protocol
+
+(defgeneric executor-interval (executor)
+  (:documentation
+   "Return the interval in seconds between calls to EXECUTOR's task
+    function."))
+
+(defgeneric (setf executor-interval) (new-value executor)
+  (:documentation
+   "Set the interval in seconds between calls to EXECTUOR's task
+    function to NEW-VALUE."))

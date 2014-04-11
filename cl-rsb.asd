@@ -430,6 +430,8 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package"))
                               (:file       "uris"
                                :depends-on ("package"))
+                              (:file       "util"
+                               :depends-on ("package"))
                               (:file       "configuration"
                                :depends-on ("package"))
                               (:file       "mixins"

@@ -258,6 +258,13 @@
 
    #:with-informer)
 
+  ;; Timed executor protocol and classes
+  (:export
+   #:executor-interval              ; also setf
+
+   #:timed-executor
+   #:timed-executor/weak)
+
   ;; Utility functions and macros
   (:export
    #:print-id
