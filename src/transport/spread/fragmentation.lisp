@@ -1,6 +1,6 @@
 ;;;; fragmentation.lisp --- Fragmentation and assembly of data/notifications.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -168,48 +168,35 @@ necessary when fragments are submitted by calls to
 ;;; Automatic pruning of old incomplete assemblies
 
 (defclass pruning-assembly-pool (assembly-pool)
-  ((lock      :reader   assembly-pool-%lock
+  ((executor  :accessor assembly-pool-%executor)
+   (lock      :reader   assembly-pool-%lock
               :initform (bt:make-lock "Assemblies Lock")
               :documentation
               "This lock protects the collection of `assembly'
 instances from concurrent modification by the pruning thread and calls
 to `merge-fragment'.")
-   (thread    :type     bt:thread
-              :documentation
-              "Stores the thread in the context of which the pruning
-of incomplete assemblies is done. ")
-   (stop?     :type     boolean
-              :initform nil
-              :documentation
-              "This flag controls termination of the pruning thread.")
    (age-limit :initarg  :age-limit
               :type     positive-real
               :accessor assembly-pool-age-limit
-              :initform 10
               :documentation
               "Controls the minimum age in seconds that `assembly'
 instances have to reach before they can be pruned."))
+  (:default-initargs
+   :age-limit 10)
   (:documentation
    "This instances of this subclass of `assembly-pool' manage a thread
 that periodically deletes partial assemblies which are older than
 MIN-AGE."))
 
 (defmethod initialize-instance :after ((instance pruning-assembly-pool)
-                                       &key)
-  ;; Create a thread that periodically deletes partial assemblies.
-  (setf (slot-value instance 'thread)
-        (bt:make-thread
-         (lambda ()
-           (iter (until (slot-value instance 'stop?))
-                 (let ((age-limit (assembly-pool-age-limit instance)))
-                   (delete-partial-assemblies instance age-limit)
-                   (sleep (/ age-limit 4)))))))
-
-  ;; Terminate the thread that deletes partial assemblies.
-  (tg:finalize instance (lambda ()
-                          (with-slots (thread stop?) instance
-                            (setf stop? t)
-                            (bt:join-thread thread)))))
+                                       &key
+                                       age-limit)
+  (setf (assembly-pool-%executor instance)
+        (make-instance 'timed-executor/weak
+                       :name     (format nil "Executor for ~A" instance)
+                       :interval (/ age-limit 4)
+                       :function #'delete-partial-assemblies
+                       :args     (list instance age-limit))))
 
 (defmethod assembly-pool-count :around ((pool pruning-assembly-pool))
   (bt:with-lock-held ((assembly-pool-%lock pool))
