@@ -546,6 +546,7 @@ See `version/list' for details on keyword parameters."
   :in-order-to ((test-op (load-op :cl-rsb-test))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
+  (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string
          "(NETWORK.SPREAD:WITH-DAEMON (:PORT (ASDF:COMPONENT-PROPERTY
                                                (ASDF:FIND-SYSTEM :CL-RSB-TEST) :SPREAD-PORT))
