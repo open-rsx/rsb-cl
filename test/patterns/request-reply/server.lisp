@@ -37,7 +37,7 @@
         (t
          (do-it))))))
 
-(deftestsuite server-root (patterns-root)
+(deftestsuite server-root (patterns-request-reply-root)
   ((simple-server (make-instance 'server :scope "/server"))
    (simple-method (make-instance 'method1
                                  :scope (make-scope "/server/foo")

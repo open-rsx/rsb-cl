@@ -20,7 +20,7 @@
   (ensure-condition 'missing-required-initarg
     (make-instance 'local-method :scope (make-scope "/foo") :name "foo")))
 
-(deftestsuite local-server-root (patterns-root)
+(deftestsuite local-server-root (patterns-request-reply-root)
   ((simple-server (make-instance 'local-server
                                  :scope             "/localserver"
                                  :transport-options '((:inprocess)))))
