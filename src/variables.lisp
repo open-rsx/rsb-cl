@@ -58,3 +58,33 @@ of random IDs and similar things requiring pseudo randomness.")
 
 (defvar *default-configuration* nil
   "DOC")
+
+;;; Participant lifecycle hooks
+
+(defvar *make-participant-hook* '()
+  "Handlers registered for this hook are run when a new participant is
+   created.
+
+   The lambda-list of handlers is
+
+     (PARTICIPANT ARGS)
+
+   where PARTICIPANT is the new participant and ARGS are the initargs
+   with which the participant instance was created.
+
+   Handlers have to return PARTICIPANT unless PARTICIPANT should be
+   replaced by some other object in which case that object has to be
+   returned.")
+
+(defvar *participant-state-change-hook* '()
+  "Handlers of this hook are run when the state of a participant changes.
+
+   The lambda-list of handlers is
+
+     (PARTICIPANT NEW-STATE)
+
+   where PARTICIPANT is the participant whose state changed to
+   NEW-STATE.
+
+   One NEW-STATE applicable to all kinds of participants
+   is :detached.")

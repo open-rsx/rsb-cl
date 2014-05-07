@@ -120,6 +120,9 @@ reachability of COMPONENT in transport-specific way."))
 
 ;; Default behavior
 
+(defclass participant () ()) ; forward declaration
+(declaim (special *participant-state-change-hook*))
+
 (defmethod participant-kind ((participant t))
   (values (make-keyword (type-of participant))))
 
@@ -133,6 +136,14 @@ converter."
         (error "~@<Participant ~A does not have a converter for ~
                 wire-type ~A.~@:>"
                participant wire-type))))
+
+(defmethod detach :around ((participant participant))
+  (if *participant-state-change-hook*
+      (unwind-protect
+           (call-next-method)
+        (hooks:run-hook '*participant-state-change-hook*
+                        participant :detached))
+      (call-next-method)))
 
 ;;; Participant creation protocol
 ;;;
@@ -248,7 +259,22 @@ converter."
 
 ;; Default behavior
 
-(defclass scope () ())
+(defclass scope () ()) ; forward declarations
+(declaim (special *make-participant-hook*))
+
+(defmethod make-participant-using-class :around ((class     class)
+                                                 (prototype t)
+                                                 (scope     scope)
+                                                 &rest args &key)
+  (if *make-participant-hook*
+      (or (hooks:run-hook '*make-participant-hook*
+                          (call-next-method) args)
+          (simple-program-error
+           "~@<A handler installed on ~S returned ~S instead of a ~
+            participant.~@:>"
+           '*make-participant-hook* nil))
+      (call-next-method)))
+
 (defmethod make-participant-using-class ((class     class)
                                          (prototype t)
                                          (scope     scope)

@@ -421,6 +421,8 @@ See `version/list' for details on keyword parameters."
   :components  ((:module     "test"
                  :components ((:file       "package")
 
+                              (:file       "protocol"
+                               :depends-on ("package"))
                               (:file       "scope"
                                :depends-on ("package"))
                               (:file       "event"

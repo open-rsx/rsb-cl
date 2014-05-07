@@ -84,7 +84,10 @@
    #:*id-random-state*
 
    #:*default-configuration*
-   #:*default-configuration-files*)
+   #:*default-configuration-files*
+
+   #:*make-participant-hook*
+   #:*participant-state-change-hook*)
 
   ;; Reloading
   (:export
