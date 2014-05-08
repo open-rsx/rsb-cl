@@ -174,8 +174,6 @@
 
   ;; Participant protocol and `participant' class
   (:export
-   #:detach #:detach/ignore-errors
-
    #:participant
    #:participant-kind
    #:participant-id
@@ -183,7 +181,12 @@
    #:participant-converters
    #:participant-converter
    #:participant-transform
-   #:participant-error-hook)
+   #:participant-error-hook
+
+   #:make-participant
+   #:make-participant-using-class
+
+   #:detach #:detach/ignore-errors)
 
   ;; Protocol for receiving participants
   (:export
@@ -262,7 +265,6 @@
 
    #:uri-mixin
 
-   #:make-participant
    #:define-participant-creation-uri-methods
    #:define-participant-creation-restart-method
 

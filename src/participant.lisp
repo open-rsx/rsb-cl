@@ -35,33 +35,32 @@
 
 ;;; Participant creation
 
-;; TODO(jmoringe): infer direction?
+(defmethod make-participant ((class t) (scope scope) &rest args &key)
+  (let ((class (find-class class)))
+    (closer-mop:finalize-inheritance class)
+    (apply #'make-participant-using-class
+           class (closer-mop:class-prototype class) scope
+           args)))
 
-(defun make-participant (class scope direction
-                         transports converters transform error-policy
-                         &rest args)
-  "Make and return a participant instance of CLASS that participates
-in the channel designated by SCOPE.
+(defmethod make-participant-using-class :around ((class     class)
+                                                 (prototype rsb.ep:client)
+                                                 (scope     scope)
+                                                 &rest args &key
+                                                 (transports (transport-options))
+                                                 (converters (default-converters)))
+  (apply #'call-next-method class prototype scope
+         :transports transports
+         :converters converters
+         (remove-from-plist args :transports :converters)))
 
-DIRECTION is one of :in-push, :in-pull and :out.
-
-TRANSPORTS is a list of connector classes.
-
-CONVERTERS is an alist of converters for particular wire-types with
-items of the form (WIRE-TYPE . CONVERTER).
-
-When non-nil, TRANSFORM is a transform object usable with
-`rsb.event-processing:transform!'.
-
-ERROR-POLICY has to be nil or a function to be installed in the error
-hook of the created participant.
-
-ARGS are arguments for the created CLASS instance.
-
-Return three values:
-1) the `participant' instance
-2) the associated `rsb.event-processing:configurator' instance
-2) the list of instantiated `rsb.transport:connector's"
+(defmethod make-participant-using-class ((class     class)
+                                         (prototype rsb.ep:client)
+                                         (scope     scope)
+                                         &rest args &key
+                                         (direction (participant-direction prototype))
+                                         transports
+                                         converters
+                                         transform)
   ;; Signal an error if no transports have been supplied.
   (unless transports
     (error 'no-transports-error
@@ -90,7 +89,8 @@ Return three values:
                               :scope        scope
                               :converters   converters
                               :configurator configurator
-                              args))
+                              (remove-from-plist
+                               args :direction :transports :converters)))
          (error-hook   (participant-error-hook participant)))
 
     ;; Associate constructed CONNECTORS to CONFIGURATOR instance.
@@ -100,13 +100,9 @@ Return three values:
     ;; intercepted by CONFIGURATOR.
     (setf (rsb.ep:processor-error-policy configurator)
           (lambda (condition)
-            (hooks:run-hook error-hook condition)
-            ;; TODO(jmoringe): maybe (ignore-error) here?
-            ))
-    (when error-policy
-      (hooks:add-to-hook error-hook error-policy))
+            (hooks:run-hook error-hook condition)))
 
-    (values participant configurator connectors)))
+    participant))
 
 (defmacro define-participant-creation-uri-methods (kind &rest args)
   (let* ((make-name      (symbolicate "MAKE-" kind))
@@ -159,6 +155,42 @@ Return three values:
                  (when converters-supplied?
                    (list :converters converters))))))))
 
+;; This method operates on URIs.
+(defmethod make-participant ((designator t) (scope puri:uri)
+                             &rest args &key
+                             (transports (transport-options
+                                          :exclude-disabled?
+                                          (not (uri-transport scope))))
+                             (converters (default-converters))
+                             transform
+                             error-policy)
+  (let+ (((&values scope options) (uri->scope-and-options scope transports)))
+    (apply #'make-participant designator scope
+           :transports   options
+           :converters   converters
+           :transform    transform
+           :error-policy error-policy
+           args)))
+
+;; This method operates on strings which it turns into either URIs (if
+;; the string contains a colon) or scopes.
+(defmethod make-participant ((kind t) (scope string)
+                             &rest args &key
+                             (transports nil transports-supplied?)
+                             (converters nil converters-supplied?)
+                             transform
+                             error-policy)
+  (apply #'make-participant kind (if (find #\: scope)
+                                     (puri:parse-uri scope)
+                                     (make-scope scope))
+         :transform    transform
+         :error-policy error-policy
+         (append (when transports-supplied?
+                   (list :transports transports))
+                 (when converters-supplied?
+                   (list :converters converters))
+                 args)))
+
 (defun call-with-participant-creation-restarts (participant-kind designator
                                                 normal-thunk args-changed-thunk)
   (declare (type function normal-thunk args-changed-thunk))
@@ -202,6 +234,38 @@ Return three values:
               (setf designator new-value
                     thunk      args-changed-thunk))))))
 
+(defmethod make-participant :around ((kind  t)
+                                     (scope scope)
+                                     &rest args &key)
+  ;; Install restarts around the creation attempt.
+  (flet ((make-participant-normal-thunk (scope)
+           (declare (ignore scope))
+           (call-next-method))
+         (make-participant-args-changed-thunk (scope)
+           (apply #'make-participant kind scope args)))
+    (declare (dynamic-extent #'make-participant-normal-thunk
+                             #'make-participant-args-changed-thunk))
+    (call-with-participant-creation-restarts
+     kind scope
+     #'make-participant-normal-thunk
+     #'make-participant-args-changed-thunk)))
+
+(defmethod make-participant :around ((kind  t)
+                                     (scope puri:uri)
+                                     &rest args &key)
+  ;; Install restarts around the creation attempt.
+  (flet ((make-participant-normal-thunk (scope)
+           (declare (ignore scope))
+           (call-next-method))
+         (make-participant-args-changed-thunk (scope)
+           (apply #'make-participant kind scope args)))
+    (declare (dynamic-extent #'make-participant-normal-thunk
+                             #'make-participant-args-changed-thunk))
+    (call-with-participant-creation-restarts
+     kind scope
+     #'make-participant-normal-thunk
+     #'make-participant-args-changed-thunk)))
+
 (defmacro define-participant-creation-restart-method (kind &rest args)
   "Emit an :around method on `make-KIND' that establishes restarts.
 KIND will usually be one of :informer, :listener and :reader. ARGS is
@@ -226,3 +290,15 @@ that is the URI or scope."
             ',kind ,designator-arg
             #'participant-creation-normal-thunk
             #'participant-creation-args-changed-thunk))))))
+
+(defmethod make-participant :around ((kind t) (scope t)
+                                     &key
+                                     transports)
+  ;; Translate different kinds of errors into
+  ;; `participant-creation-error' errors.
+  (with-condition-translation
+      (((error participant-creation-error)
+        :kind       (make-keyword kind)
+        :scope      scope
+        :transports transports)) ; TODO not always available
+    (call-next-method)))

@@ -117,18 +117,33 @@ that test participant classes."))
                  :documentation
                  ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
                           class make-name))
-         construction
+         construction/named
 
-         (ensure-cases (uri args expected-scope)
+         (ensure-cases (uri args initargs common-initargs expected-scope)
              (list ,@cases)
 
-           (case expected-scope
-             (error (ensure-condition error
-                      (apply #',make-name uri args)))
-             (t     (let ((participant (apply #',make-name uri args)))
-                      (unwind-protect
-                           (check-participant participant ,kind expected-scope)
-                        (detach/ignore-errors participant)))))))
+           (let+ (((&flet do-it () (apply #',make-name uri
+                                          (append args common-initargs)))))
+            (case expected-scope
+              (error (ensure-condition error (do-it)))
+              (t     (with-participant (participant (do-it))
+                       (check-participant participant ,kind expected-scope)))))))
+
+       (addtest (,suite-name
+                 :documentation
+                 ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
+                          class 'make-participant))
+         construction/make-participant
+
+         (ensure-cases (uri args initargs common-initargs expected-scope)
+             (list ,@cases)
+
+           (let+ (((&flet do-it () (apply #'make-participant ',class uri
+                                          (append initargs common-initargs)))))
+             (case expected-scope
+               (error (ensure-condition error (do-it)))
+               (t     (with-participant (participant (do-it))
+                        (check-participant participant ,kind expected-scope)))))))
 
        (define-restart-method-test-case
            (,make-name ((scope-or-uri (eql +restart-test-scope+))
@@ -267,6 +282,6 @@ and bound to a variable named like the value of CLASS."
 
 ;;; Utilities
 
-(defun mock-transform/error  (event)
+(defun mock-transform/error (event)
   (declare (ignore event))
   (error "Intentional error in transformation"))

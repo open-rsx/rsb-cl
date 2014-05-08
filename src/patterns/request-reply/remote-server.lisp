@@ -147,11 +147,10 @@ allows calling methods on them as if they were local."))
                           &key
                           error?)
   (or (call-next-method server name :error? error?)
-      (setf (server-method server name)
-            (make-instance 'remote-method
-                           :scope (merge-scopes
-                                   (list name) (participant-scope server))
-                           :name  name))))
+      (let ((scope (merge-scopes (list name) (participant-scope server))))
+        (setf (server-method server name)
+              (make-participant 'remote-method scope
+                                :name name)))))
 
 (defmethod call ((server  remote-server)
                  (method  string)
@@ -181,14 +180,11 @@ call it."
                                (converters (default-converters))
                                transform
                                error-policy)
-  (let ((server (make-instance 'remote-server
-                               :scope             scope
-                               :converters        converters
-                               :transport-options transports
-                               :transform         transform)))
-    (when error-policy
-      (hooks:add-to-hook (participant-error-hook server) error-policy))
-    server))
+  (make-participant 'remote-server scope
+                    :converters   converters
+                    :transports   transports
+                    :transform    transform
+                    :error-policy error-policy))
 
 (define-participant-creation-uri-methods remote-server (scope puri:uri))
 

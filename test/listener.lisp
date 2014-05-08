@@ -20,27 +20,27 @@ function."))
 
 (define-basic-participant-test-cases listener
   '("/rsbtest/listener/construction"
-    nil
+    () () ()
     "/rsbtest/listener/construction")
   '("/rsbtest/listener/construction"
-    (:transports ((:inprocess &inherit)))
+    () () (:transports ((:inprocess &inherit)))
     "/rsbtest/listener/construction")
   '("/rsbtest/listener/construction"
-    (:converters ((t . :foo)))
+    () () (:converters ((t . :foo)))
     "/rsbtest/listener/construction")
   `("/rsbtest/listener/construction"
-    (:transform ,#'1+)
+    () () (:transform ,#'1+)
     "/rsbtest/listener/construction")
   '("inprocess:/rsbtest/listener/construction"
-    nil
+    () () ()
     "/rsbtest/listener/construction")
   `("inprocess:/rsbtest/listener/construction"
-    (:error-policy ,#'continue)
+    () () (:error-policy ,#'continue)
     "/rsbtest/listener/construction")
 
   ;; No transports => error
   '("/rsbtest/listener/construction"
-    (:transports nil)
+    () () (:transports nil)
     error))
 
 (addtest (listener-root

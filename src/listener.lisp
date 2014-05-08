@@ -38,11 +38,12 @@ a mechanism for dispatching matching events to these handlers."))
 ;;; `listener' creation
 
 (defmethod make-listener ((scope scope)
-                          &key
+                          &rest args &key
                           (transports (transport-options))
                           (converters (default-converters))
                           transform
                           error-policy)
+  (declare (ignore transform error-policy))
   ;; Translate different kinds of errors into
   ;; `listener-creation-error' errors.
   (with-condition-translation
@@ -50,8 +51,10 @@ a mechanism for dispatching matching events to these handlers."))
         :kind       :listener
         :scope      scope
         :transports transports))
-    (make-participant 'listener scope :in-push
-                      transports converters transform error-policy)))
+    (apply #'make-participant 'listener scope
+           :transports transports
+           :converters converters
+           args)))
 
 (define-participant-creation-uri-methods listener (scope puri:uri))
 

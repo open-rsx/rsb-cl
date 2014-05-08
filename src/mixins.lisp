@@ -141,3 +141,16 @@
 
 (defmethod participant-error-hook ((participant error-hook-mixin))
   (hooks:object-hook participant 'error-hook))
+
+(defmethod make-participant-using-class :around ((class     class)
+                                                 (prototype error-hook-mixin)
+                                                 (scope     scope)
+                                                 &rest args &key
+                                                 (error-policy nil error-policy-supplied?))
+  (let ((participant (if error-policy-supplied?
+                         (apply #'call-next-method class prototype scope
+                                (remove-from-plist args :error-policy))
+                         (call-next-method))))
+    (when error-policy
+      (hooks:add-to-hook (participant-error-hook participant) error-policy))
+    participant))

@@ -109,13 +109,26 @@ channel."))
 
 ;;; `informer' creation
 
+(defmethod make-participant-using-class ((class     class)
+                                         (prototype informer)
+                                         (scope     scope)
+                                         &key)
+  ;; Connect the processor of CONFIGURATOR to INFORMER as an event
+  ;; handler and return the ready-to-use `informer' instance.
+  (let* ((informer     (call-next-method))
+         (configurator (rsb.ep:client-configurator informer)))
+    (push (rsb.ep:configurator-processor configurator)
+          (rsb.ep:handlers informer))
+    informer))
+
 (defmethod make-informer ((scope scope)
                           (type  t)
-                          &key
+                          &rest args &key
                           (transports (transport-options))
                           (converters (default-converters))
                           transform
                           error-policy)
+  (declare (ignore transform error-policy))
   ;; Translate different kinds of errors into
   ;; `informer-creation-error' errors.
   (with-condition-translation
@@ -124,17 +137,11 @@ channel."))
         :scope      scope
         :transports transports
         :type       type))
-    (let+ (((&values informer configurator)
-            (make-participant 'informer scope :out
-                              transports converters transform error-policy
-                              :type type)))
-      ;; Connect the processor of CONFIGURATOR to INFORMER as an event
-      ;; handler.
-      (push (rsb.ep:configurator-processor configurator)
-            (rsb.ep:handlers informer))
-
-      ;; Return the ready-to-use `informer' instance.
-      informer)))
+    (apply #'make-participant 'informer scope
+           :transports transports
+           :converters converters
+           :type       type
+           args)))
 
 (define-participant-creation-uri-methods informer
   (scope puri:uri) (type t))

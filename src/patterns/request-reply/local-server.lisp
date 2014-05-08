@@ -105,13 +105,12 @@ these methods are exposed for remote clients."))
   (check-type argument argument-style "either :payload or :event")
 
   (setf (server-method server name)
-        (make-instance 'local-method
-                       :scope    (merge-scopes
-                                  (list name) (participant-scope server))
-                       :server   server
-                       :name     name
-                       :callback new-value
-                       :argument argument)))
+        (let ((scope (merge-scopes (list name) (participant-scope server))))
+          (make-participant 'local-method scope
+                            :server   server
+                            :name     name
+                            :callback new-value
+                            :argument argument))))
 
 ;;; `local-server' creation
 
@@ -123,14 +122,11 @@ these methods are exposed for remote clients."))
                               error-policy)
   "Make and return a `local-server' instance that provides a service
 at the scope SCOPE."
-  (let ((server (make-instance 'local-server
-                               :scope             scope
-                               :converters        converters
-                               :transport-options transports
-                               :transform         transform)))
-    (when error-policy
-      (hooks:add-to-hook (participant-error-hook server) error-policy))
-    server))
+  (make-participant 'local-server scope
+                    :converters   converters
+                    :transports   transports
+                    :transform    transform
+                    :error-policy error-policy))
 
 (define-participant-creation-uri-methods local-server (scope puri:uri))
 

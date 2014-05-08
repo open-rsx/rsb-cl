@@ -14,36 +14,36 @@
 
 (define-basic-participant-test-cases reader
   '("/rsbtest/reader/construction"
-    nil
+    () () ()
     "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    (:transports ((:inprocess &inherit)))
+    () () (:transports ((:inprocess &inherit)))
     "/rsbtest/reader/construction")
 
   #+TODO-disabled '("/rsbtest/reader/construction"
-    (:transports ((t) (:inprocess &inherit)))
-               "/rsbtest/reader/construction")
+                    () () (:transports ((t) (:inprocess &inherit)))
+                    "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    (:converters ((t . :foo)))
+    () () (:converters ((t . :foo)))
     "/rsbtest/reader/construction")
 
   `("/rsbtest/reader/construction"
-    (:transform ,#'1+)
+    () () (:transform ,#'1+)
     "/rsbtest/reader/construction")
 
   '("inprocess:/rsbtest/reader/construction"
-    nil
+    () () ()
     "/rsbtest/reader/construction")
 
   `("inprocess:/rsbtest/reader/construction"
-    (:error-policy ,#'continue)
+    () () (:error-policy ,#'continue)
     "/rsbtest/reader/construction")
 
   ;; No transports => error
   '("/rsbtest/reader/construction"
-    (:transports nil)
+    () () (:transports nil)
     error))
 
 (addtest (reader-root

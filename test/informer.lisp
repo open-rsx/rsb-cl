@@ -15,27 +15,27 @@ function."))
 
 (define-basic-participant-test-cases informer
   '("/rsbtest/informer/construction"
-    (t)
+    (t) (:type t) ()
     "/rsbtest/informer/construction")
   '("/rsbtest/informer/construction"
-    (t :transports ((:inprocess &inherit)))
+    (t) (:type t) (:transports ((:inprocess &inherit)))
     "/rsbtest/informer/construction")
   '("/rsbtest/informer/construction"
-    (t :converters ((t . :foo)))
+    (t) (:type t) (:converters ((t . :foo)))
     "/rsbtest/informer/construction")
   `("/rsbtest/informer/construction"
-    (t :transform ,#'1+)
+    (t) (:type t) (:transform ,#'1+)
     "/rsbtest/informer/construction")
   '("inprocess:/rsbtest/informer/construction"
-    (t)
+    (t) (:type t) ()
     "/rsbtest/informer/construction")
   `("inprocess:/rsbtest/informer/construction"
-    (t :error-policy ,#'continue)
+    (t) (:type t) (:error-policy ,#'continue)
     "/rsbtest/informer/construction")
 
   ;; No transports => error
   '("/rsbtest/informer/construction"
-    (t :transports nil)
+    (t) (:type t) (:transports nil)
     error))
 
 (addtest (informer-root

@@ -177,6 +177,19 @@ generic support for retrieving, adding and removing methods."))
             (scope-string (participant-scope object))
             (hash-table-count (server-%methods object)))))
 
+;;; `server' creation
+
+(defmethod make-participant-using-class ((class     class)
+                                         (prototype server)
+                                         (scope     scope)
+                                         &rest args &key
+                                         (transports (transport-options))
+                                         (converters (default-converters)))
+  (apply #'call-next-method class prototype scope
+         :converters        converters
+         :transport-options transports
+         (remove-from-plist args :transports)))
+
 ;;; Utility functions
 
 (defun %remove-method-with-restart-and-timeout (server method)

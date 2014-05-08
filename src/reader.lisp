@@ -23,11 +23,12 @@ receiving events."))
 ;;; `reader' creation
 
 (defmethod make-reader ((scope scope)
-                        &key
+                        &rest args &key
                         (transports (transport-options))
                         (converters (default-converters))
                         transform
                         error-policy)
+  (declare (ignore transform error-policy))
   ;; Translate different kinds of errors into `reader-creation-error'
   ;; errors.
   (with-condition-translation
@@ -35,8 +36,10 @@ receiving events."))
         :kind       :reader
         :scope      scope
         :transports transports))
-    (make-participant 'reader scope :in-pull
-                      transports converters transform error-policy)))
+    (apply #'make-participant 'reader scope
+           :transports transports
+           :converters converters
+           args)))
 
 (define-participant-creation-uri-methods reader (scope puri:uri))
 

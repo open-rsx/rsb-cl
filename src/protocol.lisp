@@ -86,30 +86,30 @@ reachability of COMPONENT in transport-specific way."))
 (defgeneric participant-scope (participant)
   (:documentation
    "Return the scope of the channel in which PARTICIPANT
-participates."))
+    participates."))
 
 (defgeneric participant-converter (participant wire-type
                                    &key
                                    error?)
   (:documentation
    "Return the converter used by PARTICIPANT for WIRE-TYPE.
-If PARTICIPANT does not have a converter for WIRE-TYPE, signal an
-error if ERROR? is non-nil, otherwise return nil."))
+    If PARTICIPANT does not have a converter for WIRE-TYPE, signal an
+    error if ERROR? is non-nil, otherwise return nil."))
 
 (defgeneric participant-error-hook (participant)
   (:documentation
    "Return the error hook of PARTICIPANT. Handlers attached to the
-returned hook are called when errors are signaled in PARTICIPANT or an
-associated object."))
+    returned hook are called when errors are signaled in PARTICIPANT
+    or an associated object."))
 
 (defgeneric detach (participant)
   (:documentation
    "Detach PARTICIPANT from the channel in which it participates and
-the transport or transports it uses for this participation."))
+    the transport or transports it uses for this participation."))
 
 (defun detach/ignore-errors (participant)
   "Like `detach' but handle errors that occur during detaching by
-continuing in a best effort manner instead of signaling."
+   continuing in a best effort manner instead of signaling."
   (handler-bind
       (((or error bt:timeout)
         (lambda (condition)
@@ -118,7 +118,7 @@ continuing in a best effort manner instead of signaling."
           (continue))))
     (detach participant)))
 
-;;; Default behavior
+;; Default behavior
 
 (defmethod participant-kind ((participant t))
   (values (make-keyword (type-of participant))))
@@ -133,6 +133,89 @@ converter."
         (error "~@<Participant ~A does not have a converter for ~
                 wire-type ~A.~@:>"
                participant wire-type))))
+
+;;; Participant creation protocol
+;;;
+;;; 1. Clients of the protocol call `make-participant' to request the
+;;;    creation of an instance of a given participant class.
+;;;
+;;;    Methods on this generic function are in charge of:
+;;;    * Establishing appropriate restarts
+;;;    * Translating error conditions into
+;;;      `participant-creation-error' conditions
+;;;    * Parsing string designators or URIs and scopes
+;;;    * Splitting URIs into scopes and transport options
+;;;
+;;; 2. The specified class is located and a prototype instance is
+;;;    obtained (e.g. via `class-prototype').
+;;;
+;;; 3. `make-participant-using-class' is called with arguments
+;;;    augmented with the prototype instance.
+;;;
+;;;    This allows methods on `make-participant-using-class' to
+;;;    customize participant creation for certain classes and their
+;;;    respective subclasses.
+
+(defgeneric make-participant (class scope &rest args
+                              &key
+                              direction
+                              transports
+                              converters
+                              transform
+                              error-policy
+                              &allow-other-keys)
+  (:documentation
+   "Make and return a participant instance of CLASS that participates
+    in the channel designated by SCOPE.
+
+    In general, the keyword arguments ARGS are used as initargs for
+    the created CLASS instance. Some commonly accepted initargs are
+    described below.
+
+    All participant classes accept the keyword parameter
+
+      ERROR-POLICY has to be nil or a function to be installed in the
+      error hook of the created participant.
+
+    Participant classes which directly send or receive
+    events (e.g. `reader', `listener' and `informer') support the
+    following keyword parameters:
+
+      TRANSPORTS is a list of connector classes.
+
+      CONVERTERS is an alist of converters for particular wire-types
+      with items of the form (WIRE-TYPE . CONVERTER).
+
+    Many, but not necessarily all, participant classes support the
+    keyword parameter
+
+      TRANSFORM, when non-nil, is a transform object usable with
+      `rsb.event-processing:transform!'.
+
+    Return the `participant' (more likely a subclass thereof)
+    instance."))
+
+(defgeneric make-participant-using-class (class prototype scope
+                                          &rest args &key &allow-other-keys)
+  (:documentation
+   "Make and return a participant instance of CLASS, optionally using
+    PROTOTYPE for dispatch.
+
+    PROTOTYPE is an instance of CLASS intended for dispatch (it might
+    not be properly initialized but is guaranteed to be an instance of
+    CLASS).
+
+    See `make-participant' for a description of the remainder of the
+    parameters."))
+
+;; Default behavior
+
+(defclass scope () ())
+(defmethod make-participant-using-class ((class     class)
+                                         (prototype t)
+                                         (scope     scope)
+                                         &rest args &key)
+  (apply #'make-instance class :scope scope args))
 
 ;;; Common protocol for receiving participants
 
