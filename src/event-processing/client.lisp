@@ -1,6 +1,6 @@
 ;;;; configurator-client.lisp --- A client that knows its configurator.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,3 +26,7 @@ subsystem in the sense that they have an associated `configurator'."))
         (collect
             (funcall (find-symbol "CONNECTOR-RELATIVE-URL" :rsb.transport)
                      connector component))))
+
+(defmethod detach ((participant client))
+  ;; Let PARTICIPANT's configurator do the heavy lifting.
+  (detach (client-configurator participant)))

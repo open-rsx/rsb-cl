@@ -56,10 +56,6 @@ of PARTICIPANT."
                              (participant-id participant)))
    (relative-url (participant-scope participant))))
 
-(defmethod detach ((participant participant))
-  "Let PARTICIPANT's configurator do the heavy lifting."
-  (detach (rsb.ep:client-configurator participant)))
-
 (defmethod print-object ((object participant) stream)
   (print-unreadable-id-object (object stream :type t)
     (format stream "~A" (scope-string (participant-scope object)))))
