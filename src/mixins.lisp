@@ -82,3 +82,48 @@
 (define-plist-data-mixin meta-data)
 
 (define-plist-data-mixin timestamp)
+
+;;; `converters-mixin'
+
+(defclass converters-mixin ()
+  ((converters :initarg  :converters
+               :type     list
+               :initform '()
+               :reader   participant-converters
+               :documentation
+               "Stores a list of the converters available for use in
+                connectors of the participant. Each element is of the
+                form
+
+                  (WIRE-TYPE . CONVERTER)
+
+                ."))
+  (:documentation
+   "This mixin class adds a list of converters associated to
+    wire-types."))
+
+(defmethod participant-converter ((participant converters-mixin)
+                                  (wire-type   t)
+                                  &key &allow-other-keys)
+  ;; Return the converter for WIRE-TYPE that is used by the connectors
+  ;; of PARTICIPANT.
+  (mapcar #'cdr
+          (remove wire-type (participant-converters participant)
+                  :key      #'car
+                  :test-not #'subtypep)))
+
+;;; `error-hook-mixin'
+
+(defclass error-hook-mixin ()
+  ((error-hook :type     list #|of function|#
+               :initform '()
+               :documentation
+               "Stores a list of functions to call in case of
+                errors."))
+  (:documentation
+   "This mixin class adds an error hook which is automatically
+    connected to a specified error policy when an instance is
+    created."))
+
+(defmethod participant-error-hook ((participant error-hook-mixin))
+  (hooks:object-hook participant 'error-hook))

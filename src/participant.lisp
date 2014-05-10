@@ -7,47 +7,20 @@
 (cl:in-package #:rsb)
 
 (defclass participant (uuid-mixin
-                       scope-mixin)
+                       scope-mixin
+                       converters-mixin
+                       error-hook-mixin)
   ((id         :reader   participant-id)
    (scope      :reader   participant-scope)
-   (converters :initarg  :converters
-               :type     list
-               :initform '()
-               :reader   participant-converters
-               :documentation
-               "Stores a list of the converters available for use in
-connectors of the participant. Each element is of the form
-
-  (WIRE-TYPE . CONVERTER)
-
-.")
    (transform  :initarg  :transform
                :reader   participant-transform
                :initform nil
                :documentation
                "Stores the transform which should be applied to
-processed events.")
-   (error-hook :type     list #|of function|#
-               :initform '()
-               :documentation
-               "Stores a list of functions to call in case of
-errors."))
+                processed events."))
   (:documentation
    "Instances of this class participate in the exchange of
-notifications on one channel of the bus."))
-
-(defmethod participant-converter ((participant participant)
-                                  (wire-type   t)
-                                  &key &allow-other-keys)
-  "Return the converter for WIRE-TYPE that is used by the connectors
-of PARTICIPANT."
-  (mapcar #'cdr
-          (remove wire-type (participant-converters participant)
-                  :key      #'car
-                  :test-not #'subtypep)))
-
-(defmethod participant-error-hook ((participant participant))
-  (hooks:object-hook participant 'error-hook))
+    notifications on one channel of the bus."))
 
 (defmethod relative-url ((participant participant))
   (puri:merge-uris
