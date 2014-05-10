@@ -120,6 +120,53 @@ strings.")
 
 (addtest (scope-root
           :documentation
+          "Test `merge-scopes' function.")
+  merge-scopes
+
+  (ensure-cases (left right expected)
+      `((,+root-scope+      ,+root-scope+      ,+root-scope+)
+        ("/"                ,+root-scope+      "/")
+        (()                 ,+root-scope+      "/")
+        (,+root-scope+      "/"                "/")
+        (,+root-scope+      ()                 "/")
+
+        (,(make-scope "/a") ,+root-scope+      "/a")
+        ("/a"               ,+root-scope+      "/a")
+        (("a")              ,+root-scope+      "/a")
+        (,(make-scope "/a") "/"                "/a")
+        ("/a"               "/"                "/a")
+        (("a")              "/"                "/a")
+        (,(make-scope "/a") ()                 "/a")
+        ("/a"               ()                 "/a")
+        (("a")              ()                 "/a")
+
+        (,+root-scope+      ,(make-scope "/a") "/a")
+        (,+root-scope+      "/a"               "/a")
+        (,+root-scope+      ("a")              "/a")
+        ("/"                ,(make-scope "/a") "/a")
+        ("/"                "/a"               "/a")
+        ("/"                ("a")              "/a")
+        (()                 ,(make-scope "/a") "/a")
+        (()                 "/a"               "/a")
+        (()                 ("a")              "/a")
+
+        (,(make-scope "/a") ,(make-scope "/b") "/b/a")
+        ("/a"               ,(make-scope "/b") "/b/a")
+        (("a")              ,(make-scope "/b") "/b/a")
+        (,(make-scope "/a") "/b"               "/b/a")
+        ("/a"               "/b"               "/b/a")
+        (("a")              "/b"               "/b/a")
+        (,(make-scope "/a") ("b")              "/b/a")
+        ("/a"               ("b")              "/b/a")
+        (("a")              ("b")              "/b/a"))
+
+    (let ((result (merge-scopes left right)))
+      (ensure (typep result 'scope))
+      (ensure-same result expected
+                   :test (if (eq expected +root-scope+) #'eq #'scope=)))))
+
+(addtest (scope-root
+          :documentation
           "Test interning of `scope' instances.")
   intern
 

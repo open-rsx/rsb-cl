@@ -17,6 +17,9 @@
    #:rsb
    #:rsb.filter)
 
+  (:import-from #:rsb
+   #:+root-scope+)
+
   ;; Root test suite
   (:export
    #:root)

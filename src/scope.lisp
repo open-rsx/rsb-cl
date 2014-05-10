@@ -140,9 +140,9 @@
                                                (scope-components scope1))))))
    (cond
      ((eq thing1 +root-scope+)
-      thing2)
+      (ensure-scope thing2))
      ((eq thing2 +root-scope+)
-      thing1)
+      (ensure-scope thing1))
      (t
       (make-result (ensure-scope thing1) (ensure-scope thing2))))))
 
