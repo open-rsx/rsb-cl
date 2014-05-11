@@ -145,11 +145,11 @@ function."))
 
 (addtest (informer-root
           :documentation
-          "Test the \"unckecked\" mode of operation of the `send'
-method.")
-  send/unckecked
+          "Test the \"unchecked\" mode of operation of the `send'
+           method.")
+  send/unchecked
 
-  (with-informer (informer "/rsbtest/informer/send/unckecked" 'string)
+  (with-informer (informer "/rsbtest/informer/send/unchecked" 'string)
     ;; Arbitrary scopes should be accepted.
     (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
           :unchecked? t)
@@ -173,7 +173,7 @@ method.")
 (addtest (informer-root
           :documentation
           "Test sequence number generator, especially modular
-arithmetic behavior around 1**32.")
+           arithmetic behavior around 2^32.")
   sequence-number-generator
 
   (ensure-cases (start expected)
