@@ -49,27 +49,34 @@
 
 (define-condition participant-creation-error (rsb-error
                                               chainable-condition)
-  ((scope      :initarg  :scope
+  ((kind       :initarg  :kind
+               :type     keyword
+               :reader   participant-creation-error-kind
+               :documentation
+               "Kind of the participant the creation of which failed.")
+   (scope      :initarg  :scope
                :type     (or puri:uri scope)
                :reader   participant-creation-error-scope
                :documentation
                "The scope of the channel in which the participant
-would have participated.")
+                would have participated.")
    (transports :initarg  :transports
                :type     list
                :reader   participant-creation-error-transports
                :documentation
                "A list of transports the participant would have used
-to connect to the bus."))
+                to connect to the bus."))
   (:default-initargs
+   :kind       (missing-required-initarg 'participant-creation-error :kind)
    :scope      (missing-required-initarg 'participant-creation-error :scope)
    :transports (missing-required-initarg 'participant-creation-error :transports))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to participate in the channel ~
+     (format stream "~@<Failed to create ~A participant in the channel ~
                      designated by ~
                      ~S~/rsb::maybe-print-transport-configuration/~
                      .~/more-conditions:maybe-print-cause/~@:>"
+             (participant-creation-error-kind condition)
              (scope-string (participant-creation-error-scope condition))
              (participant-creation-error-transports condition)
              condition)))
@@ -109,10 +116,11 @@ to connect to the bus."))
          "The type of the informer for which the creation failed."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to create RSB informer in the channel ~
+     (format stream "~@<Failed to create ~A participant in the channel ~
                      designated by ~S and type ~
                      ~S~/rsb::maybe-print-transport-configuration/~
                      ~/more-conditions:maybe-print-cause/~@:>"
+             (participant-creation-error-kind       condition)
              (participant-creation-error-scope      condition)
              (informer-creation-error-type          condition)
              (participant-creation-error-transports condition)
@@ -127,9 +135,10 @@ to connect to the bus."))
    :transports '())
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to participate in the channel ~
+     (format stream "~@<Failed to create ~A participant in the channel ~
                      designated by ~S because no transports have been ~
                      selected.~@:>"
+             (participant-creation-error-kind condition)
              (scope-string (participant-creation-error-scope condition)))))
   (:documentation
    "This error is signaled when the creation of a participant fails

@@ -117,6 +117,7 @@ channel."))
   ;; `informer-creation-error' errors.
   (with-condition-translation
       (((error informer-creation-error)
+        :kind       :informer
         :scope      scope
         :transports transports
         :type       type))

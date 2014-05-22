@@ -91,7 +91,9 @@ Return three values:
 2) the list of instantiated `rsb.transport:connector's"
   ;; Signal an error if no transports have been supplied.
   (unless transports
-    (error 'no-transports-error :scope scope))
+    (error 'no-transports-error
+           :kind  (participant-kind prototype)
+           :scope scope))
 
   ;; Replace &inherit marker in transport options with actual default
   ;; options for respective transports.

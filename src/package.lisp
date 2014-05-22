@@ -44,6 +44,7 @@
    #:communication-error
 
    #:participant-creation-error
+   #:participant-creation-error-kind
    #:participant-creation-error-scope
    #:participant-creation-error-transports
 

@@ -31,6 +31,7 @@ receiving events."))
   ;; errors.
   (with-condition-translation
       (((error reader-creation-error)
+        :kind       :reader
         :scope      scope
         :transports transports))
     (make-participant 'reader scope :in-pull
