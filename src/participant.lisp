@@ -184,16 +184,15 @@ Return three values:
                  (when converters-supplied?
                    (list :converters converters))))))))
 
-(defun call-with-participant-creation-restarts (participant-kind designator-kind
-                                                designator
+(defun call-with-participant-creation-restarts (participant-kind designator
                                                 normal-thunk args-changed-thunk)
   (declare (type function normal-thunk args-changed-thunk))
   ;; We use NORMAL-THUNK and ARGS-CHANGED-THUNK in order to implement
   ;; the common case of not invoking any restarts efficiently.
-  (let+ ((designator designator)
-         ((&values label parser) (ecase designator-kind
-                                   (:uri   (values "URI"   #'puri:parse-uri))
-                                   (:scope (values "scope" #'make-scope))))
+  (let+ (((&values designator designator-kind label parser)
+          (etypecase designator
+            (puri:uri (values designator :uri   "URI"   #'puri:parse-uri))
+            (scope    (values designator :scope "scope" #'make-scope))))
          ((&labels read-new-value ()
             (format *query-io* "Specify ~A (not evaluated): " label)
             (force-output *query-io*)
@@ -233,10 +232,9 @@ Return three values:
 KIND will usually be one of :informer, :listener and :reader. ARGS is
 a method lambda-list. The first argument is assumed to be designator
 that is the URI or scope."
-  (let* ((make-name       (symbolicate '#:make- kind))
-         (arg-names       (mapcar (compose #'first #'ensure-list) args))
-         (designator-arg  (first arg-names))
-         (designator-kind (make-keyword (second (first args)))))
+  (let* ((make-name      (symbolicate '#:make- kind))
+         (arg-names      (mapcar (compose #'first #'ensure-list) args))
+         (designator-arg (first arg-names)))
     (with-unique-names (args-var)
       `(defmethod ,make-name :around (,@args
                                       &rest ,args-var
@@ -250,6 +248,6 @@ that is the URI or scope."
            (declare (dynamic-extent #'participant-creation-normal-thunk
                                     #'participant-creation-args-changed-thunk))
            (call-with-participant-creation-restarts
-            ',kind ,designator-kind ,designator-arg
+            ',kind ,designator-arg
             #'participant-creation-normal-thunk
             #'participant-creation-args-changed-thunk))))))
