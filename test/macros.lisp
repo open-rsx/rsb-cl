@@ -19,7 +19,7 @@
           "Smoke test for the `with-listener' macro.")
   with-listener/smoke
 
-  (with-listener (listener "/rsbtest/macros-root/with-listener/smoke")
+  (with-listener (listener "inprocess:/rsbtest/macros-root/with-listener/smoke")
     (ensure (typep listener 'listener))
     (check-participant listener :listener "/rsbtest/macros-root/with-listener/smoke")))
 
@@ -75,7 +75,7 @@
           "Smoke test for the `with-reader' macro.")
   with-reader/smoke
 
-  (with-reader (reader "/rsbtest/macros-root/with-reader/smoke")
+  (with-reader (reader "inprocess:/rsbtest/macros-root/with-reader/smoke")
     (ensure (typep reader 'reader))
     (check-participant reader :reader "/rsbtest/macros-root/with-reader/smoke")))
 
@@ -88,10 +88,10 @@
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-reader (reader "socket:/rsbtest/macros-root/with-reader/error-policy"
+           `(with-reader (reader "inprocess:/rsbtest/macros-root/with-reader/error-policy"
                                  :transform #'mock-transform/error
                                  ,@(when policy `(:error-policy ,policy)))
-              (with-informer (informer "socket:/rsbtest/macros-root/with-reader/error-policy" t)
+              (with-informer (informer "inprocess:/rsbtest/macros-root/with-reader/error-policy" t)
                 (send informer 1))
               (receive reader))))
 
@@ -116,7 +116,7 @@
           "Smoke test for the `with-informer' macro.")
   with-informer/smoke
 
-  (with-informer (informer "/rsbtest/macros-root/with-informer/smoke" t)
+  (with-informer (informer "inprocess:/rsbtest/macros-root/with-informer/smoke" t)
     (ensure (typep informer 'informer))
     (check-participant informer :informer "/rsbtest/macros-root/with-informer/smoke")))
 
@@ -129,7 +129,7 @@
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-informer (informer "socket:/rsbtest/macros-root/with-informer/error-policy" t
+           `(with-informer (informer "inprocess:/rsbtest/macros-root/with-informer/error-policy" t
                                      :transform #'mock-transform/error
                                      ,@(when policy `(:error-policy ,policy)))
               (send informer 1))))

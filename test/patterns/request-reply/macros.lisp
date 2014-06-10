@@ -70,11 +70,11 @@
     (macrolet
         ((test-case (&optional policy)
            `(with-local-server (local-server
-                                "socket:"
+                                "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy"
                                 :transform `((:argument . ,#'mock-transform/error))
                                 ,@(when policy `(:error-policy ,policy)))
               (with-methods (local-server) (("echo" (arg) arg))
-                (with-remote-server (remote-server "socket:")
+                (with-remote-server (remote-server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy")
                   (call remote-server "echo" 1))))))
 
       ;; Without an error policy, the transform error should just be
@@ -104,10 +104,10 @@
     (macrolet
         ((test-case (&optional policy)
            `(with-remote-server (remote-server
-                                 "socket:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
+                                 "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
                                  :transform `((:return . ,#'mock-transform/error))
                                  ,@(when policy `(:error-policy ,policy)))
-              (with-local-server (local-server "socket:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy")
+              (with-local-server (local-server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy")
                 (with-methods (local-server) (("echo" (arg) arg))
                   (call remote-server "echo" 1))))))
 
