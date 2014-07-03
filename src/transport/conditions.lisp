@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the transport module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,10 +28,10 @@ have been constructed.")
 been constructed."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to construct ~A connector for direction ~
-                     ~A~@[ with options~{~_~2T~16A~^: ~
-                     ~@<~@;~S~>~^,~}~].~
-                     ~/more-conditions:maybe-print-cause/~@:>"
+     (format stream "~@<Failed to construct ~A connector for direction ~A~
+                     ~@[ with options~@:_~@:_~
+                       ~2@T~<~@;~@{~16S~^ ~S~^~@:_~}~:>~
+                     ~@:_~@:_~].~/more-conditions:maybe-print-cause/~@:>"
              (connector-construction-failed-name      condition)
              (connector-construction-failed-direction condition)
              (connector-construction-failed-args      condition)

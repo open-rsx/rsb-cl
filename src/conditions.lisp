@@ -69,8 +69,8 @@ to connect to the bus."))
      (format stream "~@<Failed to participate in the channel ~
                      designated by ~
                      ~S~/rsb::maybe-print-transport-configuration/~
-                     ~/more-conditions:maybe-print-cause/~@:>"
-             (participant-creation-error-scope      condition)
+                     .~/more-conditions:maybe-print-cause/~@:>"
+             (scope-string (participant-creation-error-scope condition))
              (participant-creation-error-transports condition)
              condition)))
   (:documentation
@@ -80,9 +80,12 @@ to connect to the bus."))
 (defun maybe-print-transport-configuration (stream transports &optional colon? at?)
   "Print the transport configuration TRANSPORTS to STREAM."
   (declare (ignore colon? at?))
-  (format stream "~@[ using transport configuration~{~{~_+ ~@(~A~) ~
-                  transport with options~
-                  ~&~2T~@<~@;~@{~16S~^: ~S~^, ~_~}~:>~}~}~]"
+  (format stream "~@[ using transport configuration~@:_~@:_~
+                    ~{~{~
+                      + ~@(~A~) transport with options~@:_~@:_~
+                        ~2@T~@<~@;~@{~16S~^ ~S~^~@:_~}~:>~
+                    ~}~}~
+                  ~@:_~@:_~]"
           transports))
 
 (define-condition listener-creation-error (participant-creation-error)
