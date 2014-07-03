@@ -129,24 +129,8 @@ channel."))
                           transform
                           error-policy)
   (declare (ignore transform error-policy))
-  ;; Translate different kinds of errors into
-  ;; `informer-creation-error' errors.
-  (with-condition-translation
-      (((error informer-creation-error)
-        :kind       :informer
-        :scope      scope
-        :transports transports
-        :type       type))
-    (apply #'make-participant 'informer scope
-           :transports transports
-           :converters converters
-           :type       type
-           args)))
-
-(define-participant-creation-uri-methods informer
-  (scope puri:uri) (type t))
-
-(define-participant-creation-restart-method informer
-  (scope scope) (type t))
-(define-participant-creation-restart-method informer
-  (scope puri:uri) (type t))
+  (apply #'make-participant 'informer scope
+         :transports transports
+         :converters converters
+         :type       type
+         args))

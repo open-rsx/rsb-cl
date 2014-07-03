@@ -95,40 +95,6 @@
                   ~@:_~@:_~]"
           transports))
 
-(define-condition listener-creation-error (participant-creation-error)
-  ()
-  (:documentation
-   "This error is signaled when an attempt to create a listener
-    fails."))
-
-(define-condition reader-creation-error (participant-creation-error)
-  ()
-  (:documentation
-   "This error is signaled when an attempt to create a reader
-    fails."))
-
-(define-condition informer-creation-error (participant-creation-error)
-  ((type :initarg  :type
-         :type     (or list symbol)
-         :reader   informer-creation-error-type
-         :initform nil
-         :documentation
-         "The type of the informer for which the creation failed."))
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<Failed to create ~A participant in the channel ~
-                     designated by ~S and type ~
-                     ~S~/rsb::maybe-print-transport-configuration/~
-                     ~/more-conditions:maybe-print-cause/~@:>"
-             (participant-creation-error-kind       condition)
-             (participant-creation-error-scope      condition)
-             (informer-creation-error-type          condition)
-             (participant-creation-error-transports condition)
-             condition)))
-  (:documentation
-   "This error is signaled when an attempt to create an informer
-    fails."))
-
 (define-condition no-transports-error (participant-creation-error)
   ()
   (:default-initargs

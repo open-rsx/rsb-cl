@@ -44,19 +44,7 @@ a mechanism for dispatching matching events to these handlers."))
                           transform
                           error-policy)
   (declare (ignore transform error-policy))
-  ;; Translate different kinds of errors into
-  ;; `listener-creation-error' errors.
-  (with-condition-translation
-      (((error listener-creation-error)
-        :kind       :listener
-        :scope      scope
-        :transports transports))
-    (apply #'make-participant 'listener scope
-           :transports transports
-           :converters converters
-           args)))
-
-(define-participant-creation-uri-methods listener (scope puri:uri))
-
-(define-participant-creation-restart-method listener (scope scope))
-(define-participant-creation-restart-method listener (scope puri:uri))
+  (apply #'make-participant 'listener scope
+         :transports transports
+         :converters converters
+         args))

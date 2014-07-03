@@ -127,8 +127,3 @@ at the scope SCOPE."
                     :transports   transports
                     :transform    transform
                     :error-policy error-policy))
-
-(define-participant-creation-uri-methods local-server (scope puri:uri))
-
-(define-participant-creation-restart-method local-server (scope scope))
-(define-participant-creation-restart-method local-server (scope puri:uri))

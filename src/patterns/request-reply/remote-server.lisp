@@ -186,11 +186,6 @@ call it."
                     :transform    transform
                     :error-policy error-policy))
 
-(define-participant-creation-uri-methods remote-server (scope puri:uri))
-
-(define-participant-creation-restart-method remote-server (scope scope))
-(define-participant-creation-restart-method remote-server (scope puri:uri))
-
 ;;; Utility functions
 
 (declaim (ftype (function (event-id) (cons sequence-number string)) %event-id->key)

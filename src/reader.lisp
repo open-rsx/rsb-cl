@@ -29,19 +29,7 @@ receiving events."))
                         transform
                         error-policy)
   (declare (ignore transform error-policy))
-  ;; Translate different kinds of errors into `reader-creation-error'
-  ;; errors.
-  (with-condition-translation
-      (((error reader-creation-error)
-        :kind       :reader
-        :scope      scope
-        :transports transports))
-    (apply #'make-participant 'reader scope
-           :transports transports
-           :converters converters
-           args)))
-
-(define-participant-creation-uri-methods reader (scope puri:uri))
-
-(define-participant-creation-restart-method reader (scope scope))
-(define-participant-creation-restart-method reader (scope puri:uri))
+  (apply #'make-participant 'reader scope
+         :transports transports
+         :converters converters
+         args))

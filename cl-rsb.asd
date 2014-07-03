@@ -372,7 +372,11 @@ See `version/list' for details on keyword parameters."
 
                               (:file       "macros"
                                :depends-on ("package" "local-server"
-                                            "remote-server")))))
+                                                      "remote-server"))))
+
+                (:file        "compat"
+                 :pathname    "src/compat"
+                 :depends-on  ("src" "patterns-request-reply")))
 
   :in-order-to ((doc-op  (doc-op  :cl-rsb-doc))
                 (test-op (test-op :cl-rsb-test))))

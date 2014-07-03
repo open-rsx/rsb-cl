@@ -105,7 +105,8 @@
     participant))
 
 (defmacro define-participant-creation-uri-methods (kind &rest args)
-  (let* ((make-name      (symbolicate "MAKE-" kind))
+  (let* ((make-name      (let ((*package* (symbol-package kind)))
+                           (symbolicate '#:make- kind)))
          (arg-names      (mapcar (compose #'first #'ensure-list) args))
          (designator-arg (first arg-names)))
     ;; We want the generated method to be specialized on URI
@@ -271,7 +272,8 @@
 KIND will usually be one of :informer, :listener and :reader. ARGS is
 a method lambda-list. The first argument is assumed to be designator
 that is the URI or scope."
-  (let* ((make-name      (symbolicate '#:make- kind))
+  (let* ((make-name      (let ((*package* (symbol-package kind)))
+                           (symbolicate '#:make- kind)))
          (arg-names      (mapcar (compose #'first #'ensure-list) args))
          (designator-arg (first arg-names)))
     (with-unique-names (args-var)
