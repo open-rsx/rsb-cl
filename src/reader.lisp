@@ -7,7 +7,8 @@
 (cl:in-package #:rsb)
 
 (defclass reader (receiving-client)
-  ()
+  ((direction :allocation :class
+              :initform :in-pull))
   (:documentation
    "Instances of this class provide a pull-based interface for
 receiving events."))

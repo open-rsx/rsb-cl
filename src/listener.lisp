@@ -7,13 +7,15 @@
 (cl:in-package #:rsb)
 
 (defclass listener (receiving-client)
-  ((handlers :initarg  :handlers
-             :type     list
-             :accessor rsb.ep:handlers
-             :initform '()
-             :documentation
-             "Stores the list of handlers two which events received by
-this listener should be dispatched."))
+  ((direction :allocation :class
+              :initform :in-push)
+   (handlers  :initarg  :handlers
+              :type     list
+              :accessor rsb.ep:handlers
+              :initform '()
+              :documentation
+              "Stores the list of handlers two which events received
+               by this listener should be dispatched."))
   (:documentation
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))

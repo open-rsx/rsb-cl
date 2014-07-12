@@ -7,6 +7,7 @@
 (cl:in-package #:rsb)
 
 (defclass receiving-client (participant
+                            direction-mixin
                             rsb.ep:client)
   ((filters :type     list
             :accessor receiver-filters

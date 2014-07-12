@@ -77,6 +77,20 @@
   (when uri
     (setf (slot-value instance 'uri) (puri:uri uri))))
 
+;;; `direction-mixin'
+
+(defclass direction-mixin ()
+  ((direction :type     (member :in-pull :in-push :out)
+              :allocation :class
+              :reader   participant-direction))
+  (:documentation
+   "This mixin class is intended to be mixed into classes to which a
+    communication direction can be associated. Examples are
+
+      `reader'   -> :in-pull
+      `listener' -> :in-push
+      `informer' -> :out"))
+
 ;;; meta-data and timestamp plist mixins
 
 (define-plist-data-mixin meta-data)

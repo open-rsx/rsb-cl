@@ -7,9 +7,12 @@
 (cl:in-package #:rsb)
 
 (defclass informer (participant
+                    direction-mixin
                     rsb.ep:client
                     rsb.ep:broadcast-processor)
-  ((type                      :initarg  :type
+  ((direction                 :allocation :class
+                              :initform :out)
+   (type                      :initarg  :type
                               :type     (or symbol list)
                               :reader   informer-type
                               :initform t
