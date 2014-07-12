@@ -138,7 +138,7 @@ that test participant classes."))
          (ensure-cases (uri args initargs common-initargs expected-scope)
              (list ,@cases)
 
-           (let+ (((&flet do-it () (apply #'make-participant ',class uri
+           (let+ (((&flet do-it () (apply #'make-participant ,kind uri
                                           (append initargs common-initargs)))))
              (case expected-scope
                (error (ensure-condition error (do-it)))

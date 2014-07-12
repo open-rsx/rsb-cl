@@ -33,6 +33,8 @@ includes the informer's channel can receive these events. It is
 possible for multiple informers to send events for the same
 channel."))
 
+(register-participant-class 'informer)
+
 (defmethod send :before ((informer informer) (data event)
                          &key
                          unchecked?)
@@ -129,7 +131,7 @@ channel."))
                           transform
                           error-policy)
   (declare (ignore transform error-policy))
-  (apply #'make-participant 'informer scope
+  (apply #'make-participant :informer scope
          :transports transports
          :converters converters
          :type       type

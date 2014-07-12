@@ -29,6 +29,8 @@ for RESULT."))
    "Instances of this class represent methods provided by a remote
 server."))
 
+(rsb::register-participant-class 'remote-method)
+
 (defmethod initialize-instance :after ((instance remote-method)
                                        &key)
   (closer-mop:set-funcallable-instance-function
@@ -142,6 +144,8 @@ BLOCK? is non-nil."
    "Instances of this class represent remote servers in a way that
 allows calling methods on them as if they were local."))
 
+(rsb::register-participant-class 'remote-server)
+
 (defmethod server-method ((server remote-server)
                           (name   string)
                           &key
@@ -149,7 +153,7 @@ allows calling methods on them as if they were local."))
   (or (call-next-method server name :error? error?)
       (let ((scope (merge-scopes (list name) (participant-scope server))))
         (setf (server-method server name)
-              (make-participant 'remote-method scope
+              (make-participant :remote-method scope
                                 :name name)))))
 
 (defmethod call ((server  remote-server)
@@ -180,7 +184,7 @@ call it."
                                (converters (default-converters))
                                transform
                                error-policy)
-  (make-participant 'remote-server scope
+  (make-participant :remote-server scope
                     :converters   converters
                     :transports   transports
                     :transform    transform

@@ -35,12 +35,8 @@
 
 ;;; Participant creation
 
-(defmethod make-participant ((class t) (scope scope) &rest args &key)
-  (let ((class (find-class class)))
-    (closer-mop:finalize-inheritance class)
-    (apply #'make-participant-using-class
-           class (closer-mop:class-prototype class) scope
-           args)))
+(defmethod make-participant ((kind t) (scope scope) &rest args &key)
+  (apply #'service-provider:make-provider 'participant kind scope args))
 
 (defmethod make-participant-using-class :around ((class     class)
                                                  (prototype rsb.ep:client)
@@ -157,7 +153,7 @@
                    (list :converters converters))))))))
 
 ;; This method operates on URIs.
-(defmethod make-participant ((designator t) (scope puri:uri)
+(defmethod make-participant ((kind t) (scope puri:uri)
                              &rest args &key
                              (transports (transport-options
                                           :exclude-disabled?
@@ -166,7 +162,7 @@
                              transform
                              error-policy)
   (let+ (((&values scope options) (uri->scope-and-options scope transports)))
-    (apply #'make-participant designator scope
+    (apply #'make-participant kind scope
            :transports   options
            :converters   converters
            :transform    transform
@@ -300,7 +296,7 @@ that is the URI or scope."
   ;; `participant-creation-error' errors.
   (with-condition-translation
       (((error participant-creation-error)
-        :kind       (make-keyword kind)
+        :kind       kind
         :scope      scope
         :transports transports)) ; TODO not always available
     (call-next-method)))

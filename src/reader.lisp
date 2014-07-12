@@ -13,6 +13,8 @@
    "Instances of this class provide a pull-based interface for
 receiving events."))
 
+(register-participant-class 'reader)
+
 (defmethod receive ((reader reader)
                     &key
                     (block? t))
@@ -29,7 +31,7 @@ receiving events."))
                         transform
                         error-policy)
   (declare (ignore transform error-policy))
-  (apply #'make-participant 'reader scope
+  (apply #'make-participant :reader scope
          :transports transports
          :converters converters
          args))

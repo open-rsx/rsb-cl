@@ -137,7 +137,7 @@ converter."
 ;;; Participant creation protocol
 ;;;
 ;;; 1. Clients of the protocol call `make-participant' to request the
-;;;    creation of an instance of a given participant class.
+;;;    creation of an instance of a given participant kind.
 ;;;
 ;;;    Methods on this generic function are in charge of:
 ;;;    * Establishing appropriate restarts
@@ -146,17 +146,21 @@ converter."
 ;;;    * Parsing string designators or URIs and scopes
 ;;;    * Splitting URIs into scopes and transport options
 ;;;
-;;; 2. The specified class is located and a prototype instance is
-;;;    obtained (e.g. via `class-prototype').
+;;; 2. `service-provider:make-provider' is used to locate the
+;;;    requested participant class and obtain a prototype instance
+;;;    (e.g. via. `class-prototype').
 ;;;
-;;; 3. `make-participant-using-class' is called with arguments
-;;;    augmented with the prototype instance.
+;;;    * In most cases, this is achieved by registering instances of
+;;;      the specialized `participant-provider' provider class
+;;;
+;;; 3. Normally, the provider calls `make-participant-using-class'
+;;;    with arguments augmented with the prototype instance.
 ;;;
 ;;;    This allows methods on `make-participant-using-class' to
 ;;;    customize participant creation for certain classes and their
 ;;;    respective subclasses.
 
-(defgeneric make-participant (class scope &rest args
+(defgeneric make-participant (kind scope &rest args
                               &key
                               direction
                               transports
@@ -165,7 +169,7 @@ converter."
                               error-policy
                               &allow-other-keys)
   (:documentation
-   "Make and return a participant instance of CLASS that participates
+   "Make and return a participant instance of KIND that participates
     in the channel designated by SCOPE.
 
     In general, the keyword arguments ARGS are used as initargs for
@@ -207,6 +211,40 @@ converter."
 
     See `make-participant' for a description of the remainder of the
     parameters."))
+
+;; Service
+
+(defclass participant-provider (service-provider:class-provider)
+  ()
+  (:documentation
+   "Provider class which implements `service-provider:make-provider'
+    by delegating to `make-participant-using-class'."))
+
+(defmethod shared-initialize :after ((instance   participant-provider)
+                                     (slot-names t)
+                                     &key)
+  (closer-mop:finalize-inheritance
+   (service-provider:provider-class instance)))
+
+(defmethod service-provider:make-provider ((service  t)
+                                           (provider participant-provider)
+                                           &rest args)
+  (let* ((class     (service-provider:provider-class provider))
+         (prototype (closer-mop:class-prototype class)))
+    (apply #'make-participant-using-class class prototype args)))
+
+(service-provider:define-service participant
+  (:documentation
+   "Providers of this service are classes conforming to the
+    participant protocol."))
+
+(defun register-participant-class (class
+                                   &optional
+                                   (designator (make-keyword class)))
+  (service-provider:register-provider/class
+   'participant designator
+   :class          class
+   :provider-class 'participant-provider))
 
 ;; Default behavior
 

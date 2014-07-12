@@ -20,6 +20,8 @@
    "A listener consists of a set of filters, a set of handlers and has
 a mechanism for dispatching matching events to these handlers."))
 
+(register-participant-class 'listener)
+
 (defmethod (setf rsb.ep:handlers) :around ((new-value list)
                                            (listener  listener))
   (let* ((configurator (rsb.ep:client-configurator listener))
@@ -44,7 +46,7 @@ a mechanism for dispatching matching events to these handlers."))
                           transform
                           error-policy)
   (declare (ignore transform error-policy))
-  (apply #'make-participant 'listener scope
+  (apply #'make-participant :listener scope
          :transports transports
          :converters converters
          args))

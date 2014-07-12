@@ -29,6 +29,8 @@ should be passed to the callback function."))
 local server. The actual behavior of methods is implemented by
 invoking arbitrary user-supplied functions."))
 
+(rsb::register-participant-class 'local-method)
+
 (defmethod shared-initialize :after ((instance   local-method)
                                      (slot-names t)
                                      &key)
@@ -97,6 +99,8 @@ invoking arbitrary user-supplied functions."))
 which are implemented by callback functions with a scope under which
 these methods are exposed for remote clients."))
 
+(rsb::register-participant-class 'local-server)
+
 (defmethod (setf server-method) ((new-value function)
                                  (server    local-server)
                                  (name      string)
@@ -106,7 +110,7 @@ these methods are exposed for remote clients."))
 
   (setf (server-method server name)
         (let ((scope (merge-scopes (list name) (participant-scope server))))
-          (make-participant 'local-method scope
+          (make-participant :local-method scope
                             :server   server
                             :name     name
                             :callback new-value
@@ -122,7 +126,7 @@ these methods are exposed for remote clients."))
                               error-policy)
   "Make and return a `local-server' instance that provides a service
 at the scope SCOPE."
-  (make-participant 'local-server scope
+  (make-participant :local-server scope
                     :converters   converters
                     :transports   transports
                     :transform    transform
