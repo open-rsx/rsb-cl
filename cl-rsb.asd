@@ -444,6 +444,10 @@ See `version/list' for details on keyword parameters."
                               (:file       "macros"
                                :depends-on ("package"))))
 
+                (:file       "examples"
+                 :pathname   "test/examples"
+                 :depends-on ("test"))
+
                 (:module     "filter"
                  :pathname   "test/filter"
                  :depends-on ("test")

@@ -1,6 +1,6 @@
 ;;;; sender.lisp --- An example program demonstrating the protocol buffer converter.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,11 +11,14 @@
 ;; data-holder and corresponding (de)serialization code has to be
 ;; generated. When a textual definition is available, this can be done
 ;; at runtime like this:
-(let ((descriptor (pbf:load/text #P"SimpleImage.proto")))
-  (pbb:emit descriptor :class)
-  (pbb:emit descriptor :packed-size)
-  (pbb:emit descriptor :serializer)
-  (pbb:emit descriptor :deserializer))
+#.(let ((descriptor (pbf:load/text (merge-pathnames
+                                    "Image.proto"
+                                    *compile-file-pathname*))))
+    (pbb:emit descriptor :class)
+    (pbb:emit descriptor :packed-size)
+    (pbb:emit descriptor :serializer)
+    (pbb:emit descriptor :deserializer)
+    (values))
 
 ;; Once the data-holder class and its (de)serialization methods have
 ;; been generated, any participant that is configured to use the
@@ -23,7 +26,7 @@
 ;; events containing the protocol buffer message in question as a
 ;; payload:
 (rsb:with-informer (informer "/example/protobuf" t)
-  (rsb:send informer (make-instance 'tutorial.protobuf-converter:simple-image
+  (rsb:send informer (make-instance 'example:image
                                     :width  100
                                     :height 100
                                     :data   (nibbles:octet-vector 1 2 3))))

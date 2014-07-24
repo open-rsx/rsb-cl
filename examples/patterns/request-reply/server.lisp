@@ -4,6 +4,8 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
+;;;; Loading this file does not terminate.
+
 ;; mark-start::body
 ;; For managing the lifetime of `local-server' instances (e.g. for
 ;; short-lived clients), the `with-local-server' macro can used. It

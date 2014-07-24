@@ -1,8 +1,10 @@
 ;;;; reader.lisp --- An example program demonstrating the reader.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+
+;;;; Loading this file does not terminate.
 
 ;; mark-start::body
 

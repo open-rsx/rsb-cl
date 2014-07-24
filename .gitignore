@@ -1,3 +1,5 @@
 /build*
 /version.sexp
 /protocol-directory.sexp
+# Produced by example compilation
+*.fasl

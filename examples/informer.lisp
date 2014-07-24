@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- An example program demonstrating the informer.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,6 +11,7 @@
 ;; also in case of non-local exist.
 ;; mark-start::with-informer
 (rsb:with-informer (informer "/example/informer" 'string)
+  (format t "Sending first event~%")
   (rsb:send informer "example payload"))
 ;; mark-end::with-informer
 
@@ -28,6 +29,7 @@
 ;; mark-start::variable
 (defvar *informer* (rsb:make-informer "/example/informer" 'string))
 
+(format t "Sending second event~%")
 (rsb:send *informer* "example payload")
 ;; mark-end::variable
 ;; mark-end::body

@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- An example program demonstrating the listener.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,6 +17,7 @@
   (rsb:with-handler listener
       ((event)
        (format t "Received event: ~A~%" event))
+    (format t "Waiting for events~%")
     (sleep 20)))
 ;; mark-end::with-listener
 
