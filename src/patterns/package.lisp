@@ -7,8 +7,20 @@
 (cl:defpackage #:rsb.patterns
   (:use
    #:cl
+   #:more-conditions
 
    #:rsb)
+
+  ;; Conditions
+  (:export
+   #:protocol-condition
+   #:protocol-condition-protocol
+   #:protocol-condition-role
+   #:protocol-condition-message
+
+   #:protocol-warning
+
+   #:protocol-error)
 
   (:documentation
    "This package contains communication patterns implemented on top of

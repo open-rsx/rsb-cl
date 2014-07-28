@@ -344,7 +344,8 @@ See `version/list' for details on keyword parameters."
                 (:module     "patterns"
                  :pathname   "src/patterns"
                  :depends-on ("src")
-                 :components ((:file       "package")))
+                 :components ((:file       "package")
+                              (:file       "conditions")))
 
                 (:module     "patterns-request-reply"
                  :pathname   "src/patterns/request-reply"
