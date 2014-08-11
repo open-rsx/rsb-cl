@@ -85,11 +85,12 @@ and `use-value' restarts."
         :object    event))
     (restart-case
         (call-next-method)
-      (continue ()
+      (continue (&optional condition)
         :report (lambda (stream)
                   (format stream "~@<Continue without transforming ~
                                   ~A.~@:>"
                           event))
+        (declare (ignore condition))
         event)
       (use-value (value)
         :report (lambda (stream)

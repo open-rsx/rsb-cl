@@ -9,9 +9,9 @@
 (defmethod find-transport-class ((spec (eql :socket-in-push)))
   (find-class 'in-push-connector))
 
-(defclass in-push-connector (in-connector
-                             timestamping-receiver-mixin
-                             error-handling-push-receiver-mixin)
+(defclass in-push-connector (error-policy-handler-mixin
+                             restart-handler-mixin
+                             in-connector)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
@@ -22,4 +22,5 @@ a socket."))
 (defmethod handle ((connector in-push-connector)
                    (data      notification))
   ;; TODO(jmoringe): condition translation?
-  (dispatch connector (notification->event connector data :undetermined)))
+  (when-let ((event (notification->event connector data :undetermined)))
+    (dispatch connector event)))

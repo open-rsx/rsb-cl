@@ -33,43 +33,73 @@ handle conditions according to a client-supplied policy."))
               processor)))
 
 (defun call-with-error-policy (processor thunk)
-  "Invoke THUNK with a handler that applies the error policy of
-PROCESSOR."
-  (handler-bind
-      ((error (curry #'apply-error-policy processor)))
-    (funcall thunk)))
+  "Call THUNK with a handler that applies PROCESSOR's error policy."
+  (declare (type function thunk))
+  (flet ((apply-policy (condition)
+           (apply-error-policy processor condition)))
+    (declare (dynamic-extent #'apply-policy))
+    (handler-bind ((error #'apply-policy)) (funcall thunk))))
 
 (defmacro with-error-policy ((processor) &body body)
   "Execute BODY with a condition handler that applies the error policy
-of processor."
-  `(call-with-error-policy ,processor (lambda () ,@body)))
+   of processor."
+  `(flet ((with-error-policy-thunk () ,@body))
+     (declare (dynamic-extent #'with-error-policy-thunk))
+     (call-with-error-policy ,processor #'with-error-policy-thunk)))
 
-;;; `error-handling-dispatcher-mixin' class
+;; Mixin classes `{error-policy,restart}-{dispatcher,handler}-mixin'
 
-(defclass error-handling-dispatcher-mixin (error-policy-mixin)
-  ()
-  (:documentation
-   "This mixin class is intended to mixed into processor classes that
-perform potentially error signaling tasks in their `dispatch'
-methods. This class adds an :around method on `dispatch' that installs
-restarts for error recovery and optionally calls an error policy
-function."))
+(macrolet
+    ((define-error-policy+restart-mixins (method name)
+       (let ((error-policy-class-name (symbolicate
+                                       '#:error-policy- name '#:-mixin))
+             (restart-class-name      (symbolicate
+                                       '#:restart- name '#:-mixin)))
+         `(progn
 
-(defmethod dispatch :around ((processor error-handling-dispatcher-mixin)
-                             (event     event))
-  ;; Establish `continue' restart around call to the next `dispatch'
-  ;; method. In case of an error, call the error-policy function of
-  ;; PROCESSOR, if any.
-  (with-error-policy (processor)
-    (restart-case
-        (call-next-method)
-      (continue (&optional condition)
-        :report (lambda (stream)
-                  (format stream "~@<Ignore the failure to dispatch ~
-                                  event ~A.~@:>"
-                          event))
-        (declare (ignore condition))
-        nil))))
+            (defclass ,error-policy-class-name ()
+              ()
+              (:documentation
+               ,(format nil "This mixin class is intended to be mixed ~
+                             into processor classes that perform ~
+                             potentially error signaling tasks in ~
+                             their `~(~A~)' methods. This class adds ~
+                             an :around method on ~:*`~(~A~)' that ~
+                             installs restarts for error recovery and ~
+                             optionally calls an error policy ~
+                             function."
+                        name)))
+
+            (defmethod ,method :around ((processor ,error-policy-class-name)
+                                        (data      t))
+              ;; In case of an error, call the error-policy
+              ;; function of processor, if any.
+              (with-error-policy (processor) (call-next-method)))
+
+            (defclass ,restart-class-name ()
+              ()
+              (:documentation
+               ,(format nil "This mixin class is intended to be mixed ~
+                             into processor class that want to ~
+                             establish a `continue' restart around the ~
+                             execution of the `~(~A~)' method"
+                        name)))
+
+            (defmethod ,method :around ((processor ,restart-class-name)
+                                        (data      t))
+              ;; Establish `continue' restart around call to the next `handle'
+              ;; method.
+              (restart-case
+                  (call-next-method)
+                (continue (&optional condition)
+                  :report (lambda (stream)
+                            (format stream "~@<Ignore the failure to ~
+                                            ~S datum ~A in ~A.~@:>"
+                                    ',method data processor))
+                  (declare (ignore condition)))))))))
+
+  (define-error-policy+restart-mixins dispatch dispatcher)
+  (define-error-policy+restart-mixins handle   handler))
 
 ;;; Mixin class `filtering-processor-mixin'
 

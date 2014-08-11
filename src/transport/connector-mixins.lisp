@@ -18,9 +18,8 @@ for the `emit' method."))
 (defmethod emit :around ((connector error-handling-pull-receiver-mixin)
                          (block?    t))
   "Call the actual `emit' method with a condition handler that applies
-the error policy of CONNECTOR."
-  (with-error-policy (connector)
-    (call-next-method)))
+   the error policy of CONNECTOR."
+  (with-error-policy (connector) (call-next-method)))
 
 ;;; Mixin class `error-handling-push-receiver-mixin'
 
@@ -33,25 +32,27 @@ for the `receive-messages' method."))
 
 (defmethod receive-messages :around ((connector error-handling-push-receiver-mixin))
   "Call the actual `receive-messages' method with a condition handler
-that applies the error policy of CONNECTOR."
-  (with-error-policy (connector)
-    (call-next-method)))
+  that applies the error policy of CONNECTOR."
+  (with-error-policy (connector) (call-next-method)))
 
 ;;; Mixin class `error-handling-sender-mixin'
+;;;
+;;; Note: almost identical to `rsb.ep:error-policy-handler-mixin' but
+;;; not completely. Differences: 1) semantic difference 2) method is
+;;; specialized on `event' instead of `t'.
 
 (defclass error-handling-sender-mixin (error-policy-mixin)
   ()
   (:documentation
    "This class is intended to be mixed into out-direction connector
-classes to provide client-supplied error handling policies for the
-`handle' method."))
+    classes to provide client-supplied error handling policies for the
+    `handle' method."))
 
-(defmethod handle :around ((connector error-handling-sender-mixin)
-                           (event     event))
+(defmethod handle :around ((sink error-handling-sender-mixin)
+                           (data event))
   "Call the actual `handle' method with a condition handler that
-applies the error policy of CONNECTOR."
-  (with-error-policy (connector)
-    (call-next-method)))
+   applies the error policy of CONNECTOR."
+  (with-error-policy (sink) (call-next-method)))
 
 ;;; Mixin class `restart-notification-sender-mixin'
 
@@ -76,8 +77,7 @@ in a `event->notification' method."))
                 (format stream "~@<Ignore the failed sending attempt ~
                                 and continue with the next ~
                                 notification.~@:>"))
-      (declare (ignore condition))
-      nil)))
+      (declare (ignore condition)))))
 
 (defmethod event->notification :around ((connector    restart-notification-sender-mixin)
                                         (notification t))
@@ -89,8 +89,7 @@ in a `event->notification' method."))
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed encoding and ~
                                 continue with the next event.~@:>"))
-      (declare (ignore condition))
-      nil)))
+      (declare (ignore condition)))))
 
 ;;; Mixin class `restart-notification-receiver-mixin'
 
@@ -115,8 +114,7 @@ notifications to events in a `notification->event' method."))
                       (format stream "~@<Ignore the failed receiving ~
                                       attempt and continue with the ~
                                       next notification.~@:>"))
-            (declare (ignore condition))
-            nil))))
+            (declare (ignore condition))))))
 
 (defmethod notification->event :around ((connector    restart-notification-receiver-mixin)
                                         (notification t)
@@ -129,8 +127,7 @@ notifications to events in a `notification->event' method."))
       :report (lambda (stream)
                 (format stream "~@<Ignore the failed decoding and ~
                                 continue with the next event.~@:>"))
-      (declare (ignore condition))
-      nil)))
+      (declare (ignore condition)))))
 
 ;;; Mixin class `conversion-mixin'
 
@@ -319,8 +316,7 @@ thread."))
                 (bt:condition-wait control-condition control-mutex)))))
 
 (defmethod stop-receiver ((connector threaded-receiver-mixin))
-  (let+ (((&accessors (thread        connector-thread)
-                      (control-mutex connector-control-mutex)) connector))
+  (let+ (((&structure connector- thread control-mutex) connector))
     (bt:with-lock-held (control-mutex)
       (cond
         ;; If this is called from the receiver thread, there is no
@@ -337,7 +333,7 @@ thread."))
                (log:debug "~@<~A is interrupting receiver thread with abort~@:>"
                           connector)
                (ignore-errors
-                (bt:interrupt-thread thread #'exit-receiver))
+                 (bt:interrupt-thread thread #'exit-receiver))
 
                ;; The thread should be terminating or already have
                ;; terminated.

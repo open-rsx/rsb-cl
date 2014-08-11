@@ -9,10 +9,11 @@
 (defmethod find-transport-class ((spec (eql :inprocess-in-push)))
   (find-class 'in-push-connector))
 
-(defclass in-push-connector (connector
-                             broadcast-processor
-                             error-handling-dispatcher-mixin
-                             error-handling-push-receiver-mixin)
+(defclass in-push-connector (broadcast-processor
+                             error-policy-handler-mixin
+                             restart-handler-mixin
+                             restart-dispatcher-mixin
+                             connector)
   ()
   (:metaclass connector-class)
   (:direction :in-push)

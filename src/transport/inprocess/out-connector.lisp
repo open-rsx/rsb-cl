@@ -1,6 +1,6 @@
 ;;;; out-connector.lisp --- An out-direction connector for inprocess communication.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,7 +9,9 @@
 (defmethod find-transport-class ((spec (eql :inprocess-out)))
   (find-class 'out-connector))
 
-(defclass out-connector (connector)
+(defclass out-connector (error-handling-sender-mixin
+                         restart-handler-mixin
+                         connector)
   ()
   (:metaclass connector-class)
   (:direction :out)

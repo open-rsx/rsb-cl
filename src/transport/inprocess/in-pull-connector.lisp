@@ -17,10 +17,10 @@
 (defmethod find-transport-class ((spec (eql :inprocess-in-pull)))
   (find-class 'in-pull-connector))
 
-(defclass in-pull-connector (connector
-                             broadcast-processor
-                             error-handling-dispatcher-mixin
-                             error-handling-pull-receiver-mixin)
+(defclass in-pull-connector (broadcast-processor
+                             error-handling-pull-receiver-mixin
+                             restart-dispatcher-mixin
+                             connector)
   ((queue :type     lparallel.queue:queue
           :reader   connector-queue
           :initform (lparallel.queue:make-queue)

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for event-processing module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -100,9 +100,21 @@
 
    #:with-error-policy)
 
-  ;; `error-handling-dispatcher-mixin' class
+  ;; `error-policy-dispatcher-mixin' class
   (:export
-   #:error-handling-dispatcher-mixin)
+   #:error-policy-dispatcher-mixin)
+
+  ;; `restart-dispatcher-mixin' class
+  (:export
+   #:restart-dispatcher-mixin)
+
+  ;; `error-policy-handler-mixin' class
+  (:export
+   #:error-policy-handler-mixin)
+
+  ;; `restart-handler-mixin' class
+  (:export
+   #:restart-handler-mixin)
 
   ;; `transform-mixin' class
   (:export

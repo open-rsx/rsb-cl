@@ -7,8 +7,9 @@
 (cl:in-package #:rsb.transport.socket)
 
 (defclass in-connector (connector
-                        timestamping-receiver-mixin
                         restart-notification-receiver-mixin
+                        restart-dispatcher-mixin
+                        timestamping-receiver-mixin
                         broadcast-processor
                         expose-transport-metrics-mixin)
   ((scope :type     scope

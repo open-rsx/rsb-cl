@@ -457,10 +457,6 @@ See `version/list' for details on keyword parameters."
                                :depends-on ("package"))
                               (:file       "protocol"
                                :depends-on ("package"))
-                              (:file       "error-policy-mixin"
-                               :depends-on ("package"))
-                              (:file       "error-handling-dispatcher-mixin"
-                               :depends-on ("package"))
                               (:file       "processor-mixins"
                                :depends-on ("package"))
 
