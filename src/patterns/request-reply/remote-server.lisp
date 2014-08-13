@@ -26,8 +26,7 @@ call completes. CONDITION is a condition variable that is used to wait
 for RESULT."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
-   "Instances of this class represent methods provided by a remote
-server."))
+   "Makes a method of a remote server callable by client code."))
 
 (rsb::register-participant-class 'remote-method)
 
@@ -141,8 +140,10 @@ BLOCK? is non-nil."
 (defclass remote-server (server)
   ()
   (:documentation
-   "Instances of this class represent remote servers in a way that
-allows calling methods on them as if they were local."))
+   "Allows client code to call methods provided by remote servers.
+
+    The methods are presented as functions and can be called as if
+    they were local."))
 
 (rsb::register-participant-class 'remote-server)
 

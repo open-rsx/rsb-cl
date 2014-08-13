@@ -27,11 +27,11 @@ event payloads supported by the informer.")
 generation function which is used to generate sequence numbers for
 events sent by this informer."))
   (:documentation
-   "An informer is a participant that publishes events to a specific
-channel. Other participants on the same channel or a channel that
-includes the informer's channel can receive these events. It is
-possible for multiple informers to send events for the same
-channel."))
+   "A participant that publishes events to a specific channel.
+
+    Other participants on the same channel or a channel that includes
+    the informer's channel can receive these events. It is possible
+    for multiple informers to send events for the same channel."))
 
 (register-participant-class 'informer)
 

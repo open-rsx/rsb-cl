@@ -10,8 +10,10 @@
   ((direction :allocation :class
               :initform :in-pull))
   (:documentation
-   "Instances of this class provide a pull-based interface for
-receiving events."))
+   "Called by client to receive events on a channel (pull style).
+
+    The client makes blocking or non-blocking calls to `receive' to
+    receive the next event."))
 
 (register-participant-class 'reader)
 

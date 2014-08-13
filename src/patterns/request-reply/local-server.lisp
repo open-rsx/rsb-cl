@@ -25,9 +25,10 @@ should be passed to the callback function."))
   (:default-initargs
    :callback (missing-required-initarg 'local-method :callback))
   (:documentation
-   "Instances of this class implement and make available methods of a
-local server. The actual behavior of methods is implemented by
-invoking arbitrary user-supplied functions."))
+   "Method within a local server. Runs client code when called.
+
+    The actual behavior of methods is implemented by invoking
+    arbitrary user-supplied functions."))
 
 (rsb::register-participant-class 'local-method)
 
@@ -95,9 +96,11 @@ invoking arbitrary user-supplied functions."))
 (defclass local-server (server)
   ()
   (:documentation
-   "Instances of this class associate a collection of method instances
-which are implemented by callback functions with a scope under which
-these methods are exposed for remote clients."))
+   "Makes a set of named functions available for remote invocation.
+
+    Instances of this class associate a collection of `local-method'
+    instances which are implemented by callback functions with a scope
+    under which these methods are exposed for remote clients."))
 
 (rsb::register-participant-class 'local-server)
 

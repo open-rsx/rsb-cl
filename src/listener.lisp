@@ -17,8 +17,10 @@
               "Stores the list of handlers two which events received
                by this listener should be dispatched."))
   (:documentation
-   "A listener consists of a set of filters, a set of handlers and has
-a mechanism for dispatching matching events to these handlers."))
+   "Pushes events received on a channel to handlers (push style).
+
+    Consists of a set of filters, a set of handlers and has a
+    mechanism for dispatching matching events to these handlers."))
 
 (register-participant-class 'listener)
 
