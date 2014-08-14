@@ -39,12 +39,17 @@
   make-participant-hook/smoke
 
   (ensure-cases ((kind scope &rest args) expected)
-      '(((:reader        "/")         (:converters :transports :transform))
-        ((:listener      "/")         (:converters :transports :transform))
-        ((:informer      "/" :type t) (:converters :transports :transform :type))
+      '(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
+         (:converters :transports :transform))
+        ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke")
+         (:converters :transports :transform))
+        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke" :type t)
+         (:converters :transports :transform :type))
 
-        ((:local-server  "/")         (:transform))
-        ((:remote-server "/")         (:transform)))
+        ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke")
+         (:converters :transports :transform))
+        ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke")
+         (:converters :transports :transform)))
 
     (let ((participant))
       (ensure-same
@@ -82,7 +87,7 @@
                            (lambda (&rest args)
                             (declare (ignore args))
                             nil)))
-      (with-participant (participant (make-participant :listener "/"))
+      (with-participant (participant (make-participant :listener "inprocess:/rsbtest/make-participant-hook/buffer-handler"))
         (declare (ignore participant))))))
 
 (addtest (hooks-root
@@ -91,12 +96,13 @@
   participant-state-change-hook/smoke
 
   (ensure-cases (kind scope &rest args)
-      '((:reader        "/")
-        (:listener      "/")
-        (:informer      "/" :type t)
+      '((:reader        "inprocess:/rsbtest/participant-state-change-hook/smoke")
+        (:listener      "inprocess:/rsbtest/participant-state-change-hook/smoke")
+        (:informer      "inprocess:/rsbtest/participant-state-change-hook/smoke"
+                        :type t)
 
-        (:local-server  "/")
-        (:remote-server "/"))
+        (:local-server  "inprocess:/rsbtest/participant-state-change-hook/smoke")
+        (:remote-server "inprocess:/rsbtest/participant-state-change-hook/smoke"))
 
     (let ((participant))
       (ensure-same
