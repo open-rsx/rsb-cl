@@ -58,19 +58,15 @@ in the process. Similarly, a process that provides a socket-based bus
 as a server creates `bus-connection' instances for remote processes,
 but shares these among participants in the process."))
 
-(defmethod shared-initialize :after ((instance   bus-connection)
-                                     (slot-names t)
-                                     &key
-                                     error-policy
-                                     socket
-                                     host
-                                     port
-                                     (nodelay?    t)
-                                     handshake)
-  ;; Install error policy and socket (opening it, if specified via
-  ;; HOST and PORT).
-  (setf (processor-error-policy instance) error-policy
-        (connection-%socket instance)
+(defmethod initialize-instance :after ((instance bus-connection)
+                                       &key
+                                       socket
+                                       host
+                                       port
+                                       (nodelay? t)
+                                       handshake)
+  ;; Install socket (opening it, if specified via HOST and PORT).
+  (setf (connection-%socket instance)
         (cond
           (socket)
           ((and host port)
@@ -85,6 +81,14 @@ but shares these among participants in the process."))
   ;; If requested, perform handshake in the requested role.
   (when handshake
     (handshake instance :setup handshake)))
+
+(defmethod shared-initialize :after ((instance   bus-connection)
+                                     (slot-names t)
+                                     &key
+                                     (error-policy nil error-policy-supplied?))
+  ;; Install or change (when reinitializing) error policy.
+  (when error-policy-supplied?
+    (setf (processor-error-policy instance) error-policy)))
 
 (defmethod (setf processor-error-policy) ((new-value  t)
                                           (connection bus-connection))
