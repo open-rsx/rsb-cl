@@ -53,10 +53,11 @@ connection.")
   ;; supplied for a single host-port combination.
   (ensure-condition reader-creation-error
     (with-reader (r1 (make-socket-url t nil))
+      (declare (ignore r1))
       (with-reader (r2 (make-socket-url nil '("tcpnodelay" "0")))
+        (declare (ignore r2))
         (with-reader (r3 (make-socket-url nil nil))
-          ;; body is not important
-          )))))
+          (declare (ignore r3))))))) ; body is not important
 
 (addtest (transport-socket-bus-root
           :documentation
