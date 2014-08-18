@@ -100,58 +100,6 @@
 
     participant))
 
-(defmacro define-participant-creation-uri-methods (kind &rest args)
-  (let* ((make-name      (let ((*package* (symbol-package kind)))
-                           (symbolicate '#:make- kind)))
-         (arg-names      (mapcar (compose #'first #'ensure-list) args))
-         (designator-arg (first arg-names)))
-    ;; We want the generated method to be specialized on URI
-    ;; designators.
-    (unless (eq (second (first args)) 'puri:uri)
-      (error "~@<The specializer of the first parameter is ~S, but ~
-              should be ~S.~@:>"
-             (second (first args)) 'puri:uri))
-
-    `(progn
-       ;; This method operates on URIs.
-       (defmethod ,make-name
-           (,@args
-            &key
-            (transports (transport-options
-                         :exclude-disabled?
-                         (not (uri-transport ,designator-arg))))
-            (converters (default-converters))
-            transform
-            error-policy)
-         (let+ (((&values scope options)
-                 (uri->scope-and-options ,designator-arg transports)))
-           (,make-name scope ,@(rest arg-names)
-                       :transports   options
-                       :converters   converters
-                       :transform    transform
-                       :error-policy error-policy)))
-
-       ;; This method operates on strings which it turns into either
-       ;; URIs (if the string contains a colon) or scopes.
-       (defmethod ,make-name ((,designator-arg string) ,@(rest args)
-                              &key
-                              (transports nil transports-supplied?)
-                              (converters nil converters-supplied?)
-                              transform
-                              error-policy)
-         (apply #',make-name
-                (if (find #\: ,designator-arg)
-                    (puri:parse-uri ,designator-arg)
-                    (make-scope ,designator-arg))
-                ,@(rest arg-names)
-                :transform    transform
-                :error-policy error-policy
-                (append
-                 (when transports-supplied?
-                   (list :transports transports))
-                 (when converters-supplied?
-                   (list :converters converters))))))))
-
 ;; This method operates on URIs.
 (defmethod make-participant ((kind t) (scope puri:uri)
                              &rest args &key
@@ -262,32 +210,6 @@
      kind scope
      #'make-participant-normal-thunk
      #'make-participant-args-changed-thunk)))
-
-(defmacro define-participant-creation-restart-method (kind &rest args)
-  "Emit an :around method on `make-KIND' that establishes restarts.
-KIND will usually be one of :informer, :listener and :reader. ARGS is
-a method lambda-list. The first argument is assumed to be designator
-that is the URI or scope."
-  (let* ((make-name      (let ((*package* (symbol-package kind)))
-                           (symbolicate '#:make- kind)))
-         (arg-names      (mapcar (compose #'first #'ensure-list) args))
-         (designator-arg (first arg-names)))
-    (with-unique-names (args-var)
-      `(defmethod ,make-name :around (,@args
-                                      &rest ,args-var
-                                      &key &allow-other-keys)
-         ;; Install restarts around the creation attempt.
-         (flet ((participant-creation-normal-thunk (,designator-arg)
-                  (declare (ignore ,designator-arg))
-                  (call-next-method))
-                (participant-creation-args-changed-thunk (,designator-arg)
-                  (apply #',make-name ,@arg-names ,args-var)))
-           (declare (dynamic-extent #'participant-creation-normal-thunk
-                                    #'participant-creation-args-changed-thunk))
-           (call-with-participant-creation-restarts
-            ',kind ,designator-arg
-            #'participant-creation-normal-thunk
-            #'participant-creation-args-changed-thunk))))))
 
 (defmethod make-participant :around ((kind t) (scope t)
                                      &key
