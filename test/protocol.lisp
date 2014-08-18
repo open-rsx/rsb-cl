@@ -6,6 +6,63 @@
 
 (cl:in-package #:rsb.test)
 
+;;; Tests for the `make-participant' generic function
+
+(deftestsuite make-participant-root (root)
+  ()
+  (:documentation
+   "Unit tests for the `participant-hook' generic function."))
+
+(defclass nested-mock-participant.inner (participant) ())
+(rsb::register-participant-class 'nested-mock-participant.inner)
+(defmethod initialize-instance :after ((instance nested-mock-participant.inner)
+                                       &key
+                                       scope
+                                       signal-participant-creation-error?
+                                       &allow-other-keys)
+  (if signal-participant-creation-error?
+      (error 'participant-creation-error
+             :kind       :nested-mock-participant.inner
+             :scope      scope
+             :transports '())
+      (error "intentional error")))
+
+(defclass nested-mock-participant.outer (participant) ())
+(rsb::register-participant-class 'nested-mock-participant.outer)
+(defmethod initialize-instance :after ((instance nested-mock-participant.outer)
+                                       &key &allow-other-keys)
+  (make-participant :nested-mock-participant.inner "/"))
+
+(defun participant-creation-error-cause-by-nested-errors? (condition)
+  (flet ((check-one (condition kind)
+           (and (typep condition 'participant-creation-error)
+                (eq (participant-creation-error-kind condition) kind))))
+    (and (check-one condition :nested-mock-participant.outer)
+         (check-one (cause condition) :nested-mock-participant.inner)
+         (typep (cause (cause condition)) 'simple-error))))
+(deftype participant-creation-error-cause-by-nested-errors ()
+  '(satisfies participant-creation-error-cause-by-nested-errors?))
+
+(addtest (make-participant-root
+          :documentation
+          "Test chaining of `participant-creation-error' conditions in
+           case of recursive `make-participant' calls.")
+  error-from-nested-call
+
+  (flet ((test-case (scope &rest initargs &key &allow-other-keys)
+           (ensure-condition 'participant-creation-error-cause-by-nested-errors
+             (apply #'make-participant :nested-mock-participant.outer scope
+                    initargs))))
+    (test-case "/")
+    (test-case (puri:uri "/"))
+    (test-case (make-scope "/"))
+
+    (test-case "/"              :signal-participant-creation-error? t)
+    (test-case (puri:uri "/")   :signal-participant-creation-error? t)
+    (test-case (make-scope "/") :signal-participant-creation-error? t)))
+
+;;; Hook tests
+
 (deftestsuite hooks-root (root)
   ()
   (:documentation

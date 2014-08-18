@@ -55,7 +55,7 @@
                :documentation
                "Kind of the participant the creation of which failed.")
    (scope      :initarg  :scope
-               :type     (or puri:uri scope)
+               :type     (or string puri:uri scope)
                :reader   participant-creation-error-scope
                :documentation
                "The scope of the channel in which the participant
@@ -72,14 +72,18 @@
    :transports (missing-required-initarg 'participant-creation-error :transports))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Failed to create ~A participant in the channel ~
-                     designated by ~
-                     ~S~/rsb::maybe-print-transport-configuration/~
-                     .~/more-conditions:maybe-print-cause/~@:>"
-             (participant-creation-error-kind condition)
-             (scope-string (participant-creation-error-scope condition))
-             (participant-creation-error-transports condition)
-             condition)))
+     (let+ (((&structure-r/o
+              participant-creation-error- kind scope transports)
+             condition))
+       (format stream "~@<Failed to create ~A participant in the channel ~
+                       designated by ~
+                       ~S~/rsb::maybe-print-transport-configuration/~
+                       .~/more-conditions:maybe-print-cause/~@:>"
+               kind (etypecase scope
+                      (string   scope)
+                      (puri:uri (princ-to-string scope))
+                      (scope    (scope-string scope)))
+               transports condition))))
   (:documentation
    "This error is signaled when the creation of a participant (which
     implies participation in a channel) fails."))

@@ -35,9 +35,6 @@
 
 ;;; Participant creation
 
-(defmethod make-participant ((kind t) (scope scope) &rest args &key)
-  (apply #'service-provider:make-provider 'participant kind scope args))
-
 (defmethod make-participant-using-class :around ((class     class)
                                                  (prototype rsb.ep:client)
                                                  (scope     scope)
@@ -210,15 +207,3 @@
      kind scope
      #'make-participant-normal-thunk
      #'make-participant-args-changed-thunk)))
-
-(defmethod make-participant :around ((kind t) (scope t)
-                                     &key
-                                     transports)
-  ;; Translate different kinds of errors into
-  ;; `participant-creation-error' errors.
-  (with-condition-translation
-      (((error participant-creation-error)
-        :kind       kind
-        :scope      scope
-        :transports transports)) ; TODO not always available
-    (call-next-method)))

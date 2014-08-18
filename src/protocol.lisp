@@ -262,6 +262,48 @@ converter."
 (defclass scope () ()) ; forward declarations
 (declaim (special *make-participant-hook*))
 
+;; The variable `*make-participant-nesting*' is used to distinguish
+;; "distinct" recursive calls to `make-participant' in order to
+;; perform accurate condition translation.
+;;
+;; For example, if `make-participant' is called with a scope
+;; designated by a string, the :around method establishes a condition
+;; translating handler. Next, there is a recursive call to
+;; `make-participant' with the parsed scope. This should not be
+;; treated as a distinct call meaning that errors signaled in the
+;; inner call should not be wrapped in multiple
+;; `participant-creation-error' conditions. However, if the creation
+;; of the requested participant involves creating another participant,
+;; and the nested creation signals an, there should be a chain of
+;; `participant-creation-error' conditions, one for each requested
+;; participant.
+(declaim (type (cons boolean integer) *make-participant-nesting*))
+(defvar *make-participant-nesting* (cons nil 0))
+
+(defmethod make-participant :around ((kind t) (scope t)
+                                     &key
+                                     transports)
+  ;; Translate different kinds of errors into
+  ;; `participant-creation-error' errors.
+  (if (car *make-participant-nesting*)
+      (call-next-method)
+      (let* ((depth                      (cdr *make-participant-nesting*))
+             (*make-participant-nesting* (cons t depth)))
+        (handler-bind
+            ((error (lambda (condition)
+                      (unless (= depth (cdr *make-participant-nesting*))
+                        (error 'participant-creation-error
+                               :kind       kind
+                               :scope      scope
+                               :transports transports ; TODO not always available
+                               :cause      condition)))))
+          (call-next-method)))))
+
+(defmethod make-participant ((kind t) (scope scope) &rest args &key)
+  (let ((*make-participant-nesting*
+         (cons nil (1+ (cdr *make-participant-nesting*)))))
+    (apply #'service-provider:make-provider 'participant kind scope args)))
+
 (defmethod make-participant-using-class :around ((class     class)
                                                  (prototype t)
                                                  (scope     scope)
