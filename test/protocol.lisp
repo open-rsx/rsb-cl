@@ -69,12 +69,14 @@
                    :test #'set-equal))
                 calls expected))))))
 
-(defun participant-creation-error-caused-by-program-error? (thing)
-  (and (typep thing 'participant-creation-error)
-       (typep (cause thing) 'program-error)))
+(define-condition buggy-handler-error (error) ())
 
-(deftype participant-creation-error-caused-by-program-error ()
-  '(satisfies participant-creation-error-caused-by-program-error?))
+(defun participant-creation-error-caused-by-buggy-handler-error? (thing)
+  (and (typep thing 'participant-creation-error)
+       (typep (cause thing) 'buggy-handler-error)))
+
+(deftype participant-creation-error-caused-by-buggy-handler-error ()
+  '(satisfies participant-creation-error-caused-by-buggy-handler-error?))
 
 (addtest (hooks-root
           :documentation
@@ -82,13 +84,26 @@
            `*make-participant-hook*'.")
   make-participant-hook/buggy-handler
 
-  (ensure-condition 'participant-creation-error-caused-by-program-error
-    (hooks:with-handlers (('*make-participant-hook*
-                           (lambda (&rest args)
-                            (declare (ignore args))
-                            nil)))
-      (with-participant (participant (make-participant :listener "inprocess:/rsbtest/make-participant-hook/buffer-handler"))
-        (declare (ignore participant))))))
+  (let+ ((scope "/rsbtest/make-participant-hook/buggy-handler")
+         (uri   (concatenate 'string "inprocess:" scope))
+         ((&flet do-it (&optional thunk)
+            (hooks:with-handlers (('*make-participant-hook*
+                                   (lambda (&rest args)
+                                     (declare (ignore args))
+                                     (error 'buggy-handler-error))))
+              (with-participant (participant (make-participant :listener uri))
+                (when thunk (funcall thunk participant)))))))
+
+    ;; Without invoking restarts, the condition should be wrapped in a
+    ;; `participant-creation-error'.
+    (ensure-condition
+        'participant-creation-error-caused-by-buggy-handler-error
+      (do-it))
+
+    ;; Skip the buggy handler by using the `continue' restart. Make
+    ;; sure we get the requested participant instance in this case.
+    (handler-bind ((error #'continue))
+      (do-it (rcurry #'check-participant :listener scope)))))
 
 (addtest (hooks-root
           :documentation

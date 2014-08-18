@@ -266,14 +266,13 @@ converter."
                                                  (prototype t)
                                                  (scope     scope)
                                                  &rest args &key)
-  (if *make-participant-hook*
-      (or (hooks:run-hook '*make-participant-hook*
-                          (call-next-method) args)
-          (simple-program-error
-           "~@<A handler installed on ~S returned ~S instead of a ~
-            participant.~@:>"
-           '*make-participant-hook* nil))
-      (call-next-method)))
+  (let ((participant (call-next-method)))
+    (if *make-participant-hook*
+        ;; When the hook returns anything but nil, use it as
+        ;; replacement for PARTICIPANT. Otherwise use PARTICIPANT.
+        (or (hooks:run-hook '*make-participant-hook* participant args)
+            participant)
+        participant)))
 
 (defmethod make-participant-using-class ((class     class)
                                          (prototype t)

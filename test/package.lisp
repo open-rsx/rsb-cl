@@ -76,22 +76,6 @@
   ()
   (:dynamic-variables
    (*default-configuration* '(((:transport :inprocess :enabled) . "1"))))
-  (:function
-   (check-participant (participant expected-kind scope)
-     (ensure-same (participant-kind participant) expected-kind)
-     (ensure-same
-      (participant-scope participant) (make-scope scope)
-      :test #'scope=)
-     (ensure
-      (typep (participant-id participant) 'uuid:uuid))
-     ;; URI stuff
-     (relative-url participant)
-     (abstract-uri participant)
-     (let ((urls (transport-specific-urls participant)))
-       (ensure (length= 1 urls)
-               :report    "~@<The participant has ~D transport-specific ~
-                           URLs (~{~A~^, ~}), not ~D.~@:>"
-               :arguments ((length urls) urls 1)))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))
@@ -104,6 +88,20 @@ that test participant classes."))
   (puri:intern-uri
    (puri:uri "inprocess:/rsbtest/participantcreation/restarts/error"))
   "A special URI used in test of participant creation restarts.")
+
+(defun check-participant (participant expected-kind scope)
+  (ensure-same (participant-kind participant) expected-kind)
+  (ensure-same (participant-scope participant) (make-scope scope)
+               :test #'scope=)
+  (ensure (typep (participant-id participant) 'uuid:uuid))
+  ;; URI stuff
+  (relative-url participant)
+  (abstract-uri participant)
+  (let ((urls (transport-specific-urls participant)))
+    (ensure (length= 1 urls)
+            :report    "~@<The participant has ~D transport-specific ~
+                        URLs (~{~A~^, ~}), not ~D.~@:>"
+            :arguments ((length urls) urls 1))))
 
 (defmacro define-basic-participant-test-cases (class &body cases)
   "Define basic test cases for the participant subclass designated by
