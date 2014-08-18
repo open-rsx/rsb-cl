@@ -84,14 +84,15 @@
    "This error is signaled when the creation of a participant (which
     implies participation in a channel) fails."))
 
-(defun maybe-print-transport-configuration (stream transports &optional colon? at?)
+(defun maybe-print-transport-configuration (stream transports
+                                            &optional colon? at?)
   "Print the transport configuration TRANSPORTS to STREAM."
   (declare (ignore colon? at?))
   (format stream "~@[ using transport configuration~@:_~@:_~
                     ~{~{~
-                      + ~@(~A~) transport with options~@:_~@:_~
+                      + ~@(~A~) transport~^ with options~@:_~@:_~
                         ~2@T~@<~@;~@{~16S~^ ~S~^~@:_~}~:>~
-                    ~}~}~
+                    ~}~^~@:_~@:_~}~
                   ~@:_~@:_~]"
           transports))
 
