@@ -65,17 +65,15 @@ classes."))
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~S" (method-name object))))
 
-(defmacro define-lazy-creation-method (class slot transform args)
+(defmacro define-lazy-creation-method (class slot transform)
   "Define a :before method on the reader function for SLOT of CLASS
-that lazily creates the slot value.
+   that lazily creates the slot value.
 
-TRANSFORM has to be either :argument or :return and the corresponding
-transform is installed into the created participant.
-
-ARGS are passed to the creation function."
-  (let ((method-name (symbolicate "METHOD-" slot))
+   TRANSFORM has to be either :argument or :return and the
+   corresponding transform is installed into the created participant."
+  (let ((method-name   (symbolicate "METHOD-" slot))
         (accessor-name (symbolicate "METHOD-%" slot))
-        (make-name   (symbolicate "MAKE-" slot)))
+        (kind          (make-keyword slot)))
     `(defmethod ,method-name :before ((method ,class))
        ,(format nil "Lazily create the ~(~A~) when it is first requested."
                 slot)
@@ -85,7 +83,7 @@ ARGS are passed to the creation function."
                 ((&structure-r/o participant- converters transform error-hook) server)
                 (transform (cdr (assoc ,transform transform))))
            (setf (,accessor-name method)
-                 (,make-name scope ,@args
+                 (make-participant ,kind scope
                              :transports   (server-transport-options server)
                              :converters   converters
                              :transform    transform

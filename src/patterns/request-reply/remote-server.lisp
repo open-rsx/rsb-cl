@@ -37,8 +37,8 @@ for RESULT."))
               (apply #'call (method-server instance) instance data-or-event
                      args))))
 
-(define-lazy-creation-method remote-method listener :return   ())
-(define-lazy-creation-method remote-method informer :argument (t))
+(define-lazy-creation-method remote-method listener :return)
+(define-lazy-creation-method remote-method informer :argument)
 
 (defmethod (setf method-%listener) :after ((new-value t)
                                            (method    remote-method))

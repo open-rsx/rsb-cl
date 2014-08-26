@@ -37,8 +37,8 @@ should be passed to the callback function."))
                                      &key)
   (method-listener instance)) ; force creation
 
-(define-lazy-creation-method local-method listener :argument ())
-(define-lazy-creation-method local-method informer :return   (t))
+(define-lazy-creation-method local-method listener :argument)
+(define-lazy-creation-method local-method informer :return)
 
 (defmethod (setf method-%listener) :after ((new-value t)
                                            (method    local-method))
