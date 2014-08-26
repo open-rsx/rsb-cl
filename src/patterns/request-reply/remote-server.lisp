@@ -147,23 +147,34 @@ BLOCK? is non-nil."
 
 (rsb::register-participant-class 'remote-server)
 
-(defmethod server-method ((server remote-server)
-                          (name   string)
-                          &key
-                          error?)
-  (or (call-next-method server name :error? error?)
-      (let ((scope (merge-scopes (list name) (participant-scope server))))
-        (setf (server-method server name)
-              (make-participant :remote-method scope
-                                :name name)))))
+(flet ((ensure-method (server name error? next-method)
+         (or (funcall next-method server name :error? error?)
+             (let ((scope (if (stringp name)
+                              (merge-scopes (list name) (participant-scope server))
+                              (participant-scope server))))
+               (setf (server-method server name)
+                     (make-participant :remote-method scope
+                                       :name name))))))
+
+  (defmethod server-method ((server remote-server)
+                            (name   string)
+                            &key
+                            error?)
+    (ensure-method server name error? #'call-next-method))
+
+  (defmethod server-method ((server remote-server)
+                            (name   (eql nil))
+                            &key
+                            error?)
+    (ensure-method server nil error? #'call-next-method)))
 
 (defmethod call ((server  remote-server)
-                 (method  string)
+                 (method  t)
                  (request t)
                  &rest args
                  &key &allow-other-keys)
-  "Create the method named METHOD if it does not already exist, then
-call it."
+  ;; Create the method named METHOD if it does not already
+  ;; exist, then call it.
   (apply #'call server (server-method server method) request args))
 
 (defmethod call ((server  t)

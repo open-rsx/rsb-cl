@@ -16,7 +16,7 @@
              :documentation
              "Stores the server object to which the method belongs.")
    (name     :initarg  :name
-             :type     method-name
+             :type     (or null method-name)
              :reader   method-name
              :documentation
              "Stores the name of the method.")
@@ -123,47 +123,62 @@ generic support for retrieving, adding and removing methods."))
 (defmethod server-methods ((server server))
   (hash-table-values (server-%methods server)))
 
-(defmethod server-method ((server server)
-                          (name   string)
-                          &key
-                          (error? t))
-  (check-type name method-name "a legal method name")
+(flet ((get-method (server name error?)
+         (or (gethash name (server-%methods server))
+             (when error?
+               (error 'no-such-method :name name)))))
+  (macrolet
+      ((define-server-method-method (name-type &optional check?)
+         `(defmethod server-method ((server server)
+                                    (name   ,name-type)
+                                    &key
+                                    (error? t))
+            ,@(when check?
+                `((check-type name method-name "a legal method name")))
 
-  (or (gethash name (server-%methods server))
-      (when error?
-        (error 'no-such-method
-               :name name))))
+            (get-method server name error?))))
 
-(defmethod (setf server-method) ((new-value method1)
-                                 (server    server)
-                                 (name      string)
-                                 &key
-                                 argument)
-  (declare (ignore argument))
+    (define-server-method-method string    t)
+    (define-server-method-method (eql nil))))
 
-  (check-type name method-name "a legal method name")
+(flet ((set-method (server name method)
+         (let+ (((&structure-r/o server- (methods %methods)) server))
+           ;; If SERVER already has a method named NAME, detach it cleanly
+           ;; before replacing it.
+           (when-let ((old (gethash name methods)))
+             (detach old))
 
-  (let+ (((&accessors-r/o (methods server-%methods)) server))
-    ;; If SERVER already has a method named NAME, detach it cleanly
-    ;; before replacing it.
-    (when-let ((old (gethash name methods)))
-      (detach old))
+           ;; Install NEW-VALUE as new implementation of the method
+           ;; named NAME.
+           (setf (method-%server method) server
+                 (gethash name methods)  method)))
+       (remove-method1 (server name method)
+         (detach (server-method server name))
+         (remhash name (server-%methods server))
+         method))
 
-    ;; Install NEW-VALUE as new implementation of the method named
-    ;; NAME.
-    (setf (method-%server new-value) server
-          (gethash name methods)     new-value)))
+  (macrolet
+      ((define-setf-server-method-method (action name-type new-value-type
+                                          &optional check?)
+         `(defmethod (setf server-method) ((new-value ,new-value-type)
+                                           (server    server)
+                                           (name      ,name-type)
+                                           &key
+                                           argument)
+            (declare (ignore argument))
 
-(defmethod (setf server-method) ((new-value (eql nil))
-                                 (server    server)
-                                 (name      string)
-                                 &key
-                                 argument)
-  (declare (ignore argument))
+            ,@(when check?
+                `((check-type name method-name "a legal method name")))
 
-  (detach (server-method server name))
-  (remhash name (server-%methods server))
-  new-value)
+            ,(ecase action
+               (:set    `(set-method     server name new-value))
+               (:remove `(remove-method1 server name new-value))))))
+
+    (define-setf-server-method-method :set    string    method1   t)
+    (define-setf-server-method-method :set    (eql nil) method1)
+
+    (define-setf-server-method-method :remove string    (eql nil) t)
+    (define-setf-server-method-method :remove (eql nil) (eql nil))))
 
 (defmethod detach ((server server))
   (map nil (curry #'%remove-method-with-restart-and-timeout server)

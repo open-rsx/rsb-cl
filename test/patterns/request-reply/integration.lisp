@@ -42,6 +42,31 @@ classes."))
 
 (addtest (integration-root
           :documentation
+          "Test catch-all method on `local-server' side.")
+  local-catch-all-method
+
+  (with-local-server (local-server url)
+    (with-methods (local-server)
+        ((nil (arg integer) (1+ arg)))
+      (with-remote-server (remote-server url)
+        (ensure-same (call remote-server "foo" 1) 2)
+        (ensure-same (call remote-server "bar" 3) 4)))))
+
+(addtest (integration-root
+          :documentation
+          "Test catch-all method on `remote-server' side.")
+  remote-catch-all-method
+
+  (with-local-server (local-server url)
+    (with-methods (local-server)
+        (("foo" (arg integer) (1+ arg)))
+      (with-remote-server (remote-server url)
+        (let ((scope (merge-scopes '("foo") (uri->scope-and-options
+                                             (puri:uri url)))))
+          (ensure-same (call remote-server nil (make-event scope 1)) 2))))))
+
+(addtest (integration-root
+          :documentation
           "Test calling a remote method which signals an error during
 execution.")
   error

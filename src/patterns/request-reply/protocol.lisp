@@ -64,6 +64,7 @@ string or a list of the form (CONDITION-CLASS-NAME KW1 VALUE1
                   block?
                   timeout
                   return)
+  (:argument-precedence-order request method server)
   (:documentation
    "Call METHOD of SERVER with argument REQUEST and return the result
 of the method call. If a remote call fails for some reason, an error
@@ -90,25 +91,33 @@ returned."))
   (:documentation
    "Return a list of methods provided by SERVER."))
 
-(defgeneric server-method (server name
-                           &key
-                           error?)
+(defgeneric server-method (server name &key error?)
   (:documentation
-   "Return the method named NAME of SERVER. If no such method exists
-and ERROR? is non-nil signal an error. Otherwise return nil."))
+   "Return the method named NAME of SERVER.
+
+    Signal a `type-error' if NAME is not a valid method name for
+    SERVER.
+
+    If no such method exists and ERROR? is non-nil signal a
+    `no-such-method' error. Otherwise return nil."))
 
 (defgeneric (setf server-method) (new-value server name
-                                  &key
-                                  argument)
+                                  &key argument)
+  (:argument-precedence-order server name new-value)
   (:documentation
    "Store NEW-VALUE as the method named NAME of SERVER. NEW-VALUE can
-be a method instance a thing like a function based on which a method
-can be made. If NEW-VALUE is nil, the method stored for NAME is
-removed from SERVER.
+    be a method instance a thing like a function based on which a
+    method can be made.
 
-When supplied, ARGUMENT has to be either :event or :payload causing
-the associated callback function of NEW-VALUE to receive the request
-event or just its payload respectively."))
+    If NEW-VALUE is nil, the method stored for NAME is removed from
+    SERVER.
+
+    When supplied, ARGUMENT has to be either :event or :payload
+    causing the associated callback function of NEW-VALUE to receive
+    the request event or just its payload respectively.
+
+    Signal a `type-error' if NAME is not a valid method name for
+    SERVER."))
 
 ;;; Remote server protocol
 

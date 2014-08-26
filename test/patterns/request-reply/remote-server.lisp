@@ -49,6 +49,7 @@
 
   (ensure-cases (name expected)
       `(("foo"          t)
+        (nil            t)
 
         ;; invalid method name => error
         ("%invalidname" type-error))

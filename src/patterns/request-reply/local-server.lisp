@@ -69,7 +69,9 @@ should be passed to the callback function."))
   ;; REQUEST. Send the result or an error notification back to the
   ;; caller.
   (let+ (((&structure-r/o method- informer callback argument) method)
-         (causes (list (event-id/opaque request))))
+         (causes (list (event-id/opaque request)))
+         ((&flet make-reply (payload)
+            (make-event (event-scope request) payload))))
     (handler-case
         (let* ((maybe-result (multiple-value-list
                               (cond
@@ -82,11 +84,11 @@ should be passed to the callback function."))
                (result       (if maybe-result
                                  (first maybe-result)
                                  rsb.converter:+no-value+)))
-          (send informer result
+          (send informer (make-reply result)
                 :method :|reply|
                 :causes causes))
       (error (condition)
-        (send informer (format nil "~A" condition)
+        (send informer (make-reply (princ-to-string condition))
               :method       :|reply|
               :causes       causes
               :|rsb:error?| "1")))))
@@ -104,20 +106,30 @@ should be passed to the callback function."))
 
 (rsb::register-participant-class 'local-server)
 
-(defmethod (setf server-method) ((new-value function)
-                                 (server    local-server)
-                                 (name      string)
-                                 &key
-                                 (argument :payload))
-  (check-type argument argument-style "either :payload or :event")
+(flet ((set-method (server scope name argument callback)
+         (check-type argument argument-style)
 
-  (setf (server-method server name)
-        (let ((scope (merge-scopes (list name) (participant-scope server))))
-          (make-participant :local-method scope
-                            :server   server
-                            :name     name
-                            :callback new-value
-                            :argument argument))))
+         (setf (server-method server name)
+               (make-participant :local-method scope
+                                 :server   server
+                                 :name     name
+                                 :callback callback
+                                 :argument argument))))
+
+  (macrolet
+      ((define-method-creating-method (name-type scope-form)
+         `(defmethod (setf server-method) ((new-value function)
+                                           (server    local-server)
+                                           (name      ,name-type)
+                                           &key
+                                           (argument :payload))
+            (let+ (((&structure-r/o participant- scope) server))
+              (set-method server ,scope-form name argument new-value)))))
+
+    (define-method-creating-method string
+      (merge-scopes (list name) scope))
+    (define-method-creating-method (eql nil)
+      scope)))
 
 ;;; `local-server' creation
 

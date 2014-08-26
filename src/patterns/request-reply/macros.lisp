@@ -53,10 +53,11 @@ variable."
   (let+ (((&flet+ process-one ((name (&optional arg (request-type t))
                                 &rest body))
             (let+ ((name/thunk  (symbolicate name '#:-method-body))
-                   (name/string (string name))
+                   (name/string (when name (string name)))
                    ((&with-gensyms arg-var))
                    ((&values body declarations) (parse-body body)))
-              (check-type name/string  method-name      "a valid method name")
+              (when name/string
+                (check-type name/string method-name "a valid method name"))
               (check-type arg          symbol           "a symbol")
               (check-type request-type (or symbol cons) ":EVENT or a type specifier")
 

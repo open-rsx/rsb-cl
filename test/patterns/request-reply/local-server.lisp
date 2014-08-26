@@ -54,6 +54,9 @@
         ("foo"          ,(lambda ()) ()                   t)
         ("foo"          nil          ()                   nil)
 
+        (nil            ,(lambda ()) ()                   t)
+        (nil            nil          ()                   nil)
+
         ("bar"          ,(lambda ()) (:argument :event)   t)
         ("bar"          ,(lambda ()) (:argument :payload) t)
 

@@ -54,7 +54,7 @@
   (:export
    #:server
    #:server-methods
-   #:server-method)
+   #:server-method)                 ; also setf
 
   ;; `local-server' class
   (:export

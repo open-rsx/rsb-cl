@@ -20,6 +20,7 @@
 
   (with-local-server (server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-methods/smoke")
     (with-methods (server)
+        ;; Normal method names
         (("mymethod"     (foo string) foo)
          (:myothermethod (bar integer)
           (declare (ignore bar)))
@@ -27,12 +28,25 @@
          ("eventarg"     (baz :event)
            (declare (ignore baz)))
          ("notype"       (fez)
+           (declare (ignore fez)))
+
+         ;; Catch-all methods
+         (nil (foo string) foo)
+         (nil (bar integer)
+            (declare (ignore bar)))
+         (nil ())
+         (nil (baz :event)
+           (declare (ignore baz)))
+         (nil (fez)
            (declare (ignore fez))))
+
       (ensure (server-method server "mymethod"))
       (ensure (server-method server "MYOTHERMETHOD"))
       (ensure (server-method server "noarg"))
       (ensure (server-method server "eventarg"))
-      (ensure (server-method server "notype")))
+      (ensure (server-method server "notype"))
+
+      (ensure (server-method server nil)))
     (ensure-null (server-methods server))))
 
 (addtest (macros-root
@@ -53,7 +67,12 @@
         (("valid-name"   (foo string) foo) t)
         (("v41id_n4m3"   (foo string) foo) t)
         (("eventarg"     (foo :event) foo) t)
-        (("noarg"        ()        :const) t))
+        (("noarg"        ()        :const) t)
+
+        ;; Catch-all methods.
+        ((nil            (foo string) foo) t)
+        ((nil            (foo :event) foo) t)
+        ((nil            ()        :const) t))
 
     (case expected
       (type-error (ensure-condition 'type-error

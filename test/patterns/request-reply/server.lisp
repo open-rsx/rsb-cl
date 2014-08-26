@@ -80,7 +80,10 @@
   (ensure-cases (name method expected)
       `(("foo"          ,simple-method ,simple-method)
         ("foo"          ,simple-method ,simple-method)
+        (nil            ,simple-method ,simple-method)
+
         ("foo"          nil            nil)
+        (nil            nil            nil)
 
         ;; invalid method name => type-error
         ("%invalidname" ,simple-method type-error))
