@@ -30,18 +30,34 @@
 (defclass nested-mock-participant.outer (participant) ())
 (rsb::register-participant-class 'nested-mock-participant.outer)
 (defmethod initialize-instance :after ((instance nested-mock-participant.outer)
-                                       &key &allow-other-keys)
-  (make-participant :nested-mock-participant.inner "/"))
+                                       &key
+                                       signal-participant-creation-error?
+                                       &allow-other-keys)
+  (make-participant :nested-mock-participant.inner "/"
+                    :signal-participant-creation-error?
+                    signal-participant-creation-error?))
 
-(defun participant-creation-error-cause-by-nested-errors? (condition)
+(defun caused-by-intentional-error? (condition)
   (flet ((check-one (condition kind)
            (and (typep condition 'participant-creation-error)
                 (eq (participant-creation-error-kind condition) kind))))
     (and (check-one condition :nested-mock-participant.outer)
          (check-one (cause condition) :nested-mock-participant.inner)
-         (typep (cause (cause condition)) 'simple-error))))
-(deftype participant-creation-error-cause-by-nested-errors ()
-  '(satisfies participant-creation-error-cause-by-nested-errors?))
+         (typep (cause (cause condition)) 'simple-error)
+         (string= (princ-to-string (cause (cause condition)))
+                  "intentional error"))))
+(deftype caused-by-intentional-error ()
+  '(satisfies caused-by-intentional-error?))
+
+(defun caused-by-same? (condition)
+  (flet ((check-one (condition kind)
+           (and (typep condition 'participant-creation-error)
+                (eq (participant-creation-error-kind condition) kind))))
+    (and (check-one condition :nested-mock-participant.outer)
+         (check-one (cause condition) :nested-mock-participant.inner)
+         (null (cause (cause condition))))))
+(deftype caused-by-same ()
+  '(satisfies caused-by-same?))
 
 (addtest (make-participant-root
           :documentation
@@ -49,17 +65,27 @@
            case of recursive `make-participant' calls.")
   error-from-nested-call
 
-  (flet ((test-case (scope &rest initargs &key &allow-other-keys)
-           (ensure-condition 'participant-creation-error-cause-by-nested-errors
-             (apply #'make-participant :nested-mock-participant.outer scope
-                    initargs))))
-    (test-case "/")
-    (test-case (puri:uri "/"))
-    (test-case (make-scope "/"))
+  (let+ (((&flet do-it (scope &rest initargs)
+            (apply #'make-participant :nested-mock-participant.outer scope
+                   initargs)))
+         ((&flet test-case (expected &rest args)
+            (ecase expected
+              (caused-by-intentional-error
+               (ensure-condition 'caused-by-intentional-error
+                 (apply #'do-it args)))
+              (caused-by-same
+               (ensure-condition 'caused-by-same
+                 (apply #'do-it args)))))))
+    (test-case 'caused-by-intentional-error "/")
+    (test-case 'caused-by-intentional-error (puri:uri "/"))
+    (test-case 'caused-by-intentional-error (make-scope "/"))
 
-    (test-case "/"              :signal-participant-creation-error? t)
-    (test-case (puri:uri "/")   :signal-participant-creation-error? t)
-    (test-case (make-scope "/") :signal-participant-creation-error? t)))
+    (test-case 'caused-by-same              "/"
+               :signal-participant-creation-error? t)
+    (test-case 'caused-by-same              (puri:uri "/")
+               :signal-participant-creation-error? t)
+    (test-case 'caused-by-same              (make-scope "/")
+               :signal-participant-creation-error? t)))
 
 ;;; Hook tests
 

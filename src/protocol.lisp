@@ -287,11 +287,12 @@ converter."
   ;; `participant-creation-error' errors.
   (if (car *make-participant-nesting*)
       (call-next-method)
-      (let* ((depth                      (cdr *make-participant-nesting*))
+      (let* ((depth                      (1+ (cdr *make-participant-nesting*)))
              (*make-participant-nesting* (cons t depth)))
         (handler-bind
             ((error (lambda (condition)
-                      (unless (= depth (cdr *make-participant-nesting*))
+                      (when (or (/= depth (cdr *make-participant-nesting*))
+                                (not (typep condition 'participant-creation-error)))
                         (error 'participant-creation-error
                                :kind       kind
                                :scope      scope
@@ -301,7 +302,7 @@ converter."
 
 (defmethod make-participant ((kind t) (scope scope) &rest args &key)
   (let ((*make-participant-nesting*
-         (cons nil (1+ (cdr *make-participant-nesting*)))))
+         (cons nil (cdr *make-participant-nesting*))))
     (apply #'service-provider:make-provider 'participant kind scope args)))
 
 (defmethod make-participant-using-class :around ((class     class)
