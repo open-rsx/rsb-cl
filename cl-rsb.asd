@@ -267,7 +267,9 @@
                  :depends-on ("src")
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "conditions")))
+                              (:file       "conditions")
+                              (:file       "protocol")
+                              (:file       "mixins")))
 
                 (:module     "patterns-request-reply"
                  :pathname   "src/patterns/request-reply"
@@ -370,7 +372,10 @@
                 (:module     "patterns"
                  :pathname   "test/patterns"
                  :depends-on ("test")
-                 :components ((:file       "package")))
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "protocol")
+                              (:file       "mixins")))
 
                 (:module     "patterns-request-reply"
                  :pathname   "test/patterns/request-reply"

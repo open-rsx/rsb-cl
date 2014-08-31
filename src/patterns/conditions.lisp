@@ -6,6 +6,63 @@
 
 (cl:in-package #:rsb.patterns)
 
+;;; Conditions related to composite participants
+
+(define-condition child-condition (condition)
+  ((container :initarg  :container
+              :reader   child-condition-container
+              :documentation
+              "Stores the container participant in which the requested
+               child participant could not be found.")
+   (key       :initarg  :key
+              :type     cons
+              :reader   child-condition-key
+              :documentation
+              "Stores the key naming the requested child.
+
+               The key is usually a list of a name and a kind."))
+  (:default-initargs
+   :container (missing-required-initarg 'child-condition :container)
+   :key       (missing-required-initarg 'child-condition :key))
+  (:documentation
+   "Superclass for conditions involving a child participant and a
+    containing parent participant."))
+
+(define-condition no-such-child-error (rsb-error
+                                       child-condition)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The child participant ~{~S~^ ~} could not be ~
+                     found in ~A.~@:>"
+             (child-condition-key       condition)
+             (child-condition-container condition))))
+  (:documentation
+   "This error is signaled when a requested child participant cannot
+    be found in a container participant."))
+
+(define-condition child-exists-error (rsb-error
+                                      child-condition)
+  ((child :initarg  :child
+          :reader   child-exists-error-child
+          :documentation
+          "Stores the duplicate child participant."))
+  (:default-initargs
+   :child (missing-required-initarg 'child-exists-error :child))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<There already is the child participant ~A ~
+                     designated by ~{~S~^ ~} in ~A.~@:>"
+             (child-exists-error-child  condition)
+             (child-condition-key       condition)
+             (child-condition-container condition))))
+  (:documentation
+   "This error is signaled when an attempt is made to add a child
+    participant to a container participant and a child participant of
+    the same name already exists in the container participant."))
+
+;;; Protocol-related conditions
+
 (define-condition protocol-condition (rsb-condition
                                       chainable-condition)
   ((protocol :initarg  :protocol

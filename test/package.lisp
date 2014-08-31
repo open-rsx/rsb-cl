@@ -42,6 +42,8 @@
 
    #:mock-transform/error
 
+   #:mock-participant-state
+
    #:*simple-parent*)
 
   (:documentation
@@ -304,8 +306,17 @@ and bound to a variable named like the value of CLASS."
   (declare (ignore event))
   (error "Intentional error in transformation"))
 
-(defclass mock-participant (participant) ())
+(defclass mock-participant (participant)
+  ((state :initform :attached
+          :accessor mock-participant-state)))
+
 (rsb::register-participant-class 'mock-participant :mock)
+
+(defmethod participant-kind ((participant mock-participant))
+  :mock)
+
+(defmethod detach ((participant mock-participant))
+  (setf (mock-participant-state participant) :detached))
 
 (defvar *simple-parent*
   (let ((*configuration* +test-configuration+))
