@@ -18,6 +18,8 @@
    #:protocol-condition-role
    #:protocol-condition-message
 
+   #:simple-protocol-condition
+
    #:protocol-warning
 
    #:protocol-error)
