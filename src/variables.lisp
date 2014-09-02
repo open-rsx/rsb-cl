@@ -42,16 +42,12 @@ of random IDs and similar things requiring pseudo randomness.")
     "rsb.conf"
 
     ;; User-specific configuration
-    #+(and unix (not darwin)) #P"~/.config/rsb.conf"
-    ;;#+darwin                ?
-    #+windows                 ,(merge-pathnames
-                                "rsb.conf" (user-homedir-pathname))
+    #+unix     #P"~/.config/rsb.conf"
+    #+windows  ,(merge-pathnames "rsb.conf" (user-homedir-pathname))
 
     ;; System-wide configuration
-    #+(and unix (not darwin)) #P"/etc/rsb.conf"
-    ;;#+darwin                ?
-    #+windows                 #P"/rsb.conf"
-    )
+    #+unix     #P"/etc/rsb.conf"
+    #+windows  #P"/rsb.conf")
   "List of configuration file names in order of decreasing priority.")
 
 (declaim (special *default-configuration*))
