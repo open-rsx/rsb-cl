@@ -42,6 +42,39 @@ classes."))
 
 (addtest (integration-root
           :documentation
+          "Test communication in which the `local-method' and the
+`remote-method' operate on events.")
+
+
+  smoke/event
+
+  (with-local-server (local-server url)
+    (with-methods (local-server)
+        (("echo" (arg :event) arg))
+      (with-remote-server (remote-server url)
+        (let ((event (make-event
+                      (merge-scopes
+                       '("echo") (participant-scope remote-server))
+                      5)))
+          ;; Invoke with payload result using `call' method
+          (ensure-same (call remote-server "echo" event) 5 :test #'=)
+
+          ;; Invoke with event result using `call' method
+          (ensure (typep (call remote-server "echo"
+                               event :return :event)
+                         'event))
+
+          ;; Invoke using `funcall'
+          (ensure-same (funcall (server-method remote-server "echo") event)
+                       5 :test #'=)
+
+          ;; Invoke with event result using `funcall'
+          (ensure (typep (funcall (server-method remote-server "echo")
+                                  event :return :event)
+                         'event)))))))
+
+(addtest (integration-root
+          :documentation
           "Test catch-all method on `local-server' side.")
   local-catch-all-method
 

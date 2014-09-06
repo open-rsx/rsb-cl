@@ -81,12 +81,14 @@ should be passed to the callback function."))
                                  (funcall callback))
                                 (t
                                  (funcall callback (event-data request))))))
-               (result       (if maybe-result
-                                 (first maybe-result)
-                                 rsb.converter:+no-value+)))
-          (send informer (make-reply result)
-                :method :|reply|
-                :causes causes))
+               (result       (cond
+                               ((not maybe-result)
+                                rsb.converter:+no-value+)
+                               ((typep maybe-result '(cons event null))
+                                (first maybe-result))
+                               (t
+                                (make-reply (first maybe-result))))))
+          (send informer result :method :|reply| :causes causes))
       (error (condition)
         (send informer (make-reply (princ-to-string condition))
               :method       :|reply|
