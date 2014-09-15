@@ -491,6 +491,8 @@ See `version/list' for details on keyword parameters."
                               (:file       "error-handling-mixins"
                                :depends-on ("package"))
                               (:file       "restart-mixins"
+                               :depends-on ("package"))
+                              (:file       "connector"
                                :depends-on ("package"))))
 
                 (:module     "inprocess"

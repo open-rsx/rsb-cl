@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,7 +25,7 @@ group communication framework."))
   (setf (slot-value instance 'rsb::uri)
         (make-instance 'puri:uri
                        :scheme schema
-                       :host   host
+                       :host   (or host (when port "localhost"))
                        :port   port)))
 
 (defmethod connector-relative-url ((connector connector)
