@@ -117,9 +117,6 @@ contained in NOTIFICATION."
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
 into one notification."
-  ;; Set the :send timestamp of EVENT to enable the caller to read it.
-  (setf (timestamp event :send) (local-time:now))
-
   ;; Put EVENT into one or more notifications.
   (let+ (((&accessors-r/o (origin          event-origin)
                           (sequence-number event-sequence-number)
@@ -181,49 +178,53 @@ into one notification."
   "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
 ORIGIN and optionally SCOPE, METHOD, WIRE-SCHEMA, META-DATA and
 CAUSES."
-  (let* ((full?        scope)
-         (event-id     (make-instance
-                        'event-id
-                        :sender-id       (uuid:uuid-to-byte-array origin)
-                        :sequence-number sequence-number))
-         (meta-data1   (when full?
-                         (make-instance
-                          'event-meta-data
-                          :create-time (timestamp->unix-microseconds
-                                        (getf timestamps :create))
-                          :send-time   (timestamp->unix-microseconds
-                                        (getf timestamps :send)))))
+  (let+ ((full?     scope)
+         (event-id (make-instance 'event-id
+                                  :sender-id       (uuid:uuid-to-byte-array origin)
+                                  :sequence-number sequence-number))
+         ((&flet make-meta-data ()
+            (let ((result (make-instance 'event-meta-data)))
+              ;; Add META-DATA.
+              (iter (for (key value) on meta-data :by #'cddr)
+                    (vector-push-extend
+                     (make-instance 'user-info
+                                    :key   (keyword->bytes key)
+                                    :value (string->bytes value))
+                     (event-meta-data-user-infos result)))
+
+              ;; Add framework timestamps in TIMESTAMPS.
+              (macrolet
+                  ((set-timestamp (which accessor)
+                     `(when-let ((value (getf timestamps ,which)))
+                        (setf (,accessor result)
+                              (timestamp->unix-microseconds value)))))
+                (set-timestamp :create  event-meta-data-create-time)
+                (set-timestamp :send    event-meta-data-send-time)
+                (set-timestamp :receive event-meta-data-receive-time)
+                (set-timestamp :deliver event-meta-data-deliver-time))
+              ;; Add "user timestamps" in TIMESTAMPS.
+              (iter (for (key value) on timestamps :by #'cddr)
+                    ;; Framework timestamps are stored in dedicated fields of
+                    ;; the notification.
+                    (unless (member key *framework-timestamps* :test #'eq)
+                      (vector-push-extend
+                       (make-instance 'user-time
+                                      :key       (keyword->bytes key)
+                                      :timestamp (timestamp->unix-microseconds value))
+                       (event-meta-data-user-times result))))
+              result)))
          (notification (apply #'make-instance 'notification
                               :event-id event-id
                               (when full?
                                 (list
                                  :scope       (string->bytes (scope-string scope))
                                  :wire-schema (wire-schema->bytes wire-schema)
-                                 :meta-data   meta-data1)))))
+                                 :meta-data   (make-meta-data))))))
     (when full?
       ;; Store the method of the event in the new notification if the
       ;; event has one.
       (when method
         (setf (notification-method notification) (keyword->bytes method)))
-
-      ;; Add META-DATA.
-      (iter (for (key value) on meta-data :by #'cddr)
-            (vector-push-extend
-             (make-instance 'user-info
-                            :key   (keyword->bytes key)
-                            :value (string->bytes value))
-             (event-meta-data-user-infos meta-data1)))
-
-      ;; Add TIMESTAMPS.
-      (iter (for (key value) on timestamps :by #'cddr)
-            ;; Framework timestamps are stored in dedicated fields of
-            ;; the notification.
-            (unless (member key *framework-timestamps* :test #'eq)
-              (vector-push-extend
-               (make-instance 'user-time
-                              :key       (keyword->bytes key)
-                              :timestamp (timestamp->unix-microseconds value))
-               (event-meta-data-user-times meta-data1))))
 
       ;; Add CAUSES.
       (iter (for (origin-id . sequence-number) in causes)

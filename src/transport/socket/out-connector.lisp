@@ -11,6 +11,7 @@
 
 (defclass out-connector (error-handling-sender-mixin
                          restart-notification-sender-mixin
+                         timestamping-sender-mixin
                          connector)
   ()
   (:metaclass connector-class)

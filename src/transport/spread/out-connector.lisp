@@ -1,6 +1,6 @@
 ;;;; out-connector.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,6 +11,7 @@
 
 (defclass out-connector (restart-notification-sender-mixin
                          error-handling-sender-mixin
+                         timestamping-sender-mixin
                          connector)
   ((max-fragment-size :initarg  :max-fragment-size
                       :type     positive-fixnum

@@ -83,9 +83,6 @@ contained in NOTIFICATION."
   "Convert EVENT into one or more notifications. More than one
 notification is required when data contained in event does not fit
 into one notification."
-  ;; Set the :send timestamp of EVENT to enable the caller to read it.
-  (setf (timestamp event :send) (local-time:now))
-
   ;; Put EVENT into one or more notifications.
   (let+ (((&accessors-r/o (origin          event-origin)
                           (sequence-number event-sequence-number)
@@ -121,12 +118,7 @@ and CAUSES."
                         'rsb.protocol:event-id
                         :sender-id       (uuid:uuid-to-byte-array origin)
                         :sequence-number sequence-number))
-         (meta-data1   (make-instance
-                        'rsb.protocol:event-meta-data
-                        :create-time (timestamp->unix-microseconds
-                                      (getf timestamps :create))
-                        :send-time   (timestamp->unix-microseconds
-                                      (getf timestamps :send))))
+         (meta-data1   (make-instance 'rsb.protocol:event-meta-data))
          (notification (make-instance
                         'rsb.protocol:notification
                         :event-id        event-id
@@ -134,12 +126,6 @@ and CAUSES."
                         :wire-schema     (wire-schema->bytes wire-schema)
                         :data            data
                         :meta-data       meta-data1)))
-
-    ;; Store the method of the event in the new notification if the
-    ;; event has one.
-    (when method
-      (setf (notification-method notification) (keyword->bytes method)))
-
     ;; Add META-DATA.
     (iter (for (key value) on meta-data :by #'cddr)
           (vector-push-extend
@@ -148,7 +134,17 @@ and CAUSES."
                           :value (string->bytes value))
            (event-meta-data-user-infos meta-data1)))
 
-    ;; Add TIMESTAMPS.
+    ;; Add framework timestamps in TIMESTAMPS.
+    (macrolet
+        ((set-timestamp (which accessor)
+           `(when-let ((value (getf timestamps ,which)))
+              (setf (,accessor meta-data1)
+                    (timestamp->unix-microseconds value)))))
+      (set-timestamp :create  event-meta-data-create-time)
+      (set-timestamp :send    event-meta-data-send-time)
+      (set-timestamp :receive event-meta-data-receive-time)
+      (set-timestamp :deliver event-meta-data-deliver-time))
+    ;; Add "user timestamps" in TIMESTAMPS.
     (iter (for (key value) on timestamps :by #'cddr)
           ;; Framework timestamps are stored in dedicated fields of
           ;; the notification.
@@ -158,6 +154,11 @@ and CAUSES."
                             :key       (keyword->bytes key)
                             :timestamp (timestamp->unix-microseconds value))
              (event-meta-data-user-times meta-data1))))
+
+    ;; Store the method of the event in the new notification if the
+    ;; event has one.
+    (when method
+      (setf (notification-method notification) (keyword->bytes method)))
 
     ;; Add CAUSES.
     (iter (for (origin-id . sequence-number) in causes)

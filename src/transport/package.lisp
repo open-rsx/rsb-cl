@@ -108,6 +108,10 @@
   (:export
    #:timestamping-receiver-mixin)
 
+  ;; `timestamping-sender-mixin' class
+  (:export
+   #:timestamping-sender-mixin)
+
   ;; Error handling mixin classes
   (:export
    #:error-handling-push-receiver-mixin

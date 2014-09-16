@@ -169,12 +169,12 @@ stored in CONNECTOR."
 (defclass timestamping-receiver-mixin ()
   ()
   (:documentation
-   "This mixin class is intended to be mixed into connector classes
-that perform two tasks:
-+ receive notifications
-+ decode received notifications
-The associated protocol is designed to be
-direction-agnostic (i.e. should work for both push and pull)."))
+   "This class is intended to be mixed into connector classes that
+    perform two tasks:
+    1) receive notifications
+    2) decode received notifications
+    The associated protocol is designed to be
+    direction-agnostic (i.e. should work for both push and pull)."))
 
 (defmethod notification->event :around ((connector    timestamping-receiver-mixin)
                                         (notification t)
@@ -183,6 +183,18 @@ direction-agnostic (i.e. should work for both push and pull)."))
   (when-let ((event (call-next-method)))
     (setf (timestamp event :receive) (local-time:now))
     event))
+
+;;; Mixin class `timestamping-sender-mixin'
+
+(defclass timestamping-sender-mixin ()
+  ()
+  (:documentation
+   "This class is intended to be mixed into connector classes that
+    send events."))
+
+(defmethod event->notification :before ((connector timestamping-sender-mixin)
+                                        (event     event))
+  (setf (timestamp event :send) (local-time:now)))
 
 ;;; `expose-transport-metrics-mixin'
 
