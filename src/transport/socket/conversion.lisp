@@ -42,7 +42,11 @@ contained in NOTIFICATION."
                                             (bytes->keyword method))
                        :causes            (map 'list #'event-id->cons causes)
                        :data              data
-                       :create-timestamp? nil)))
+                       :create-timestamp? nil))
+         ((&flet set-timestamp (key value)
+            (unless (zerop value)
+              (setf (timestamp event key)
+                    (unix-microseconds->timestamp value))))))
 
     ;; "User infos" and timestamps
     (when meta-data
@@ -52,24 +56,16 @@ contained in NOTIFICATION."
                                     (user-info-key user-info)))
                   (bytes->string (user-info-value user-info))))
 
-      ;; Set :create timestamp, if present
-      (unless (zerop (event-meta-data-create-time meta-data))
-        (setf (timestamp event :create)
-              (unix-microseconds->timestamp
-               (event-meta-data-create-time meta-data))))
-      ;; Set :send timestamp, if present
-      (unless (zerop (event-meta-data-send-time meta-data))
-        (setf (timestamp event :send)
-              (unix-microseconds->timestamp
-               (event-meta-data-send-time meta-data))))
-      ;; Set :receive timestamp
-      (setf (timestamp event :receive) (local-time:now))
-
+      ;; Set framework timestamps :create, :send, :receive and
+      ;; :deliver, if present.
+      (set-timestamp :create  (event-meta-data-create-time meta-data))
+      (set-timestamp :send    (event-meta-data-send-time meta-data))
+      (set-timestamp :receive (event-meta-data-receive-time meta-data))
+      (set-timestamp :deliver (event-meta-data-deliver-time meta-data))
+      ;; Set "user timestamps"
       (iter (for user-time in-vector (event-meta-data-user-times meta-data))
-            (setf (timestamp event (bytes->keyword
-                                    (user-time-key user-time)))
-                  (unix-microseconds->timestamp
-                   (user-time-timestamp user-time)))))
+            (set-timestamp (bytes->keyword (user-time-key user-time))
+                           (user-time-timestamp user-time))))
 
     ;; When requested, store transport metrics as meta-data items.
     (when expose-wire-schema?
