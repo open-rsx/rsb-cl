@@ -241,7 +241,7 @@ and bound to a variable named like the value of CLASS."
     certain code."))
 
 (declaim (special *signal-error-for-restart-test?*))
-(defvar *signal-error-restart-test?* nil)
+(defvar *signal-error-for-restart-test?* nil)
 
 (defmacro define-restart-method-test-case ((generic-function (&rest args)
                                             &key
