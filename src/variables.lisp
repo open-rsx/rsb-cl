@@ -17,7 +17,7 @@
 
 ;;; Framework timestamps
 
-(declaim (special *framework-timestamps*))
+(declaim (type list *framework-timestamps*))
 
 (defvar *framework-timestamps* '(:create :send :receive :deliver)
   "Names of timestamps which are associated to certain points in the
@@ -27,7 +27,7 @@ life of RSB events.")
 ;;;
 ;;; For uuid generation and such.
 
-(declaim (special *id-random-state*))
+(declaim (type random-state *id-random-state*))
 
 (defvar *id-random-state* (make-random-state nil)
   "Stores a `random-state' object which should be used for generation
@@ -35,7 +35,7 @@ of random IDs and similar things requiring pseudo randomness.")
 
 ;;; Configuration
 
-(declaim (special *default-configuration-files*))
+(declaim (type list *default-configuration-files*))
 
 (defvar *default-configuration-files*
   `(;; Current directory
@@ -50,7 +50,7 @@ of random IDs and similar things requiring pseudo randomness.")
     #+windows  #P"/rsb.conf")
   "List of configuration file names in order of decreasing priority.")
 
-(declaim (special *default-configuration*))
+(declaim (type list *default-configuration*))
 
 (defvar *default-configuration*
   '(((:transport :socket :enabled) . "1"))
