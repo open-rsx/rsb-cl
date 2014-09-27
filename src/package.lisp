@@ -85,6 +85,7 @@
 
    #:*default-configuration*
    #:*default-configuration-files*
+   #:*configuration*
 
    #:*make-participant-hook*
    #:*participant-state-change-hook*)

@@ -75,7 +75,7 @@
 (deftestsuite participant-suite ()
   ()
   (:dynamic-variables
-   (*default-configuration* '(((:transport :inprocess :enabled) . "1"))))
+   (*configuration* '(((:transport :inprocess :enabled) . "1"))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
 that test participant classes."))

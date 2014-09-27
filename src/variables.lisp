@@ -53,8 +53,14 @@ of random IDs and similar things requiring pseudo randomness.")
 (declaim (special *default-configuration*))
 
 (defvar *default-configuration*
-  '((:transport :socket :enabled) . "1")
-  "DOC")
+  '(((:transport :socket :enabled) . "1"))
+  "A list of default configuration option values: these are used when
+   no other configuration is performed.")
+
+(declaim (type list *configuration*))
+
+(defvar *configuration* '()
+  "A list of current configuration option values.")
 
 ;;; Participant lifecycle hooks
 

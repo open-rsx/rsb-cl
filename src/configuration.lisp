@@ -62,17 +62,18 @@ CONFIG-FILES. Default:
 + User-wide rsb.conf file (e.g. ~/.config/rsb.conf on UNIX)
 + $(PWD)/rsb.conf
 + Environment Variables"
-  (apply #'merge-options
-         (options-from-environment)
-         (iter (for file in config-files)
-               (with-open-file (stream file :if-does-not-exist nil)
-                 (when stream
-                   (collect (options-from-stream stream)))))))
+  (reduce #'merge-options
+          (list* (options-from-environment)
+                 (iter (for file in config-files)
+                       (with-open-file (stream file :if-does-not-exist nil)
+                         (when stream
+                           (collect (options-from-stream stream))))))
+          :initial-value *default-configuration*
+          :from-end      t))
 
 ;;;
 
-(defun section-options (section &optional
-                        (config *default-configuration*))
+(defun section-options (section &optional (config *configuration*))
   (let+ ((section (ensure-list section))
          ((&flet strip-key (option)
             (cons (nthcdr (length section) (car option))
@@ -82,8 +83,7 @@ CONFIG-FILES. Default:
                  :test-not #'starts-with-subseq
                  :key      #'car))))
 
-(defun option-value (name &optional default
-                     (config *default-configuration*))
+(defun option-value (name &optional default (config *configuration*))
   "DOC"
   (let ((option (assoc name config :test #'equal)))
     (if option
@@ -93,7 +93,7 @@ CONFIG-FILES. Default:
 ;;;
 
 (defun transport-options (&key
-                          (config            *default-configuration*)
+                          (config            *configuration*)
                           (exclude-disabled? t))
   "Collect and interpret options in CONFIG that apply to
 transports. Options for transports which are disabled in CONFIG are
@@ -130,15 +130,14 @@ TRANSPORT. Otherwise return OPTIONS unmodified."
                                   :key #'first)))
               transport-options))))
 
-(defun default-converters (&key
-                           (config *default-configuration*))
+(defun default-converters (&key (config *configuration*))
   "Return an alist of default converters for particular wire-types
-with items of the form (WIRE-TYPE . CONVERTER).
+   with items of the form (WIRE-TYPE . CONVERTER).
 
-If supplied, CONFIG specifies the configuration that should be used to
-determine the set of default converters. if CONFIG is not supplied,
-the value of `*default-configuration*' is used."
-  '((nibbles:octet-vector . (:fundamental-void
+   If supplied, CONFIG specifies the configuration that should be used
+   to determine the set of default converters. if CONFIG is not
+   supplied, the value of `*configuration*' is used."
+   '((nibbles:octet-vector . (:fundamental-void
                              :fundamental-bool
                              :fundamental-int64
                              :fundamental-uint32
@@ -150,14 +149,12 @@ the value of `*default-configuration*' is used."
                              :fundamental-bytes
                              :protocol-buffer))))
 
-(defun default-converter (wire-type
-                          &key
-                          (config *default-configuration*))
+(defun default-converter (wire-type &key (config *configuration*))
   "Return the default converter for WIRE-TYPE.
 
-If supplied, CONFIG specifies the configuration that should be used to
-determine the set of default converters. if CONFIG is not supplied,
-the value of `*default-configuration*' is used."
+   If supplied, CONFIG specifies the configuration that should be used
+   to determine the set of default converters. if CONFIG is not
+   supplied, the value of `*configuration*' is used."
   (cdr (assoc wire-type (default-converters :config config))))
 
 ;;; Utility functions
@@ -184,4 +181,4 @@ options."
 ;;; Set default configuration
 
 (eval-when (:load-toplevel :execute)
-  (setf *default-configuration* (options-from-default-sources)))
+  (setf *configuration* (options-from-default-sources)))
