@@ -56,9 +56,16 @@ for RESULT."))
                        method (cadr call) event (cddr call) (car call)))))
               (cond
                 ((when-let ((local-call *local-call*))
-                   (when (consp local-call)
-                     (update-call local-call)
-                     (setf (car local-call) t))))
+                   (cond
+                     ((not (consp local-call))
+                      nil)
+                     ;; Can happen when more than one local-method
+                     ;; processes a blocking local call.
+                     ((eq (car local-call) t)
+                      t)
+                     (t
+                      (update-call local-call)
+                      (setf (car local-call) t)))))
                 (t
                  ;; Extract the call id, look up the call, store the
                  ;; result and notify the caller.
