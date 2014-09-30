@@ -8,6 +8,8 @@
   (:use
    #:cl
    #:alexandria
+   #:let-plus
+   #:more-conditions
 
    #:rsb)
 

@@ -19,6 +19,14 @@
 
    #:rsb.test)
 
+  ;; Platform information functions
+  (:import-from #:rsb.introspection
+   #:current-process-id
+   #:current-program-name-and-commandline-arguments
+   #:current-process-start-time
+
+   #:current-host-id)
+
   ;; Root test suite
   (:export
    #:introspection-root)

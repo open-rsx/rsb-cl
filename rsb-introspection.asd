@@ -22,6 +22,7 @@
   :license     "LGPLv3" ; see COPYING file for details.
   :description "Introspection support for RSB."
   :depends-on  (:utilities.print-items
+                (:version :uiop   "3") ; for portable platform information
 
                 (:version :cl-rsb #.(cl-rsb-system:version/string)))
   :encoding    :utf-8
@@ -30,6 +31,20 @@
                  :depends-on ("protocol")
                  :serial     t
                  :components ((:file       "package")
+
+                              ;; Platform information interface.
+                              (:file       "platform-common")
+                              (:file       "platform-sbcl-linux"
+                               :if-feature (:and :sbcl :linux))
+                              (:file       "platform-sbcl-darwin"
+                               :if-feature (:and :sbcl :darwin))
+                              (:file       "platform-sbcl-win32"
+                               :if-feature (:and :sbcl :win32))
+                              (:file       "platform-generic"
+                               :if-feature (:or (:not :sbcl)
+                                                (:and (:not :linux)
+                                                      (:not :darwin)
+                                                      (:not :win32))))
 
                               (:file       "conditions")
                               (:file       "protocol")
@@ -52,7 +67,9 @@
   :components  ((:module     "introspection"
                  :pathname   "test/introspection"
                  :serial     t
-                 :components ((:file       "package"))))
+                 :components ((:file       "package")
+
+                              (:file       "platform"))))
 
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 
