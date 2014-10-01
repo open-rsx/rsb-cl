@@ -30,6 +30,43 @@
 
    #:introspection-process-scope)
 
+  ;; Model protocol and classes
+  (:export
+   #:info-most-recent-activity
+
+   #:info-clock-offset
+   #:info-latency
+
+   #:participant-info                   #:remote-participant-info
+   #:participant-info-kind
+   #:participant-info-id
+   #:participant-info-parent-id
+   #:participant-info-scope
+   #:participant-info-type
+   #:participant-info-transports
+
+   #:process-info                       #:remote-process-info
+   #:process-info-process-id            #:process-info-state
+   #:process-info-program-name          #:process-info-transports
+   #:process-info-commandline-arguments
+   #:process-info-start-time
+   #:current-process-info
+
+   #:host-info                          #:remote-host-info
+   #:host-info-id                       #:host-info-state
+   #:host-info-hostname
+   #:current-host-info)
+
+  ;; Introspection message protocol
+  (:export
+   #:hello
+   #:hello-participant
+   #:hello-process
+   #:hello-host
+
+   #:bye
+   #:bye-id)
+
   (:documentation
    "This package contains the introspection functionality.
 

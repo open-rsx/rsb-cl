@@ -21,12 +21,20 @@
   :version     #.(cl-rsb-system:version/string)
   :license     "LGPLv3" ; see COPYING file for details.
   :description "Introspection support for RSB."
+  :defsystem-depends-on (:cl-protobuf)
   :depends-on  (:utilities.print-items
                 (:version :uiop   "3") ; for portable platform information
 
                 (:version :cl-rsb #.(cl-rsb-system:version/string)))
   :encoding    :utf-8
-  :components  ((:module     "introspection"
+  :components  ((:protocol-buffer-descriptor-directory "protocol"
+                 :pathname   #.cl-rsb-system:+protocol-directory+
+                 :components ((:file       "Hello"
+                               :pathname   "rsb/protocol/introspection/Hello")
+                              (:file       "Bye"
+                               :pathname   "rsb/protocol/introspection/Bye")))
+
+                (:module     "introspection"
                  :pathname   "src/introspection"
                  :depends-on ("protocol")
                  :serial     t
@@ -46,9 +54,11 @@
                                                       (:not :darwin)
                                                       (:not :win32))))
 
+                              (:file       "types")
                               (:file       "conditions")
                               (:file       "protocol")
-                              (:file       "variables"))))
+                              (:file       "variables")
+                              (:file       "model"))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
@@ -69,7 +79,9 @@
                  :serial     t
                  :components ((:file       "package")
 
-                              (:file       "platform"))))
+                              (:file       "platform")
+
+                              (:file       "model"))))
 
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 
