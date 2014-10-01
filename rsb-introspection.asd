@@ -62,7 +62,8 @@
                               (:file       "conversion")
 
                               (:file       "mixins")
-                              (:file       "local-introspection"))))
+                              (:file       "local-introspection")
+                              (:file       "timing-tracking"))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
@@ -87,7 +88,8 @@
 
                               (:file       "model")
 
-                              (:file       "local-introspection"))))
+                              (:file       "local-introspection")
+                              (:file       "timing-tracking"))))
 
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 

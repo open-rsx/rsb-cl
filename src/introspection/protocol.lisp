@@ -268,3 +268,26 @@
 (defgeneric call-with-database-lock (database thunk)
   (:documentation
    "Call THUNK with locked DATABASE."))
+
+;;; Timing tracker protocol
+
+(defgeneric timing-tracker-clock-offset (tracker)
+  (:documentation
+   "Return the clock offset estimated by TRACKER or nil if not
+    available."))
+
+(defgeneric timing-tracker-latency (tracker)
+  (:documentation
+   "Return the communication latency estimated by TRACKER or nil if
+    not available."))
+
+(defgeneric timing-tracker-to-local-clock (tracker time &key allow-future?)
+  (:documentation
+   "Return a timestamp corresponding to TIME but expressed with
+    respect to the local clock.
+
+    If possible, the clock offset estimate computed by TRACKER is used
+    to perform the conversion.
+
+    ALLOW-FUTURE? controls whether returned timestamps are restricted
+    to the current time of the local clock or earlier."))
