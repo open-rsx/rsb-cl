@@ -26,7 +26,9 @@
    #:current-program-name-and-commandline-arguments
    #:current-process-start-time
 
-   #:current-host-id)
+   #:current-host-id
+
+   #:remote-introspection-database)
 
   ;; Root test suite
   (:export

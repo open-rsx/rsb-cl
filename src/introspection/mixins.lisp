@@ -201,3 +201,18 @@
 
 (defmacro with-database-lock ((database) &body body)
   `(call-with-database-lock ,database (lambda () ,@body)))
+
+;;; `change-hook-mixin'
+
+(defclass change-hook-mixin ()
+  ((change-hook :type     list
+                :initform '()
+                :documentation
+                "Stores a list of handlers to run when something
+                 changes in the object."))
+  (:documentation
+   "This class is intended to be mixed into database classes that
+    notify handlers of changes."))
+
+(defmethod database-change-hook ((database change-hook-mixin))
+  (hooks:object-hook database 'change-hook))

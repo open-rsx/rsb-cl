@@ -291,3 +291,54 @@
 
     ALLOW-FUTURE? controls whether returned timestamps are restricted
     to the current time of the local clock or earlier."))
+
+;;; Database change hook protocol
+
+(defgeneric database-change-hook (database)
+  (:documentation
+   "Return a hook that is run when DATABASE changes."))
+
+;;; Introspection receiver protocol
+
+(defgeneric introspection-survey (introspection)
+  (:documentation
+   "Perform an introspection survey collecting the results in
+    INTROSPECTION."))
+
+(defgeneric introspection-ping (introspection host process
+                                &key
+                                block?)
+  (:documentation
+   "Send a \"ping\" message to PROCESS running on HOST and return the
+    reply event.
+
+    BLOCK? controls whether the call should block until the reply
+    arrives. If false, a `rsb.patterns.request-reply:future' is
+    returned."))
+
+;;; Remote introspection database protocol
+;;;
+;;; Each entry has an associated "*-info instance" (e.g. `host-info',
+;;; `remote-host-info', `process-info', etc.) associated to
+;;; it. Also, entries form a hierarchy:
+;;;
+;;; `host-entry' ─> `process-entry' ─> `participant-entry' ─┐
+;;;                                             ⌃           │
+;;;                                             └───────────┘
+
+(defgeneric entry-info (entry)
+  (:documentation
+   "Return the *-info instance associated to ENTRY."))
+
+(defgeneric entry-parent (entry)
+  (:documentation
+   "Return the entry which is the parent of ENTRY or nil if there is
+    none."))
+
+(defgeneric entry-children (entry)
+  (:documentation
+   "Return the list of entries which are the children of ENTRY."))
+
+;; Local Variables:
+;; coding: utf-8
+;; End:

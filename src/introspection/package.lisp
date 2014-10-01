@@ -13,6 +13,15 @@
 
    #:rsb)
 
+  (:import-from #:rsb.patterns.request-reply
+   #:remote-call-error
+
+   #:future-done?
+   #:future-result
+
+   #:server-method
+   #:call)
+
   ;; Conditions
   (:export
    #:introspection-protocol-error
@@ -93,6 +102,27 @@
   (:export
    #:call-with-database-lock
    #:with-database-lock)
+
+  ;; Change hook protocol
+  (:export
+   #:database-change-hook)
+
+  ;; Introspection receiver protocol
+  (:export
+   #:introspection-survey
+   #:introspection-ping)
+
+  ;; Remote database entries and protocol
+  (:export
+   #:entry-info
+
+   #:participant-entry
+   #:entry-parent
+   #:entry-children
+
+   #:process-entry
+
+   #:host-entry)
 
   (:documentation
    "This package contains the introspection functionality.

@@ -63,7 +63,8 @@
 
                               (:file       "mixins")
                               (:file       "local-introspection")
-                              (:file       "timing-tracking"))))
+                              (:file       "timing-tracking")
+                              (:file       "remote-introspection"))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
@@ -89,7 +90,8 @@
                               (:file       "model")
 
                               (:file       "local-introspection")
-                              (:file       "timing-tracking"))))
+                              (:file       "timing-tracking")
+                              (:file       "remote-introspection"))))
 
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 
