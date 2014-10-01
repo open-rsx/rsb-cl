@@ -15,6 +15,7 @@
    #:lift
 
    #:rsb
+   #:rsb.patterns.request-reply
    #:rsb.introspection
 
    #:rsb.test)

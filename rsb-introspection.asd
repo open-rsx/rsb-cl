@@ -61,7 +61,8 @@
                               (:file       "model")
                               (:file       "conversion")
 
-                              (:file       "mixins"))))
+                              (:file       "mixins")
+                              (:file       "local-introspection"))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
@@ -84,7 +85,9 @@
 
                               (:file       "platform")
 
-                              (:file       "model"))))
+                              (:file       "model")
+
+                              (:file       "local-introspection"))))
 
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 

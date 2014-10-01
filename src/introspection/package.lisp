@@ -77,6 +77,18 @@
    #:introspection-participants/roots
    #:find-participant)              ; also `setf'
 
+  ;; Process table protocol
+  (:export
+   #:introspection-processes
+   #:find-process                   ; also `setf'
+   #:ensure-process)
+
+  ;; Host table protocol
+  (:export
+   #:introspection-hosts
+   #:find-host                      ; also `setf'
+   #:ensure-host)
+
   ;; Database locking protocol
   (:export
    #:call-with-database-lock

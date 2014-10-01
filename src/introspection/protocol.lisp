@@ -219,6 +219,50 @@
 (defmethod introspection-participants/roots ((container t))
   (remove-if #'entry-parent (introspection-participants container)))
 
+;;; Process table protocol
+
+(defgeneric introspection-processes (container)
+  (:documentation
+   "Return the list of `process-info' instances stored in
+    CONTAINER."))
+
+(defgeneric find-process (id container)
+  (:documentation
+   "Return the process designated by ID in CONTAINER."))
+
+(defgeneric (setf find-process) (new-value id container)
+  (:documentation
+   "Store NEW-VALUE as the process designated by ID in CONTAINER."))
+
+(defgeneric ensure-process (id container process &key receiver)
+  (:documentation
+   "If the process designated by ID exists in CONTAINER, update it
+    with information from PROCESS and return it. Otherwise create and
+    return a new entry based on PROCESS.
+
+    RECEIVER is the introspection receiver through which PROCESS was
+    received. This relation is recorded in the updated or created
+    entry."))
+
+;;; Host table protocol
+
+(defgeneric introspection-hosts (container)
+  (:documentation
+   "Return the list of `host-info' instances stored in CONTAINER."))
+
+(defgeneric find-host (id container)
+  (:documentation
+   "Return the host designated by ID in CONTAINER."))
+
+(defgeneric (setf find-host) (new-value id container)
+  (:documentation
+   "Store NEW-VALUE as the host designated by ID in CONTAINER."))
+
+(defgeneric ensure-host (id container host)
+  (:documentation
+   "If the host designated by ID exists in CONTAINER, return
+    it. Otherwise create and return a new entry based on HOST."))
+
 ;;; Database locking protocol
 
 (defgeneric call-with-database-lock (database thunk)
