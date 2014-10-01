@@ -58,7 +58,8 @@
                               (:file       "conditions")
                               (:file       "protocol")
                               (:file       "variables")
-                              (:file       "model"))))
+                              (:file       "model")
+                              (:file       "conversion"))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
