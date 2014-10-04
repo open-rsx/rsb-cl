@@ -64,7 +64,10 @@
                               (:file       "mixins")
                               (:file       "local-introspection")
                               (:file       "timing-tracking")
-                              (:file       "remote-introspection"))))
+                              (:file       "remote-introspection")
+
+                              (:file       "reloading"
+                               :if-feature :sbcl))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
@@ -91,7 +94,10 @@
 
                               (:file       "local-introspection")
                               (:file       "timing-tracking")
-                              (:file       "remote-introspection"))))
+                              (:file       "remote-introspection")
+
+                              (:file       "reloading"
+                               :if-feature :sbcl))))
 
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 

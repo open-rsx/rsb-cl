@@ -124,6 +124,10 @@
 
    #:host-entry)
 
+  ;; Reloading support
+  (:export
+   #:reinitialize-introspection)
+
   (:documentation
    "This package contains the introspection functionality.
 
