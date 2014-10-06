@@ -23,8 +23,9 @@
                  (handler-bind ((warning #'muffle-warning))
                    (format trace-stream "/// Compiling example ~24,0T~S~%" file)
                    (with-standard-io-syntax
-                     (with-compilation-unit (:override t)
-                       (compile-file file)))))))
+                     (let ((*print-readably* nil)) ; SBCL workaround
+                       (with-compilation-unit (:override t)
+                         (compile-file file))))))))
          (cond
            ((or warnings? failure?)
             (error "~@<Failed to compile example file ~S~@:_~@:_~
