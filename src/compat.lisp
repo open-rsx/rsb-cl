@@ -51,7 +51,7 @@
             &key
             (transports     (transport-options
                              :exclude-disabled?
-                             (not (uri-transport ,designator-arg))))
+                             (not (puri:uri-scheme ,designator-arg))))
             (converters     (default-converters))
             transform
             error-policy)

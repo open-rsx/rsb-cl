@@ -102,7 +102,7 @@
                              &rest args &key
                              (transports (transport-options
                                           :exclude-disabled?
-                                          (not (uri-transport scope))))
+                                          (not (puri:uri-scheme scope))))
                              (converters (default-converters))
                              transform
                              error-policy)

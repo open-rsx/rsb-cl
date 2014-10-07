@@ -1,6 +1,6 @@
 ;;;; uris.lisp --- Unit tests for URI-related functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,20 +17,31 @@
   uri-options-smoke
 
   (ensure-cases (uri-string expected)
-      '((""                      nil)
-        ("spread:"               nil)
-        ("?"                     nil)
+      '(;; Some illegal cases.
+        ("?scheme=foo"           error)
+        ("?host=foo"             error)
+        ("?port=4444"            error)
+        ;; These are allowed.
+        (""                      ())
+        ("spread:"               ())
+        ("?"                     ())
         ("?foo=bar"              (:foo "bar"))
         ("?bar=baz;whoop=nooble" (:bar "baz" :whoop "nooble"))
-        ("?first=yes&amp=yes"    (:first "yes" :amp "yes"))
-        ("?host=foo;port=4444"   ()))
+        ("?first=yes&amp=yes"    (:first "yes" :amp "yes")))
 
-    (let* ((uri    (puri:parse-uri uri-string))
-           (result (uri-options uri)))
-      (ensure-same result expected
-                   :test   #'equal
-                   :report "~@<Extracted option from URI ~S are ~S, not ~S.~@:>"
-                   :arguments (uri result expected)))))
+    (let+ (((&flet do-it ()
+              (let ((uri (puri:parse-uri uri-string)))
+                (values (uri-options uri) uri)))))
+      (case expected
+        (error
+         (ensure-condition 'error (do-it)))
+        (t
+         (let+ (((&values options uri) (do-it)))
+           (ensure-same options expected
+                        :test      #'equal
+                        :report    "~@<Extracted options from URI ~S are ~
+                                    ~S, not ~S.~@:>"
+                        :arguments (uri options expected))))))))
 
 (addtest (uris-root
           :documentation

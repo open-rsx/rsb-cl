@@ -14,13 +14,6 @@
       (puri:parse-uri string)
       (make-scope string)))
 
-(defun uri-transport (uri)
-  "If URI specifies a transport configuration, return three values:
-the transport name, hostname and port. Both hostname and port can be
-nil. If URI does not specify a transport, return nil."
-  (when (puri:uri-scheme uri)
-    (values (puri:uri-scheme uri) (puri:uri-host uri) (puri:uri-port uri))))
-
 (defun uri-options (uri)
   "Translate the query part of URI into a plist of options."
   (let+ (((&flet separator? (char)
@@ -33,48 +26,62 @@ nil. If URI does not specify a transport, return nil."
     (iter (for (name value) in names-and-values)
           (let ((key (make-keyword (string-upcase name))))
             (if (member key '(:scheme :host :port) :test #'eq)
-                (warn "~@<Ignoring query-option ~S - use ~:*~(~A~) part ~
-                       of the URI instead.~@:>"
-                      key)
+                (error "~@<Illegal query option \"~(~A~)\". ~:*~@(~A~) ~
+                        URI component must be used instead.~@:>"
+                        key)
                 (appending (list key value)))))))
 
 (defun uri->scope-and-options (uri &optional defaults)
   "Dissect URI of the form
 
-  SCHEME:[//HOST][:PORT][/PATH][?QUERY][#FRAGMENT]
+     [SCHEME:[//HOST[:PORT]]][PATH][?QUERY][#FRAGMENT]
 
-as follows:
+   as follows:
 
-+ SCHEME   -> Transport name
-+ HOST     -> Transport option :HOST
-+ PORT     -> Transport option :PORT
-+ PATH     -> Scope
-+ QUERY    -> \"freestyle\" transport options. Has to be of the form
-              KEY1=VALUE1;KEY2=VALUE2;...
-+ FRAGMENT -> not processed
+     SCHEME   -> Transport name
+     HOST     -> Transport option :HOST
+     PORT     -> Transport option :PORT
+     PATH     -> Scope
+     QUERY    -> \"freestyle\" transport options. Has to be of the form
 
-Return two values: scope and transport options.
+                   KEY1=VALUE1;KEY2=VALUE2;...
 
-Examples:
-RSB> (uri->scope-and-options (puri:parse-uri \"spread:\"))
-=> (make-scope \"/\") '((:spread))
-:test #'equal
-RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
-=> (make-scope \"/\") '((:spread :port 4811 :host \"localhost\"))
-:test #'equal
-RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
-=> (make-scope \"/\") '((:spread :port 4811))
-:test #'equal"
-  (let+ (((&values transport host port) (uri-transport uri))
-         ((&accessors-r/o (path        puri:uri-path)
+     FRAGMENT -> not allowed
+
+   Return two values: scope and transport options.
+
+   Examples:
+   RSB> (uri->scope-and-options (puri:parse-uri \"spread:\"))
+   => (make-scope \"/\") '((:spread))
+   :test #'equal
+
+   RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
+   => (make-scope \"/\") '((:spread :port 4811 :host \"localhost\"))
+   :test #'equal
+
+   RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
+   => (make-scope \"/\") '((:spread :port 4811))
+   :test #'equal"
+  (let+ (((&accessors-r/o (transport   puri:uri-scheme)
+                          (host        puri:uri-host)
+                          (port        puri:uri-port)
+                          (path        puri:uri-path)
                           (fragment    puri:uri-fragment)
-                          (uri-options uri-options)) uri)
+                          (uri-options uri-options))
+          uri)
          (transport-options
           (%transport-options transport defaults host port)))
+    ;; Disallow host or port components without scheme.
+    (when (and (or host port) (not transport))
+      (error "~@<URI ~S has ~{~{~A component ~S~}~^ and ~} but no ~
+              scheme component.~@:>"
+             (princ-to-string uri)
+             (append (when host `(("host" ,host)))
+                     (when port `(("port" ,port))))))
+    ;; Disallow fragment component.
     (when fragment
-      (warn "~@<Ignoring fragment ~S in URI -> scope and options ~
-             translation. URI was ~S~@:>"
-            fragment uri))
+      (error "~@<URI ~A has fragment component ~S.~@:>"
+             (princ-to-string uri) fragment))
     (values (make-scope path)
             (mapcar (curry #'%merge-options uri-options)
                     transport-options))))
