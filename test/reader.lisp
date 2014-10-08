@@ -41,6 +41,10 @@
     () () (:error-policy ,#'continue)
     "/rsbtest/reader/construction")
 
+  `("/rsbtest/reader/construction?foo=bar"
+    () () ()
+    "/rsbtest/reader/construction")
+
   ;; No transports => error
   '("/rsbtest/reader/construction"
     () () (:transports nil)

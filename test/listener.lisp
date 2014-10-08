@@ -22,20 +22,29 @@ function."))
   '("/rsbtest/listener/construction"
     () () ()
     "/rsbtest/listener/construction")
+
   '("/rsbtest/listener/construction"
     () () (:transports ((:inprocess &inherit)))
     "/rsbtest/listener/construction")
+
   '("/rsbtest/listener/construction"
     () () (:converters ((t . :foo)))
     "/rsbtest/listener/construction")
+
   `("/rsbtest/listener/construction"
     () () (:transform ,#'1+)
     "/rsbtest/listener/construction")
+
   '("inprocess:/rsbtest/listener/construction"
     () () ()
     "/rsbtest/listener/construction")
+
   `("inprocess:/rsbtest/listener/construction"
     () () (:error-policy ,#'continue)
+    "/rsbtest/listener/construction")
+
+  `("/rsbtest/listener/construction?foo=bar"
+    () () ()
     "/rsbtest/listener/construction")
 
   ;; No transports => error

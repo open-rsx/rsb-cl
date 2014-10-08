@@ -37,7 +37,12 @@
   '("/localserver/construction"
     () () ()
     "/localserver/construction")
+
   '("inprocess://localhost/localserver/construction"
+    () () ()
+    "/localserver/construction")
+
+  '("/localserver/construction?foo=bar"
     () () ()
     "/localserver/construction")
 

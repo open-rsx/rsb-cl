@@ -17,20 +17,29 @@ function."))
   '("/rsbtest/informer/construction"
     (t) (:type t) ()
     "/rsbtest/informer/construction")
+
   '("/rsbtest/informer/construction"
     (t) (:type t) (:transports ((:inprocess &inherit)))
     "/rsbtest/informer/construction")
+
   '("/rsbtest/informer/construction"
     (t) (:type t) (:converters ((t . :foo)))
     "/rsbtest/informer/construction")
+
   `("/rsbtest/informer/construction"
     (t) (:type t) (:transform ,#'1+)
     "/rsbtest/informer/construction")
+
   '("inprocess:/rsbtest/informer/construction"
     (t) (:type t) ()
     "/rsbtest/informer/construction")
+
   `("inprocess:/rsbtest/informer/construction"
     (t) (:type t) (:error-policy ,#'continue)
+    "/rsbtest/informer/construction")
+
+  `("/rsbtest/informer/construction?foo=bar"
+    (t) (:type t) ()
     "/rsbtest/informer/construction")
 
   ;; No transports => error

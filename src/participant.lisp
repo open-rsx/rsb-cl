@@ -115,16 +115,14 @@
            args)))
 
 ;; This method operates on strings which it turns into either URIs (if
-;; the string contains a colon) or scopes.
+;; the string contains ":", "//", "#" or "?") or scopes.
 (defmethod make-participant ((kind t) (scope string)
                              &rest args &key
                              (transports nil transports-supplied?)
                              (converters nil converters-supplied?)
                              transform
                              error-policy)
-  (apply #'make-participant kind (if (find #\: scope)
-                                     (puri:parse-uri scope)
-                                     (make-scope scope))
+  (apply #'make-participant kind (parse-scope-or-uri scope)
          :transform    transform
          :error-policy error-policy
          (append (when transports-supplied?

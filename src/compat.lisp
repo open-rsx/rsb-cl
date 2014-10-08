@@ -71,10 +71,7 @@
                               (converters  nil converters-supplied?)
                               transform
                               error-policy)
-         (apply #',make-name
-                (if (find #\: ,designator-arg)
-                    (puri:parse-uri ,designator-arg)
-                    (make-scope ,designator-arg))
+         (apply #',make-name (parse-scope-or-uri ,designator-arg)
                 ,@(rest arg-names)
                 :transform    transform
                 :error-policy error-policy

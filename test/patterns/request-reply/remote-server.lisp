@@ -35,7 +35,12 @@
   '("/remoteserver/construction"
     () () ()
     "/remoteserver/construction")
+
   '("inprocess://localhost/remoteserver/construction"
+    () () ()
+    "/remoteserver/construction")
+
+  '("/remoteserver/construction?foo=bar"
     () () ()
     "/remoteserver/construction")
 

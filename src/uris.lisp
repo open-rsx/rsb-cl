@@ -6,6 +6,14 @@
 
 (cl:in-package #:rsb)
 
+(defun parse-scope-or-uri (string)
+  "PARSE string as either a URI or a scope and return a `puri:uri' or
+   `scope' instance respectively."
+  (if (some (rcurry #'search string)
+            '(":" "//" "#" "?"))
+      (puri:parse-uri string)
+      (make-scope string)))
+
 (defun uri-transport (uri)
   "If URI specifies a transport configuration, return three values:
 the transport name, hostname and port. Both hostname and port can be
