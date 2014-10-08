@@ -38,6 +38,14 @@ function."))
     (t) (:type t) (:parent ,*simple-parent*)
     "/rsbtest/informer/construction")
 
+  '("/rsbtest/informer/construction"
+    (t) (:type t) (:introspection? nil)
+    "/rsbtest/informer/construction")
+
+  '("/rsbtest/informer/construction"
+    (t) (:type t) (:introspection? t)
+    "/rsbtest/informer/construction")
+
   '("inprocess:/rsbtest/informer/construction"
     (t) (:type t) ()
     "/rsbtest/informer/construction")

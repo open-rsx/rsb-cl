@@ -178,6 +178,7 @@ converter."
                               transform
                               error-policy
                               parent
+                              introspection?
                               &allow-other-keys)
   (:documentation
    "Make and return a participant instance of KIND that participates
@@ -194,6 +195,11 @@ converter."
 
       PARENT, if supplied, is a participant that should be considered
       the parent of the created participant.
+
+      INTROSPECTION? controls whether the created participant
+      participates in the introspection machinery. Specifically,
+      whether it announces its creation and destruction and answers to
+      introspection queries.
 
     Participant classes which directly send or receive
     events (e.g. `reader', `listener' and `informer') support the
@@ -311,22 +317,25 @@ converter."
          (cons nil (cdr *make-participant-nesting*))))
     (apply #'service-provider:make-provider 'participant kind scope args)))
 
-(defmethod make-participant-using-class :around ((class     class)
-                                                 (prototype t)
-                                                 (scope     scope)
-                                                 &rest args &key
-                                                 parent)
-  (let* ((args        (if parent
-                          (remove-from-plist args :parent)
-                          args))
+(defmethod make-participant-using-class :around
+    ((class     class)
+     (prototype t)
+     (scope     scope)
+     &rest args &key
+     parent
+     (introspection? (when (member (option-value '(:introspection :enabled)) '(t "1")
+                                   :test #'equal)
+                       t)))
+  (let* ((args        (remove-from-plist args :parent :introspection?))
          (participant (apply #'call-next-method class prototype scope args)))
     (if *make-participant-hook*
         ;; When the hook returns anything but nil, use it as
         ;; replacement for PARTICIPANT. Otherwise use PARTICIPANT.
-        (or (hooks:run-hook '*make-participant-hook* participant
-                            (if parent
-                                (list* :parent parent args)
-                                args))
+        (or (hooks:run-hook
+             '*make-participant-hook* participant
+             (append (when parent
+                       (list :parent parent))
+                     (list* :introspection? introspection? args)))
             participant)
         participant)))
 
@@ -356,7 +365,8 @@ RECEIVER to NEW-VALUE."))
                            converters
                            transform
                            error-policy
-                           parent)
+                           parent
+                           introspection?)
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
@@ -380,7 +390,12 @@ ERROR-POLICY has to be nil or a function to be installed in the error
 hook of the created `listener'.
 
 If supplied, PARENT is a participant that should be considered the
-parent of the created `listener'."))
+parent of the created `listener'.
+
+INTROSPECTION? controls whether the newly created listener
+participates in the introspection machinery. Specifically, whether it
+announces its construction and destruction and answers to
+introspection queries."))
 
 ;;; Reader protocol
 
@@ -390,7 +405,8 @@ parent of the created `listener'."))
                          converters
                          transform
                          error-policy
-                         parent)
+                         parent
+                         introspection?)
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
@@ -416,6 +432,10 @@ hook of the created `reader'.
 If supplied, PARENT is a participant that should be considered the
 parent of the created `reader'.
 
+INTROSPECTION? controls whether the newly created reader participates
+in the introspection machinery. Specifically, whether it announces its
+creation and destruction and answers to introspection queries.
+
 The resulting `reader' instance can be used to receive data in
 \"pull\" manner using the `receive' function."))
 
@@ -437,7 +457,8 @@ nil is returned."))
                            converters
                            transform
                            error-policy
-                           parent)
+                           parent
+                           introspection?)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
@@ -461,7 +482,12 @@ ERROR-POLICY has to be nil or a function to be installed in the error
 hook of the created `informer'.
 
 If supplied, PARENT is a participant that should be considered the
-parent of the created `informer'."))
+parent of the created `informer'.
+
+INTROSPECTION? controls whether the newly created informer
+participates in the introspection machinery. Specifically, whether it
+announces its creation and destruction and answers to introspection
+queries."))
 
 (defgeneric send (informer data
                   &rest meta-data

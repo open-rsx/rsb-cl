@@ -84,13 +84,14 @@ classes."))
                 (transform (cdr (assoc ,transform transform))))
            (setf (,accessor-name method)
                  (make-participant ,kind scope
-                             :transports   (server-transport-options server)
-                             :converters   converters
-                             :transform    transform
-                             :error-policy (lambda (condition)
-                                             (hooks:run-hook
-                                              error-hook condition))
-                             :parent       method)))))))
+                                   :transports     (server-transport-options server)
+                                   :converters     converters
+                                   :transform      transform
+                                   :error-policy   (lambda (condition)
+                                                     (hooks:run-hook
+                                                      error-hook condition))
+                                   :parent         method
+                                   :introspection? (server-introspection? server))))))))
 
 ;;; `server' class
 
@@ -103,6 +104,16 @@ classes."))
                       "Stores the transport options that should be
 used by participants which implement the actual communication on
 behalf of the server.")
+   (introspection?    :initarg  :introspection?
+                      :type     boolean
+                      :reader   server-introspection?
+                      :initform t
+                      :documentation
+                      "Stores a Boolean indicating whether
+                       introspection has enabled for the server.
+
+                       TODO this is a temporary workaround until
+                       participant-configuration is ready.")
    (rsb::transform    :type     transform-specification)
    (methods           :type     hash-table
                       :reader   server-%methods
@@ -194,12 +205,16 @@ generic support for retrieving, adding and removing methods."))
 
 ;;; `server' creation
 
-(defmethod make-participant-using-class ((class     class)
-                                         (prototype server)
-                                         (scope     scope)
-                                         &rest args &key
-                                         (transports '())
-                                         (converters (default-converters)))
+(defmethod make-participant-using-class
+    ((class     class)
+     (prototype server)
+     (scope     scope)
+     &rest args &key
+     (transports     '())
+     (converters     (default-converters))
+     (introspection? (when (member (option-value '(:introspection :enabled)) '(t "1")
+                                   :test #'equal)
+                       t)))
   ;; Check that TRANSPORTS will select at least one transport.
   (unless (rsb::effective-transport-options
            (rsb::merge-transport-options
@@ -211,7 +226,8 @@ generic support for retrieving, adding and removing methods."))
   (apply #'call-next-method class prototype scope
          :converters        converters
          :transport-options transports
-         (remove-from-plist args :transports)))
+         :introspection?    introspection?
+         (remove-from-plist args :transports :introspection?)))
 
 ;;; Utility functions
 

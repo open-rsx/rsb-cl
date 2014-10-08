@@ -50,6 +50,14 @@
     () () (:parent ,*simple-parent*)
     "/rsbtest/localserver/construction")
 
+  '("/rsbtest/localserver/construction"
+    () () (:introspection? nil)
+    "/rsbtest/localserver/construction")
+
+  '("/rsbtest/localserver/construction"
+    () () (:introspection? t)
+    "/rsbtest/localserver/construction")
+
   '("inprocess://localhost/rsbtest/localserver/construction"
     () () ()
     "/rsbtest/localserver/construction")

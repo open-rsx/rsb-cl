@@ -127,7 +127,8 @@ returned."))
                                 converters
                                 transform
                                 error-policy
-                                parent)
+                                parent
+                                introspection?)
   (:documentation
    "Make and return a `remote-server' instance that calls methods
 provided by servers on the scope SCOPE-OR-URI.
@@ -153,6 +154,11 @@ hook of the created remote server.
 If supplied, PARENT is a participant that should be considered the
 parent of the created `remote-server'.
 
+INTROSPECTION? controls whether the newly created remote server
+participates in the introspection machinery. Specifically, whether it
+announces its creation and destruction and answers to introspection
+queries.
+
 If the server cannot be created, an error of type
 `participant-creation-error' is signaled."))
 
@@ -164,7 +170,8 @@ If the server cannot be created, an error of type
                                converters
                                transform
                                error-policy
-                               parent)
+                               parent
+                               introspection?)
   (:documentation
    "Make and return a `local-server' instance that provides methods on
 the scope SCOPE-OR-URI for other participants to call.
@@ -190,6 +197,11 @@ hook of the created local server.
 
 If supplied, PARENT is a participant that should be considered the
 parent of the created `local-server'.
+
+INTROSPECTION? controls whether the newly created local server
+participates in the introspection machinery. Specifically, whether it
+announces its creation and destruction and answers to introspection
+queries.
 
 If the server cannot be created, an error of type
 `participant-creation-error' is signaled."))

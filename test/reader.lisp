@@ -37,6 +37,14 @@
     () () (:parent ,*simple-parent*)
     "/rsbtest/reader/construction")
 
+  '("/rsbtest/reader/construction"
+    () () (:introspection? nil)
+    "/rsbtest/reader/construction")
+
+  '("/rsbtest/reader/construction"
+    () () (:introspection? t)
+    "/rsbtest/reader/construction")
+
   '("inprocess:/rsbtest/reader/construction"
     () () ()
     "/rsbtest/reader/construction")

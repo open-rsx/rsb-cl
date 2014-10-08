@@ -43,6 +43,14 @@ function."))
     () () (:parent ,*simple-parent*)
     "/rsbtest/listener/construction")
 
+  '("/rsbtest/listener/construction"
+    () () (:introspection? nil)
+    "/rsbtest/listener/construction")
+
+  '("/rsbtest/listener/construction"
+    () () (:introspection? t)
+    "/rsbtest/listener/construction")
+
   '("inprocess:/rsbtest/listener/construction"
     () () ()
     "/rsbtest/listener/construction")

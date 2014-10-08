@@ -111,11 +111,12 @@ should be passed to the callback function."))
 
          (setf (server-method server name)
                (make-participant :local-method scope
-                                 :server   server
-                                 :name     name
-                                 :callback callback
-                                 :argument argument
-                                 :parent   server))))
+                                 :server         server
+                                 :name           name
+                                 :callback       callback
+                                 :argument       argument
+                                 :parent         server
+                                 :introspection? (server-introspection? server)))))
 
   (macrolet
       ((define-method-creating-method (name-type scope-form)
