@@ -31,7 +31,7 @@
                         key)
                 (appending (list key value)))))))
 
-(defun uri->scope-and-options (uri &optional defaults)
+(defun uri->scope-and-options (uri)
   "Dissect URI of the form
 
      [SCHEME:[//HOST[:PORT]]][PATH][?QUERY][#FRAGMENT]
@@ -48,19 +48,21 @@
 
      FRAGMENT -> not allowed
 
-   Return two values: scope and transport options.
+   Return two values: scope and transport options. If SCHEME is
+   present, return transport options that enable only the transport
+   designated by SCHEME and disable all other transports.
 
    Examples:
    RSB> (uri->scope-and-options (puri:parse-uri \"spread:\"))
-   => (make-scope \"/\") '((:spread))
+   => (make-scope \"/\") '((:spread :enabled t &inherit) (t :enabled nil &inherit))
    :test #'equal
 
    RSB> (uri->scope-and-options (puri:parse-uri \"spread://localhost:4811\"))
-   => (make-scope \"/\") '((:spread :port 4811 :host \"localhost\"))
+   => (make-scope \"/\") '((:spread :enabled t :host \"localhost\" :port 4811) (t :enabled nil &inherit))
    :test #'equal
 
-   RSB> (uri->scope-and-options (puri:parse-uri \"spread:\") '((:spread :port 4811)))
-   => (make-scope \"/\") '((:spread :port 4811))
+   RSB> (uri->scope-and-options (puri:uri \"/justscope\"))
+   => (make-scope \"/justscope\") '()
    :test #'equal"
   (let+ (((&accessors-r/o (transport   puri:uri-scheme)
                           (host        puri:uri-host)
@@ -68,9 +70,7 @@
                           (path        puri:uri-path)
                           (fragment    puri:uri-fragment)
                           (uri-options uri-options))
-          uri)
-         (transport-options
-          (%transport-options transport defaults host port)))
+          uri))
     ;; Disallow host or port components without scheme.
     (when (and (or host port) (not transport))
       (error "~@<URI ~S has ~{~{~A component ~S~}~^ and ~} but no ~
@@ -82,27 +82,16 @@
     (when fragment
       (error "~@<URI ~A has fragment component ~S.~@:>"
              (princ-to-string uri) fragment))
+    ;; Return scope and transport options that disable all other
+    ;; transports iff TRANSPORT is specified (via scheme component of
+    ;; URI).
     (values (make-scope path)
-            (mapcar (curry #'%merge-options uri-options)
-                    transport-options))))
-
-;;; Utility functions
-
-(defun %transport-options (transport defaults host port)
-  "Extract options for TRANSPORT from DEFAULTS if TRANSPORT is not
-nil. If HOST and PORT are not nil, replace the host and port options
-in the extracted transport options. Return the resulting options."
-  (if transport
-      (list (%merge-options
-             (append (when host (list :host host))
-                     (when port (list :port port))
-                     (cdr (find t defaults :test #'eq :key #'car)))
-             (or (find transport defaults :test #'eq :key #'car)
-                 (list transport))))
-      defaults))
-
-(defun %merge-options (options transport-options)
-  "Merge OPTIONS into TRANSPORT-OPTIONS such that options in OPTIONS
-take precedence."
-  (let+ (((transport &rest transport-options) transport-options))
-    (cons transport (append options transport-options))))
+            (append (when (or transport host  port uri-options)
+                      `((,(or transport t)
+                         ,@(when transport `(:enabled t))
+                         ,@(when host      `(:host ,host))
+                         ,@(when port      `(:port ,port))
+                         ,@uri-options
+                         &inherit)))
+                    (when transport
+                      '((t :enabled nil &inherit)))))))

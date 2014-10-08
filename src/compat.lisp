@@ -46,19 +46,17 @@
 
     `(progn
        ;; This method operates on URIs.
-       (defmethod ,make-name
-           (,@args
-            &key
-            (transports     (transport-options
-                             :exclude-disabled?
-                             (not (puri:uri-scheme ,designator-arg))))
-            (converters     (default-converters))
-            transform
-            error-policy)
-         (let+ (((&values scope options)
-                 (uri->scope-and-options ,designator-arg transports)))
+       (defmethod ,make-name (,@args
+                              &key
+                              (transports '())
+                              (converters (default-converters))
+                              transform
+                              error-policy)
+         (let+ (((&values scope uri-transports)
+                 (uri->scope-and-options ,designator-arg)))
            (,make-name scope ,@(rest arg-names)
-                       :transports   options
+                       :transports   (merge-transport-options
+                                      uri-transports transports)
                        :converters   converters
                        :transform    transform
                        :error-policy error-policy)))

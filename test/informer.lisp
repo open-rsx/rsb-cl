@@ -44,7 +44,7 @@ function."))
 
   ;; No transports => error
   '("/rsbtest/informer/construction"
-    (t) (:type t) (:transports nil)
+    (t) (:type t) (:transports ((t :enabled nil)))
     error))
 
 (addtest (informer-root

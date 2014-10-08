@@ -48,34 +48,53 @@
           "Smoke test for the `scope->uri-and-options' function.")
   uri->scope-and-options-smoke
 
-  (ensure-cases (uri-string defaults expected-scope expected-options)
+  (ensure-cases (uri-string expected-scope &optional expected-options)
       '(;; From https://code.cor-lab.de/projects/rsb/wiki/URI_Schema
-        (""                              nil "/"        nil)
-        ("spread:"                       nil "/"        ((:spread)))
-        ("inprocess:"                    nil "/"        ((:inprocess)))
-        ("spread://localhost:5555"       nil "/"        ((:spread :host "localhost" :port 5555)))
-        ("inprocess://someotherhost"     nil "/"        ((:inprocess :host "someotherhost")))
-        ("spread:/foo/bar"               nil "/foo/bar" ((:spread)))
-        ("spread:?maxfragmentsize=10000" nil "/"        ((:spread :maxfragmentsize "10000")))
-        ;; Additional
-        ("foo:/bla?bar=baz;awesome=no"   nil "/bla"     ((:foo :bar "baz" :awesome "no")))
-        ("bar:" ((:bar :whoop 10)) "/" ((:bar :whoop 10)))
-        ("bar://baz:20" ((:bar :port 10)) "/" ((:bar :host "baz" :port 20 :port 10)))
-        ("bar://baz" ((:bar :port 10)) "/" ((:bar :host "baz" :port 10)))
-        ("/?foo=5&bar=whoop"
-         ((:spread :port 10 :bar "baz") (:inprocess :bla 5))
-         "/"
-         ((:spread :foo "5" :bar "whoop" :port 10 :bar "baz")
-          (:inprocess :foo "5" :bar "whoop" :bla 5))))
+        (""                              "/"        ())
+        ("spread:"                       "/"        ((:spread    :enabled t                                &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("inprocess:"                    "/"        ((:inprocess :enabled t                                &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("spread://localhost:5555"       "/"        ((:spread    :enabled t   :host "localhost" :port 5555 &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("inprocess://someotherhost"     "/"        ((:inprocess :enabled t   :host "someotherhost"        &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("spread:/foo/bar"               "/foo/bar" ((:spread    :enabled t                                &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("spread:?maxfragmentsize=10000" "/"        ((:spread    :enabled t   :maxfragmentsize "10000"     &inherit)
+                                                     (t          :enabled nil                              &inherit)))
 
-    (let+ ((uri (puri:parse-uri uri-string))
-           ((&values scope options)
-            (uri->scope-and-options uri defaults)))
-      (ensure-same scope expected-scope
-                   :test      #'scope=
-                   :report    "~@<Expected scope ~S, not ~S.~@:>"
-                   :arguments (expected-scope scope))
-      (ensure-same options expected-options
-                   :test      #'equalp
-                   :report    "~@<Expected options ~S, not ~S.~@:>"
-                   :arguments (expected-options options)))))
+        ;; Additional
+        ("foo:/bla?bar=baz;awesome=no"   "/bla"     ((:foo       :enabled t   :bar "baz" :awesome "no"     &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("bar:"                          "/"        ((:bar       :enabled t                                &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("bar://baz:20"                  "/"        ((:bar       :enabled t   :host "baz" :port 20         &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("bar://baz"                     "/"        ((:bar       :enabled t   :host "baz"                  &inherit)
+                                                     (t          :enabled nil                              &inherit)))
+        ("/?foo=5&bar=whoop"             "/"        ((t                       :foo "5" :bar "whoop"        &inherit)))
+
+        ;; Some illegal cases.
+        ("#fragment"                     error)
+        ("//host"                        error)
+        (":1234"                         error)
+        ("//host:1234"                   error)
+        ("?host=foo"                     error)
+        ("?port=4444"                    error))
+
+    (let+ (((&flet do-it ()
+              (uri->scope-and-options (puri:parse-uri uri-string)))))
+      (case expected-scope
+        (error
+         (ensure-condition 'error (do-it)))
+        (t
+         (let+ (((&values scope options) (do-it)))
+           (ensure-same scope expected-scope
+                        :test      #'scope=
+                        :report    "~@<Expected scope ~S, not ~S.~@:>"
+                        :arguments (expected-scope scope))
+           (ensure-same options expected-options
+                        :test      #'equalp
+                        :report    "~@<Expected options ~S, not ~S.~@:>"
+                        :arguments (expected-options options))))))))

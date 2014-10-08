@@ -191,16 +191,13 @@ BLOCK? is non-nil."
 ;;; `remote-server' creation
 
 (defmethod make-remote-server ((scope scope)
-                               &key
-                               (transports (transport-options))
-                               (converters (default-converters))
+                               &rest args &key
+                               transports
+                               converters
                                transform
                                error-policy)
-  (make-participant :remote-server scope
-                    :converters   converters
-                    :transports   transports
-                    :transform    transform
-                    :error-policy error-policy))
+  (declare (ignore transports converters transform error-policy))
+  (apply #'make-participant :remote-server scope args))
 
 ;;; Utility functions
 

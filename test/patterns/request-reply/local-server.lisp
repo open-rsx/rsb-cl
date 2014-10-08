@@ -28,7 +28,7 @@
                                  participant-suite)
   ((simple-server (make-instance 'local-server
                                  :scope             "/localserver"
-                                 :transport-options '((:inprocess)))))
+                                 :transport-options '((:inprocess :enabled t)))))
   (:documentation
    "Test suite for the `local-server' class."))
 
@@ -47,7 +47,7 @@
     "/localserver/construction")
 
   ;; No transports => error
-  '("/" () () (:transports nil) error))
+  '("/" () () (:transports ((t :enabled nil))) error))
 
 (addtest (local-server-root
           :documentation

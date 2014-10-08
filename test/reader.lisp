@@ -47,7 +47,7 @@
 
   ;; No transports => error
   '("/rsbtest/reader/construction"
-    () () (:transports nil)
+    () () (:transports ((t :enabled nil)))
     error))
 
 (addtest (reader-root

@@ -45,7 +45,7 @@
     "/remoteserver/construction")
 
   ;; No transports => error
-  '("/" () () (:transports nil) error))
+  '("/" () () (:transports ((t :enabled nil))) error))
 
 (addtest (remote-server-root
           :documentation

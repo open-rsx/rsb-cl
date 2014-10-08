@@ -39,10 +39,12 @@
                                                  (prototype rsb.ep:client)
                                                  (scope     scope)
                                                  &rest args &key
-                                                 (transports (transport-options))
+                                                 (transports '())
                                                  (converters (default-converters)))
+  ;; This method performs defaulting of the TRANSPORTS and CONVERTERS
+  ;; keyword arguments.
   (apply #'call-next-method class prototype scope
-         :transports transports
+         :transports (merge-transport-options transports (transport-options))
          :converters converters
          (remove-from-plist args :transports :converters)))
 
@@ -51,18 +53,18 @@
                                          (scope     scope)
                                          &rest args &key
                                          (direction (participant-direction prototype))
-                                         transports
-                                         converters
+                                         (transports (missing-required-argument :transports))
+                                         (converters (missing-required-argument :converters))
                                          transform)
-  ;; Signal an error if no transports have been supplied.
-  (unless transports
-    (error 'no-transports-error
-           :kind  (participant-kind prototype)
-           :scope scope))
-
-  ;; Replace &inherit marker in transport options with actual default
-  ;; options for respective transports.
-  (setf transports (map 'list #'process-transport-options transports))
+  ;; Remove &inherit markers in transport options and select enabled
+  ;; transports. Removed :enabled option from options of enabled
+  ;; transports.
+  (setf transports (or (effective-transport-options transports)
+                       ;; Signal an error if no transports have been
+                       ;; supplied.
+                       (error 'no-transports-error
+                              :kind  (participant-kind prototype)
+                              :scope scope)))
 
   ;; Ensure that CONVERTERS is an alist of items of the form
   ;; (WIRE-TYPE . CONVERTER).
@@ -100,15 +102,13 @@
 ;; This method operates on URIs.
 (defmethod make-participant ((kind t) (scope puri:uri)
                              &rest args &key
-                             (transports (transport-options
-                                          :exclude-disabled?
-                                          (not (puri:uri-scheme scope))))
+                             (transports '())
                              (converters (default-converters))
                              transform
                              error-policy)
-  (let+ (((&values scope options) (uri->scope-and-options scope transports)))
+  (let+ (((&values scope uri-transports) (uri->scope-and-options scope)))
     (apply #'make-participant kind scope
-           :transports   options
+           :transports   (merge-transport-options uri-transports transports)
            :converters   converters
            :transform    transform
            :error-policy error-policy

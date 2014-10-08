@@ -90,45 +90,71 @@ CONFIG-FILES. Default:
         (cdr option)
         default)))
 
-;;;
+;;; Transport configuration
 
-(defun transport-options (&key
-                          (config            *configuration*)
-                          (exclude-disabled? t))
-  "Collect and interpret options in CONFIG that apply to
-transports. Options for transports which are disabled in CONFIG are
-not returned."
+(defun transport-options (&optional (config *configuration*))
+  "Collect and return options in CONFIG that apply to transports."
   (let+ (((&flet options->plist (options)
             (iter (for (key . value) in options)
-                  (when (and (length= 1 key)
-                             (not (eq (first key) :enabled)))
-                    (collect (first key)) (collect value)))))
+                  (collect (first key))
+                  (collect value))))
          (options    (section-options :transport config))
          (transports (remove-duplicates
-                      (map 'list (compose #'first #'car) options))))
-    ;; Collect options for all individual transport. Skip disabled
-    ;; transports.
-    (iter (for transport in transports)
-          (let ((options (section-options transport options)))
-            (when (or (not exclude-disabled?)
-                      (eq (option-value '(:enabled) nil options) t)
-                      (string= (option-value '(:enabled) "0" options) "1")) ; TODO(jmoringe):
-              (collect (cons transport (options->plist options))))))))
+                      (mapcar (compose #'first #'car) options))))
+    ;; Collect options for all individual transport.
+    (mapcar (lambda (transport)
+              (cons transport (options->plist
+                               (section-options transport options))))
+            transports)))
 
-(defun process-transport-options (options)
-  "If OPTIONS is of the form
+(let+ (((&flet find-transport (name options)
+          (find name options :test #'eq :key #'first)))
+       ((&flet inherit? (options)
+          (ends-with '&inherit options)))
+       ((&flet enabled? (options)
+          (member (getf options :enabled) '(t "1") :test #'equal)))
+       ((&flet deinherit (options)
+          (if (inherit? options)
+              (butlast options)
+              options)))
+       ((&flet inherit (options defaults)
+          (let ((result (deinherit defaults)))
+            (iter (for (value key) on (reverse (deinherit options)) :by #'cddr)
+                  (setf (getf result key) value))
+            result)))
+       ((&flet+ merge-entries ((transport1 &rest options)
+                               (transport2 &rest defaults))
+          (list* (if (eq transport1 t) transport2 transport1)
+                 (if (inherit? options)
+                     (append (inherit options defaults)
+                             (when (inherit? defaults)
+                               '(&inherit)))
+                     options)))))
 
-  \(TRANSPORT KEY1 VALUE1 KEY2 VALUE2 ... &inherit)
+ (defun effective-transport-options (options)
+   (iter (for (transport . options*) in options)
+         (unless (or (eq transport t) (not (enabled? options*)))
+           (let ((effective-options
+                  (remove-from-plist (deinherit options*) :enabled)))
+             (collect (list* transport effective-options))))))
 
-replace &inherit with the default configuration options for
-TRANSPORT. Otherwise return OPTIONS unmodified."
-  (let+ (((transport &rest transport-options) options))
-    (cons transport
-          (if (ends-with '&inherit transport-options)
-              (append (butlast transport-options)
-                      (rest (find transport (transport-options)
-                                  :key #'first)))
-              transport-options))))
+ (defun merge-transport-options (options defaults)
+   (let+ ((generic (find-transport t options))
+          (rest    (if generic
+                       (mapcar (rcurry #'merge-entries generic) options)
+                       options))
+          ((&flet merge-one-default (default)
+             (let ((intermediate (if generic
+                                     (merge-entries generic default)
+                                     default)))
+               (if-let ((entry (find-transport (first intermediate) rest)))
+                 (progn
+                   (removef rest entry)
+                   (merge-entries entry intermediate))
+                 intermediate)))))
+     (append (mapcar #'merge-one-default defaults) rest))))
+
+;;; Converter configuration
 
 (defun default-converters (&key (config *configuration*))
   "Return an alist of default converters for particular wire-types

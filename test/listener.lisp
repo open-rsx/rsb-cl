@@ -49,7 +49,7 @@ function."))
 
   ;; No transports => error
   '("/rsbtest/listener/construction"
-    () () (:transports nil)
+    () () (:transports ((t :enabled nil)))
     error))
 
 (addtest (listener-root

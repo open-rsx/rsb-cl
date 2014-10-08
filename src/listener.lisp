@@ -43,12 +43,9 @@
 
 (defmethod make-listener ((scope scope)
                           &rest args &key
-                          (transports (transport-options))
-                          (converters (default-converters))
+                          transports
+                          converters
                           transform
                           error-policy)
-  (declare (ignore transform error-policy))
-  (apply #'make-participant :listener scope
-         :transports transports
-         :converters converters
-         args))
+  (declare (ignore transports converters transform error-policy))
+  (apply #'make-participant :listener scope args))
