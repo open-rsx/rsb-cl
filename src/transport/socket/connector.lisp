@@ -61,14 +61,13 @@ bus to which the connector provides access.")
 employ socked-based bus access."))
 
 ;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
-(defmethod shared-initialize :after ((instance   connector)
-                                     (slot-names t)
-                                     &key
-                                     port
-                                     server?
-                                     server
-                                     tcpnodelay
-                                     nodelay?)
+(defmethod initialize-instance :after ((instance connector)
+                                       &key
+                                       port
+                                       server?
+                                       server
+                                       tcpnodelay
+                                       nodelay?)
   (setf (slot-value instance 'port)
         (etypecase port
           (string
