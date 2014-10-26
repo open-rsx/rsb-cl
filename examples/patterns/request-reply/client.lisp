@@ -62,15 +62,17 @@
 ;; initial call of a method may take more time than subsequent methods
 ;; due to lazy initialization strategies.
 ;;
-;; The remote server will remain connected to the bus until it is
-;; garbage collected or explicitly detached using the `detach'
-;; function.
 ;; mark-start::variable
 (defvar *remote-server* (rsb.patterns.request-reply:make-remote-server
                          "/example/clientserver"))
 
 (rsb.patterns.request-reply:call *remote-server* "echo" "bla")
 
+;; The remote server will remain connected to the bus until it is
+;; garbage collected or explicitly detached using the `rsb:detach'
+;; function.
+
 (rsb:detach *remote-server*)
 ;; mark-end::variable
+
 ;; mark-end::body

@@ -35,9 +35,6 @@
 ;; The new server instance initially does not have any methods. There
 ;; are several ways to add methods.
 ;;
-;; The local server and its methods will remain connected to the bus
-;; until they are garbage collected or explicitly detached using the
-;; `detach' function.
 ;; mark-start::variable
 (defvar *local-server* (rsb.patterns.request-reply:make-local-server
                         "/example/clientserver"))
@@ -45,6 +42,11 @@
 (setf (rsb.patterns.request-reply:server-method *local-server* "echo")
       (lambda (arg) arg))
 
+;; The local server and its methods will remain connected to the bus
+;; until they are garbage collected or explicitly detached using the
+;; `rsb:detach' function.
+
 (rsb:detach *local-server*)
 ;; mark-end::variable
+
 ;; mark-end::body

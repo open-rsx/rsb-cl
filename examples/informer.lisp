@@ -24,12 +24,16 @@
 ;; This will publish the string "data" to the channel in which the
 ;; informer participates.
 ;;
-;; The informer will participate in the channel until it is garbage
-;; collected or explicitly detached from he channel.
 ;; mark-start::variable
 (defvar *informer* (rsb:make-informer "/example/informer" 'string))
 
 (format t "Sending second event~%")
 (rsb:send *informer* "example payload")
+
+;; The informer will participate in the channel until it is garbage
+;; collected or explicitly detached using the `rsb:detach' function.
+
+(rsb:detach *informer*)
 ;; mark-end::variable
+
 ;; mark-end::body

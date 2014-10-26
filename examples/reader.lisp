@@ -27,14 +27,12 @@
 ;; configuration with their respective configured options.
 ;;
 ;; Note: the `receive' call will block until an event is received.
+;;
 ;; mark-start::variable
 (defvar *reader* (rsb:make-reader "/example/informer"))
 
-;; The reader will participate in the channel until it is garbage
-;; collected or explicitly detached from the channel.
-
 ;; mark-start::receive/block
-(let ((event (rsb:receive *reader* :block? t))) ;; block? defaults to t
+(let ((event (rsb:receive *reader* :block? t))) ; block? defaults to t
   (format t "Received event: ~A~%" event)
   event) ; return the event
 ;; mark-end::receive/block
@@ -47,6 +45,11 @@
           event)
   event) ; return the event, or nil
 ;; mark-end::receive/noblock
+
+;; The reader will participate in the channel until it is garbage
+;; collected or explicitly detached using the `rsb:detach' function.
+
+(rsb:detach *reader*)
 ;; mark-end::variable
 
 ;; mark-end::body

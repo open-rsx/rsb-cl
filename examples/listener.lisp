@@ -27,24 +27,29 @@
 ;; enabled in the configuration with their respective configured
 ;; options.
 ;;
+;; mark-start::variable
+(defvar *listener* (rsb:make-listener "/example/informer"))
+
 ;; Just after creation, the listener will not act upon received
 ;; events. In order to process received events, handlers have to be
 ;; added to the listener. A handler is a function of one argument, the
 ;; event.
-;;
-;; The listener will participate in the channel until it is garbage
-;; collected or explicitly detached from he channel.
-;; mark-start::variable
-(defvar *listener* (rsb:make-listener "/example/informer"))
 
 (push (lambda (event)
         (format t "Received event: ~A~%" event))
       (rsb.ep:handlers *listener*))
+
+;; The listener will participate in the channel until it is garbage
+;; collected or explicitly detached using the `rsb:detach' function.
+
+(rsb:detach *listener*)
 ;; mark-end::variable
 
-;; In order to be notified about event receiving errors, additional
-;; error handlers have to be registered.
-(push (lambda (condition)
-        (format t "Error: ~A~%" condition))
-      (hooks:hook-handlers (hooks:object-hook *listener* 'rsb:error-hook)))
+;; In order to be notified about and react on event receiving errors,
+;; additional error handlers can to be registered.
+(rsb:with-listener (listener "/example/informer")
+  (push (lambda (condition)
+          (format t "Error: ~A~%" condition))
+        (hooks:hook-handlers (rsb:participant-error-hook listener))))
+
 ;; mark-end::body
