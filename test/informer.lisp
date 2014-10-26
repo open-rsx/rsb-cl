@@ -23,6 +23,10 @@ function."))
     "/rsbtest/informer/construction")
 
   '("/rsbtest/informer/construction"
+    (t) (:type t) (:transports ((t &inherit) (:inprocess &inherit)))
+    "/rsbtest/informer/construction")
+
+  '("/rsbtest/informer/construction"
     (t) (:type t) (:converters ((t . :foo)))
     "/rsbtest/informer/construction")
 

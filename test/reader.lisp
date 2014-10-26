@@ -21,9 +21,9 @@
     () () (:transports ((:inprocess &inherit)))
     "/rsbtest/reader/construction")
 
-  #+TODO-disabled '("/rsbtest/reader/construction"
-                    () () (:transports ((t) (:inprocess &inherit)))
-                    "/rsbtest/reader/construction")
+  '("/rsbtest/reader/construction"
+    () () (:transports ((t &inherit) (:inprocess &inherit)))
+    "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
     () () (:converters ((t . :foo)))

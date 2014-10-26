@@ -28,6 +28,10 @@ function."))
     "/rsbtest/listener/construction")
 
   '("/rsbtest/listener/construction"
+    () () (:transports ((t &inherit) (:inprocess &inherit)))
+    "/rsbtest/listener/construction")
+
+  '("/rsbtest/listener/construction"
     () () (:converters ((t . :foo)))
     "/rsbtest/listener/construction")
 

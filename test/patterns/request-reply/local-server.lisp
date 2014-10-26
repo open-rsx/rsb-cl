@@ -38,6 +38,14 @@
     () () ()
     "/localserver/construction")
 
+  '("/localserver/construction"
+    () () (:transports ((:inprocess &inherit)))
+    "/localserver/construction")
+
+  '("/localserver/construction"
+    () () (:transports ((t &inherit) (:inprocess &inherit)))
+    "/localserver/construction")
+
   '("inprocess://localhost/localserver/construction"
     () () ()
     "/localserver/construction")

@@ -36,6 +36,14 @@
     () () ()
     "/remoteserver/construction")
 
+  '("/remoteserver/construction"
+    () () (:transports ((:inprocess &inherit)))
+    "/remoteserver/construction")
+
+  '("/remoteserver/construction"
+    () () (:transports ((t &inherit) (:inprocess &inherit)))
+    "/remoteserver/construction")
+
   '("inprocess://localhost/remoteserver/construction"
     () () ()
     "/remoteserver/construction")
