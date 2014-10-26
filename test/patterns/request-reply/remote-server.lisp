@@ -32,25 +32,25 @@
 
 (define-basic-participant-test-cases (:remote-server
                                       :check-transport-urls? nil)
-  '("/remoteserver/construction"
+  '("/rsbtest/remoteserver/construction"
     () () ()
-    "/remoteserver/construction")
+    "/rsbtest/remoteserver/construction")
 
-  '("/remoteserver/construction"
+  '("/rsbtest/remoteserver/construction"
     () () (:transports ((:inprocess &inherit)))
-    "/remoteserver/construction")
+    "/rsbtest/remoteserver/construction")
 
-  '("/remoteserver/construction"
+  '("/rsbtest/remoteserver/construction"
     () () (:transports ((t &inherit) (:inprocess &inherit)))
-    "/remoteserver/construction")
+    "/rsbtest/remoteserver/construction")
 
-  '("inprocess://localhost/remoteserver/construction"
+  '("inprocess://localhost/rsbtest/remoteserver/construction"
     () () ()
-    "/remoteserver/construction")
+    "/rsbtest/remoteserver/construction")
 
-  '("/remoteserver/construction?foo=bar"
+  '("/rsbtest/remoteserver/construction?foo=bar"
     () () ()
-    "/remoteserver/construction")
+    "/rsbtest/remoteserver/construction")
 
   ;; No transports => error
   '("/" () () (:transports ((t :enabled nil))) error))
