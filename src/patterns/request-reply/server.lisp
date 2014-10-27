@@ -198,12 +198,13 @@ generic support for retrieving, adding and removing methods."))
                                          &rest args &key
                                          (transports '())
                                          (converters (default-converters)))
-  (setf transports (or (rsb::effective-transport-options
-                        (rsb::merge-transport-options
-                         transports (transport-options)))
-                       (error 'no-transports-error
-                              :kind  (participant-kind prototype)
-                              :scope scope)))
+  ;; Check that TRANSPORTS will select at least one transport.
+  (unless (rsb::effective-transport-options
+           (rsb::merge-transport-options
+            transports (transport-options)))
+      (error 'no-transports-error
+           :kind  (participant-kind prototype)
+           :scope scope))
 
   (apply #'call-next-method class prototype scope
          :converters        converters
