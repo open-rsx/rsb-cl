@@ -96,8 +96,13 @@ CONFIG-FILES. Default:
   "Collect and return options in CONFIG that apply to transports."
   (let+ (((&flet options->plist (options)
             (iter (for (key . value) in options)
-                  (collect (first key))
-                  (collect value))))
+                  (cond
+                    ((length= 1 key)
+                     (collect (first key))
+                     (collect value))
+                    ((starts-with-subseq '(:converter :lisp) key)
+                     ;; Ignore converter configuration for now.
+                     )))))
          (options    (section-options :transport config))
          (transports (remove-duplicates
                       (mapcar (compose #'first #'car) options))))
