@@ -52,7 +52,7 @@ connector classes for Spread."))
     (handler-bind
         ((error (lambda (condition)
                   (error 'decoding-error
-                         :encoded          notification
+                         :encoded          buffer
                          :format-control   "~@<The data could not be ~
                                             unpacked as a protocol ~
                                             buffer of kind ~S.~:@>"

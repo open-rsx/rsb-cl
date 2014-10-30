@@ -106,6 +106,15 @@ form (WIRE-TYPE . CONVERTER)."))
 instance fails because the list of available converters does not
 contain a suitable one for the requested connector."))
 
+(defun decoding-error-print-data (stream data &optional colon? at?)
+  (declare (ignore colon? at?))
+  (typecase data
+    (sequence
+     (let+ (((&values data shortened?) (maybe-shorten-sequence data)))
+       (format stream "~{~2,'0X~^ ~}~:[~; ...~]" (coerce data 'list) shortened?)))
+    (t
+     (format stream "~A" data))))
+
 (define-condition decoding-error (rsb-error
                                   simple-condition
                                   chainable-condition)
@@ -116,15 +125,14 @@ contain a suitable one for the requested connector."))
             "The encoded data, for which the decoding failed."))
   (:report
    (lambda (condition stream)
-     (let+ (((&values data shortened?)
-             (maybe-shorten-sequence (decoding-error-encoded condition))))
-       (format stream "~@<The encoded data ~_~{~2,'0X~^ ~}~:[~; ...~] ~
-                       ~_could not be decoded~
-                       ~/more-conditions:maybe-print-explanation/~
-                       ~/more-conditions:maybe-print-cause/~@:>"
-               (coerce data 'list) shortened?
-               condition
-               condition))))
+     (format stream "~@<The encoded data~
+                     ~@:_~@:_~
+                     ~2@T~<~/rsb.transport::decoding-error-print-data/~:>~
+                     ~@:_~@:_~
+                     could not be decoded~
+                     ~/more-conditions:maybe-print-explanation/~
+                     ~:*~/more-conditions:maybe-print-cause/~@:>"
+             (list (decoding-error-encoded condition)) condition)))
   (:documentation
    "This error is signaled when decoding one or more notifications
 into an `event' instance fails."))

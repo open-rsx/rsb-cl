@@ -59,7 +59,7 @@ queue received events for delivery."))
     ;;    In this case, nil is returned.
     (with-condition-translation
         (((error decoding-error)
-          :encoded          (list notification) ; TODO(jmoringe): hack
+          :encoded          notification
           :format-control   "~@<After unpacking, the ~
                              notification~_~A~_could not be converted ~
                              into an event.~:@>"
