@@ -27,10 +27,5 @@
 ;;; `reader' creation
 
 (defmethod make-reader ((scope scope)
-                        &rest args &key
-                        transports
-                        converters
-                        transform
-                        error-policy)
-  (declare (ignore transports converters transform error-policy))
+                        &rest args &key &allow-other-keys)
   (apply #'make-participant :reader scope args))

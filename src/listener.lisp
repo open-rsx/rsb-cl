@@ -42,10 +42,5 @@
 ;;; `listener' creation
 
 (defmethod make-listener ((scope scope)
-                          &rest args &key
-                          transports
-                          converters
-                          transform
-                          error-policy)
-  (declare (ignore transports converters transform error-policy))
+                          &rest args &key &allow-other-keys)
   (apply #'make-participant :listener scope args))

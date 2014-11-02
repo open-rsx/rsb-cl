@@ -125,12 +125,5 @@ events sent by this informer."))
 
 (defmethod make-informer ((scope scope)
                           (type  t)
-                          &rest args &key
-                          transports
-                          converters
-                          transform
-                          error-policy)
-  (declare (ignore transports converters transform error-policy))
-  (apply #'make-participant :informer scope
-         :type type
-         args))
+                          &rest args &key &allow-other-keys)
+  (apply #'make-participant :informer scope :type type args))

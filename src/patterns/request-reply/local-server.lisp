@@ -136,12 +136,5 @@ should be passed to the callback function."))
 ;;; `local-server' creation
 
 (defmethod make-local-server ((scope scope)
-                              &rest args &key
-                              transports
-                              converters
-                              transform
-                              error-policy)
-  "Make and return a `local-server' instance that provides a service
-at the scope SCOPE."
-  (declare (ignore transports converters transform error-policy))
+                              &rest args &key &allow-other-keys)
   (apply #'make-participant :local-server scope args))

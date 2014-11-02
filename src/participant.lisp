@@ -52,7 +52,7 @@
                                          (prototype rsb.ep:client)
                                          (scope     scope)
                                          &rest args &key
-                                         (direction (participant-direction prototype))
+                                         (direction  (participant-direction prototype))
                                          (transports (missing-required-argument :transports))
                                          (converters (missing-required-argument :converters))
                                          transform)

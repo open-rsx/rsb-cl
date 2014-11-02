@@ -173,7 +173,6 @@ converter."
 
 (defgeneric make-participant (kind scope &rest args
                               &key
-                              direction
                               transports
                               converters
                               transform

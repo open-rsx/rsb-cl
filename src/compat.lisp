@@ -47,37 +47,22 @@
     `(progn
        ;; This method operates on URIs.
        (defmethod ,make-name (,@args
-                              &key
+                              &rest args &key
                               (transports '())
-                              (converters (default-converters))
-                              transform
-                              error-policy)
+                              &allow-other-keys)
          (let+ (((&values scope uri-transports)
                  (uri->scope-and-options ,designator-arg)))
-           (,make-name scope ,@(rest arg-names)
-                       :transports   (merge-transport-options
-                                      uri-transports transports)
-                       :converters   converters
-                       :transform    transform
-                       :error-policy error-policy)))
+           (apply #',make-name scope ,@(rest arg-names)
+                  :transports (merge-transport-options
+                               uri-transports transports)
+                  (remove-from-plist args :transports))))
 
        ;; This method operates on strings which it turns into either
        ;; URIs (if the string contains a colon) or scopes.
        (defmethod ,make-name ((,designator-arg string) ,@(rest args)
-                              &key
-                              (transports  nil transports-supplied?)
-                              (converters  nil converters-supplied?)
-                              transform
-                              error-policy)
+                              &rest args &key &allow-other-keys)
          (apply #',make-name (parse-scope-or-uri ,designator-arg)
-                ,@(rest arg-names)
-                :transform    transform
-                :error-policy error-policy
-                (append
-                 (when transports-supplied?
-                   (list :transports transports))
-                 (when converters-supplied?
-                   (list :converters converters))))))))
+                ,@(rest arg-names) args)))))
 
 (defmacro define-participant-creation-restart-method (kind &rest args)
   "Emit an :around method on `make-KIND' that establishes restarts.
