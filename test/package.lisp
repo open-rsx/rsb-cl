@@ -111,31 +111,31 @@ that test participant classes."))
 (defmacro define-basic-participant-test-cases (class-and-options &body cases)
   "Define basic test cases for the participant subclass designated by
    CLASS."
-  (let+ (((class &key (check-transport-urls? t))
+  (let+ (((class &key (check-transport-urls? t) (named? t))
           (ensure-list class-and-options))
          (suite-name (symbolicate class "-ROOT"))
          (make-name  (symbolicate "MAKE-" class))
-         (with-name  (symbolicate "WITH-" class))
          (kind       (make-keyword class)))
     `(progn
-       (addtest (,suite-name
-                 :documentation
-                 ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
-                          class make-name))
-         construction/named
+       ,@(when named?
+           `((addtest (,suite-name
+                       :documentation
+                       ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
+                                class make-name))
+               construction/named
 
-         (ensure-cases (uri args initargs common-initargs expected-scope)
-             (list ,@cases)
+               (ensure-cases (uri args initargs common-initargs expected-scope)
+                   (list ,@cases)
 
-           (let+ (((&flet do-it () (apply #',make-name uri
-                                          (append args common-initargs)))))
-             (case expected-scope
-               (error (ensure-condition error
-                        (detach/ignore-errors (do-it))))
-               (t     (with-participant (participant (do-it))
-                        (check-participant
-                         participant ,kind expected-scope
-                         :check-transport-urls? ,check-transport-urls?)))))))
+                 (let+ (((&flet do-it () (apply #',make-name uri
+                                                (append args common-initargs)))))
+                   (case expected-scope
+                     (error (ensure-condition error
+                              (detach/ignore-errors (do-it))))
+                     (t     (with-participant (participant (do-it))
+                              (check-participant
+                               participant ,kind expected-scope
+                               :check-transport-urls? ,check-transport-urls?)))))))))
 
        (addtest (,suite-name
                  :documentation
@@ -156,25 +156,26 @@ that test participant classes."))
                          participant ,kind expected-scope
                          :check-transport-urls? ,check-transport-urls?)))))))
 
-       (define-restart-method-test-case
-           (,make-name ((scope-or-uri (eql +restart-test-scope+))
-                         ,@(when (eq class 'informer) '((type t)))
-                         &key  &allow-other-keys)
-                        :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
-                        :suite-name ,suite-name
-                        :case-name  ,(symbolicate make-name '#:/restart/scope))
-         (detach/ignore-errors
-          (,make-name +restart-test-scope+ ,@(when (eq class 'informer) '(t)))))
+       ,@(when named?
+           `((define-restart-method-test-case
+               (,make-name ((scope-or-uri (eql +restart-test-scope+))
+                            ,@(when (eq class 'informer) '((type t)))
+                            &key  &allow-other-keys)
+                           :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
+                           :suite-name ,suite-name
+                           :case-name  ,(symbolicate make-name '#:/restart/scope))
+               (detach/ignore-errors
+                (,make-name +restart-test-scope+ ,@(when (eq class 'informer) '(t)))))
 
-       (define-restart-method-test-case
-           (,make-name ((scope-or-uri (eql +restart-test-uri+))
-                        ,@(when (eq class 'informer) '((type t)))
-                        &key &allow-other-keys)
-                        :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
-                        :suite-name ,suite-name
-                        :case-name  ,(symbolicate make-name '#:/restart/uri))
-         (detach/ignore-errors
-          (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t)))))
+             (define-restart-method-test-case
+                 (,make-name ((scope-or-uri (eql +restart-test-uri+))
+                              ,@(when (eq class 'informer) '((type t)))
+                              &key &allow-other-keys)
+                             :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
+                             :suite-name ,suite-name
+                             :case-name  ,(symbolicate make-name '#:/restart/uri))
+               (detach/ignore-errors
+                (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t)))))))
 
        (addtest (,suite-name
                  :documentation
@@ -182,8 +183,10 @@ that test participant classes."))
                           class))
          print
 
-         (,with-name (participant ,(format nil "/~(~A~)/print" class)
-                                  ,@(when (eq class 'informer) '(t)))
+         (with-participant (participant
+                            (make-participant
+                             ,kind ,(format nil "/~(~A~)/print" class)
+                             ,@(when (eq class 'informer) '(:type  t))))
            (ensure
             (not (emptyp
                   (with-output-to-string (stream)
