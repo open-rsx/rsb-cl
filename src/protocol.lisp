@@ -207,7 +207,10 @@ converter."
       `rsb.event-processing:transform!'.
 
     Return the `participant' (more likely a subclass thereof)
-    instance."))
+    instance.
+
+    If the participant cannot be created, an error of type
+    `participant-creation-error' is signaled."))
 
 (defgeneric make-participant-using-class (class prototype scope
                                           &rest args &key &allow-other-keys)
