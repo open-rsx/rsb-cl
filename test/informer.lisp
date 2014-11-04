@@ -34,6 +34,10 @@ function."))
     (t) (:type t) (:transform ,#'1+)
     "/rsbtest/informer/construction")
 
+  `("/rsbtest/informer/construction"
+    (t) (:type t) (:parent ,*simple-parent*)
+    "/rsbtest/informer/construction")
+
   '("inprocess:/rsbtest/informer/construction"
     (t) (:type t) ()
     "/rsbtest/informer/construction")

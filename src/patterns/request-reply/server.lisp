@@ -89,7 +89,8 @@ classes."))
                              :transform    transform
                              :error-policy (lambda (condition)
                                              (hooks:run-hook
-                                              error-hook condition)))))))))
+                                              error-hook condition))
+                             :parent       method)))))))
 
 ;;; `server' class
 

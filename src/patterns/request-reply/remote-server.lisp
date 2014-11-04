@@ -160,7 +160,8 @@ BLOCK? is non-nil."
                               (participant-scope server))))
                (setf (server-method server name)
                      (make-participant :remote-method scope
-                                       :name name))))))
+                                       :name   name
+                                       :parent server))))))
 
   (defmethod server-method ((server remote-server)
                             (name   string)

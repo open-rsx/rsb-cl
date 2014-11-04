@@ -33,6 +33,10 @@
     () () (:transform ,#'1+)
     "/rsbtest/reader/construction")
 
+  `("/rsbtest/reader/construction"
+    () () (:parent ,*simple-parent*)
+    "/rsbtest/reader/construction")
+
   '("inprocess:/rsbtest/reader/construction"
     () () ()
     "/rsbtest/reader/construction")

@@ -114,7 +114,8 @@ should be passed to the callback function."))
                                  :server   server
                                  :name     name
                                  :callback callback
-                                 :argument argument))))
+                                 :argument argument
+                                 :parent   server))))
 
   (macrolet
       ((define-method-creating-method (name-type scope-form)

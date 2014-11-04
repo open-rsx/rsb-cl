@@ -39,6 +39,10 @@ function."))
     () () (:transform ,#'1+)
     "/rsbtest/listener/construction")
 
+  `("/rsbtest/listener/construction"
+    () () (:parent ,*simple-parent*)
+    "/rsbtest/listener/construction")
+
   '("inprocess:/rsbtest/listener/construction"
     () () ()
     "/rsbtest/listener/construction")

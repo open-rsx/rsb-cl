@@ -126,7 +126,8 @@ returned."))
                                 transports
                                 converters
                                 transform
-                                error-policy)
+                                error-policy
+                                parent)
   (:documentation
    "Make and return a `remote-server' instance that calls methods
 provided by servers on the scope SCOPE-OR-URI.
@@ -149,6 +150,9 @@ arguments and/or return values.
 ERROR-POLICY has to be nil or a function to be installed in the error
 hook of the created remote server.
 
+If supplied, PARENT is a participant that should be considered the
+parent of the created `remote-server'.
+
 If the server cannot be created, an error of type
 `participant-creation-error' is signaled."))
 
@@ -159,7 +163,8 @@ If the server cannot be created, an error of type
                                transports
                                converters
                                transform
-                               error-policy)
+                               error-policy
+                               parent)
   (:documentation
    "Make and return a `local-server' instance that provides methods on
 the scope SCOPE-OR-URI for other participants to call.
@@ -182,6 +187,9 @@ arguments and/or return values.
 
 ERROR-POLICY has to be nil or a function to be installed in the error
 hook of the created local server.
+
+If supplied, PARENT is a participant that should be considered the
+parent of the created `local-server'.
 
 If the server cannot be created, an error of type
 `participant-creation-error' is signaled."))

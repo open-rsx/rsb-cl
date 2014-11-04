@@ -177,6 +177,7 @@ converter."
                               converters
                               transform
                               error-policy
+                              parent
                               &allow-other-keys)
   (:documentation
    "Make and return a participant instance of KIND that participates
@@ -186,10 +187,13 @@ converter."
     the created CLASS instance. Some commonly accepted initargs are
     described below.
 
-    All participant classes accept the keyword parameter
+    All participant classes accept the keyword parameters
 
       ERROR-POLICY has to be nil or a function to be installed in the
       error hook of the created participant.
+
+      PARENT, if supplied, is a participant that should be considered
+      the parent of the created participant.
 
     Participant classes which directly send or receive
     events (e.g. `reader', `listener' and `informer') support the
@@ -310,12 +314,19 @@ converter."
 (defmethod make-participant-using-class :around ((class     class)
                                                  (prototype t)
                                                  (scope     scope)
-                                                 &rest args &key)
-  (let ((participant (call-next-method)))
+                                                 &rest args &key
+                                                 parent)
+  (let* ((args        (if parent
+                          (remove-from-plist args :parent)
+                          args))
+         (participant (apply #'call-next-method class prototype scope args)))
     (if *make-participant-hook*
         ;; When the hook returns anything but nil, use it as
         ;; replacement for PARTICIPANT. Otherwise use PARTICIPANT.
-        (or (hooks:run-hook '*make-participant-hook* participant args)
+        (or (hooks:run-hook '*make-participant-hook* participant
+                            (if parent
+                                (list* :parent parent args)
+                                args))
             participant)
         participant)))
 
@@ -344,7 +355,8 @@ RECEIVER to NEW-VALUE."))
                            transports
                            converters
                            transform
-                           error-policy)
+                           error-policy
+                           parent)
   (:documentation
    "Listen to events on the channel designated by SCOPE-OR-URI.
 If successful return a `listener' instance. Otherwise an error of type
@@ -365,7 +377,10 @@ When non-nil, TRANSFORM is a transform object, usable with
 events.
 
 ERROR-POLICY has to be nil or a function to be installed in the error
-hook of the created `listener'."))
+hook of the created `listener'.
+
+If supplied, PARENT is a participant that should be considered the
+parent of the created `listener'."))
 
 ;;; Reader protocol
 
@@ -374,7 +389,8 @@ hook of the created `listener'."))
                          transports
                          converters
                          transform
-                         error-policy)
+                         error-policy
+                         parent)
   (:documentation
    "Receive events on the channel designated by SCOPE-OR-URI.
 If successful, return a `reader' instance. Otherwise an error of type
@@ -397,6 +413,9 @@ events.
 ERROR-POLICY has to be nil or a function to be installed in the error
 hook of the created `reader'.
 
+If supplied, PARENT is a participant that should be considered the
+parent of the created `reader'.
+
 The resulting `reader' instance can be used to receive data in
 \"pull\" manner using the `receive' function."))
 
@@ -417,7 +436,8 @@ nil is returned."))
                            transports
                            converters
                            transform
-                           error-policy)
+                           error-policy
+                           parent)
   (:documentation
    "Start publishing data of type TYPE on the channel designated by
 SCOPE-OR-URI. If successful, return an `informer' instance. Otherwise
@@ -438,7 +458,10 @@ When non-nil, TRANSFORM is a transform object, usable with
 events.
 
 ERROR-POLICY has to be nil or a function to be installed in the error
-hook of the created `informer'."))
+hook of the created `informer'.
+
+If supplied, PARENT is a participant that should be considered the
+parent of the created `informer'."))
 
 (defgeneric send (informer data
                   &rest meta-data

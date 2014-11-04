@@ -46,6 +46,10 @@
     () () (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/localserver/construction")
 
+  `("/rsbtest/localserver/construction"
+    () () (:parent ,*simple-parent*)
+    "/rsbtest/localserver/construction")
+
   '("inprocess://localhost/rsbtest/localserver/construction"
     () () ()
     "/rsbtest/localserver/construction")

@@ -122,17 +122,36 @@
   make-participant-hook/smoke
 
   (ensure-cases ((kind scope &rest args) expected)
-      '(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
+      `(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :transform))
+        ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
+                         :parent ,*simple-parent*)
+         (:converters :transports :transform :parent))
+
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :transform))
-        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke" :type t)
+        ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
+                         :parent ,*simple-parent*)
+         (:converters :transports :transform :parent))
+
+        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
+                         :type t)
          (:converters :transports :transform :type))
+        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
+                         :type t :parent ,*simple-parent*)
+         (:converters :transports :transform :type :parent))
 
         ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :transform))
+        ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
+                         :parent ,*simple-parent*)
+         (:converters :transports :transform :parent))
+
         ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:converters :transports :transform)))
+         (:converters :transports :transform))
+        ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
+                         :parent ,*simple-parent*)
+         (:converters :transports :transform :parent)))
 
     (let ((participant))
       (ensure-same

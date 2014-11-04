@@ -39,7 +39,9 @@
 
    #:define-restart-method-test-case
 
-   #:mock-transform/error)
+   #:mock-transform/error
+
+   #:*simple-parent*)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
@@ -296,3 +298,9 @@ and bound to a variable named like the value of CLASS."
 (defun mock-transform/error (event)
   (declare (ignore event))
   (error "Intentional error in transformation"))
+
+(defclass mock-participant (participant) ())
+(rsb::register-participant-class 'mock-participant :mock)
+
+(defvar *simple-parent*
+  (make-participant :mock "/rsbtest/simple-parent"))
