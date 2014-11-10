@@ -15,7 +15,11 @@
 
   ;; Conditions
   (:export
-   #:introspection-protocol-error)
+   #:introspection-protocol-error
+
+   #:no-such-participant-error
+   #:no-such-participant-error-container
+   #:no-such-participant-error-id)
 
   ;; Variables
   (:export
@@ -66,6 +70,17 @@
 
    #:bye
    #:bye-id)
+
+  ;; Participant table protocol
+  (:export
+   #:introspection-participants
+   #:introspection-participants/roots
+   #:find-participant)              ; also `setf'
+
+  ;; Database locking protocol
+  (:export
+   #:call-with-database-lock
+   #:with-database-lock)
 
   (:documentation
    "This package contains the introspection functionality.

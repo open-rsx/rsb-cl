@@ -154,3 +154,73 @@
   (:documentation
    "Return the unique id of the participant to which MESSAGE
     refers."))
+
+;;; Participant table protocol
+;;;
+;;; Retrieval and manipulation of `participant-info' instances indexed
+;;; by id.
+
+(defgeneric introspection-participants (container)
+  (:documentation
+   "Return the list of all `participant-info' instances stored in
+    CONTAINER."))
+
+(defgeneric (setf introspection-participants) (new-value container)
+  (:documentation
+   "Store NEW-VALUE as the list of `participant-info' instances in
+    CONTAINER."))
+
+(defgeneric introspection-participants/roots (container)
+  (:documentation
+   "Return the list of root (i.e. without parent) `participant-info'
+    instances stored in CONTAINER."))
+
+(defgeneric find-participant (id container
+                              &key
+                              parent-id
+                              if-does-not-exist)
+  (:documentation
+   "Return the `participant-info' instance designated by ID in
+    CONTAINER.
+
+    PARENT-ID is accepted for parity with (setf find-participant).
+
+    IF-DOES-NOT-EXIST controls the behavior in case ID does not
+    designate a participant entry in CONTAINER."))
+
+(defgeneric (setf find-participant) (new-value id container
+                                     &key
+                                     parent-id
+                                     if-does-not-exist)
+  (:documentation
+   "Store NEW-VALUE as the `participant-info' instance designated by
+    ID in CONTAINER.
+
+    If NEW-VALUE is nil, remove the corresponding entry.
+
+    IF-DOES-NOT-EXIST is accepted for parity with
+    `find-participant'."))
+
+(defgeneric ensure-participant (id container default)
+  (:documentation
+   "If the participant designated by ID exists in CONTAINER,
+    return it. Otherwise create it according to DEFAULT, store and
+    return it.
+
+    DEFAULT is of the form
+
+      (CLASS . INITARGS)
+
+    and maybe be passed to `make-instance' or `change-class' depending
+    on the existing entry for ID."))
+
+;; Default behavior
+
+(defmethod introspection-participants/roots ((container t))
+  (remove-if #'entry-parent (introspection-participants container)))
+
+;;; Database locking protocol
+
+(defgeneric call-with-database-lock (database thunk)
+  (:documentation
+   "Call THUNK with locked DATABASE."))

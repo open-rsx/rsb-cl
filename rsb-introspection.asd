@@ -59,7 +59,9 @@
                               (:file       "protocol")
                               (:file       "variables")
                               (:file       "model")
-                              (:file       "conversion"))))
+                              (:file       "conversion")
+
+                              (:file       "mixins"))))
 
   :in-order-to ((test-op (test-op :rsb-introspection-test))))
 
