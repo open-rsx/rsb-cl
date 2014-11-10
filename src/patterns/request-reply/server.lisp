@@ -43,8 +43,8 @@ classes."))
 (defmethod shared-initialize :before ((instance   method1)
                                       (slot-names t)
                                       &key
-                                      name)
-  (when name
+                                      (name nil name-supplied?))
+  (when (and name-supplied? name)
     (check-type name method-name "a legal method name")))
 
 (defmethod detach ((method method1))
@@ -117,8 +117,9 @@ generic support for retrieving, adding and removing methods."))
 (defmethod shared-initialize :before ((instance   server)
                                       (slot-names t)
                                       &key
-                                      transform)
-  (check-type transform transform-specification))
+                                      (transform nil transform-supplied?))
+  (when transform-supplied?
+    (check-type transform transform-specification)))
 
 (defmethod server-methods ((server server))
   (hash-table-values (server-%methods server)))

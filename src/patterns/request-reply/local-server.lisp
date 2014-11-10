@@ -32,9 +32,7 @@ should be passed to the callback function."))
 
 (rsb::register-participant-class 'local-method)
 
-(defmethod shared-initialize :after ((instance   local-method)
-                                     (slot-names t)
-                                     &key)
+(defmethod initialize-instance :after ((instance local-method) &key)
   (method-listener instance)) ; force creation
 
 (define-lazy-creation-method local-method listener :argument)

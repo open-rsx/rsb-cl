@@ -30,8 +30,7 @@ for RESULT."))
 
 (rsb::register-participant-class 'remote-method)
 
-(defmethod initialize-instance :after ((instance remote-method)
-                                       &key)
+(defmethod initialize-instance :after ((instance remote-method) &key)
   (closer-mop:set-funcallable-instance-function
    instance (lambda (data-or-event &rest args)
               (apply #'call (method-server instance) instance data-or-event
