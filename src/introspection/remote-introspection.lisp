@@ -610,15 +610,23 @@
                         (introspection remote-introspection-database)
                         (host          host-info))
   (let+ (((&structure-r/o introspection- inactivity-threshold) introspection)
-         ((&structure-r/o host-info- (id1 id) hostname) host))
+         ((&structure-r/o host-info- (id1 id) hostname
+                                     machine-type machine-version
+                                     software-type software-version)
+          host))
     (or (find-host id introspection)
         (setf (find-host id introspection)
               (make-instance
                'host-entry
-               :info                 (make-instance 'remote-host-info
-                                                    :id       id1
-                                                    :hostname hostname
-                                                    :state    :up)
+               :info                 (make-instance
+                                      'remote-host-info
+                                      :id               id1
+                                      :hostname         hostname
+                                      :machine-type     machine-type
+                                      :machine-version  machine-version
+                                      :software-type    software-type
+                                      :software-version software-version
+                                      :state            :up)
                :inactivity-threshold inactivity-threshold)))))
 
 (defmethod rsb.ep:handle ((sink remote-introspection-database) ; TODO mixin

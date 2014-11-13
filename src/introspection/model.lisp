@@ -192,17 +192,46 @@
 ;;; `host-info'
 
 (defclass host-info (print-items:print-items-mixin)
-  ((id       :initarg  :id
-             :type     (or null string)
-             :reader   host-info-id
-             :documentation
-             "Stores a string (hopefully) uniquely identifying the
-              host.")
-   (hostname :initarg  :hostname
-             :type     string
-             :reader   host-info-hostname
-             :documentation
-             "Stores the name of the host."))
+  ((id               :initarg  :id
+                     :type     (or null string)
+                     :reader   host-info-id
+                     :documentation
+                     "Stores a string (hopefully) uniquely identifying
+                      the host.")
+   (hostname         :initarg  :hostname
+                     :type     string
+                     :reader   host-info-hostname
+                     :documentation
+                     "Stores the name of the host.")
+   (machine-type     :initarg  :machine-type
+                     :type     (or null string)
+                     :reader   host-info-machine-type
+                     :initform nil
+                     :documentation
+                     "Stores the type of the machine, usually CPU
+                      architecture.")
+   (machine-version  :initarg  :machine-version
+                     :type     (or null string)
+                     :reader   host-info-machine-version
+                     :initform nil
+                     :documentation
+                     "Stores the version of the machine within its
+                      type, usually the CPU identification string.")
+   (software-type    :initarg  :software-type
+                     :type     (or null string)
+                     :reader   host-info-software-type
+                     :initform nil
+                     :documentation
+                     "Stores the type of the operating system running
+                      on the host, usually the kernel name. ")
+   (software-version :initarg  :software-version
+                     :type     (or null string)
+                     :reader   host-info-software-version
+                     :initform nil
+                     :documentation
+                     "Stores the version of the operating system
+                      within its type, usually the kernel version
+                      string."))
   (:default-initargs
    :id       (missing-required-initarg 'host-info :id)
    :hostname (missing-required-initarg 'host-info :hostname))
@@ -210,14 +239,22 @@
    "Instances of this class store information about a host."))
 
 (defmethod print-items:print-items append ((object host-info))
-  `((:hostname ,(host-info-hostname object))))
+  (let+ (((&structure-r/o host-info- hostname machine-type software-type)
+          object))
+    `((:hostname      ,hostname)
+      (:machine-type  ,machine-type  " ~:[?~:;~:*~A~]" ((:after :hostname)))
+      (:software-type ,software-type " ~:[?~:;~:*~A~]" ((:after :machine-type))))))
 
 (defun current-host-info ()
   "Return a `host-info' instance describing the local host."
   (with-platform-information-fallback-values
     (make-instance 'host-info
-                   :id       (current-host-id)
-                   :hostname (machine-instance))))
+                   :id               (current-host-id)
+                   :hostname         (machine-instance)
+                   :machine-type     (current-machine-type)
+                   :machine-version  (current-machine-version)
+                   :software-type    (current-software-type)
+                   :software-version (current-software-version))))
 
 ;;; `remote-host-info'
 
@@ -238,7 +275,9 @@
 (defmethod print-items:print-items append ((object remote-host-info))
   (let+ (((&accessors-r/o (state        host-info-state)
                           (clock-offset info-clock-offset)) object))
-    `((:host-state ,state " ~A" ((:after :hostname)))
+    `((:host-state ,state " ~A" ((:after :hostname)
+                                 (:after :machine-type)
+                                 (:after :software-type)))
       ,@(when (and clock-offset (> (abs clock-offset) 0.001))
           `((:clock-offset ,clock-offset " ~@[~,3@F s~]" ((:after :host-state))))))))
 

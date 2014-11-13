@@ -101,10 +101,14 @@
 
 (define-simple-model-class-tests host-info
   ;; Missing required initargs.
-  '((:id "foo")                 error)
-  '((:hostname "bar")           error)
+  '((:id "foo")                                             error)
+  '((:hostname "bar")                                       error)
   ;; These are OK.
-  '((:id "foo" :hostname "bar")))
+  '((:id "foo" :hostname "bar"))
+  '((:id "foo" :hostname "bar" :machine-type "x86"))
+  '((:id "foo" :hostname "bar" :machine-version "foo"))
+  '((:id "foo" :hostname "bar" :software-type "linux"))
+  '((:id "foo" :hostname "bar" :software-version "3.16.30")))
 
 (addtest (introspection-model-host-info-root
           :documentation
@@ -112,8 +116,12 @@
   current-host-info/smoke
 
   (let ((info (current-host-info)))
-    (ensure (typep (host-info-id info)       'string))
-    (ensure (typep (host-info-hostname info) 'string))))
+    (ensure (typep (host-info-id info)               'string))
+    (ensure (typep (host-info-hostname info)         'string))
+    (ensure (typep (host-info-machine-type info)     'string))
+    (ensure (typep (host-info-machine-version info)  'string))
+    (ensure (typep (host-info-software-type info)    'string))
+    (ensure (typep (host-info-software-version info) 'string))))
 
 (define-simple-model-class-tests remote-host-info
   ;; These are OK.

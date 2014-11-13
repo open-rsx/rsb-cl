@@ -68,6 +68,10 @@
    #:host-info                          #:remote-host-info
    #:host-info-id                       #:host-info-state
    #:host-info-hostname
+   #:host-info-machine-type
+   #:host-info-machine-version
+   #:host-info-software-type
+   #:host-info-software-version
    #:current-host-info)
 
   ;; Introspection message protocol

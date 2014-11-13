@@ -56,8 +56,12 @@
              (start-time            rsb.protocol.operatingsystem:process-start-time))
             process)
            ((&accessors-r/o
-             (host-id  rsb.protocol.operatingsystem:host-id)
-             (hostname rsb.protocol.operatingsystem:host-hostname))
+             (host-id          rsb.protocol.operatingsystem:host-id)
+             (hostname         rsb.protocol.operatingsystem:host-hostname)
+             (machine-type     rsb.protocol.operatingsystem:host-machine-type)
+             (machine-version  rsb.protocol.operatingsystem:host-machine-version)
+             (software-type    rsb.protocol.operatingsystem:host-software-type)
+             (software-version rsb.protocol.operatingsystem:host-software-version))
             host))
       (make-instance
        'hello
@@ -89,18 +93,30 @@
                                              start-time))
        :host        (make-instance
                      'host-info
-                     :id       host-id
-                     :hostname hostname)))
+                     :id               host-id
+                     :hostname         hostname
+                     :machine-type     (unless (emptyp machine-type)
+                                         machine-type)
+                     :machine-version  (unless (emptyp machine-version)
+                                         machine-version)
+                     :software-type    (unless (emptyp software-type)
+                                         software-type)
+                     :software-version (unless (emptyp software-version)
+                                         software-version))))
 
     :domain->wire
     (let+ (((&structure-r/o hello- participant process host) domain-object)
-           ((&structure-r/o participant-info- kind id scope type transports parent-id)
+           ((&structure-r/o
+             participant-info- kind id scope type transports parent-id)
             participant)
            ((&structure-r/o
              process-info-
              process-id program-name commandline-arguments start-time)
             process)
-           ((&structure-r/o host-info- (host-id id) hostname) host))
+           ((&structure-r/o
+             host-info- (host-id id) hostname
+             machine-type machine-version software-type software-version)
+            host))
       (apply #'make-instance 'rsb.protocol.introspection:hello
              :kind      (string-downcase kind)
              :id        (uuid:uuid-to-byte-array id)
@@ -117,8 +133,12 @@
                                                  start-time))
              :host      (make-instance
                          'rsb.protocol.operatingsystem:host
-                         :id       host-id
-                         :hostname hostname)
+                         :id               host-id
+                         :hostname         hostname
+                         :machine-type     machine-type
+                         :machine-version  machine-version
+                         :software-type    software-type
+                         :software-version software-version)
              (when parent-id
                (list :parent (uuid:uuid-to-byte-array parent-id))))))
 

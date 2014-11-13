@@ -69,3 +69,15 @@
                 (format stream "~@<Use a fallback host id value.~@:>"))
       (declare (ignore condition))
       (machine-instance))))
+
+(defun current-machine-type ()
+  (string-downcase (machine-type)))
+
+(defun current-machine-version ()
+  (machine-version))
+
+(defun current-software-type ()
+  (string-downcase (software-type)))
+
+(defun current-software-version ()
+  (software-version))
