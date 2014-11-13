@@ -35,7 +35,7 @@
                 (hooks:clear-hook (hook)))))))
   (rsb:with-participant (introspection
                          (rsb:make-participant
-                          :remote-introspection "/"
+                          :remote-introspection rsb.introspection:+introspection-scope+
                           :change-handler (alexandria:curry #'on-database-change :introspection)))
     (declare (ignore introspection))
     (sleep most-positive-fixnum)))
