@@ -28,7 +28,7 @@
 
 (defun call-with-platform-information-error-translation (description thunk)
   (with-condition-translation (((error platform-information-error)
-                                :format-control   "~@<Could not ~A~@:>"
+                                :format-control   "~@<Could not ~A.~@:>"
                                 :format-arguments (list description)))
     (funcall thunk)))
 
@@ -41,7 +41,7 @@
 (defun call-with-platform-information-fallback-values (thunk)
   (handler-bind ((platform-information-error
                   (lambda (condition)
-                    (log:warn "~@<~A.~@:_Using fallback value~@:>"
+                    (log:warn "~@<~A.~@:_Using fallback value.~@:>"
                               condition)
                     (continue))))
     (funcall thunk)))

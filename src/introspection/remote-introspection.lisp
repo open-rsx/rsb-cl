@@ -120,7 +120,7 @@
                                (host-info-id host)
                                (participant-scope introspection)))))
     (call server nil (make-event scope rsb.converter:+no-value+)
-          :block? block? :return :event))) ; TODO what about errors?
+          :block? block? :return :event)))
 
 ;;; Introspection objects and database
 ;;;
