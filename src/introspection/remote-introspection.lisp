@@ -84,12 +84,14 @@
        (scope-string (event-scope data)))))
 
   ;; Check payload.
-  (unless (typep (event-data data) '(or hello bye (eql "pong")))
-    (introspection-error :response (event-data data) nil
-                         "~@<Payload is ~S (not ~{~S~^ or ~})~@:>."
-                         data '(rsb.protocol.introspection:hello
-                                rsb.protocol.introspection:bye
-                                "pong")))
+  (let ((payload (event-data data)))
+    (unless (or (typep payload '(or hello bye))
+                (equal  payload "pong"))
+      (introspection-error :response payload nil
+                           "~@<Payload is ~S (not ~{~S~^ or ~})~@:>."
+                           payload '(rsb.protocol.introspection:hello
+                                     rsb.protocol.introspection:bye
+                                     "pong"))))
 
   ;; Some processors want to know by which receiver an event was
   ;; received.
@@ -631,6 +633,10 @@
 (defmethod rsb.ep:handle ((sink remote-introspection-database)
                           (data bye))
   (introspection-hosts sink))
+
+(defmethod rsb.ep:handle ((sink remote-introspection-database)
+                          (data string))
+  '()) ; ignore "pong" replies
 
 ;;; `remote-introspection'
 

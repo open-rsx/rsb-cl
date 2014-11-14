@@ -134,6 +134,11 @@
     (with-participant (introspection (make-participant
                                       :remote-introspection +introspection-scope+
                                       :error-policy #'record-and-continue))
+      ;; "pong" replies should be ignored.
+      (send-introspection-event
+       "pong" :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
+      (check-conditions '())
+
       ;; Invalid scopes
       (send-introspection-event "pong")
       (check-conditions
