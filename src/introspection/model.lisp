@@ -137,7 +137,14 @@
                           :initform (local-time:now)
                           :documentation
                           "Stores (an approximation of) the start time
-                           of the process."))
+                           of the process.")
+   (executing-user        :initarg  :executing-user
+                          :type     (or null string)
+                          :reader   process-info-executing-user
+                          :initform nil
+                          :documentation
+                          "Stores the login- or account-name of the
+                           user executing the process."))
   (:default-initargs
    :program-name (missing-required-initarg 'process-info :program-name)
    :process-id   (missing-required-initarg 'process-info :process-id))
@@ -160,7 +167,8 @@
                      :program-name          (pathname-name
                                              (parse-namestring program-name))
                      :commandline-arguments arguments
-                     :start-time            (current-process-start-time)))))
+                     :start-time            (current-process-start-time)
+                     :executing-user        (current-user)))))
 
 ;;; `remote-process-info'
 

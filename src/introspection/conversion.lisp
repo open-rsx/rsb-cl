@@ -53,7 +53,8 @@
              (process-id            rsb.protocol.operatingsystem:process-id)
              (program-name          rsb.protocol.operatingsystem:process-program-name)
              (commandline-arguments rsb.protocol.operatingsystem:process-commandline-arguments)
-             (start-time            rsb.protocol.operatingsystem:process-start-time))
+             (start-time            rsb.protocol.operatingsystem:process-start-time)
+             (executing-user        rsb.protocol.operatingsystem:process-executing-user))
             process)
            ((&accessors-r/o
              (host-id          rsb.protocol.operatingsystem:host-id)
@@ -90,7 +91,8 @@
                      :program-name          program-name
                      :commandline-arguments (coerce commandline-arguments 'list)
                      :start-time            (unix-microseconds->timestamp
-                                             start-time))
+                                             start-time)
+                     :executing-user        executing-user)
        :host        (make-instance
                      'host-info
                      :id               host-id
@@ -111,7 +113,8 @@
             participant)
            ((&structure-r/o
              process-info-
-             process-id program-name commandline-arguments start-time)
+             process-id program-name commandline-arguments
+             start-time executing-user)
             process)
            ((&structure-r/o
              host-info- (host-id id) hostname
@@ -130,7 +133,8 @@
                          :commandline-arguments (coerce commandline-arguments
                                                         '(vector string))
                          :start-time            (timestamp->unix-microseconds
-                                                 start-time))
+                                                 start-time)
+                         :executing-user        executing-user)
              :host      (make-instance
                          'rsb.protocol.operatingsystem:host
                          :id               host-id

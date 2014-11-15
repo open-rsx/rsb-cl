@@ -61,6 +61,23 @@
         (declare (ignore condition))
         (or fallback (setf fallback (local-time:now)))))))
 
+(defun %current-user ()
+  (with-platform-information-error-translation
+      ("determine username from passwd database entry")
+    (sb-posix:passwd-name (sb-posix:getpwuid (sb-posix:getuid)))))
+
+(defun current-user ()
+  (restart-case
+      (%current-user)
+    (continue (&optional condition)
+      :report (lambda (stream)
+                (format stream "~@<Guess username from home directory.~@:>"))
+      (declare (ignore condition))
+      (when-let* ((pathname  (user-homedir-pathname))
+                  (directory (pathname-directory pathname)))
+        (when (>= (length directory) 2)
+          (lastcar directory))))))
+
 (defun current-host-id ()
   (restart-case
       (%current-host-id)

@@ -63,6 +63,7 @@
    #:process-info-program-name          #:process-info-transports
    #:process-info-commandline-arguments
    #:process-info-start-time
+   #:process-info-executing-user
    #:current-process-info
 
    #:host-info                          #:remote-host-info

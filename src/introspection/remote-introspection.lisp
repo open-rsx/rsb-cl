@@ -476,7 +476,8 @@
                            (receiver (missing-required-argument :receiver)))
   (let+ (((&structure-r/o
            process-info-
-           process-id program-name commandline-arguments start-time)
+           process-id program-name commandline-arguments
+           start-time executing-user)
           process)
          (transports (transport-specific-urls receiver))
          ((&flet update-transports (entry)
@@ -491,6 +492,7 @@
                            :start-time            (timing-tracker-to-local-clock
                                                    (entry-%tracker introspection)
                                                    start-time)
+                           :executing-user        executing-user
                            :state                 :running
                            :transports            transports))))
     (if-let ((entry (find-process id introspection)))

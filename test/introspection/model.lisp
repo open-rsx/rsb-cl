@@ -66,8 +66,13 @@
   '((:program-name "foo")                error)
   ;; These are OK.
   `((:process-id   20
+     :program-name "foo"))
+  `((:process-id   20
      :program-name "foo"
-     :start-time   ,(local-time:now))))
+     :start-time   ,(local-time:now)))
+  '((:process-id     20
+     :program-name   "foo"
+     :executing-user "john")))
 
 (addtest (introspection-model-process-info-root
           :documentation
@@ -78,7 +83,8 @@
     (ensure (typep (process-info-process-id info)            'non-negative-integer))
     (ensure (typep (process-info-program-name info)          'string))
     (ensure (typep (process-info-commandline-arguments info) 'list))
-    (ensure (typep (process-info-start-time info)            'local-time:timestamp))))
+    (ensure (typep (process-info-start-time info)            'local-time:timestamp))
+    (ensure (typep (process-info-executing-user info)        'string))))
 
 (define-simple-model-class-tests remote-process-info
   ;; Missing required initargs.
