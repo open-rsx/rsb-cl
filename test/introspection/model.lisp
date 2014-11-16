@@ -72,7 +72,10 @@
      :start-time   ,(local-time:now)))
   '((:process-id     20
      :program-name   "foo"
-     :executing-user "john")))
+     :executing-user "john"))
+  '((:process-id   20
+     :program-name "foo"
+     :rsb-version  "0.11")))
 
 (addtest (introspection-model-process-info-root
           :documentation

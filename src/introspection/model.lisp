@@ -144,7 +144,18 @@
                           :initform nil
                           :documentation
                           "Stores the login- or account-name of the
-                           user executing the process."))
+                           user executing the process.")
+   (rsb-version           :initarg  :rsb-version
+                          :type     (or null string)
+                          :reader   process-info-rsb-version
+                          :initform nil
+                          :documentation
+                          "Sores the version of the RSB implementation
+                           used in the process.
+
+                           The version string is of the form
+
+                             MAJOR.MINOR.REVISION[-COMMIT]"))
   (:default-initargs
    :program-name (missing-required-initarg 'process-info :program-name)
    :process-id   (missing-required-initarg 'process-info :process-id))
@@ -168,7 +179,8 @@
                                              (parse-namestring program-name))
                      :commandline-arguments arguments
                      :start-time            (current-process-start-time)
-                     :executing-user        (current-user)))))
+                     :executing-user        (current-user)
+                     :rsb-version           (cl-rsb-system:version/string :commit? t)))))
 
 ;;; `remote-process-info'
 

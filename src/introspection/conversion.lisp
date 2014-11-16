@@ -54,7 +54,8 @@
              (program-name          rsb.protocol.operatingsystem:process-program-name)
              (commandline-arguments rsb.protocol.operatingsystem:process-commandline-arguments)
              (start-time            rsb.protocol.operatingsystem:process-start-time)
-             (executing-user        rsb.protocol.operatingsystem:process-executing-user))
+             (executing-user        rsb.protocol.operatingsystem:process-executing-user)
+             (rsb-version           rsb.protocol.operatingsystem:process-rsb-version))
             process)
            ((&accessors-r/o
              (host-id          rsb.protocol.operatingsystem:host-id)
@@ -92,7 +93,8 @@
                      :commandline-arguments (coerce commandline-arguments 'list)
                      :start-time            (unix-microseconds->timestamp
                                              start-time)
-                     :executing-user        executing-user)
+                     :executing-user        executing-user
+                     :rsb-version           rsb-version)
        :host        (make-instance
                      'host-info
                      :id               host-id
@@ -114,7 +116,7 @@
            ((&structure-r/o
              process-info-
              process-id program-name commandline-arguments
-             start-time executing-user)
+             start-time executing-user rsb-version)
             process)
            ((&structure-r/o
              host-info- (host-id id) hostname
@@ -134,7 +136,8 @@
                                                         '(vector string))
                          :start-time            (timestamp->unix-microseconds
                                                  start-time)
-                         :executing-user        executing-user)
+                         :executing-user        executing-user
+                         :rsb-version           rsb-version)
              :host      (make-instance
                          'rsb.protocol.operatingsystem:host
                          :id               host-id

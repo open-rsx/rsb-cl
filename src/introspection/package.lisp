@@ -64,6 +64,7 @@
    #:process-info-commandline-arguments
    #:process-info-start-time
    #:process-info-executing-user
+   #:process-info-rsb-version
    #:current-process-info
 
    #:host-info                          #:remote-host-info
