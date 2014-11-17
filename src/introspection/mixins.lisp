@@ -114,8 +114,9 @@
     (detach server)))
 
 (defmethod transport-specific-urls ((component introspection-participant-mixin))
-  (mapcar (curry #'puri:merge-uris (relative-url component))
-          (transport-specific-urls (introspection-listener component))))
+  (when-let ((listener (introspection-%listener component)))
+    (mapcar (curry #'puri:merge-uris (relative-url component))
+            (transport-specific-urls listener))))
 
 ;;; `participant-table-mixin'
 

@@ -740,21 +740,24 @@
       ;; Try to batch-create all requested receivers, cleaning up if
       ;; something goes wrong.
       (unwind-protect-case ()
-          (mapc #'add-receiver (if receiver-uris
-                                   (mapcar #'prepare-uri receiver-uris)
-                                   `((,scope ,transports))))
-        (:abort
-         (mapc #'detach receivers)))
-      ;; If all receivers have been created, start initial surveys.
-      (mapc #'introspection-survey receivers))
+          (progn
+            (mapc #'add-receiver (if receiver-uris
+                                     (mapcar #'prepare-uri receiver-uris)
+                                     `((,scope ,transports))))
+            ;; If all receivers have been created, start initial
+            ;; surveys.
+            (mapc #'introspection-survey receivers)
 
-    ;; Initialize executor for timed updates.
-    (when update-interval
-      (setf executor (make-instance 'timed-executor/weak
-                                    :name     "Remote introspection update"
-                                    :interval update-interval
-                                    :function #'rsb.ep:handle
-                                    :args     (list instance :update))))))
+            ;; Initialize executor for timed updates.
+            (when update-interval
+              (setf executor (make-instance
+                              'timed-executor/weak
+                              :name     "Remote introspection update"
+                              :interval update-interval
+                              :function #'rsb.ep:handle
+                              :args     (list instance :update)))))
+        (:abort
+         (detach instance))))))
 
 (defmethod detach ((participant remote-introspection))
   (when-let ((executor (introspection-%executor participant)))

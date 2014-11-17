@@ -14,7 +14,8 @@
    "Unit test suite for the `introspection-receiver' class."))
 
 (define-basic-participant-test-cases (rsb.introspection::introspection-receiver
-                                      :named? nil)
+                                      :named?                nil
+                                      :check-transport-urls? nil)
   '("/rsbtest/introspection-receiver/construction"
     () () ()
     "/rsbtest/introspection-receiver/construction")

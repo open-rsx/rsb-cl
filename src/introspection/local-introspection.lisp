@@ -26,10 +26,9 @@
     local host, the current process and participants existing within
     it."))
 
-(defmethod shared-initialize :after ((instance   introspection-sender)
-                                     (slot-names t)
-                                     &key
-                                     (participants '() participants-supplied?))
+(defmethod initialize-instance :after ((instance introspection-sender)
+                                       &key
+                                       (participants '() participants-supplied?))
   (let+ (((&accessors (error-policy rsb.ep:processor-error-policy)
                       (error-hook   participant-error-hook)
                       (informer     introspection-informer)) instance))
@@ -37,8 +36,12 @@
     (setf error-policy (curry #'hooks:run-hook error-hook))
 
     ;; Child participants.
-    (introspection-listener instance) ; force creation
-    (introspection-server instance)   ; likewise
+    (unwind-protect-case ()
+        (progn
+          (introspection-listener instance) ; force creation
+          (introspection-server instance))  ; likewise
+      (:abort
+       (detach instance)))
 
     ;; Broadcast initial hello messages for participants registered in
     ;; INSTANCE.
