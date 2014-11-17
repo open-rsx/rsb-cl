@@ -8,7 +8,7 @@
 
 ;;; Class `introspection-receiver'
 
-(deftestsuite introspection-receiver-root ()
+(deftestsuite introspection-receiver-root (introspection-root)
   ()
   (:documentation
    "Unit test suite for the `introspection-receiver' class."))
@@ -55,49 +55,13 @@
   (:documentation
    "Unit test suite for the `remote-introspection-database' class."))
 
-;;; TODO test construction
 (addtest (remote-introspection-database-root
           :documentation
-          "TODO")
-  construction
-
-  )
-
-(addtest (remote-introspection-database-root
-          :documentation
-          "TODO")
+          "Test printing `remote-introspection-database' instances.")
   print
 
   (let ((introspection (make-instance 'remote-introspection-database)))
     (ensure (not (emptyp (princ-to-string introspection))))))
-
-(addtest (remote-introspection-database-root
-          :documentation
-          "TODO")
-  smoke
-
-  (let* ((ri (make-instance 'remote-introspection-database))
-         (id (uuid:make-v4-uuid)))
-    (rsb.ep:handle ri (make-instance 'hello
-                                     :participant (make-instance 'remote-participant-info
-                                                                 :kind :reader
-                                                                 :id id
-                                                                 :scope (make-scope "/bla")
-                                                                 :type t
-                                                                 :transports '())
-                                     :process (make-instance 'remote-process-info :process-id 8587 :program-name "bla" :transports '())
-                                     :host (make-instance 'remote-host-info :id "1234" :hostname "ferberit")))
-    (rsb.ep:handle ri (make-instance 'hello
-                                     :participant (make-instance 'remote-participant-info
-                                                                 :kind :reader
-                                                                 :id (uuid:make-v4-uuid)
-                                                                 :scope (make-scope "/bla")
-                                                                 :type t
-                                                                 :transports '())
-                                     :process (make-instance 'remote-process-info :process-id 0 :program-name "bla" :transports '())
-                                     :host (make-instance 'remote-host-info :id "5678" :hostname "bla")))
-    (rsb.ep:handle ri (make-instance 'bye :id id))
-    ri))
 
 ;;; Class `remote-introspection'
 
