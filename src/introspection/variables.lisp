@@ -176,21 +176,29 @@
 
 ;;; Participant state change handlers
 
+(defun exclude-from-introspection? (participant)
+  (or (member (participant-kind participant)
+              '(:local-introspection
+                :remote-introspection :introspection-receiver)
+              :test #'eq)
+      (sub-scope? (participant-scope participant) +introspection-scope+)))
+
 (defun handle-make-participant (participant args)
   ;; Register PARTICIPANT for introspection but only if it does not
-  ;; like being part of the introspection machinery itself.
-  (let+ (((&structure-r/o participant- scope) participant)
-         ((&plist-r/o (introspection? :introspection?) (parent :parent)) args))
-    (when (and introspection?
-               (not (member (participant-kind participant)
-                            '(:local-introspection :remote-introspection)))
-               (not (sub-scope? scope +introspection-scope+)))
+  ;; look like being part of the introspection machinery itself.
+  (let+ (((&plist-r/o (introspection? :introspection?) (parent :parent)) args))
+    (when (and introspection? (not (exclude-from-introspection? participant)))
       (register-participant participant parent)))
   ;; Do not return a non-nil value: the hook interprets such a value
   ;; as a replacement for PARTICIPANT.
   nil)
 
 (defgeneric handle-participant-state-change (participant new-state)
+  (:method ((participant t) (new-state t))
+    nil)
+  (:method ((participant t) (new-state (eql :detached)))
+    (unless (exclude-from-introspection? participant)
+      (unregister-participant participant)))
   (:documentation
    "Handle the event of PARTICIPANT changing into state NEW-STATE.
 
@@ -199,13 +207,6 @@
 
     This generic function is not part of a public protocol. It exists
     only for local convenient and flexible dispatch."))
-
-(defmethod handle-participant-state-change ((participant t) (new-state t))
-  nil)
-
-(defmethod handle-participant-state-change ((participant t) (new-state (eql :detached)))
-  (unless (sub-scope? (participant-scope participant) +introspection-scope+)
-    (unregister-participant participant)))
 
 ;;; Event handling
 
