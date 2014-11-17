@@ -71,12 +71,16 @@
 (defmethod make-scope ((thing sequence) &key intern?)
   (make-scope (coerce thing 'list) :intern? intern?))
 
+(declaim (inline starts-with-/))
+(defun starts-with-/ (string)
+  (starts-with #\/ string))
+
 (defmethod make-scope ((thing string) &key intern?)
-  (let+ (((&values components separator-count)
-          (split-sequence #\/ thing :remove-empty-subseqs t)))
-    (when (zerop separator-count)
-      (check-type separator-count positive-integer
-                  "a positive number of \"/\"-separators"))
+  (unless (starts-with-/ thing)
+    (error 'type-error
+           :datum         thing
+           :expected-type '(satisfies starts-with-/)))
+  (let ((components (split-sequence #\/ thing :remove-empty-subseqs t)))
     (make-scope components :intern? intern?)))
 
 (declaim (ftype (function (t) (values scope &rest nil)) ensure-scope)

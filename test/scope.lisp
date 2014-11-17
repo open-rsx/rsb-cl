@@ -63,6 +63,8 @@ strings.")
 
   (ensure-cases (string expected-components)
       '(;; Some invalid cases.
+        ("foo"         type-error) ; missing leading "/"
+        ("foo/bar"     type-error) ; likewise
         ("/foo "       type-error) ; invalid character: space
         ("/!@#/+1"     type-error) ; invalid characters: !@#+
         ("/foo/+1"     type-error) ; in second component
@@ -71,7 +73,6 @@ strings.")
         ;; These are valid.
         ("///Foo//BAR" ("Foo" "BAR"))
         ("//foo/bar"   ("foo" "bar"))
-        ("foo/bar"     ("foo" "bar"))
         ("//foo/bar"   ("foo" "bar"))
         ("/foo/bar/"   ("foo" "bar"))
         ("/foo/5/"     ("foo" "5"))

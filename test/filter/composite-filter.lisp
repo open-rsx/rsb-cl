@@ -17,12 +17,12 @@
 (define-basic-filter-test-cases (complement-filter :complement)
     ;; construct cases
     `(;; exactly one child is required.
-      (()                                                  error)
-      ((:children ())                                      error)
-      ((:children (,#1=(filter :scope :scope "bar") ,#1#)) error)
+      (()                                                   error)
+      ((:children ())                                       error)
+      ((:children (,#1=(filter :scope :scope "/bar") ,#1#)) error)
 
       ;; these are ok
-      ((:children (,(filter :scope :scope "bar")))         t))
+      ((:children (,(filter :scope :scope "/bar")))         t))
 
   ;; expected matching results
   t nil nil nil)

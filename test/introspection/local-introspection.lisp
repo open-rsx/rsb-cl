@@ -128,9 +128,9 @@
          (introspection-protocol-error
           "not conform to the REQUEST role within the INTROSPECTION protocol")))
 
-      (send-introspection-event "ping" :method :|request| :suffix-scope "foo")
+      (send-introspection-event "ping" :method :|request| :suffix-scope "/foo")
       (send-introspection-event
-       rsb.converter:+no-value+ :method :|request| :suffix-scope "foo")
+       rsb.converter:+no-value+ :method :|request| :suffix-scope "/foo")
       (check-conditions
        '((introspection-protocol-error
           "not conform to the REQUEST role within the INTROSPECTION protocol")
@@ -141,20 +141,20 @@
       (send-introspection-event
        "ping"
        :method       :|survey|
-       :suffix-scope (princ-to-string (uuid:make-null-uuid)))
+       :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
       (send-introspection-event
        rsb.converter:+no-value+
        :method       :|survey|
-       :suffix-scope (princ-to-string (uuid:make-null-uuid)))
+       :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
       (check-conditions
        '((introspection-protocol-error
           "not conform to the REQUEST role within the INTROSPECTION protocol")
          (introspection-protocol-error
           "not conform to the REQUEST role within the INTROSPECTION protocol")))
 
-      (send-introspection-event "ping" :method :|survey| :suffix-scope "foo")
+      (send-introspection-event "ping" :method :|survey| :suffix-scope "/foo")
       (send-introspection-event
-       rsb.converter:+no-value+ :method :|survey| :suffix-scope "foo")
+       rsb.converter:+no-value+ :method :|survey| :suffix-scope "/foo")
       (check-conditions
        '((introspection-protocol-error
           "not conform to the REQUEST role within the INTROSPECTION protocol")

@@ -178,7 +178,7 @@
           "Malformed participant scope"
           "No participant-id scope component in scope")))
 
-      (send-introspection-event "this will not work" :suffix-scope "foo")
+      (send-introspection-event "this will not work" :suffix-scope "/foo")
       (check-conditions
        '((introspection-protocol-error
           "not conform to the RESPONSE role within the INTROSPECTION protocol"
@@ -187,7 +187,8 @@
 
       ;; Invalid payloads
       (send-introspection-event
-       "this will not work" :suffix-scope (princ-to-string (uuid:make-null-uuid)))
+       "this will not work"
+       :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
       (check-conditions
        '((introspection-protocol-error
           "not conform to the RESPONSE role within the INTROSPECTION protocol"
@@ -195,7 +196,7 @@
           "(not RSB.PROTOCOL.INTROSPECTION:HELLO or RSB.PROTOCOL.INTROSPECTION:BYE or \"pong\")")))
 
       (send-introspection-event
-       1 :suffix-scope (princ-to-string (uuid:make-null-uuid)))
+       1 :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
       (check-conditions
        '((introspection-protocol-error
           "not conform to the RESPONSE role within the INTROSPECTION protocol"
