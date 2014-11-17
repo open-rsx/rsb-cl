@@ -48,8 +48,14 @@
 
 (cl:in-package #:rsb.test)
 
+(defparameter +test-configuration+
+  '(((:transport :inprocess :enabled) . t)
+    ((:introspection :enabled)        . nil)))
+
 (deftestsuite root ()
   ()
+  (:dynamic-variables
+   (*configuration* +test-configuration+))
   (:function
    (make-id (source)
      (uuid:make-uuid-from-string source)))
@@ -76,11 +82,9 @@
 
 (deftestsuite participant-suite ()
   ()
-  (:dynamic-variables
-   (*configuration* '(((:transport :inprocess :enabled) . "1"))))
   (:documentation
    "This test suite class can be used as a superclass for test suites
-that test participant classes."))
+    that test participant classes."))
 
 (defparameter +restart-test-scope+
   (make-scope "/rsbtest/participantcreation/restarts/error" :intern? t)
@@ -168,14 +172,14 @@ that test participant classes."))
                 (,make-name +restart-test-scope+ ,@(when (eq class 'informer) '(t)))))
 
              (define-restart-method-test-case
-                 (,make-name ((scope-or-uri (eql +restart-test-uri+))
-                              ,@(when (eq class 'informer) '((type t)))
-                              &key &allow-other-keys)
-                             :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
-                             :suite-name ,suite-name
-                             :case-name  ,(symbolicate make-name '#:/restart/uri))
-               (detach/ignore-errors
-                (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t)))))))
+               (,make-name ((scope-or-uri (eql +restart-test-uri+))
+                            ,@(when (eq class 'informer) '((type t)))
+                            &key &allow-other-keys)
+                           :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
+                           :suite-name ,suite-name
+                           :case-name  ,(symbolicate make-name '#:/restart/uri))
+                (detach/ignore-errors
+                 (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t)))))))
 
        (addtest (,suite-name
                  :documentation
@@ -306,4 +310,5 @@ and bound to a variable named like the value of CLASS."
 (rsb::register-participant-class 'mock-participant :mock)
 
 (defvar *simple-parent*
-  (make-participant :mock "/rsbtest/simple-parent"))
+  (let ((*configuration* +test-configuration+))
+    (make-participant :mock "/rsbtest/simple-parent")))

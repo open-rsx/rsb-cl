@@ -42,9 +42,9 @@
 ;;; Utilities
 
 (defparameter +introspection-configuration+
-  '(((:introspection :enabled)        . "1")
-    ((:transport :socket :enabled)    . "0")
-    ((:transport :inprocess :enabled) . "1")))
+  '(((:introspection :enabled)        . t)
+    ((:transport :socket :enabled)    . nil)
+    ((:transport :inprocess :enabled) . t)))
 
 (defun make-introspection-scope (&optional (suffix '()))
   (merge-scopes suffix +introspection-scope+))
