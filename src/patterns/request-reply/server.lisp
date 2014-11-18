@@ -102,8 +102,13 @@ classes."))
                       :initform '()
                       :documentation
                       "Stores the transport options that should be
-used by participants which implement the actual communication on
-behalf of the server.")
+                       used by participants which implement the actual
+                       communication on behalf of the server.
+
+                       The stored options have already been merged
+                       with defaults and thus make created child
+                       participants ignore any special binding of
+                       `*configuration*'.")
    (introspection?    :initarg  :introspection?
                       :type     boolean
                       :reader   server-introspection?
@@ -215,19 +220,27 @@ generic support for retrieving, adding and removing methods."))
      (introspection? (when (member (option-value '(:introspection :enabled)) '(t "1")
                                    :test #'equal)
                        t)))
-  ;; Check that TRANSPORTS will select at least one transport.
-  (unless (rsb::effective-transport-options
-           (rsb::merge-transport-options
-            transports (transport-options)))
+  ;; TODO This logic can move into some of the composite patterns
+  ;; after the 0.11 release.
+  ;;
+  ;; "Freeze" transport options by merging with defaults, thereby
+  ;; disabling further inheritance from special bindings of
+  ;; `*configuration*' during child participant creation (may even
+  ;; happen in a different thread with different special bindings).
+  ;;
+  ;; Also check that TRANSPORTS will select at least one transport.
+  (let ((transport-options (rsb::merge-transport-options
+                            transports (transport-options))))
+    (unless (rsb::effective-transport-options transport-options)
       (error 'no-transports-error
-           :kind  (participant-kind prototype)
-           :scope scope))
+             :kind  (participant-kind prototype)
+             :scope scope))
 
-  (apply #'call-next-method class prototype scope
-         :converters        converters
-         :transport-options transports
-         :introspection?    introspection?
-         (remove-from-plist args :transports :introspection?)))
+    (apply #'call-next-method class prototype scope
+           :converters        converters
+           :transport-options transport-options
+           :introspection?    introspection?
+           (remove-from-plist args :transports :introspection?))))
 
 ;;; Utility functions
 

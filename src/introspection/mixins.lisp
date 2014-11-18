@@ -36,7 +36,12 @@
                       :documentation
                       "Stores the transport options that should be
                        passed to the child participants when they are
-                       created."))
+                       created.
+
+                       The stored options have already been merged
+                       with defaults and thus make created child
+                       participants ignore any special binding of
+                       `*configuration*'."))
   (:default-initargs
    :scope             +introspection-scope+
    :transport-options (missing-required-initarg
@@ -50,10 +55,26 @@
      (prototype introspection-participant-mixin)
      (scope     scope)
      &rest args &key
-     (transports (transport-options)))
-  (apply #'call-next-method class prototype scope
-         :transport-options transports
-         (remove-from-plist args :transports)))
+     (transports '()))
+  ;; TODO This logic can move into some of the composite patterns
+  ;; after the 0.11 release.
+  ;;
+  ;; "Freeze" transport options by merging with defaults, thereby
+  ;; disabling further inheritance from special bindings of
+  ;; `*configuration*' during child participant creation (may even
+  ;; happen in a different thread with different special bindings).
+  ;;
+  ;; Also check that TRANSPORTS will select at least one transport.
+  (let ((transport-options (rsb::merge-transport-options
+                            transports (transport-options))))
+    (unless (rsb::effective-transport-options transport-options)
+      (error 'no-transports-error
+             :kind  (participant-kind prototype)
+             :scope scope))
+
+    (apply #'call-next-method class prototype scope
+           :transport-options transports
+           (remove-from-plist args :transports))))
 
 (defun participant-make-child (participant kind scope
                                &rest initargs &key
