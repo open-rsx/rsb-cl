@@ -210,8 +210,15 @@
 
 ;;; Event handling
 
-(hooks:add-to-hook '*make-participant-hook*
-                   #'handle-make-participant) ; TODO bad for reloading
+;; Avoid adding handler multiple times after redefinition of
+;; handle-{make-participant,participant-state-change}.
+(defvar *make-participant-handler*
+  (lambda (&rest args) (apply 'handle-make-participant args)))
+
+(hooks:add-to-hook '*make-participant-hook* *make-participant-handler*)
+
+(defvar *participant-state-change-handler*
+  (lambda (&rest args) (apply 'handle-participant-state-change args)))
 
 (hooks:add-to-hook '*participant-state-change-hook*
-                   #'handle-participant-state-change)
+                   *participant-state-change-handler*)
