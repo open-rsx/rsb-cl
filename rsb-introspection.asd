@@ -102,6 +102,7 @@
   :in-order-to ((test-op (load-op :rsb-introspection-test))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rsb-introspection-test))))
+  (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string "(lift:run-tests :config
                              (asdf:system-relative-pathname
                               :rsb-introspection-test \"lift-introspection.config\"))")))
