@@ -93,8 +93,10 @@
                      :commandline-arguments (coerce commandline-arguments 'list)
                      :start-time            (unix-microseconds->timestamp
                                              start-time)
-                     :executing-user        executing-user
-                     :rsb-version           rsb-version)
+                     :executing-user        (unless (emptyp executing-user)
+                                              executing-user)
+                     :rsb-version           (unless (emptyp rsb-version)
+                                              rsb-version))
        :host        (make-instance
                      'host-info
                      :id               host-id
