@@ -1,6 +1,6 @@
 ;;;; processor-mixins.lisp --- Unit tests for processor mixin classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -134,7 +134,7 @@
   (:documentation
    "Unit tests for the `transform-mixin' processor mixin class.
 
-See test suite for `transform!' generic function."))
+    See test suite for `transform!' generic function."))
 
 (defclass transform-mock-processor (transform-mixin
                                     mock-processor)
@@ -143,14 +143,14 @@ See test suite for `transform!' generic function."))
 (addtest (rsb.event-processing.transform-mixin-root
           :documentation
           "Smoke test for the `transform-mixin' processor mixin
-class.")
+           class.")
   smoke
 
   (ensure-cases (initargs objects expected)
       `(;; Some invalid transforms.
-        ((:transform :no-such-transform)     (:does-not-matter) transform-error)
-        ((:transform (:no-such-transform))   (:does-not-matter) transform-error)
-        ((:transform ,#'1+)                  (:wrong-type)      transform-error)
+        ((:transform :no-such-transform)     (:does-not-matter) rsb.transform:transform-error)
+        ((:transform (:no-such-transform))   (:does-not-matter) rsb.transform:transform-error)
+        ((:transform ,#'1+)                  (:wrong-type)      rsb.transform:transform-error)
 
         ;; These are valid
         ((:transform ,#'1+)                  (1 2 3)            (2 3 4))
@@ -163,5 +163,7 @@ class.")
                 (mapc (curry #'handle processor) objects)
                 (processor-handled processor)))))
       (case expected
-        (transform-error (ensure-condition 'transform-error (do-it)))
-        (t               (ensure-same (do-it) expected :test #'equal))))))
+        (rsb.transform:transform-error
+         (ensure-condition 'rsb.transform:transform-error (do-it)))
+        (t
+         (ensure-same (do-it) expected :test #'equal))))))

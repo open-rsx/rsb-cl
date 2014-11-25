@@ -44,7 +44,7 @@
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
-      (ensure-condition rsb.event-processing:transform-error
+      (ensure-condition rsb.transform:transform-error
         (test-case))
 
       ;; With `continue' error policy, receiving and dispatching of
@@ -54,7 +54,7 @@
                                  (continue condition)))))
         (ensure (typep result 'event))
         (ensure-same (length calls) 1)
-        (ensure (typep (first calls) 'rsb.event-processing:transform-error))
+        (ensure (typep (first calls) 'rsb.transform:transform-error))
         (ensure-same (length received) 1)))))
 
 (addtest (macros-root
@@ -101,7 +101,7 @@
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
-      (ensure-condition rsb.event-processing:transform-error
+      (ensure-condition rsb.transform:transform-error
         (test-case))
 
       ;; With `continue' error policy, sending the event should proceed
@@ -111,7 +111,7 @@
                                  (continue condition)))))
         (ensure (typep result 'event))
         (ensure-same (length calls) 1)
-        (ensure (typep (first calls) 'rsb.event-processing:transform-error))))))
+        (ensure (typep (first calls) 'rsb.transform:transform-error))))))
 
 ;;; Informer-related macros
 
@@ -141,7 +141,7 @@
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
-      (ensure-condition rsb.event-processing:transform-error
+      (ensure-condition rsb.transform:transform-error
         (test-case))
 
      ;; With `continue' error policy, sending the event should proceed

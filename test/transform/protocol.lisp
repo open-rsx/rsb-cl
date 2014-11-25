@@ -1,20 +1,20 @@
-;;;; protocol.lisp --- Unit tests for the protocol provided by the event-processing module.
+;;;; protocol.lisp --- Unit tests for the protocol provided by the transform module.
 ;;;;
-;;;; Copyright (C) 2013 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.event-processing.test)
+(cl:in-package #:rsb.transform.test)
 
-(deftestsuite rsb.event-processing.transform!-root (event-processing-root)
+(deftestsuite rsb.transform.transform!-root (rsb.transform-root)
   ()
   (:documentation
    "Unit tests for the `transform!' generic function."))
 
-(addtest (rsb.event-processing.transform!-root
+(addtest (rsb.transform.transform!-root
           :documentation
           "Test default behavior of the `transform!' generic
-function.")
+           function.")
   default-behavior
 
   (ensure-cases (transform object expected)
@@ -23,7 +23,7 @@ function.")
         ((:no-such-transform)   :does-not-matter transform-error)
         (,#'1+                  :wrong-type      transform-error)
 
-        ;; These are valid
+        ;; These are valid.
         (,#'1+                  1                2)
         ((,#'1+ ,(curry #'* 2)) 1                3)
         ((,(curry #'* 2) ,#'1+) 1                4))
@@ -34,23 +34,25 @@ function.")
         (transform-error (ensure-condition 'transform-error (do-it)))
         (t               (ensure-same (do-it) expected))))))
 
-(addtest (rsb.event-processing.transform!-root
+(addtest (rsb.transform.transform!-root
           :documentation
           "Test restarts established by default methods on the
-`transform!' generic function.")
+           `transform!' generic function.")
   restarts
 
   (ensure-cases (restart expected)
       '((continue      1)
         ((use-value 2) 2))
 
-      (handler-bind
-          ((error (lambda (condition)
-                    (let+ (((name &rest args) (ensure-list restart))
-                           (restart (find-restart name)))
-                      (ensure restart)          ; ensure it is there
-                      (princ-to-string restart) ; ensure it prints
-                      (apply #'invoke-restart restart args)))))
-        (ensure-same
-         (transform! (curry #'error "~@<I hate ~A~@:>") 1)
-         expected))))
+    (handler-bind
+        ((error (lambda (condition)
+                  (let+ (((name &rest args) (ensure-list restart))
+                         (restart (find-restart name)))
+                    ;; Ensure it is there.
+                    (ensure restart)
+                    ;; Ensure it prints.
+                    (ensure (typep (princ-to-string restart) 'string))
+                    ;; Ensure it works.
+                    (apply #'invoke-restart restart args)))))
+      (ensure-same (transform! (curry #'error "~@<I hate ~A~@:>") 1)
+                   expected))))

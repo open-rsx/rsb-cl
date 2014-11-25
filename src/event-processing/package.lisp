@@ -17,13 +17,6 @@
 
    #:rsb)
 
-  ;; Conditions
-  (:export
-   #:transform-error
-
-   #:transform-error-transform
-   #:transform-error-object)
-
   ;; Push source protocol
   (:export
    #:handlers)
@@ -39,10 +32,6 @@
   ;; Dispatching processor protocol
   (:export
    #:dispatch)
-
-  ;; Transformation protocol
-  (:export
-   #:transform!)
 
   ;; Notification protocol
   (:export

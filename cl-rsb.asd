@@ -185,13 +185,20 @@
                               (:file       "method-filter")
                               (:file       "meta-data-filter")))
 
+                (:module     "transform"
+                 :pathname   "src/transform"
+                 :depends-on ("src-early")
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "conditions")
+                              (:file       "protocol")))
+
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
-                 :depends-on ("src-early" "filter") ; for filtering-processor-mixin
+                 :depends-on ("src-early" "filter" "transform") ; for {filter,transform}-mixin
                  :serial     t
                  :components ((:file       "package")
                               (:file       "util")
-                              (:file       "conditions")
                               (:file       "protocol")
 
                               (:file       "scope-trie")
@@ -204,7 +211,6 @@
                               (:file       "configurator")
                               (:file       "in-route-configurator")
                               (:file       "out-route-configurator")
-
                               (:file       "client")))
 
                 (:module     "converter"
@@ -336,13 +342,19 @@
                               (:file       "method-filter")
                               (:file       "meta-data-filter")))
 
+                (:module     "transform"
+                 :pathname   "test/transform"
+                 :depends-on ("test")
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "protocol")))
+
                 (:module     "event-processing"
                  :pathname   "test/event-processing"
                  :depends-on ("test")
                  :serial     t
                  :components ((:file       "package")
                               (:file       "util")
-                              (:file       "protocol")
 
                               (:file       "scope-trie")
 

@@ -163,4 +163,4 @@ transform (in the sense of being usable with `transform!') to all
 handled data."))
 
 (defmethod handle :around ((sink transform-mixin) (data t))
-  (call-next-method sink (transform! (processor-transform sink) data)))
+  (call-next-method sink (rsb.transform:transform! (processor-transform sink) data)))
