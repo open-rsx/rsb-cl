@@ -86,6 +86,10 @@
                (event-scope event) (event-data event)
                :timestamps `(:request.send    ,(timestamp event :send)
                              :request.receive ,(timestamp event :receive))))
+            (server-method server "eval")
+            (lambda (request)
+              (with-standard-io-syntax
+                (write-to-string (eval (read-from-string request)))))
             (introspection-%server introspection) server))))
 
 (defmethod (setf find-participant) ((new-value participant)
