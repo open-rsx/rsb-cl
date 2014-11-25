@@ -56,3 +56,24 @@
                     (apply #'invoke-restart restart args)))))
       (ensure-same (transform! (curry #'error "~@<I hate ~A~@:>") 1)
                    expected))))
+
+(deftestsuite rsb.transform.make-transform-root (rsb.transform-root)
+  ()
+  (:documentation
+   "Unit tests for the `make-transform' generic function."))
+
+(addtest (rsb.transform.make-transform-root
+          :documentation
+          "Smoke test for the `make-transform' generic function.")
+  smoke
+
+  (ensure-cases (spec expected)
+      '((:no-such-transform transform-creation-error))
+
+    (let+ (((&flet do-it ()
+              (apply #'make-transform (ensure-list spec)))))
+      (case expected
+        (transform-creation-error
+         (ensure-condition transform-creation-error (do-it)))
+        (t
+         (do-it))))))

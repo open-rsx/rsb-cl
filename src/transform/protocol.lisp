@@ -69,3 +69,25 @@
 
 (defmethod transform! ((transform sequence) (event t))
   (reduce #'transform! transform :initial-value event :from-end t))
+
+;;; Transform creation protocol.
+
+(defgeneric make-transform (spec &key &allow-other-keys)
+  (:documentation
+   "Make and return a transform according to SPEC."))
+
+(define-condition-translating-method make-transform ((spec symbol)
+                                                     &rest args &key)
+  ((error transform-creation-error)
+   :spec (list* spec args)))
+
+(defmethod make-transform ((spec symbol) &rest args &key)
+  (apply #'service-provider:make-provider 'transform spec args))
+
+(service-provider:define-service transform
+  (:documentation
+   "Providers of this service destructively transform events.
+
+    Providers implement methods on the `transform!' generic function
+    which accept an event, destructively modify one or more aspects of
+    the event and return the modified event."))

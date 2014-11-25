@@ -15,6 +15,9 @@
 
   ;; Conditions
   (:export
+   #:transform-creation-error
+   #:transform-creation-error-spec
+
    #:transform-error
 
    #:transform-error-transform
@@ -24,8 +27,15 @@
   (:export
    #:transform!)
 
+  ;; Transform creation protocol
+  (:export
+   #:make-transform)
+
   (:documentation
    "This package contains event transformation infrastructure and transforms.
+
+    The generic function `make-transform' can be used to instantiate
+    transforms.
 
     Given an instantiated transform the generic function `transform!'
     can be used to destructively transform events."))
