@@ -193,7 +193,8 @@
                               (:file       "conditions")
                               (:file       "protocol")
 
-                              (:file       "prefix-scope")))
+                              (:file       "prefix-scope")
+                              (:file       "drop-payload")))
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
@@ -351,7 +352,8 @@
                  :components ((:file       "package")
                               (:file       "protocol")
 
-                              (:file       "prefix-scope")))
+                              (:file       "prefix-scope")
+                              (:file       "drop-payload")))
 
                 (:module     "event-processing"
                  :pathname   "test/event-processing"
