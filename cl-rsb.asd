@@ -194,7 +194,8 @@
                               (:file       "protocol")
 
                               (:file       "prefix-scope")
-                              (:file       "drop-payload")))
+                              (:file       "drop-payload")
+                              (:file       "adjust-timestamps")))
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
@@ -353,7 +354,8 @@
                               (:file       "protocol")
 
                               (:file       "prefix-scope")
-                              (:file       "drop-payload")))
+                              (:file       "drop-payload")
+                              (:file       "adjust-timestamps")))
 
                 (:module     "event-processing"
                  :pathname   "test/event-processing"
