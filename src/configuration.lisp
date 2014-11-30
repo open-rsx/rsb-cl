@@ -1,6 +1,6 @@
 ;;;; configuration.lisp --- Configuration of RSB participants.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -78,17 +78,17 @@ CONFIG-FILES. Default:
          ((&flet strip-key (option)
             (cons (nthcdr (length section) (car option))
                   (cdr option)))))
-    (map 'list #'strip-key
-         (remove section config
-                 :test-not #'starts-with-subseq
-                 :key      #'car))))
+    (mapcar #'strip-key
+            (remove section config
+                    :test-not #'starts-with-subseq
+                    :key      #'car))))
 
 (defun option-value (name &optional default (config *configuration*))
-  "DOC"
-  (let ((option (assoc name config :test #'equal)))
-    (if option
-        (cdr option)
-        default)))
+  "Return the value of the option named NAME in CONFIG.
+   Return DEFAULT, if NAME does not exist in CONFIG."
+  (if-let ((option (assoc name config :test #'equal)))
+    (cdr option)
+    default))
 
 ;;; Transport configuration
 
