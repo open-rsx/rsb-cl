@@ -1,6 +1,6 @@
 ;;;; participant.lisp --- A superclass for participant classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -104,33 +104,17 @@
 (defmethod make-participant ((kind t) (scope puri:uri)
                              &rest args &key
                              (transports '())
-                             (converters (default-converters))
-                             transform
-                             error-policy)
+                             (converters (default-converters)))
   (let+ (((&values scope uri-transports) (uri->scope-and-options scope)))
     (apply #'make-participant kind scope
-           :transports   (merge-transport-options uri-transports transports)
-           :converters   converters
-           :transform    transform
-           :error-policy error-policy
-           args)))
+           :transports (merge-transport-options uri-transports transports)
+           :converters converters
+           (remove-from-plist args :transports :converters))))
 
 ;; This method operates on strings which it turns into either URIs (if
 ;; the string contains ":", "//", "#" or "?") or scopes.
-(defmethod make-participant ((kind t) (scope string)
-                             &rest args &key
-                             (transports nil transports-supplied?)
-                             (converters nil converters-supplied?)
-                             transform
-                             error-policy)
-  (apply #'make-participant kind (parse-scope-or-uri scope)
-         :transform    transform
-         :error-policy error-policy
-         (append (when transports-supplied?
-                   (list :transports transports))
-                 (when converters-supplied?
-                   (list :converters converters))
-                 args)))
+(defmethod make-participant ((kind t) (scope string) &rest args &key)
+  (apply #'make-participant kind (parse-scope-or-uri scope) args))
 
 (defun call-with-participant-creation-restarts (participant-kind designator
                                                 normal-thunk args-changed-thunk)
@@ -175,8 +159,7 @@
               (setf designator new-value
                     thunk      args-changed-thunk))))))
 
-(defmethod make-participant :around ((kind  t)
-                                     (scope scope)
+(defmethod make-participant :around ((kind t) (scope scope)
                                      &rest args &key)
   ;; Install restarts around the creation attempt.
   (flet ((make-participant-normal-thunk (scope)
@@ -191,8 +174,7 @@
      #'make-participant-normal-thunk
      #'make-participant-args-changed-thunk)))
 
-(defmethod make-participant :around ((kind  t)
-                                     (scope puri:uri)
+(defmethod make-participant :around ((kind t) (scope puri:uri)
                                      &rest args &key)
   ;; Install restarts around the creation attempt.
   (flet ((make-participant-normal-thunk (scope)
