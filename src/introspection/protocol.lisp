@@ -115,6 +115,27 @@
   (:documentation
    "Return the name of the host represented by INFO."))
 
+(defgeneric host-info-machine-type (info)
+  (:documentation
+   "Return the type of the machine, usually CPU architecture, of the
+    host represented by INFO."))
+
+(defgeneric host-info-machine-version (info)
+  (:documentation
+   "Return the version of the machine within its type, usually the CPU
+    identification string, of the host represented by INFO."))
+
+(defgeneric host-info-software-type (info)
+  (:documentation
+   "Return the type of the operating system, usually the kernel name,
+    running on the host represented by INFO."))
+
+(defgeneric host-info-software-version (info)
+  (:documentation
+   "Return the version of the operating system within its type,
+    usually the kernel version string, of the host represented by
+    INFO."))
+
 ;; Remote host information protocol
 
 (defgeneric host-info-state (info)

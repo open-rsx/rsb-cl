@@ -243,7 +243,7 @@
                      :initform nil
                      :documentation
                      "Stores the type of the operating system running
-                      on the host, usually the kernel name. ")
+                      on the host, usually the kernel name.")
    (software-version :initarg  :software-version
                      :type     (or null string)
                      :reader   host-info-software-version
