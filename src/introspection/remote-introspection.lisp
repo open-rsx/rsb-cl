@@ -305,6 +305,9 @@
       (unless (eq old-value new-value)
         (hooks:run-hook (database-change-hook info) new-value :state-changed)))))
 
+(defmethod entry-children ((entry process-entry))
+  (introspection-participants/roots entry))
+
 (defmethod (setf find-participant) :after ((new-value     t)
                                            (id            uuid:uuid)
                                            (introspection process-entry)
@@ -435,6 +438,9 @@
       (unless (eq old-value new-value)
         (hooks:run-hook (database-change-hook info)
                         new-value :state-changed)))))
+
+(defmethod entry-children ((entry host-entry))
+  (introspection-processes entry))
 
 (defmethod introspection-processes ((host host-entry))
   (hash-table-values (introspection-%processes host)))
@@ -572,6 +578,9 @@
 (defmethod print-items:print-items append ((object remote-introspection-database))
   `((:num-hosts        ,(length (introspection-hosts object))        " (H ~D)")
     (:num-participants ,(length (introspection-participants object)) " (P ~D)")))
+
+(defmethod entry-children ((entry remote-introspection-database))
+  (introspection-hosts entry))
 
 (defmethod introspection-participants ((introspection remote-introspection-database))
   (mappend #'introspection-participants (introspection-processes introspection)))
