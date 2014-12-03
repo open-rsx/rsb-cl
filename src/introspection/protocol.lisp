@@ -101,6 +101,11 @@
     through which the process represented by INFO has been
     contacted."))
 
+(defgeneric process-info-executing-user (info)
+  (:documentation
+   "Return the login- or account-name of the user executing the
+    process represented by INFO."))
+
 ;;; Host information protocol
 
 (defgeneric host-info-id (info)
