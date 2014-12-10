@@ -322,20 +322,17 @@ converter."
      (prototype t)
      (scope     scope)
      &rest args &key
-     parent
      (introspection? (when (member (option-value '(:introspection :enabled)) '(t "1")
                                    :test #'equal)
                        t)))
-  (let* ((args        (remove-from-plist args :parent :introspection?))
-         (participant (apply #'call-next-method class prototype scope args)))
+  (let ((participant (call-next-method)))
     (if *make-participant-hook*
         ;; When the hook returns anything but nil, use it as
         ;; replacement for PARTICIPANT. Otherwise use PARTICIPANT.
         (or (hooks:run-hook
              '*make-participant-hook* participant
-             (append (when parent
-                       (list :parent parent))
-                     (list* :introspection? introspection? args)))
+             (list* :introspection? introspection?
+                    (remove-from-plist args :introspection?)))
             participant)
         participant)))
 
@@ -343,7 +340,8 @@ converter."
                                          (prototype t)
                                          (scope     scope)
                                          &rest args &key)
-  (apply #'make-instance class :scope scope args))
+  (apply #'make-instance class :scope scope
+         (remove-from-plist args :parent :introspection?)))
 
 ;;; Common protocol for receiving participants
 

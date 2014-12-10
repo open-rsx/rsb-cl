@@ -91,41 +91,44 @@ classes."))
                                                      (hooks:run-hook
                                                       error-hook condition))
                                    :parent         method
-                                   :introspection? (server-introspection? server))))))))
+                                   :introspection? (server-introspection?-option server))))))))
 
 ;;; `server' class
 
 (defclass server (participant)
-  ((transport-options :initarg  :transport-options
-                      :type     list
-                      :reader   server-transport-options
-                      :initform '()
-                      :documentation
-                      "Stores the transport options that should be
-                       used by participants which implement the actual
-                       communication on behalf of the server.
+  ((transport-options        :initarg  :transport-options
+                             :type     list
+                             :reader   server-transport-options
+                             :initform '()
+                             :documentation
+                             "Stores the transport options that should
+                              be used by participants which implement
+                              the actual communication on behalf of
+                              the server.
 
-                       The stored options have already been merged
-                       with defaults and thus make created child
-                       participants ignore any special binding of
-                       `*configuration*'.")
-   (introspection?    :initarg  :introspection?
-                      :type     boolean
-                      :reader   server-introspection?
-                      :initform t
-                      :documentation
-                      "Stores a Boolean indicating whether
-                       introspection has enabled for the server.
+                              The stored options have already been
+                              merged with defaults and thus make
+                              created child participants ignore any
+                              special binding of `*configuration*'.")
+   (introspection?-option    :initarg  :introspection?-option
+                             :type     boolean
+                             :reader   server-introspection?-option
+                             :initform t
+                             :documentation
+                             "Stores a Boolean indicating whether
+                              introspection has enabled for the
+                              server.
 
-                       TODO this is a temporary workaround until
-                       participant-configuration is ready.")
-   (rsb::transform    :type     transform-specification)
-   (methods           :type     hash-table
-                      :reader   server-%methods
-                      :initform (make-hash-table :test #'equal)
-                      :documentation
-                      "Stores a mapping of method names to method
-objects."))
+                              TODO this is a temporary workaround
+                              until participant-configuration is
+                              ready.")
+   (rsb::transform           :type     transform-specification)
+   (methods                  :type     hash-table
+                             :reader   server-%methods
+                             :initform (make-hash-table :test #'equal)
+                             :documentation
+                             "Stores a mapping of method names to
+                              method objects."))
   (:documentation
    "This class serves as a superclass for local and remote server
 classes. It provides storage of transport options and methods and
@@ -237,9 +240,9 @@ generic support for retrieving, adding and removing methods."))
              :scope scope))
 
     (apply #'call-next-method class prototype scope
-           :converters        converters
-           :transport-options transport-options
-           :introspection?    introspection?
+           :converters            converters
+           :transport-options     transport-options
+           :introspection?-option introspection?
            (remove-from-plist args :transports :introspection?))))
 
 ;;; Utility functions

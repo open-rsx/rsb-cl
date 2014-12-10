@@ -162,7 +162,7 @@ BLOCK? is non-nil."
                      (make-participant :remote-method scope
                                        :name           name
                                        :parent         server
-                                       :introspection? (server-introspection? server)))))))
+                                       :introspection? (server-introspection?-option server)))))))
 
   (defmethod server-method ((server remote-server)
                             (name   string)

@@ -116,7 +116,7 @@ should be passed to the callback function."))
                                  :callback       callback
                                  :argument       argument
                                  :parent         server
-                                 :introspection? (server-introspection? server)))))
+                                 :introspection? (server-introspection?-option server)))))
 
   (macrolet
       ((define-method-creating-method (name-type scope-form)

@@ -85,7 +85,8 @@
                               :converters   converters
                               :configurator configurator
                               (remove-from-plist
-                               args :direction :transports :converters)))
+                               args :direction :transports :converters
+                                    :parent :introspection?)))
          (error-hook   (participant-error-hook participant)))
 
     ;; Associate constructed CONNECTORS to CONFIGURATOR instance.
