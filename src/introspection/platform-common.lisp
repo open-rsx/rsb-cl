@@ -88,7 +88,7 @@
       (machine-instance))))
 
 (defun current-machine-type ()
-  (string-downcase (machine-type)))
+  (substitute #\_ #\- (string-downcase (machine-type))))
 
 (defun current-machine-version ()
   (machine-version))
