@@ -213,7 +213,7 @@
 
 (defclass host-info (print-items:print-items-mixin)
   ((id               :initarg  :id
-                     :type     (or null string)
+                     :type     string
                      :reader   host-info-id
                      :documentation
                      "Stores a string (hopefully) uniquely identifying
@@ -270,7 +270,7 @@
   (with-platform-information-fallback-values
     (make-instance 'host-info
                    :id               (current-host-id)
-                   :hostname         (first (split-sequence:split-sequence #\. (machine-instance)))
+                   :hostname         (current-hostname)
                    :machine-type     (current-machine-type)
                    :machine-version  (current-machine-version)
                    :software-type    (current-software-type)

@@ -85,7 +85,10 @@
       :report (lambda (stream)
                 (format stream "~@<Use a fallback host id value.~@:>"))
       (declare (ignore condition))
-      (machine-instance))))
+      (current-hostname))))
+
+(defun current-hostname ()
+  (first (split-sequence:split-sequence #\. (machine-instance))))
 
 (defun current-machine-type ()
   (substitute #\_ #\- (string-downcase (machine-type))))
