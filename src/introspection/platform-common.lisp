@@ -78,7 +78,15 @@
         (when (>= (length directory) 2)
           (lastcar directory))))))
 
-(defun current-host-id ()
+(defun current-host-id (&key (compatible? t))
+  ;; For compatibility with languages who have no easy way of calling
+  ;; C API functions, use hostname instead calling host id C function
+  ;; provided by respective operating system.
+  (when (and compatible?
+             (member (current-software-type) '("win32" "darwin")
+                     :test #'string=))
+    (return-from current-host-id (current-hostname)))
+
   (restart-case
       (%current-host-id)
     (continue (&optional condition)
