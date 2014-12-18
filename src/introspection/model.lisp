@@ -270,7 +270,7 @@
   (with-platform-information-fallback-values
     (make-instance 'host-info
                    :id               (current-host-id)
-                   :hostname         (machine-instance)
+                   :hostname         (first (split-sequence:split-sequence #\. (machine-instance)))
                    :machine-type     (current-machine-type)
                    :machine-version  (current-machine-version)
                    :software-type    (current-software-type)
