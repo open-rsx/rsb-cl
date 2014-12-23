@@ -144,7 +144,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "A Common Lisp implementation of RSB."
   :depends-on  (:alexandria
                 :split-sequence
@@ -387,7 +387,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "Documentation generation for the cl-rsb system."
   :depends-on  (:cxml-stp
                 :cl-protobuf
@@ -406,7 +406,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "Unit Tests for the cl-rsb system."
   :depends-on  ((:version :lift   "1.7.1")
 
@@ -575,7 +575,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "Generate clon option descriptions based on
 introspection of RSB configuration options."
   :requires    (cl-rsb
@@ -591,7 +591,7 @@ introspection of RSB configuration options."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "This system connections provides a RSB transport based
 on the spread group communication system."
   :requires    (cl-rsb
@@ -645,7 +645,7 @@ cl-rsb-and-cl-protobuf unless system cl-protobuf can be loaded~@:>"))
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "This system connection provides methods to serialize/deserialize
 RSB events to/from Google protocol buffers."
   :requires    (cl-rsb
@@ -680,7 +680,7 @@ RSB events to/from Google protocol buffers."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "This system connection provides a simple socket-based connector."
   :requires    (cl-rsb
                 cl-rsb-and-cl-protobuf
@@ -728,7 +728,7 @@ RSB events to/from Google protocol buffers."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "This system connection provides a regular expression
 filter for events with text content."
   :requires    (cl-rsb
@@ -745,7 +745,7 @@ filter for events with text content."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LGPLv3; see COPYING file for details."
+  :license     "LGPLv3" ; see COPYING file for details.
   :description "This system connection provides a filter classs that
 uses XPath expressions to discriminate events."
   :requires    (cl-rsb
