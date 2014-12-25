@@ -37,7 +37,8 @@
    #:participant-suite
    #:define-basic-participant-test-cases
 
-   #:define-restart-method-test-case
+   #:define-restart-test-method
+   #:define-restart-test-case
 
    #:mock-transform/error
 
@@ -85,15 +86,6 @@
   (:documentation
    "This test suite class can be used as a superclass for test suites
     that test participant classes."))
-
-(defparameter +restart-test-scope+
-  (make-scope "/rsbtest/participantcreation/restarts/error" :intern? t)
-  "A special scope used in tests of participant creation restarts.")
-
-(defparameter +restart-test-uri+
-  (puri:intern-uri
-   (puri:uri "inprocess:/rsbtest/participantcreation/restarts/error"))
-  "A special URI used in test of participant creation restarts.")
 
 (defun check-participant (participant expected-kind scope
                           &key
@@ -160,26 +152,21 @@
                          participant ,kind expected-scope
                          :check-transport-urls? ,check-transport-urls?)))))))
 
-       ,@(when named?
-           `((define-restart-method-test-case
-               (,make-name ((scope-or-uri (eql +restart-test-scope+))
-                            ,@(when (eq class 'informer) '((type t)))
-                            &key  &allow-other-keys)
-                           :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
-                           :suite-name ,suite-name
-                           :case-name  ,(symbolicate make-name '#:/restart/scope))
-               (detach/ignore-errors
-                (,make-name +restart-test-scope+ ,@(when (eq class 'informer) '(t)))))
+       (define-restart-test-case
+           (make-participant-restart/scope
+            :suite-name ,suite-name
+            :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
+            :condition  participant-creation-error-caused-by-restart-test-error)
+         (detach/ignore-errors
+          (make-participant ,kind +restart-test-scope+)))
 
-             (define-restart-method-test-case
-               (,make-name ((scope-or-uri (eql +restart-test-uri+))
-                            ,@(when (eq class 'informer) '((type t)))
-                            &key &allow-other-keys)
-                           :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
-                           :suite-name ,suite-name
-                           :case-name  ,(symbolicate make-name '#:/restart/uri))
-                (detach/ignore-errors
-                 (,make-name +restart-test-uri+ ,@(when (eq class 'informer) '(t)))))))
+       (define-restart-test-case
+           (make-participant-restart/uri
+            :suite-name ,suite-name
+            :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
+            :condition  participant-creation-error-caused-by-restart-test-error)
+         (detach/ignore-errors
+          (make-participant ,kind +restart-test-uri+)))
 
        (addtest (,suite-name
                  :documentation
@@ -233,72 +220,106 @@ and bound to a variable named like the value of CLASS."
 ;;; Test utilities for restarts
 
 (define-condition restart-test-error (error)
-  ((generic-function :initarg  :generic-function
-                     :reader   restart-test-error-generic-function
-                     :documentation
-                     "Stores the generic function from which the
-                      condition was signaled."))
+  ((context :initarg  :context
+            :reader   restart-test-error-context
+            :documentation
+            "Stores the context from which the condition was
+             signaled."))
   (:default-initargs
-   :method (missing-required-initarg
-            'restart-test-error :generic-function))
+   :context (missing-required-initarg
+             'restart-test-error :context))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Simulated error in ~S method.~@:>"
-             (restart-test-error-generic-function condition))))
+     (format stream "~@<Simulated error in ~S.~@:>"
+             (restart-test-error-context condition))))
   (:documentation
    "This error is signaled to test establishing of restarts around
     certain code."))
 
-(declaim (special *signal-error-for-restart-test?*))
 (defvar *signal-error-for-restart-test?* nil)
 
-(defmacro define-restart-method-test-case ((generic-function (&rest args)
-                                            &key
-                                            (suite-name (missing-required-argument :suite-name))
-                                            (case-name  (symbolicate generic-function '#:/restart))
-                                            (restarts   '(continue))
-                                            (var-name   '*signal-error-for-restart-test?*))
-                                           &body body)
-  `(progn
-     ;; Define a method that signals an error unless a variable is
-     ;; set.
-     (defmethod ,generic-function (,@args)
-       (when ,var-name
-         (error 'restart-test-error
-                :generic-function ',generic-function))
-       (when (next-method-p)
-         (call-next-method)))
+(defmacro define-restart-test-method (name (&rest args)
+                                      &key
+                                      (var-name '*signal-error-for-restart-test?*))
+  "Define a method on the generic function named by NAME that signals
+   a `restart-test-error' when the variable named by VAR-NAME is
+   true."
+  `(defmethod ,name (,@args)
+     (when ,var-name
+       (error 'restart-test-error
+              :context '(generic-function ,name)))
+     (when (next-method-p)
+       (call-next-method))))
 
-     ;; Define the test case that invokes the generic function and
-     ;; fails if the error is not handled by restarts.
-     (addtest (,suite-name
-               :documentation
-               ,(format nil "Smoke test for establishing restarts in ~
-                             methods of generic-function `~(~A~)'."
-                        generic-function))
-       ,case-name
+(defmacro define-restart-test-case
+    ((name
+      &key
+      (suite-name (missing-required-argument :suite-name))
+      (restarts   '(continue))
+      (var-name   '*signal-error-for-restart-test?*)
+      (condition  'restart-test-error))
+     &body body)
+  "Define the test case NAME in suite SUITE-NAME that executes BODY
+   and fails if the condition of type CONDITION is not handled by the
+   restarts listed in RESTARTS."
+  `(addtest (,suite-name
+             :documentation
 
+             ,(format nil "Smoke test for establishing ~{~S~^, ~} ~
+                           restart~P."
+                      (mapcar (compose #'first #'ensure-list) restarts)
+                      (length restarts)))
+     ,name
+
+     (let+ (((&flet do-it ()
+               ,@body))
+            ((&flet do-one-restart (restart &rest args)
+               (let ((,var-name t))
+                 (handler-bind
+                     ((,condition
+                       (lambda (condition)
+                         (declare (ignore condition))
+                         (setf ,var-name nil)
+                         (apply #'invoke-restart
+                                (or (find-restart restart)
+                                    (error "~@<Restart ~S not found.~@:>"
+                                           restart))
+                                args))))
+                   (do-it))))))
+       ;; Make sure CONDITION is signaled when no restarts are
+       ;; invoked.
        (let ((,var-name t))
-         (ensure-condition 'restart-test-error ,@body))
+         (ensure-condition ',condition (do-it)))
 
-       (let+ (((&flet+ do-one ((restart &rest args))
-                 (setf ,var-name t)
-                 (unwind-protect
-                      (handler-bind
-                          ((restart-test-error
-                            (lambda (condition)
-                              (declare (ignore condition))
-                              (setf ,var-name nil)
-                              (apply #'invoke-restart
-                                     (or (find-restart restart)
-                                         (error "~@<Restart ~S not found.~@:>"
-                                                restart))
-                                     args))))
-                        ,@body)
-                   (setf ,var-name nil)))))
-         ,@(iter (for restart in restarts)
-                 (let+ (((name &rest args) (ensure-list restart)))
-                   (collect `(do-one (list ',name ,@args)))))))))
+       ;; For each restart in RESTARTS, make sure that invoking it
+       ;; works properly.
+       ,@(iter (for restart in restarts)
+               (let+ (((name &rest args) (ensure-list restart)))
+                 (collect `(do-one-restart ',name ,@args)))))))
+
+;;; `make-participant' restarts
+
+(defun participant-creation-error-caused-by-restart-test-error? (condition)
+  (and (typep condition         'participant-creation-error)
+       (typep (cause condition) 'restart-test-error)))
+
+(deftype participant-creation-error-caused-by-restart-test-error ()
+  '(satisfies participant-creation-error-caused-by-restart-test-error?))
+
+(defparameter +restart-test-scope+
+  (make-scope "/rsbtest/participantcreation/restarts/error" :intern? t)
+  "A special scope used in tests of participant creation restarts.")
+
+(define-restart-test-method make-participant
+    ((kind t) (scope-or-uri (eql +restart-test-scope+)) &key))
+
+(defparameter +restart-test-uri+
+  (puri:intern-uri
+   (puri:uri "inprocess:/rsbtest/participantcreation/restarts/error"))
+  "A special URI used in test of participant creation restarts.")
+
+(define-restart-test-method make-participant
+    ((kind t) (scope-or-uri (eql +restart-test-uri+)) &key))
 
 ;;; Utilities
 
