@@ -48,13 +48,6 @@
    #:participant-creation-error-scope
    #:participant-creation-error-transports
 
-   #:listener-creation-error
-
-   #:reader-creation-error
-
-   #:informer-creation-error
-   #:informer-creation-error-type
-
    #:no-transports-error
 
    #:event-error

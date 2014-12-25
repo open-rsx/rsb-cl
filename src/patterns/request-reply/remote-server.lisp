@@ -198,9 +198,50 @@ BLOCK? is non-nil."
 
 ;;; `remote-server' creation
 
-(defmethod make-remote-server ((scope scope)
-                               &rest args &key &allow-other-keys)
-  (apply #'make-participant :remote-server scope args))
+(defun make-remote-server (scope-or-uri &rest args
+                           &key
+                           transports
+                           converters
+                           transform
+                           error-policy
+                           parent
+                           introspection?
+                           &allow-other-keys)
+  "Make and return a `remote-server' instance that calls methods
+   provided by servers on the scope SCOPE-OR-URI.
+
+   TRANSPORTS determines the transport configuration that should be
+   used to contact the servers. See `rsb.transport:make-connectors'
+   for details regarding acceptable values of TRANSPORTS.
+
+   CONVERTERS, if supplied, is an list that specifies a set of
+   converters for particular wire-types from which the converters that
+   are used in transports should be chosen. Items are of the
+   form (WIRE-TYPE . CONVERTER). If CONVERTERS is not supplied, a
+   default set of converters is derived from the default
+   configuration.
+
+   When non-nil, TRANSFORM is a specification of type
+   `transform-specification' describing transform objects (which have
+   to work with `rsb.event-processing:transform!') that should be
+   applied to arguments and/or return values.
+
+   ERROR-POLICY has to be nil or a function to be installed in the
+   error hook of the created remote server.
+
+   If supplied, PARENT is a participant that should be considered the
+   parent of the created `remote-server'.
+
+   INTROSPECTION? controls whether the newly created remote server
+   participates in the introspection machinery. Specifically, whether
+   it announces its creation and destruction and answers to
+   introspection queries.
+
+   If the server cannot be created, an error of type
+   `participant-creation-error' is signaled."
+  (declare (ignore transports converters transform error-policy parent
+                   introspection?))
+  (apply #'make-participant :remote-server scope-or-uri args))
 
 ;;; Utility functions
 
