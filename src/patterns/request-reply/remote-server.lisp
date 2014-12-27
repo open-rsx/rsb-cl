@@ -245,8 +245,7 @@ BLOCK? is non-nil."
 
 ;;; Utility functions
 
-(declaim (ftype (function (event-id) (cons sequence-number string)) %event-id->key)
-         (inline %event-id->key))
+(declaim (ftype (function (event-id) (cons sequence-number string)) %event-id->key))
 
 (defun %event-id->key (event-id)
   "Return an `equall'-comparable object representing EVENT-ID."

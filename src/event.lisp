@@ -226,8 +226,6 @@ event."
   (uuid:make-v5-uuid
    (car event-id) (format nil "~(~8,'0X~)" (cdr event-id))))
 
-(declaim (inline %maybe-set-event-id))
-
 (defun %maybe-set-event-id (event)
   "When the id slot of EVENT is nil compute a unique id based on the
 origin id of EVENT and the sequence number of EVENT. If EVENT does not
