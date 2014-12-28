@@ -12,7 +12,8 @@
    #:iterate
    #:more-conditions
 
-   #:rsb)
+   #:rsb
+   #:rsb.patterns)
 
   ;; Types
   (:export

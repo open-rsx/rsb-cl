@@ -43,9 +43,7 @@ classes."))
 (addtest (integration-root
           :documentation
           "Test communication in which the `local-method' and the
-`remote-method' operate on events.")
-
-
+           `remote-method' operate on events.")
   smoke/event
 
   (with-participant (local-server :local-server url)
@@ -171,14 +169,14 @@ execution.")
             (setf (event-data event) (* 2 (event-data event)))
             event)))
     (with-participant (local-server :local-server url
-                                    :transform `((:argument ,#'event-1+)
-                                                 (:return   ,#'event-2*)))
+                                    :transform `((:argument . ,#'event-1+)
+                                                 (:return   . ,#'event-2*)))
       (with-methods (local-server)
           (("addfive" (arg integer)
              (+ arg 5)))
         (with-participant (remote-server :remote-server url
-                                         :transform `((:argument ,#'event-2*)
-                                                      (:return   ,#'event-1+)))
+                                         :transform `((:argument . ,#'event-2*)
+                                                      (:return   . ,#'event-1+)))
           (ensure-random-cases 100 ((i an-integer))
 
             ;; Invoke with payload result using `call' method

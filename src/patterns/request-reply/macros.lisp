@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Convenience macros provided by the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,8 +22,8 @@
                        (warn "~@<Error removing method ~S: ~A~@:>"
                              method condition)
                        (continue))))
-                (%remove-method-with-restart-and-timeout
-                 server method))))))
+                (with-restart-and-timeout (10)
+                  (setf (server-method server (method-name method)) nil)))))))
     (unwind-protect
          (progn
            (mapc #'add-one-method methods)

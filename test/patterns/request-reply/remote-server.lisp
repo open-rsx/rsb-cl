@@ -1,6 +1,6 @@
 ;;;; remote-server.lisp --- Unit tests for the remote-server class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,15 +18,16 @@
           "Test constructing `remote-method' instances.")
   construction
 
-  (make-instance 'remote-method :scope "/remoteserver/foo" :name "foo"))
+  (make-instance 'remote-method
+                 :scope  "/remoteserver/foo"
+                 :name   "foo"
+                 :server t))
 
 ;;; `remote-server' tests
 
 (deftestsuite remote-server-root (patterns-request-reply-root
                                   participant-suite)
-  ((simple-server (make-instance 'remote-server
-                                 :scope             "/remoteserver"
-                                 :transport-options '((:inprocess)))))
+  ()
   (:documentation
    "Unit tests for the `remote-server' class."))
 
@@ -72,15 +73,16 @@
           "Test adding methods to a `remote-server' instance.")
   set-method
 
-  (ensure-cases (name expected)
-      `(("foo"          t)
-        (nil            t)
+  (with-participant (server :remote-server "/rsbtest/remoteserver/set-method")
+    (ensure-cases (name expected)
+        `(("foo"          t)
+          (nil            t)
 
-        ;; invalid method name => error
-        ("%invalidname" type-error))
+          ;; invalid method name => error
+          ("%invalidname" type-error))
 
-    (let+ (((&flet do-it ()
-              (server-method simple-server name))))
-     (case expected
-       (type-error (ensure-condition 'type-error (do-it)))
-       ((t)        (ensure (do-it)))))))
+      (let+ (((&flet do-it ()
+                (server-method server name))))
+        (case expected
+          (type-error (ensure-condition 'type-error (do-it)))
+          ((t)        (ensure (do-it))))))))

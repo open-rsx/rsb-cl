@@ -14,45 +14,56 @@
           :initform (bt:make-lock "Remote Method Lock")
           :documentation
           "Stores a lock which protects the table of in-progress calls
-from concurrent modification.")
+           from concurrent modification.")
    (calls :type     hash-table
           :reader   method-%calls
           :initform (make-hash-table :test #'equal)
           :documentation
           "Stores a mapping of request ids (as strings) to the
-associated call information which is represented as a cons cell
-\(CONDITION . RESULT). RESULT is initially nil and gets set when a
-call completes. CONDITION is a condition variable that is used to wait
-for RESULT."))
+           associated call information which is represented as a cons
+           cell
+
+             (CONDITION . RESULT).
+
+           RESULT is initially nil and gets set when a call
+           completes. CONDITION is a condition variable that is used
+           to wait for RESULT."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Makes a method of a remote server callable by client code."))
 
 (rsb::register-participant-class 'remote-method)
 
-(defmethod initialize-instance :after ((instance remote-method) &key)
+(defmethod initialize-instance :after ((instance remote-method)
+                                       &key
+                                       server)
   (closer-mop:set-funcallable-instance-function
    instance (lambda (data-or-event &rest args)
-              (apply #'call (method-server instance) instance data-or-event
-                     args))))
+              (apply #'call server instance data-or-event args))))
 
-(define-lazy-creation-method remote-method listener :return)
-(define-lazy-creation-method remote-method informer :argument)
+(defmethod make-child-initargs ((participant remote-method)
+                                (which       (eql nil))
+                                (kind        t)
+                                &key)
+  (let* ((initargs  (call-next-method))
+         (transform (getf initargs :transform)))
+    (list* :transform (cdr (assoc (ecase kind
+                                    (:listener :return)
+                                    (:informer :argument))
+                                  transform))
+           (remove-from-plist initargs :transform))))
 
-(defmethod (setf method-%listener) :after ((new-value t)
-                                           (method    remote-method))
-  ;; Ignore events which do have a suitable method to be considered
-  ;; replies.
-  (pushnew *reply-filter* (receiver-filters new-value))
-
-  ;; After instantiating the listener for METHOD, install a handler
-  ;; for replies to method calls.
-  (let+ (((&accessors-r/o (lock  method-%lock)
-                          (calls method-%calls)) method)
+(defmethod make-child-initargs ((participant remote-method)
+                                (which       (eql nil))
+                                (kind        (eql :listener))
+                                &key)
+  (let+ ((initargs (call-next-method))
+         ((&plist-r/o (filters :filters) (handlers :handlers)) initargs)
+         ((&structure-r/o method- (lock %lock) (calls %calls)) participant)
          ((&flet handle-reply (event)
             (let+ (((&flet update-call (call)
                       (%call-result->future
-                       method (cadr call) event (cddr call) (car call)))))
+                       participant (cadr call) event (cddr call) (car call)))))
               (cond
                 ((when-let ((local-call *local-call*))
                    (cond
@@ -77,7 +88,13 @@ for RESULT."))
                                        (remhash key calls)
                                        call))))
                    (update-call call))))))))
-    (push #'handle-reply (rsb.ep:handlers new-value))))
+    ;; Filter: ignore events which do have a suitable method to be
+    ;; considered replies.
+    ;;
+    ;; Handler: `handle-reply' processes replies to method calls.
+    (list* :filters  (list* *reply-filter* filters)
+           :handlers (list* #'handle-reply handlers)
+           (remove-from-plist initargs :filters :handlers))))
 
 (defmethod call ((server  t)
                  (method  remote-method)
@@ -90,11 +107,10 @@ for RESULT."))
   ;; data.
   (check-type return return-style "either :payload or :event")
 
-  (method-listener method) ; force creation
+  (participant-child method nil :listener) ; force creation
 
-  (let+ (((&accessors-r/o (informer method-informer)
-                          (lock     method-%lock)
-                          (calls    method-%calls)) method)
+  (let+ ((informer (participant-child method nil :informer))
+         ((&structure-r/o method- (lock %lock) (calls %calls)) method)
          (future       (make-instance 'future))
          (call         (cons future (cons request return)))
          (*local-call* (if block? call t)))
@@ -144,7 +160,8 @@ BLOCK? is non-nil."
 ;;; `remote-server' class
 
 (defclass remote-server (server)
-  ()
+  ((method-kind :allocation :class
+                :initform   :remote-method))
   (:documentation
    "Allows client code to call methods provided by remote servers.
 
@@ -155,26 +172,16 @@ BLOCK? is non-nil."
 
 (flet ((ensure-method (server name error? next-method)
          (or (funcall next-method server name :error? error?)
-             (let ((scope (if (stringp name)
-                              (merge-scopes (list name) (participant-scope server))
-                              (participant-scope server))))
-               (setf (server-method server name)
-                     (make-participant :remote-method scope
-                                       :name           name
-                                       :parent         server
-                                       :introspection? (server-introspection?-option server)))))))
-
-  (defmethod server-method ((server remote-server)
-                            (name   string)
-                            &key
-                            error?)
-    (ensure-method server name error? #'call-next-method))
-
-  (defmethod server-method ((server remote-server)
-                            (name   (eql nil))
-                            &key
-                            error?)
-    (ensure-method server nil error? #'call-next-method)))
+             (setf (participant-child server name :remote-method)
+                   (make-child-participant server name :remote-method)))))
+  (macrolet ((define-server-method-method (name-specializer)
+               `(defmethod server-method ((server remote-server)
+                                          (name   ,name-specializer)
+                                          &key
+                                          error?)
+                  (ensure-method server name error? #'call-next-method))))
+    (define-server-method-method string)
+    (define-server-method-method (eql nil))))
 
 (defmethod call ((server  remote-server)
                  (method  t)
@@ -190,10 +197,10 @@ BLOCK? is non-nil."
                  (request t)
                  &rest args
                  &key &allow-other-keys)
-  (let ((event (make-instance 'event
-                              :scope (participant-scope
-                                      (method-informer method))
-                              :data  request)))
+  (let* ((informer (participant-child method nil :informer))
+         (event    (make-instance 'event
+                                  :scope (participant-scope informer)
+                                  :data  request)))
     (apply #'call server method event args)))
 
 ;;; Utility functions

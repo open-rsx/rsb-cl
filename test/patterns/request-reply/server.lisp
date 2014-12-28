@@ -1,6 +1,6 @@
 ;;;; server.lisp --- Unit tests for the method1 and server classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,13 +18,14 @@
 
   (ensure-cases (initargs expected)
       '(;; Some invalid instantiations.
-        (()                     missing-required-initarg) ; missing :name
-        ((:name "illegal/name") type-error)
-        ((:name "illegal name") type-error)
-        ((:name "i113g4l n4m3") type-error)
+        (()                               missing-required-initarg) ; missing :name
+        ((:name "foo")                    missing-required-initarg) ; missing :server
+        ((:name "illegal/name" :server t) type-error)
+        ((:name "illegal name" :server t) type-error)
+        ((:name "i113g4l n4m3" :server t) type-error)
 
         ;; These are valid.
-        ((:name "legal-name")   t))
+        ((:name "legal-name" :server t)   t))
 
     (let+ (((&flet do-it ()
               (apply #'make-instance 'method1
@@ -38,10 +39,7 @@
          (do-it))))))
 
 (deftestsuite server-root (patterns-request-reply-root)
-  ((simple-server (make-instance 'server :scope "/rsbtest/patterns/request-reply/server-root/server"))
-   (simple-method (make-instance 'method1
-                                 :scope (make-scope "/rsbtest/patterns/request-reply/server-root/server/foo")
-                                 :name  "foo")))
+  ()
   (:documentation
    "Test suite for the `server' class."))
 
@@ -53,14 +51,14 @@
   (ensure-cases (initargs &optional expected)
       `(;; Some invalid constructions.
         (()                            missing-required-initarg) ; scope
-        ((:scope "/" :transform ,#'1+) type-error)
-        ((:scope "/" :transform ,#'1+) type-error)
+        ((:scope "/" :transform-option ,#'1+) type-error)
+        ((:scope "/" :transform-option ,#'1+) type-error)
 
         ;; These are valid.
-        ((:scope "/" :transform ((:return ,#'1+))))
-        ((:scope "/" :transform ((:argument ,#'1+))))
-        ((:scope "/" :transform ((:return ,#'1+ :argument ,#'1+))))
-        ((:scope "/" :transform ((:argument ,#'1+ :return ,#'1+)))))
+        ((:scope "/" :transform-option ((:return . ,#'1+))))
+        ((:scope "/" :transform-option ((:argument . ,#'1+))))
+        ((:scope "/" :transform-option ((:return . ,#'1+) (:argument . ,#'1+))))
+        ((:scope "/" :transform-option ((:argument . ,#'1+) (:return . ,#'1+)))))
 
     (let+ (((&flet do-it ()
               (apply #'make-instance 'server initargs))))
@@ -77,24 +75,33 @@
           "Test adding methods to a `server' instance.")
   set-method
 
-  (ensure-cases (name method expected)
-      `(("foo"          ,simple-method ,simple-method)
-        ("foo"          ,simple-method ,simple-method)
-        (nil            ,simple-method ,simple-method)
+  (with-active-participants
+      ((server (make-instance
+                'server
+                :scope "/rsbtest/patterns/request-reply/server-root/server"))
+       (method (make-instance
+                'method1
+                :scope  (make-scope "/rsbtest/patterns/request-reply/server-root/server/foo")
+                :name   "foo"
+                :server server)))
+    (ensure-cases (name method expected)
+        `(("foo"          ,method ,method)
+          ("foo"          ,method ,method)
+          (nil            ,method ,method)
 
-        ("foo"          nil            nil)
-        (nil            nil            nil)
+          ("foo"          nil     nil)
+          (nil            nil     nil)
 
-        ;; invalid method name => type-error
-        ("%invalidname" ,simple-method type-error))
+          ;; invalid method name => type-error
+          ("%invalidname" ,method type-error))
 
-    (case expected
-      (type-error
-       (ensure-condition 'type-error
-         (setf (server-method simple-server name) method)))
+      (case expected
+        (type-error
+         (ensure-condition 'type-error
+           (setf (server-method server name) method)))
 
-      (t
-       (let ((result-1 (setf (server-method simple-server name) method))
-             (result-2 (server-method simple-server name :error? nil)))
-         (ensure-same result-1 expected)
-         (ensure-same result-2 expected))))))
+        (t
+         (let ((result-1 (setf (server-method server name) method))
+               (result-2 (server-method server name :error? nil)))
+           (ensure-same result-1 expected)
+           (ensure-same result-2 expected)))))))

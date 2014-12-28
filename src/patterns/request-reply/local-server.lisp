@@ -9,7 +9,13 @@
 ;;; `local-method' class
 
 (defclass local-method (method1)
-  ((callback :initarg  :callback
+  ((server   :initarg  :server
+             :type     local-server
+             :reader   method-%server
+             :documentation
+             "Stores the `local-server' instance to which the method
+              belongs.")
+   (callback :initarg  :callback
              :type     function
              :reader   method-callback
              :documentation
@@ -33,21 +39,35 @@ should be passed to the callback function."))
 (rsb::register-participant-class 'local-method)
 
 (defmethod initialize-instance :after ((instance local-method) &key)
-  (method-listener instance)) ; force creation
+  (participant-child instance nil :listener)) ; force creation
 
-(define-lazy-creation-method local-method listener :argument)
-(define-lazy-creation-method local-method informer :return)
+(defmethod make-child-initargs ((participant local-method)
+                                (which       (eql nil))
+                                (kind        t)
+                                &key)
+  (let* ((initargs  (call-next-method))
+         (transform (getf initargs :transform)))
+    (list* :transform (cdr (assoc (ecase kind
+                                    (:listener :argument)
+                                    (:informer :return))
+                                  transform))
+           (remove-from-plist initargs :transform))))
 
-(defmethod (setf method-%listener) :after ((new-value t)
-                                           (method    local-method))
-  ;; Ignore events which do have a suitable method to be considered
-  ;; requests.
-  (pushnew *request-filter* (receiver-filters new-value))
-
-  ;; Install a handler on the request listener that calls the callback
-  ;; and sends the reply using the informer.
-  (push (curry #'call (method-server method) method)
-        (rsb.ep:handlers new-value)))
+(defmethod make-child-initargs ((participant local-method)
+                                (which       (eql nil))
+                                (kind        (eql :listener))
+                                &key)
+  (let+ ((initargs (call-next-method))
+         ((&plist-r/o (filters :filters) (handlers :handlers)) initargs))
+    ;; Filter: ignore events which do have a suitable method to be
+    ;; considered requests.
+    ;;
+    ;; Handler: call the callback and sends the reply using the
+    ;; informer.
+    (list* :filters  (list* *request-filter* filters)
+           :handlers (list* (curry #'call (method-%server participant) participant)
+                            handlers)
+           (remove-from-plist initargs :filters :handlers))))
 
 (defmethod call :around ((server  t)
                          (method  local-method)
@@ -66,7 +86,8 @@ should be passed to the callback function."))
   ;; Invoke the call back function of METHOD with the payload of
   ;; REQUEST. Send the result or an error notification back to the
   ;; caller.
-  (let+ (((&structure-r/o method- informer callback argument) method)
+  (let+ ((informer (participant-child method nil :informer))
+         ((&structure-r/o method- callback argument) method)
          (causes (list (event-id/opaque request)))
          ((&flet make-reply (payload)
             (make-event (event-scope request) payload))))
@@ -96,7 +117,8 @@ should be passed to the callback function."))
 ;;; `local-server' class
 
 (defclass local-server (server)
-  ()
+  ((method-kind :allocation :class
+                :initform   :local-method))
   (:documentation
    "Makes a set of named functions available for remote invocation.
 
@@ -106,29 +128,22 @@ should be passed to the callback function."))
 
 (rsb::register-participant-class 'local-server)
 
-(flet ((set-method (server scope name argument callback)
+(flet ((set-method (server name argument callback)
          (check-type argument argument-style)
 
-         (setf (server-method server name)
-               (make-participant :local-method scope
-                                 :server         server
-                                 :name           name
-                                 :callback       callback
-                                 :argument       argument
-                                 :parent         server
-                                 :introspection? (server-introspection?-option server)))))
+         (setf (participant-child server name :local-method)
+               (make-child-participant server name :local-method
+                                       :callback callback
+                                       :argument argument))))
 
   (macrolet
-      ((define-method-creating-method (name-type scope-form)
+      ((define-setf-server-method-method (name-type)
          `(defmethod (setf server-method) ((new-value function)
                                            (server    local-server)
                                            (name      ,name-type)
                                            &key
                                            (argument :payload))
-            (let+ (((&structure-r/o participant- scope) server))
-              (set-method server ,scope-form name argument new-value)))))
+            (set-method server name argument new-value))))
 
-    (define-method-creating-method string
-      (merge-scopes (list name) scope))
-    (define-method-creating-method (eql nil)
-      scope)))
+    (define-setf-server-method-method string)
+    (define-setf-server-method-method (eql nil))))

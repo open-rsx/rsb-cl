@@ -1,26 +1,24 @@
 ;;;; conditions.lisp --- Conditions used in the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.patterns.request-reply)
 
-(define-condition no-such-method (rsb-error)
-  ((name :initarg  :name
-         :type     string
-         :reader   no-such-method-name
-         :documentation
-         "Stores the name of the method that was specified but could
-not be found."))
+(define-condition no-such-method (no-such-child-error)
+  ()
   (:default-initargs
    :name (missing-required-initarg 'no-such-method :name))
   (:report
    (lambda (condition stream)
      (format stream "~@<The specified method ~S does not exist.~@:>"
-             (no-such-method-name condition))))
+             (second (child-condition-key condition)))))
   (:documentation
    "This error is signaled when a specified method does not exist."))
+
+(defun no-such-method-name (condition)
+  (second (child-condition-key condition)))
 
 (define-condition remote-call-error (rsb-error
                                      chainable-condition)
