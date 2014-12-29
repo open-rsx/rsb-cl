@@ -1,6 +1,6 @@
 ;;;; local-introspection.lisp --- Classes and functions for local introspection.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -29,30 +29,22 @@
 (defmethod initialize-instance :after ((instance introspection-sender)
                                        &key
                                        (participants '() participants-supplied?))
-  (let+ (((&accessors (error-policy rsb.ep:processor-error-policy)
-                      (error-hook   participant-error-hook)
-                      (informer     introspection-informer)) instance))
-    ;; Forward processing errors to error hook.
-    (setf error-policy (curry #'hooks:run-hook error-hook))
+  ;; Forward processing errors to error hook.
+  (setf (rsb.ep:processor-error-policy instance)
+        (curry #'hooks:run-hook (participant-error-hook instance)))
 
-    ;; Child participants.
-    (unwind-protect-case ()
-        (progn
-          (introspection-listener instance) ; force creation
-          (introspection-server instance))  ; likewise
-      (:abort
-       (detach instance)))
+  ;; Force creation of child participants.
+  (participant-child instance :participants :listener)
+  (participant-child instance :server       :local-server)
 
-    ;; Broadcast initial hello messages for participants registered in
-    ;; INSTANCE.
-    (when participants-supplied?
-      (setf (introspection-participants instance) participants))))
+  ;; Broadcast initial hello messages for participants registered in
+  ;; INSTANCE.
+  (when participants-supplied?
+    (setf (introspection-participants instance) participants)))
 
 (let+ (((&flet reinitialize-server (introspection)
-          (when-let ((server (introspection-%server introspection)))
-            (detach server)
-            (setf (introspection-%server introspection) nil))
-          (introspection-server introspection))))
+          (setf (participant-child introspection :server :local-server) nil)
+          (participant-child introspection :server :local-server))))
   (defmethod (setf introspection-host) :after ((new-value     t)
                                                (introspection introspection-sender))
     (reinitialize-server introspection))
@@ -60,37 +52,44 @@
                                                   (introspection introspection-sender))
     (reinitialize-server introspection)))
 
-(defmethod (setf introspection-%listener) :after ((new-value     listener)
-                                                  (introspection introspection-sender))
-  ;; Install appropriate filters and install INTROSPECTION as handler
-  ;; which processes queries.
-  (pushnew *survey-filter* (receiver-filters new-value))
-  (pushnew introspection (rsb.ep:handlers new-value)))
+(defmethod make-child-initargs ((participant introspection-sender)
+                                (which       (eql :participants))
+                                (kind        (eql :listener))
+                                &key)
+  (let+ ((initargs (call-next-method))
+         ((&plist-r/o (filters :filters) (handlers :handlers)) initargs))
+    ;; Use appropriate filters and install PARTICIPANT as handler
+    ;; which processes queries.
+    (list* :filters  (list* *survey-filter* filters)
+           :handlers (list* participant handlers)
+           (remove-from-plist initargs :filters :handlers))))
 
-(defmethod introspection-server :before ((introspection introspection-sender))
-  (unless (introspection-%server introspection)
-    (let+ (((&accessors-r/o
-             (scope                                     participant-scope)
-             ((&structure-r/o process-info- process-id) introspection-process)
-             ((&structure-r/o host-info- (host-id id))  introspection-host))
-            introspection)
-           (server (participant-make-child
-                    introspection :local-server
-                    (introspection-process-scope
-                     process-id host-id scope)
-                    :converters '(:fundamental-void
-                                  :fundamental-utf-8-string))))
-      (setf (server-method server "echo" :argument :event)
-            (lambda (event)
-              (make-event
-               (event-scope event) (event-data event)
-               :timestamps `(:request.send    ,(timestamp event :send)
-                             :request.receive ,(timestamp event :receive))))
-            (server-method server "eval")
-            (lambda (request)
-              (with-standard-io-syntax
-                (write-to-string (eval (read-from-string request)))))
-            (introspection-%server introspection) server))))
+(defmethod make-child-scope ((participant introspection-sender)
+                             (which       (eql :server))
+                             (kind        (eql :local-server)))
+  (let+ (((&accessors-r/o
+           (scope                                     participant-scope)
+           ((&structure-r/o process-info- process-id) introspection-process)
+           ((&structure-r/o host-info- (host-id id))  introspection-host))
+          participant))
+    (introspection-process-scope process-id host-id scope)))
+
+(defmethod make-child-participant ((participant introspection-sender)
+                                   (which       (eql :server))
+                                   (kind        (eql :local-server))
+                                   &key)
+  (let ((server (call-next-method)))
+    (setf (server-method server "echo" :argument :event)
+          (lambda (event)
+            (make-event
+             (event-scope event) (event-data event)
+             :timestamps `(:request.send    ,(timestamp event :send)
+                           :request.receive ,(timestamp event :receive))))
+          (server-method server "eval")
+          (lambda (request)
+            (with-standard-io-syntax
+              (write-to-string (eval (read-from-string request))))))
+    server))
 
 (defmethod (setf find-participant) ((new-value participant)
                                     (id        uuid:uuid)
@@ -201,12 +200,12 @@
                  in-reply-to)
   (declare (type remote-participant-info participant)
            (type (or null event)         in-reply-to))
-  (let+ (((&accessors-r/o (scope     participant-scope)
-                          (informer1 introspection-informer)) informer)
-         (scope (participant-id->scope (participant-info-id participant) scope))
-         (event (apply #'make-event scope data
-                       (when in-reply-to
-                         (list :causes (list (event-id/opaque in-reply-to)))))))
+  (let+ ((informer1 (participant-child informer :participants :informer))
+         (scope     (participant-id->scope (participant-info-id participant)
+                                           (participant-scope informer)))
+         (event     (apply #'make-event scope data
+                           (when in-reply-to
+                             (list :causes (list (event-id/opaque in-reply-to)))))))
     (send informer1 event)))
 
 (defmethod send ((informer introspection-sender)

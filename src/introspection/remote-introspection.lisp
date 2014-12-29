@@ -1,6 +1,6 @@
 ;;;; remote-introspection.lisp --- Classes and functions for remote introspection.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -56,19 +56,21 @@
   (setf (rsb.ep:processor-error-policy instance)
         (curry #'hooks:run-hook (participant-error-hook instance))))
 
-(defmethod (setf introspection-%listener) :after ((new-value     listener)
-                                                  (introspection introspection-receiver))
-  ;; Install appropriate filters and install INTROSPECTION as handler.
-  (pushnew *broadcast-filter* (receiver-filters new-value))
-  (pushnew introspection (rsb.ep:handlers new-value)))
+(defmethod make-child-initargs ((participant introspection-receiver)
+                                (which       (eql :participants))
+                                (kind        (eql :listener))
+                                &key)
+  (let+ ((initargs (call-next-method))
+         ((&plist-r/o (filters :filters) (handlers :handlers)) initargs))
+    ;; Use appropriate filters and install INTROSPECTION as handler.
+    (list* :filters  (list* *broadcast-filter* filters)
+           :handlers (list* participant handlers)
+           (remove-from-plist initargs :filters :handlers))))
 
-(defmethod introspection-server :before ((introspection introspection-receiver))
-  (unless (introspection-%server introspection)
-    (setf (introspection-%server introspection)
-          (participant-make-child
-           introspection :remote-server (introspection-hosts-scope
-                                         (participant-scope introspection))
-           :converters *introspection-host-converters*))))
+(defmethod make-child-scope ((participant introspection-receiver)
+                             (which       (eql :server))
+                             (kind        (eql :remote-server)))
+  (introspection-hosts-scope (participant-scope participant)))
 
 (defmethod rsb.ep:handle ((processor introspection-receiver)
                           (data      event))
@@ -99,13 +101,14 @@
   (rsb.ep:dispatch processor data))
 
 (defmethod introspection-survey ((introspection introspection-receiver))
-  (introspection-listener introspection) ; Force creation
+  (participant-child introspection :participants :listener) ; Force creation
 
   ;; Perform (initial) survey. The listener and handler configured
   ;; above will collect and process the responses. We do not have to
   ;; wait for responses since there is (almost) no difference between
   ;; requested and spontaneous responses.
-  (send (introspection-informer introspection) rsb.converter:+no-value+
+  (send (participant-child introspection :participants :informer)
+        rsb.converter:+no-value+
         :method :|survey|))
 
 (defmethod introspection-ping ((introspection introspection-receiver)
@@ -113,12 +116,12 @@
                                (process       process-info)
                                &key
                                block?)
-  (let+ (((&accessors-r/o (server introspection-server)) introspection)
-         (scope (merge-scopes '("echo")
-                              (introspection-process-scope
-                               (process-info-process-id process)
-                               (host-info-id host)
-                               (participant-scope introspection)))))
+  (let ((server (participant-child introspection :server :remote-server))
+        (scope (merge-scopes '("echo")
+                             (introspection-process-scope
+                              (process-info-process-id process)
+                              (host-info-id host)
+                              (participant-scope introspection)))))
     (call server nil (make-event scope rsb.converter:+no-value+)
           :block? block? :return :event)))
 
@@ -662,21 +665,17 @@
 
 ;;; `remote-introspection'
 
-(defclass remote-introspection (print-items:print-items-mixin
-                                participant
-                                lockable-database-mixin)
+(defclass remote-introspection (participant
+                                composite-participant-mixin
+                                child-container-mixin
+                                lockable-database-mixin
+                                print-items:print-items-mixin)
   ((database         :reader   introspection-database
                      :accessor introspection-%database
                      :initform nil ; for early `print-items' calls
                      :documentation
                      "Stores the database of known information about
                       remote participants.")
-   (receivers        :accessor introspection-%receivers
-                     :initform '()
-                     :documentation
-                     "Stores an introspection event receiver which
-                      receives introspection events from remote
-                      processes and feeds them into the database.")
    (executor         :accessor introspection-%executor
                      :initform nil ; for early `print-items' calls
                      :documentation
@@ -729,7 +728,6 @@
   (let+ (((&accessors-r/o (error-hook participant-error-hook)) instance)
          ((&accessors (change-hook database-change-hook)
                       (database    introspection-%database)
-                      (receivers   introspection-%receivers)
                       (executor    introspection-%executor))
           instance))
     ;; Initialize change hook and database first. This has to be ready
@@ -757,8 +755,11 @@
                :error-policy (lambda (condition)
                                (hooks:run-hook error-hook condition))
                :handlers     (list (curry #'rsb.ep:handle instance)))))
+           (counter 0)
            ((&labels add-receiver (spec)
-              (push (make-receiver spec) receivers))))
+              (let ((id (prin1-to-string (incf counter))))
+                (setf (participant-child instance id :introspection-receiver)
+                      (make-receiver spec))))))
       ;; Try to batch-create all requested receivers, cleaning up if
       ;; something goes wrong.
       (unwind-protect-case ()
@@ -768,7 +769,7 @@
                                      `((,scope ,transports))))
             ;; If all receivers have been created, start initial
             ;; surveys.
-            (mapc #'introspection-survey receivers)
+            (mapc #'introspection-survey (participant-children instance))
 
             ;; Initialize executor for timed updates.
             (when update-interval
@@ -781,16 +782,9 @@
         (:abort
          (detach instance))))))
 
-(defmethod detach ((participant remote-introspection))
-  (when-let ((executor (introspection-%executor participant)))
-    (detach executor))
-  (mapc #'detach (introspection-%receivers participant)))
-
-(defmethod transport-specific-urls ((component remote-introspection))
-  (mappend #'transport-specific-urls (introspection-%receivers component)))
-
 (defmethod print-items:print-items append ((object remote-introspection))
-  `((:name nil "") ; Suppress printing of the executor's :name item
+  `((:name         nil "") ; Suppress printing of the executor's :name item
+    (:num-children nil "") ; and `composite-participant-mixin''s :num-children item
     ,@(mappend #'print-items:print-items
                (list (introspection-database object)
                      (introspection-%executor object)))))

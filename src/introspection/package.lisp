@@ -11,7 +11,8 @@
    #:let-plus
    #:more-conditions
 
-   #:rsb)
+   #:rsb
+   #:rsb.patterns)
 
   (:import-from #:rsb.patterns.request-reply
    #:remote-call-error

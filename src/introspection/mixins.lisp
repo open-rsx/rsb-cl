@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixins for introspection-related classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,115 +8,30 @@
 
 ;;; `introspection-participant-mixin'
 
-(defclass introspection-participant-mixin (participant)
-  ((listener          :accessor introspection-%listener ; without lazy creation
-                      :reader   introspection-listener  ; with lazy creation
-                      :initform nil
-                      :documentation
-                      "Stores the listener participant used to receive
-                       events by the participant; nil while the
-                       listener has not been created.")
-   (informer          :accessor introspection-%informer ; without-lazy creation
-                      :reader   introspection-informer  ; with lazy creation
-                      :initform nil
-                      :documentation
-                      "Stores the informer participant used to send
-                       events by the participant; nil while the
-                       informer has not been created.")
-   (server            :accessor introspection-%server ; without lazy creation
-                      :reader   introspection-server  ; with lazy creation
-                      :initform nil
-                      :documentation
-                      "Stores a `remote-server' or `local-server' used
-                       for making or serving requests for
-                       host/process-level information.")
-   (transport-options :initarg :transport-options
-                      :type    list
-                      :reader  participant-transport-options
-                      :documentation
-                      "Stores the transport options that should be
-                       passed to the child participants when they are
-                       created.
-
-                       The stored options have already been merged
-                       with defaults and thus make created child
-                       participants ignore any special binding of
-                       `*configuration*'."))
+(defclass introspection-participant-mixin (participant
+                                           composite-participant-mixin
+                                           lazy-child-making-mixin
+                                           child-container-mixin
+                                           configuration-inheritance-mixin)
+  ()
   (:default-initargs
-   :scope             +introspection-scope+
-   :transport-options (missing-required-initarg
-                       'introspection-participant-mixin :transport-options))
+   :scope +introspection-scope+)
   (:documentation
    "This class is intended to be mixed into introspection participant
     classes that have to send and receive events."))
 
-(defmethod make-participant-using-class
-    ((class     class)
-     (prototype introspection-participant-mixin)
-     (scope     scope)
-     &rest args &key
-     (transports '()))
-  ;; TODO This logic can move into some of the composite patterns
-  ;; after the 0.11 release.
-  ;;
-  ;; "Freeze" transport options by merging with defaults, thereby
-  ;; disabling further inheritance from special bindings of
-  ;; `*configuration*' during child participant creation (may even
-  ;; happen in a different thread with different special bindings).
-  ;;
-  ;; Also check that TRANSPORTS will select at least one transport.
-  (let ((transport-options (rsb::merge-transport-options
-                            transports (transport-options))))
-    (unless (rsb::effective-transport-options transport-options)
-      (error 'no-transports-error
-             :kind  (participant-kind prototype)
-             :scope scope))
+(defmethod make-child-initargs ((participant introspection-participant-mixin)
+                                (which       t)
+                                (kind        t)
+                                &key)
+  (list* :introspection? nil
+         :converters     *introspection-all-converters*
+         (call-next-method)))
 
-    (apply #'call-next-method class prototype scope
-           :transport-options transports
-           (remove-from-plist args :transports))))
-
-(defun participant-make-child (participant kind scope
-                               &rest initargs &key
-                               (converters *introspection-all-converters*)
-                               &allow-other-keys)
-  (let+ (((&structure-r/o participant- error-hook transport-options)
-          participant))
-    (apply #'make-participant kind scope
-           :transports     transport-options
-           :converters     converters
-           :error-policy   (lambda (condition)
-                             (hooks:run-hook error-hook condition))
-           :introspection? nil
-           (remove-from-plist initargs :converters))))
-
-(macrolet
-    ((define-lazy-creation-method (kind)
-       (let ((method-name   (symbolicate '#:introspection- kind))
-             (accessor-name (symbolicate '#:introspection-% kind)))
-         `(defmethod ,method-name :before ((introspection introspection-participant-mixin))
-            (unless (,accessor-name introspection)
-              (setf (,accessor-name introspection)
-                    (participant-make-child
-                     introspection ,kind
-                     (introspection-participants-scope
-                      (participant-scope introspection)))))))))
-
-  (define-lazy-creation-method :listener)
-  (define-lazy-creation-method :informer))
-
-(defmethod detach ((participant introspection-participant-mixin))
-  (when-let ((listener (introspection-%listener participant)))
-    (detach listener))
-  (when-let ((informer (introspection-%informer participant)))
-    (detach informer))
-  (when-let ((server (introspection-%server participant)))
-    (detach server)))
-
-(defmethod transport-specific-urls ((component introspection-participant-mixin))
-  (when-let ((listener (introspection-%listener component)))
-    (mapcar (curry #'puri:merge-uris (relative-url component))
-            (transport-specific-urls listener))))
+(defmethod make-child-scope ((participant introspection-participant-mixin)
+                             (which       (eql :participants))
+                             (kind        t))
+  (introspection-participants-scope (participant-scope participant)))
 
 ;;; `participant-table-mixin'
 

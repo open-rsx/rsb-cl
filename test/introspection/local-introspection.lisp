@@ -93,8 +93,8 @@
 
     ;; Call "echo" method of introspection server.
     (let ((server-scope (participant-scope
-                         (rsb.introspection::introspection-%server
-                          introspection))))
+                         (rsb.patterns:participant-child
+                          introspection :server :local-server))))
       (with-participant (server :remote-server server-scope)
         (call server "echo" rsb.converter:+no-value+)))))
 
