@@ -64,7 +64,9 @@
 (defun %current-user ()
   (with-platform-information-error-translation
       ("determine username from passwd database entry")
-    (sb-posix:passwd-name (sb-posix:getpwuid (sb-posix:getuid)))))
+    (if-let ((entry (sb-posix:getpwuid (sb-posix:getuid))))
+      (sb-posix:passwd-name entry)
+      (error "~@<No passwd database entry for current user.~@:>"))))
 
 (defun current-user ()
   (restart-case
