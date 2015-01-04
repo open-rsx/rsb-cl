@@ -151,212 +151,141 @@
   :encoding    :utf-8
   :components  ((:module     "src-early"
                  :pathname   "src"
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "types"
-                               :depends-on ("package"))
-                              (:file       "conditions"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package"))
+                              (:file       "types")
+                              (:file       "conditions")
+                              (:file       "protocol")
 
-                              (:file       "scope"
-                               :depends-on ("package" "types" "protocol"))
-                              (:file       "uris"
-                               :depends-on ("package" "scope"))
-                              (:file       "variables"
-                               :depends-on ("package" "scope"))
-                              (:file       "util"
-                               :depends-on ("package" "types" "protocol"
-                                            "variables"))
+                              (:file       "scope")
+                              (:file       "uris")
+                              (:file       "variables")
+                              (:file       "util")
 
-                              (:file       "mixins"
-                               :depends-on ("package" "types" "protocol"
-                                            "scope"))
-                              (:file       "event"
-                               :depends-on ("package" "types" "util"
-                                            "mixins"))
+                              (:file       "mixins")
+                              (:file       "event")
 
-                              (:file       "error-handling"
-                               :depends-on ("package"))))
+                              (:file       "error-handling")))
 
                 (:module     "filter"
                  :pathname   "src/filter"
                  :depends-on ("src-early")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "types"
-                               :depends-on ("package"))
-                              (:file       "conditions"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package"))
+                              (:file       "types")
+                              (:file       "conditions")
+                              (:file       "protocol")
 
-                              (:file       "filter-mixins"
-                               :depends-on ("package" "protocol"))
-                              (:file       "composite-filter"
-                               :depends-on ("package" "protocol"
-                                            "filter-mixins"))
+                              (:file       "filter-mixins")
+                              (:file       "composite-filter")
 
-                              (:file       "scope-filter"
-                               :depends-on ("package" "protocol"
-                                            "filter-mixins"))
-                              (:file       "type-filter"
-                               :depends-on ("package" "protocol"
-                                            "filter-mixins"))
-                              (:file       "origin-filter"
-                               :depends-on ("package" "protocol"
-                                            "filter-mixins"))
-                              (:file       "method-filter"
-                               :depends-on ("package" "protocol"
-                                            "filter-mixins"))))
+                              (:file       "scope-filter")
+                              (:file       "type-filter")
+                              (:file       "origin-filter")
+                              (:file       "method-filter")))
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
                  :depends-on ("src-early" "filter") ; for filtering-processor-mixin
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "util"
-                               :depends-on ("package"))
-                              (:file       "conditions"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package" "conditions"))
+                              (:file       "util")
+                              (:file       "conditions")
+                              (:file       "protocol")
 
-                              (:file       "broadcast-processor"
-                               :depends-on ("package" "protocol"))
-                              (:file       "pull-processor"
-                               :depends-on ("package" "protocol"))
+                              (:file       "broadcast-processor")
+                              (:file       "pull-processor")
 
-                              (:file       "processor-mixins"
-                               :depends-on ("package" "protocol"))
+                              (:file       "processor-mixins")
 
-                              (:file       "configurator"
-                               :depends-on ("package"
-                                            "broadcast-processor"
-                                            "pull-processor"
-                                            "processor-mixins"))
-                              (:file       "in-route-configurator"
-                               :depends-on ("package" "util" "configurator"))
-                              (:file       "out-route-configurator"
-                               :depends-on ("package" "configurator"))
-                              (:file       "client"
-                               :depends-on ("package" "configurator"))))
+                              (:file       "configurator")
+                              (:file       "in-route-configurator")
+                              (:file       "out-route-configurator")
+
+                              (:file       "client")))
 
                 (:module     "converter"
                  :pathname   "src/converter"
                  :depends-on ("src-early")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "conditions"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package"))
-                              (:file       "macros"
-                               :depends-on ("package" "protocol"))
+                              (:file       "conditions")
+                              (:file       "protocol")
+                              (:file       "macros")
 
-                              (:file       "sequence"
-                               :depends-on ("package" "conditions"
-                                            "protocol"))
-                              (:file       "force-wire-schema"
-                               :depends-on ("package" "protocol"))
+                              (:file       "sequence")
+                              (:file       "force-wire-schema")
 
-                              (:file       "fundamental"
-                               :depends-on ("package" "conditions"
-                                            "protocol" "macros"))
+                              (:file       "fundamental")
 
-                              (:file       "reader"
-                               :depends-on ("package" "conditions"
-                                            "protocol"))))
+                              (:file       "reader")))
 
                 (:module     "transport"
                  :pathname   "src/transport"
                  :depends-on ("src-early"
                               "event-processing" ; for error-policy-mixin
                               "converter")       ; for conversion-mixin
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "variables"
-                               :depends-on ("package"))
-                              (:file       "conditions"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package" "conditions"))
-                              (:file       "connector-class"
-                               :depends-on ("package" "protocol"))
-                              (:file       "connector"
-                               :depends-on ("package" "protocol"
-                                            "connector-class"))
+                              (:file       "variables")
+                              (:file       "conditions")
+                              (:file       "protocol")
+                              (:file       "connector-class")
+                              (:file       "connector")
 
-                              (:file       "connector-mixins"
-                               :depends-on ("package" "protocol" "connector-class"))))
+                              (:file       "connector-mixins")))
 
                 (:module      "src"
                  :depends-on  ("src-early"
                                "event-processing"
                                "transport")
+                 :serial     t
                  :components ((:file       "configuration")
 
-                              (:file       "participant"
-                               :depends-on ("configuration"))
+                              (:file       "participant")
                               (:file       "receiving-client")
-                              (:file       "listener"
-                               :depends-on ("participant"
-                                            "receiving-client"))
-                              (:file       "reader"
-                               :depends-on ("participant"
-                                            "receiving-client"))
-                              (:file       "informer"
-                               :depends-on ("participant"))
+                              (:file       "listener")
+                              (:file       "reader")
+                              (:file       "informer")
 
-                              (:file       "macros"
-                               :depends-on ("listener" "reader"
-                                             "informer"))
+                              (:file       "macros")
 
                               (:file       "reloading")))
 
                 (:module     "transport-inprocess"
                  :pathname   "src/transport/inprocess"
                  :depends-on ("transport" "filter")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "connector"
-                               :depends-on ("package"))
-                              (:file       "in-push-connector"
-                               :depends-on ("package" "connector"))
-                              (:file       "in-pull-connector"
-                               :depends-on ("package" "connector"))
-                              (:file       "out-connector"
-                               :depends-on ("package" "connector"))))
+                              (:file       "connector")
+                              (:file       "in-push-connector")
+                              (:file       "in-pull-connector")
+                              (:file       "out-connector")))
 
                 (:module     "patterns"
                  :pathname   "src/patterns"
                  :depends-on ("src")
+                 :serial     t
                  :components ((:file       "package")
                               (:file       "conditions")))
 
                 (:module     "patterns-request-reply"
                  :pathname   "src/patterns/request-reply"
                  :depends-on ("src" "patterns")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "types"
-                               :depends-on ("package"))
-                              (:file       "variables"
-                               :depends-on ("package"))
-                              (:file       "conditions"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package" "types"))
+                              (:file       "types")
+                              (:file       "variables")
+                              (:file       "conditions")
+                              (:file       "protocol")
 
-                              (:file       "future"
-                               :depends-on ("package" "protocol"))
+                              (:file       "future")
 
-                              (:file       "server"
-                               :depends-on ("package" "protocol"))
-                              (:file       "local-server"
-                               :depends-on ("package" "variables"
-                                            "protocol" "server"))
-                              (:file       "remote-server"
-                               :depends-on ("package" "variables"
-                                            "protocol" "server"))
+                              (:file       "server")
+                              (:file       "local-server")
+                              (:file       "remote-server")
 
-                              (:file       "macros"
-                               :depends-on ("package" "local-server"
-                                                      "remote-server")))))
+                              (:file       "macros"))))
 
   :in-order-to ((test-op (test-op :cl-rsb-test))))
 
@@ -371,33 +300,20 @@
                 (:version :cl-rsb #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "test"
+                 :serial     t
                  :components ((:file       "package")
-
-                              (:file       "protocol"
-                               :depends-on ("package"))
-                              (:file       "scope"
-                               :depends-on ("package"))
-                              (:file       "event"
-                               :depends-on ("package"))
-                              (:file       "uris"
-                               :depends-on ("package"))
-                              (:file       "util"
-                               :depends-on ("package"))
-                              (:file       "configuration"
-                               :depends-on ("package"))
-                              (:file       "mixins"
-                               :depends-on ("package"))
-                              (:file       "participant"
-                               :depends-on ("package"))
-                              (:file       "listener"
-                               :depends-on ("package"))
-                              (:file       "reader"
-                               :depends-on ("package"))
-                              (:file       "informer"
-                               :depends-on ("package"))
-
-                              (:file       "macros"
-                               :depends-on ("package"))))
+                              (:file       "protocol")
+                              (:file       "scope")
+                              (:file       "event")
+                              (:file       "uris")
+                              (:file       "util")
+                              (:file       "configuration")
+                              (:file       "mixins")
+                              (:file       "participant")
+                              (:file       "listener")
+                              (:file       "reader")
+                              (:file       "informer")
+                              (:file       "macros")))
 
                 (:file       "examples"
                  :pathname   "test/examples"
@@ -406,64 +322,50 @@
                 (:module     "filter"
                  :pathname   "test/filter"
                  :depends-on ("test")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "protocol"
-                               :depends-on ("package"))
-                              (:file       "composite-filter"
-                               :depends-on ("package"))
-                              (:file       "scope-filter"
-                               :depends-on ("package"))
-                              (:file       "method-filter"
-                               :depends-on ("package"))))
+                              (:file       "protocol")
+                              (:file       "composite-filter")
+                              (:file       "scope-filter")
+                              (:file       "method-filter")))
 
                 (:module     "event-processing"
                  :pathname   "test/event-processing"
                  :depends-on ("test")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "util"
-                               :depends-on ("package"))
-                              (:file       "protocol"
-                               :depends-on ("package"))
-                              (:file       "processor-mixins"
-                               :depends-on ("package"))
-
-                              (:file       "in-route-configurator"
-                               :depends-on ("package"))))
+                              (:file       "util")
+                              (:file       "protocol")
+                              (:file       "processor-mixins")
+                              (:file       "in-route-configurator")))
 
                 (:module     "converter"
                  :pathname   "test/converter"
                  :depends-on ("test")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "fundamental"
-                               :depends-on ("package"))
-                              (:file       "reader"
-                               :depends-on ("package"))))
+                              (:file       "fundamental")
+                              (:file       "reader")))
 
                 (:module     "transport"
                  :pathname   "test/transport"
                  :depends-on ("test")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "connector-class"
-                               :depends-on ("package"))
-                              (:file       "threaded-receiver-mixin"
-                               :depends-on ("package"))
-                              (:file       "error-handling-mixins"
-                               :depends-on ("package"))
-                              (:file       "restart-mixins"
-                               :depends-on ("package"))
-                              (:file       "connector"
-                               :depends-on ("package"))))
+                              (:file       "connector-class")
+                              (:file       "threaded-receiver-mixin")
+                              (:file       "error-handling-mixins")
+                              (:file       "restart-mixins")
+                              (:file       "connector")))
 
                 (:module     "inprocess"
                  :pathname   "test/transport/inprocess"
                  :depends-on ("test" "transport")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "in-pull-connector"
-                               :depends-on ("package"))
-                              (:file       "in-push-connector"
-                               :depends-on ("package"))
-                              (:file       "out-connector"
-                               :depends-on ("package"))))
+                              (:file       "in-pull-connector")
+                              (:file       "in-push-connector")
+                              (:file       "out-connector")))
 
                 (:module     "patterns"
                  :pathname   "test/patterns"
@@ -473,20 +375,15 @@
                 (:module     "patterns-request-reply"
                  :pathname   "test/patterns/request-reply"
                  :depends-on ("test" "patterns")
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "future"
-                               :depends-on ("package"))
-                              (:file       "server"
-                               :depends-on ("package"))
-                              (:file       "local-server"
-                               :depends-on ("package"))
-                              (:file       "remote-server"
-                               :depends-on ("package"))
-                              (:file       "macros"
-                               :depends-on ("package"))
+                              (:file       "future")
+                              (:file       "server")
+                              (:file       "local-server")
+                              (:file       "remote-server")
+                              (:file       "macros")
 
-                              (:file       "integration"
-                               :depends-on ("package"))))))
+                              (:file       "integration")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
