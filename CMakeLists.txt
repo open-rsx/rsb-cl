@@ -167,6 +167,7 @@ test(test-transport-socket rsb-transport-socket)
 test(test-transport-spread rsb-transport-spread)
 
 test(test-filter-regex     rsb-filter-regex)
+test(test-filter-xpath     rsb-filter-xpath)
 
 test(test-introspection    rsb-introspection)
 
