@@ -4,6 +4,10 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
+#.(progn
+    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+    (values))
+
 (cl:in-package #:cl-rsb-system)
 
 (defsystem :rsb-converter-protocol-buffer
