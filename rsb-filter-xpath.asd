@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(progn
+#.(unless (find-package '#:cl-rsb-system)
     (load (merge-pathnames "cl-rsb.asd" *load-truename*))
     (values))
 

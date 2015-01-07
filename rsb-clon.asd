@@ -4,6 +4,10 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
+#.(unless (find-package '#:cl-rsb-system)
+    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+    (values))
+
 (cl:in-package #:cl-rsb-system)
 
 (defsystem :rsb-clon

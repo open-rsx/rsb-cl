@@ -1,34 +1,29 @@
 ;;;; rsb-introspection.asd --- System definition for introspection for RSB.
 ;;;;
-;;;; Copyright (C) 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:rsb-introspection-system
-  (:use
-   #:cl
-   #:asdf))
-
-(cl:in-package #:rsb-introspection-system)
-
-#.(progn
+#.(unless (find-package '#:cl-rsb-system)
     (load (merge-pathnames "cl-rsb.asd" *load-truename*))
     (values))
+
+(cl:in-package #:cl-rsb-system)
 
 (defsystem :rsb-introspection
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(cl-rsb-system:version/string)
+  :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
   :description "Introspection support for RSB."
   :defsystem-depends-on (:cl-protobuf)
   :depends-on  (:utilities.print-items
                 (:version :uiop   "3") ; for portable platform information
 
-                (:version :cl-rsb #.(cl-rsb-system:version/string)))
+                (:version :cl-rsb #.(version/string)))
   :encoding    :utf-8
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-                 :pathname   #.cl-rsb-system:+protocol-directory+
+                 :pathname   #.+protocol-directory+
                  :components ((:file       "Hello"
                                :pathname   "rsb/protocol/introspection/Hello")
                               (:file       "Bye"
@@ -74,14 +69,14 @@
 (defsystem :rsb-introspection-test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(cl-rsb-system:version/string)
+  :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
   :description "Unit tests for the rsb-introspection system."
   :depends-on  ((:version :lift              "1.7.1")
 
-                (:version :rsb-introspection #.(cl-rsb-system:version/string))
+                (:version :rsb-introspection #.(version/string))
 
-                (:version :cl-rsb-test       #.(cl-rsb-system:version/string)))
+                (:version :cl-rsb-test       #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "introspection"
                  :pathname   "test/introspection"
