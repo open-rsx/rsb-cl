@@ -1,6 +1,6 @@
 ;;;; client.lisp --- An example program demonstrating the remote- server.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,20 +38,26 @@
   (let ((future (rsb.patterns.request-reply:call remote-server "echo" "bla"
                                                  :block? nil
                                                  :return :event)))
-    (rsb.patterns.request-reply:future-result future))
+    (rsb.patterns.request-reply:future-result future)))
+;; mark-end::calls
 
-  ;; Another way of calling methods makes use of the fact that
-  ;; `remote-method' instances are funcallable:
+;; Another way of calling methods makes use of the fact that
+;; `remote-method' instances are funcallable:
+;;
+;; mark-start::funcalls
+(rsb.patterns.request-reply:with-remote-server
+    (remote-server "/example/clientserver")
+
+  ;; Blocking calls for a sequence of arguments:
   (map 'list (rsb.patterns.request-reply:server-method remote-server "echo")
        '("a" "b" "c"))
 
-  ;; This variant provides all the different behaviors of the `call'
-  ;; variant:
+  ;; Keyword arguments work the same way they do when using `call':
   (funcall (rsb.patterns.request-reply:server-method remote-server "echo")
            "bla"
            :return :event
            :block? nil))
-;; mark-end::calls
+;; mark-end::funcalls
 
 ;; Create a `remote-server' instance that calls methods of the remote
 ;; server at "/example/clientserver".
