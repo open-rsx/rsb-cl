@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the introspection module.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -56,7 +56,7 @@
                                  suffix-scope
                                  &allow-other-keys)
   (let ((scope (make-introspection-participants-scope suffix-scope)))
-    (with-informer (informer scope t :introspection? nil)
+    (with-participant (informer :informer scope :introspection? nil)
       (apply #'send informer datum (remove-from-plist args :suffix-scope)))))
 
 (defmacro with-condition-tracking ((handler-name check-conditions-name

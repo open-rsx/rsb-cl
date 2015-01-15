@@ -8,19 +8,17 @@
 
 ;; mark-start::body
 ;; For managing the lifetime of `remote-server' instances (e.g. for
-;; short-lived clients), the `with-remote-server' macro can used. It
+;; short-lived clients), the `with-participant' macro can used. It
 ;; will take care of disposing of the `remote-server' instance after
 ;; it has been used, also in case of non-local exist.
-;; mark-start::with-remote-server
-(rsb.patterns.request-reply:with-remote-server
-    (remote-server "/example/clientserver")
+;; mark-start::with-participant
+(rsb:with-participant (remote-server :remote-server "/example/clientserver")
   (format t "Server replied: ~A~%"
           (rsb.patterns.request-reply:call remote-server "echo" "bla")))
-;; mark-end::with-remote-server
+;; mark-end::with-participant
 
 ;; mark-start::calls
-(rsb.patterns.request-reply:with-remote-server
-    (remote-server "/example/clientserver")
+(rsb:with-participant (remote-server :remote-server "/example/clientserver")
 
   ;; The default behavior of returning the reply payload can be
   ;; changed using the :return keyword parameter.
@@ -45,8 +43,7 @@
 ;; `remote-method' instances are funcallable:
 ;;
 ;; mark-start::funcalls
-(rsb.patterns.request-reply:with-remote-server
-    (remote-server "/example/clientserver")
+(rsb:with-participant (remote-server :remote-server "/example/clientserver")
 
   ;; Blocking calls for a sequence of arguments:
   (map 'list (rsb.patterns.request-reply:server-method remote-server "echo")

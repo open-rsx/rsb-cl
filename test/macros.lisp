@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Unit tests for macros.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,32 +12,34 @@
   (:documentation
    "Unit tests for macros provided by the cl-rsb system."))
 
-;;; Listener-related macros
+;;; Test `with-participant' macro with `listener' and test
+;;; `listener'-related macros
 
 (addtest (macros-root
           :documentation
-          "Smoke test for the `with-listener' macro.")
-  with-listener/smoke
+          "Smoke test for the `with-participant' macro with
+           a :listener participant.")
+  with-participant/listener/smoke
 
-  (with-listener (listener "inprocess:/rsbtest/macros-root/with-listener/smoke")
+  (with-participant (listener :listener "/rsbtest/macros-root/with-participant/listener/smoke")
     (ensure (typep listener 'listener))
-    (check-participant listener :listener "/rsbtest/macros-root/with-listener/smoke")))
+    (check-participant listener :listener "/rsbtest/macros-root/with-participant/listener/smoke")))
 
 (addtest (macros-root
           :documentation
           "Test handling of error-policy keyword parameter in
-           `with-listener' macro.")
-  with-listener/error-policy
+           `with-participant' macro with a :listener participant.")
+  with-participant/listener/error-policy
 
   (let ((calls    '())
         (received '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-listener (listener "inprocess:/rsbtest/macros-root/with-listener/error-policy"
-                                     :transform #'mock-transform/error
-                                     ,@(when policy `(:error-policy ,policy)))
+           `(with-participant (listener :listener "/rsbtest/macros-root/with-listener/error-policy"
+                                        :transform #'mock-transform/error
+                                        ,@(when policy `(:error-policy ,policy)))
               (with-handler listener ((event) (push event received))
-                (with-informer (informer "inprocess:/rsbtest/macros-root/with-listener/error-policy" t)
+                (with-participant (informer :informer "/rsbtest/macros-root/with-listener/error-policy")
                   (send informer 1))))))
 
       ;; Without an error policy, the transform error should just be
@@ -61,37 +63,39 @@
   with-handler/smoke
 
   (let ((received '()))
-    (with-listener (listener "inprocess:/rsbtest/macros-root/with-handler/smoke")
+    (with-participant (listener :listener "/rsbtest/macros-root/with-handler/smoke")
       (with-handler listener ((event) (push event received))
         (ensure (typep listener 'listener))
         (check-participant listener :listener "/rsbtest/macros-root/with-handler/smoke")
-        (with-informer (i "inprocess:/rsbtest/macros-root/with-handler/smoke" t) (send i 1))))
+        (with-participant (informer :informer "/rsbtest/macros-root/with-handler/smoke")
+          (send informer 1))))
     (ensure-same (length received) 1)))
 
 ;;; Reader-related macros
 
 (addtest (macros-root
           :documentation
-          "Smoke test for the `with-reader' macro.")
-  with-reader/smoke
+          "Smoke test for the `with-participant' macro with a :reader
+           participant.")
+  with-participant/reader/smoke
 
-  (with-reader (reader "inprocess:/rsbtest/macros-root/with-reader/smoke")
+  (with-participant (reader :reader "/rsbtest/macros-root/with-participant/reader/smoke")
     (ensure (typep reader 'reader))
-    (check-participant reader :reader "/rsbtest/macros-root/with-reader/smoke")))
+    (check-participant reader :reader "/rsbtest/macros-root/with-participant/reader/smoke")))
 
 (addtest (macros-root
           :documentation
           "Test handling of error-policy keyword parameter in
-           `with-reader' macro.")
-  with-reader/error-policy
+           `with-participant' macro with a :reader participant.")
+  with-participant/reader/error-policy
 
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-reader (reader "inprocess:/rsbtest/macros-root/with-reader/error-policy"
-                                 :transform #'mock-transform/error
-                                 ,@(when policy `(:error-policy ,policy)))
-              (with-informer (informer "inprocess:/rsbtest/macros-root/with-reader/error-policy" t)
+           `(with-participant (reader :reader "/rsbtest/macros-root/with-participant/reader/error-policy"
+                                      :transform #'mock-transform/error
+                                      ,@(when policy `(:error-policy ,policy)))
+              (with-participant (informer :informer "/rsbtest/macros-root/with-participant/reader/error-policy")
                 (send informer 1))
               (receive reader))))
 
@@ -113,25 +117,26 @@
 
 (addtest (macros-root
           :documentation
-          "Smoke test for the `with-informer' macro.")
-  with-informer/smoke
+          "Smoke test for the `with-participant' macro with
+           a :informer participant.")
+  with-participant/informer/smoke
 
-  (with-informer (informer "inprocess:/rsbtest/macros-root/with-informer/smoke" t)
+  (with-participant (informer :informer "/rsbtest/macros-root/with-participant/informer/smoke")
     (ensure (typep informer 'informer))
-    (check-participant informer :informer "/rsbtest/macros-root/with-informer/smoke")))
+    (check-participant informer :informer "/rsbtest/macros-root/with-participant/informer/smoke")))
 
 (addtest (macros-root
           :documentation
           "Test handling of error-policy keyword parameter in
-           `with-informer' macro.")
-  with-informer/error-policy
+           `with-participant' macro with a :informer participant.")
+  with-participant/informer/error-policy
 
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-informer (informer "inprocess:/rsbtest/macros-root/with-informer/error-policy" t
-                                     :transform #'mock-transform/error
-                                     ,@(when policy `(:error-policy ,policy)))
+           `(with-participant (informer :informer "/rsbtest/macros-root/with-informer/error-policy"
+                                        :transform #'mock-transform/error
+                                        ,@(when policy `(:error-policy ,policy)))
               (send informer 1))))
 
       ;; Without an error policy, the transform error should just be

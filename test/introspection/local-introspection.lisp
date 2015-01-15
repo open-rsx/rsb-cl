@@ -1,6 +1,6 @@
 ;;;; local-introspection.lisp --- Unit tests for the local-introspection class.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -86,9 +86,7 @@
           "Smoke test for the `local-introspection' class.")
   smoke
 
-  (with-participant (introspection
-                     (make-participant
-                      :local-introspection +introspection-scope+))
+  (with-participant (introspection :local-introspection +introspection-scope+)
     ;; Survey existing participants.
     (send-introspection-event rsb.converter:+no-value+
                               :scope-suffix "/participants"
@@ -98,7 +96,7 @@
     (let ((server-scope (participant-scope
                          (rsb.introspection::introspection-%server
                           introspection))))
-      (with-remote-server (server server-scope)
+      (with-participant (server :remote-server server-scope)
         (call server "echo" rsb.converter:+no-value+)))))
 
 (addtest (local-introspection-root
@@ -108,10 +106,8 @@
   error-policy
 
   (with-condition-tracking (record-and-continue check-conditions)
-    (with-participant (introspection
-                       (make-participant
-                        :local-introspection +introspection-scope+
-                        :error-policy        #'record-and-continue))
+    (with-participant (introspection :local-introspection +introspection-scope+
+                                     :error-policy        #'record-and-continue)
       ;; All of the following are ignored because of the survey
       ;; filter.
       (send-introspection-event :foo)
@@ -168,18 +164,16 @@
            participants in a second set of threads.")
   stress
 
-  (with-participant (introspection
-                     (make-participant
-                      :local-introspection +introspection-scope+))
+  (with-participant (introspection :local-introspection +introspection-scope+)
     (let+ ((configuration *configuration*)
            ((&flet participant-noise ()
               (let ((*local-database* introspection))
                 (iter (repeat 30)
-                      (with-local-server (server (string (gensym "/")))
+                      (with-participant (server :local-server (string (gensym "/")))
                         (with-methods (server)
                           (("echo" (x) x) ("echo2" (x) x) ("echo3" (x) x))))))))
            ((&flet survey-noise ()
-              (with-informer (i (introspection-participants-scope) t)
+              (with-participant (i :informer (introspection-participants-scope))
                 (iter (repeat 30)
                       (send i rsb.converter:+no-value+
                             :method :|survey|)))))

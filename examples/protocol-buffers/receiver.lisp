@@ -1,6 +1,6 @@
 ;;;; receiver.lisp --- An example program demonstrating the protocol buffer converter.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -27,7 +27,7 @@
 ;; generic protocol buffer converter will be able to send and receive
 ;; events containing the protocol buffer message in question as a
 ;; payload:
-(rsb:with-reader (reader "/example/protobuf")
+(rsb:with-participant (reader :reader "/example/protobuf")
   (let ((event (rsb:receive reader)))
    (format t "Received ~A with payload ~%" event)
    (describe event)))

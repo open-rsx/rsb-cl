@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- Unit tests for informer class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,7 +68,7 @@ function."))
           "Test sending data.")
   send/data
 
-  (with-informer (informer "/rsbtest/informer/send" t)
+  (with-participant (informer :informer "/rsbtest/informer/send")
     (iter (repeat 100)
           (send informer "<foo/>")
           (send informer "<bar/>"))))
@@ -78,7 +78,7 @@ function."))
           "Test sending data.")
   send/event
 
-  (with-informer (informer "/rsbtest/informer/send/event" t)
+  (with-participant (informer :informer "/rsbtest/informer/send/event")
     (ensure-cases (scope data args
                    expected-meta-data expected-method expected-timestamps
                    expected-causes)
@@ -140,7 +140,8 @@ function."))
           "Test the type check employed by the `send' method.")
   send/check-type
 
-  (with-informer (informer "/rsbtest/informer/send/check-type" 'sequence)
+  (with-participant (informer :informer "/rsbtest/informer/send/check-type"
+                              :type 'sequence)
     ;; In this case, the event cannot be constructed from the payload.
     (ensure-condition 'type-error
       (send informer 5))
@@ -158,7 +159,7 @@ function."))
           "Test the scope check employed by the `send' method.")
   send/check-scope
 
-  (with-informer (informer "/rsbtest/informer/send/check-scope" t)
+  (with-participant (informer :informer "/rsbtest/informer/send/check-scope")
     ;; Identical scope and subscopes are allowed
     (send informer (make-event "/rsbtest/informer/send/check-scope" "foo"))
     (send informer (make-event "/rsbtest/informer/send/check-scope/subscope" "foo"))
@@ -174,7 +175,8 @@ function."))
            method.")
   send/unchecked
 
-  (with-informer (informer "/rsbtest/informer/send/unchecked" 'string)
+  (with-participant (informer :informer "/rsbtest/informer/send/unchecked"
+                              :type 'string)
     ;; Arbitrary scopes should be accepted.
     (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
           :unchecked? t)

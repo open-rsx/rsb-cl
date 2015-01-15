@@ -1,6 +1,6 @@
 ;;;; reloading.lisp --- Unit tests for introspection database reloading.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,7 @@
 
   ;; The listener forces a `local-introspection' database. Otherwise
   ;; `reinitialize-introspection' would be a noop.
-  (with-listener (listener "inprocess:/rsbtest/introspection/reloading")
+  (with-participant (listener :listener "inprocess:/rsbtest/introspection/reloading")
     (let+ (((&flet introspection-data ()
               (rsb.introspection::with-local-database (database)
                 (values (rsb.introspection::introspection-host database)

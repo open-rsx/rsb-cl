@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Main package definition for the rsb system.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -238,22 +238,19 @@
 
   ;; Macros
   (:export
-   #:call-with-participant
+   #:call-with-active-participant
+   #:with-active-participant
+   #:with-active-participants
+
    #:with-participant
+   #:with-participants
 
-   #:define-with-participant-macro
-
-   #:with-reader
-
-   #:with-listener
    #:call-with-handler
-   #:with-handler
-
-   #:with-informer)
+   #:with-handler)
 
   ;; Timed executor protocol and classes
   (:export
-   #:executor-interval              ; also setf
+   #:executor-interval                  ; also setf
 
    #:timed-executor
    #:timed-executor/weak)
@@ -276,18 +273,21 @@
    #:+optimization-fast+unsafe+)
 
   (:documentation
-   "This package contains most of the basic, client-facing
-functionality of cl-rsb:
-+ `event' class
-+ participant classes and associated protocols
-  + `reader' participant class
-    + `make-reader' method, `with-reader' macro
-    + `receiver-filters' accessor
-    + `receive' method
-  + `listener' participant class
-    + `make-listener' method, `with-listener' macro
-    + `receiver-filters' accessor
-  + `informer' participant class
-    + `make-informer' method, `with-informer macro
-    + `send' method
-+ configuration system"))
+   "This package contains most of the basic programming interface of rsb:
+
+    Scopes and events:
+    + `scope'                       [class]
+    + `event'                       [class]
+      + `event-scope'               [generic function]
+      + `event-data'                [generic function]
+
+    Participant classes and associated protocols:
+    + `make-participant'            [generic function]
+    + `with-participant'            [macro]
+    + `reader' participant          [class]
+      + `receiver-filters'          [generic function]
+      + `receive'                   [generic function]
+    + `listener' participant        [class]
+      + `receiver-filters'          [generic function]
+    + `informer' participant        [class]
+      + `send'                      [generic function]"))

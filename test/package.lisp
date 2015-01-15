@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition cl-rsb unit tests.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -128,7 +128,7 @@
                    (case expected-scope
                      (error (ensure-condition error
                               (detach/ignore-errors (do-it))))
-                     (t     (with-participant (participant (do-it))
+                     (t     (with-active-participant (participant (do-it))
                               (check-participant
                                participant ,kind expected-scope
                                :check-transport-urls? ,check-transport-urls?)))))))))
@@ -147,7 +147,7 @@
              (case expected-scope
                (error (ensure-condition error
                         (detach/ignore-errors (do-it))))
-               (t     (with-participant (participant (do-it))
+               (t     (with-active-participant (participant (do-it))
                         (check-participant
                          participant ,kind expected-scope
                          :check-transport-urls? ,check-transport-urls?)))))))
@@ -175,9 +175,7 @@
          print
 
          (with-participant (participant
-                            (make-participant
-                             ,kind ,(format nil "/~(~A~)/print" class)
-                             ,@(when (eq class 'informer) '(:type  t))))
+                            ,kind ,(format nil "/~(~A~)/print" class))
            (ensure
             (not (emptyp
                   (with-output-to-string (stream)
@@ -193,11 +191,11 @@ CLASS.
 PARTICIPANT? controls whether a participant of class CLASS is created
 and bound to a variable named like the value of CLASS."
   (let+ ((suite-name (format-symbol *package* "~A-ROOT" class))
-         (with-macro (format-symbol :rsb "WITH-~A" class))
+         (kind       (make-keyword class))
          (scope      (format nil "/rsbtest/~(~A~)/errorhook" class))
          ((&flet maybe-wrap (body)
             (if participant?
-                `((,with-macro (,class ,scope) ,@body))
+                `((with-participant (,class ,kind ,scope) ,@body))
                 body))))
     `(addtest (,suite-name
               :documentation
@@ -207,7 +205,7 @@ and bound to a variable named like the value of CLASS."
 
        (let ((expected-errors)
              (seen-errors))
-         (with-informer (informer ,scope t)
+         (with-participant (informer :informer ,scope)
            ,@(maybe-wrap
               `(;; Install collecting error handler.
                 (push (lambda (condition) (push condition seen-errors) (continue))

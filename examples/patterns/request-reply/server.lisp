@@ -1,6 +1,6 @@
 ;;;; server.lisp --- An example program demonstrating the local server.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,21 +8,21 @@
 
 ;; mark-start::body
 ;; For managing the lifetime of `local-server' instances (e.g. for
-;; short-lived clients), the `with-local-server' macro can used. It
+;; short-lived clients), the `with-participant' macro can used. It
 ;; will take care of disposing of the `local-server' instance after it
 ;; has been used, also in case of non-local exist.
 ;;
 ;; Methods can be managed similarly. After the `with-methods' form,
 ;; the methods are removed.
-;; mark-start::with-local-server
-(rsb.patterns.request-reply:with-local-server (server "/example/clientserver")
+;; mark-start::with-participant
+(rsb:with-participant (server :local-server "/example/clientserver")
   (rsb.patterns.request-reply:with-methods (server)
       (("echo" (arg string)
          arg))))
-;; mark-end::with-local-server
+;; mark-end::with-participant
 
 ;; mark-start::setf-method
-(rsb.patterns.request-reply:with-local-server (server "/example/clientserver")
+(rsb:with-participant (server :local-server "/example/clientserver")
   (setf (rsb.patterns.request-reply:server-method server "echo")
         (lambda (arg) arg)))
 ;; mark-end::setf-method

@@ -1,25 +1,24 @@
 ;;;; reader.lisp --- An example program demonstrating the reader.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 ;;;; Loading this file does not terminate.
 
 ;; mark-start::body
-
 ;; For managing the lifetime of readers (e.g. for short-lived
-;; readers), the `with-reader' macro can used. It will take care of
-;; disposing of the `reader' instance after it has been used, also in
-;; case of non-local exist.
+;; readers), the `with-participant' macro can used. It will take care
+;; of disposing of the `reader' instance after it has been used, also
+;; in case of non-local exist.
 ;;
 ;; Note: this form will block until an event is received.
-;; mark-start::with-reader
-(rsb:with-reader (reader "/example/informer")
+;; mark-start::with-participant
+(rsb:with-participant (reader :reader "/example/informer")
   (let ((event (rsb:receive reader)))
     (format t "Received event: ~A~%" event)
     event)) ; return the event
-;; mark-end::with-reader
+;; mark-end::with-participant
 
 ;; This will create a `reader' instance that receives events which are
 ;; sent to the channel designated by the scope "/example/reader". The

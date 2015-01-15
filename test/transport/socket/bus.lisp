@@ -1,6 +1,6 @@
 ;;;; bus.lisp --- Unit tests for the bus* classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -52,11 +52,11 @@ connection.")
   ;; Has to signal an error since the incompatible options are
   ;; supplied for a single host-port combination.
   (ensure-condition participant-creation-error
-    (with-reader (r1 (make-socket-url t nil))
+    (with-participant (r1 :reader (make-socket-url t nil))
       (declare (ignore r1))
-      (with-reader (r2 (make-socket-url nil '("tcpnodelay" "0")))
+      (with-participant (r2 :reader (make-socket-url nil '("tcpnodelay" "0")))
         (declare (ignore r2))
-        (with-reader (r3 (make-socket-url nil nil))
+        (with-participant (r3 :reader (make-socket-url nil nil))
           (declare (ignore r3))))))) ; body is not important
 
 (addtest (transport-socket-bus-root
@@ -81,7 +81,8 @@ port. This helps ensuring proper cleanup.")
         (ensure-bus-client host port connector-1))
 
       ;; Create a bus server.
-      (with-reader (dummy (make-socket-url t nil) :converters '((t . :fundamental-null)))
+      (with-participant (dummy :reader (make-socket-url t nil)
+                               :converters '((t . :fundamental-null)))
         ;; We should be able to create a bus clients now. We create
         ;; two connectors and request a bus client for each of
         ;; them. The first request should cause the bus client to be

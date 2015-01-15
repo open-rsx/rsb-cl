@@ -1,6 +1,6 @@
 ;;;; logger.lisp --- An example program demonstrating introspection.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,9 +34,8 @@
                (:host-removed
                 (hooks:clear-hook (hook)))))))
   (rsb:with-participant (introspection
-                         (rsb:make-participant
-                          :remote-introspection rsb.introspection:+introspection-scope+
-                          :change-handler (alexandria:curry #'on-database-change :introspection)))
+                         :remote-introspection rsb.introspection:+introspection-scope+
+                         :change-handler (alexandria:curry #'on-database-change :introspection))
     (declare (ignore introspection))
     (sleep most-positive-fixnum)))
 ;; mark-end::body

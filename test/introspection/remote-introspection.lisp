@@ -1,6 +1,6 @@
 ;;;; remote-introspection.lisp --- Unit tests for the remote-introspection class.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -120,9 +120,8 @@
            `remote-introspection'.")
   update/smoke
 
-  (with-participant (introspection (make-participant
-                                    :remote-introspection +introspection-scope+
-                                    :update-interval .2))
+  (with-participant (introspection :remote-introspection +introspection-scope+
+                                   :update-interval .2)
     (sleep 1.0)))
 
 (addtest (remote-introspection-root
@@ -132,9 +131,8 @@
   error-policy
 
   (with-condition-tracking (record-and-continue check-conditions)
-    (with-participant (introspection (make-participant
-                                      :remote-introspection +introspection-scope+
-                                      :error-policy #'record-and-continue))
+    (with-participant (introspection :remote-introspection +introspection-scope+
+                                     :error-policy #'record-and-continue)
       ;; "pong" replies should be ignored.
       (send-introspection-event
        "pong" :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
@@ -214,14 +212,13 @@
               (mapc #'check-call calls expected))
             (setf calls '()))))
 
-    (with-participant (introspection (make-participant
-                                      :remote-introspection +introspection-scope+
-                                      :change-handler   #'on-database-change
-                                      :update-interval  nil
-                                      :response-timeout .01))
+    (with-participant (introspection :remote-introspection +introspection-scope+
+                                     :change-handler   #'on-database-change
+                                     :update-interval  nil
+                                     :response-timeout .01)
       ;; Create and destroy an `informer' participant and check the
       ;; generated events.
-      (with-informer (informer "/rsbtest/remote-introspection/change-hook/participant" t)
+      (with-participant (informer :informer "/rsbtest/remote-introspection/change-hook/participant")
         (declare (ignore informer)))
       (check-calls
        '(((eql :database) host-entry        (eql :host-added))
@@ -232,7 +229,7 @@
          (host-entry      (eql :unknown)    (eql :state-changed))))
 
       ;; Test clock-offset and latency events.
-      (with-informer (informer "/rsbtest/remote-introspection/change-hook/timing" t)
+      (with-participant (informer :informer "/rsbtest/remote-introspection/change-hook/timing")
         (declare (ignore informer))
         (setf calls '())
         (dotimes (i 4) (rsb.ep:handle introspection :update))
@@ -249,20 +246,16 @@
            parallel.")
   stress
 
-  (with-participant (introspection
-                     (make-participant
-                      :remote-introspection +introspection-scope+
-                      :update-interval .01))
-    (with-participant (introspection
-                       (make-participant
-                        :local-introspection +introspection-scope+))
+  (with-participant (introspection :remote-introspection +introspection-scope+
+                                   :update-interval .01)
+    (with-participant (introspection :local-introspection +introspection-scope+)
       (let+ ((configuration *configuration*)
              ((&flet participant-noise ()
                 (let ((*configuration* configuration)
                       (*local-database* introspection))
                   (iter (repeat 30)
                         (sleep (random .01))
-                        (with-local-server (server (string (gensym "/")))
+                        (with-participant (server :local-server (string (gensym "/")))
                           (with-methods (server)
                               (("echo" (x) x) ("echo2" (x) x) ("echo3" (x) x))))))))
              (threads (map-into (make-list 10) (curry #'bt:make-thread

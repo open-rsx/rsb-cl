@@ -1,6 +1,6 @@
 ;;;; integration.lisp --- Integration test for local and remote servers.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,11 +18,11 @@ classes."))
 `remote-server' instances.")
   smoke
 
-  (with-local-server (local-server url)
+  (with-participant (local-server :local-server url)
     (with-methods (local-server)
         (("echo" (arg string)
             arg))
-      (with-remote-server (remote-server url)
+      (with-participant (remote-server :remote-server url)
         (ensure-random-cases 100 ((s a-string))
 
           ;; Invoke with payload result using `call' method
@@ -48,10 +48,10 @@ classes."))
 
   smoke/event
 
-  (with-local-server (local-server url)
+  (with-participant (local-server :local-server url)
     (with-methods (local-server)
         (("echo" (arg :event) arg))
-      (with-remote-server (remote-server url)
+      (with-participant (remote-server :remote-server url)
         (let ((event (make-event
                       (merge-scopes
                        '("echo") (participant-scope remote-server))
@@ -78,10 +78,10 @@ classes."))
           "Test catch-all method on `local-server' side.")
   local-catch-all-method
 
-  (with-local-server (local-server url)
+  (with-participant (local-server :local-server url)
     (with-methods (local-server)
         ((nil (arg integer) (1+ arg)))
-      (with-remote-server (remote-server url)
+      (with-participant (remote-server :remote-server url)
         (ensure-same (call remote-server "foo" 1) 2)
         (ensure-same (call remote-server "bar" 3) 4)))))
 
@@ -90,10 +90,10 @@ classes."))
           "Test catch-all method on `remote-server' side.")
   remote-catch-all-method
 
-  (with-local-server (local-server url)
+  (with-participant (local-server :local-server url)
     (with-methods (local-server)
         (("foo" (arg integer) (1+ arg)))
-      (with-remote-server (remote-server url)
+      (with-participant (remote-server :remote-server url)
         (let ((scope (merge-scopes '("foo") (uri->scope-and-options
                                              (puri:uri url)))))
           (ensure-same (call remote-server nil (make-event scope 1)) 2))))))
@@ -104,11 +104,11 @@ classes."))
 execution.")
   error
 
-  (with-local-server (local-server url)
+  (with-participant (local-server :local-server url)
     (with-methods (local-server)
         (("error" (arg string)
            (error "intentional error")))
-      (with-remote-server (remote-server url)
+      (with-participant (remote-server :remote-server url)
 
         ;; Invoke using `call' method
         (ensure-condition 'remote-method-execution-error
@@ -138,7 +138,7 @@ execution.")
           "Test timeout behavior when calling non-existent methods.")
   timeout
 
-  (with-remote-server (remote-server url)
+  (with-participant (remote-server :remote-server url)
     ;; Invoke using `call' method
     (ensure-condition 'bt:timeout
       (call remote-server "nosuchmethod" "does-not-matter"
@@ -170,15 +170,15 @@ execution.")
          ((&flet event-2* (event)
             (setf (event-data event) (* 2 (event-data event)))
             event)))
-    (with-local-server (local-server
-                        url :transform `((:argument ,#'event-1+)
-                                         (:return   ,#'event-2*)))
+    (with-participant (local-server :local-server url
+                                    :transform `((:argument ,#'event-1+)
+                                                 (:return   ,#'event-2*)))
       (with-methods (local-server)
           (("addfive" (arg integer)
              (+ arg 5)))
-        (with-remote-server (remote-server
-                             url :transform `((:argument ,#'event-2*)
-                                              (:return   ,#'event-1+)))
+        (with-participant (remote-server :remote-server url
+                                         :transform `((:argument ,#'event-2*)
+                                                      (:return   ,#'event-1+)))
           (ensure-random-cases 100 ((i an-integer))
 
             ;; Invoke with payload result using `call' method

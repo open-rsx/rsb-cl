@@ -186,8 +186,8 @@
     (let ((participant))
       (ensure-same
        (with-hook-call-tracking (*make-participant-hook*)
-         (with-participant (participant1 (apply #'make-participant
-                                                kind scope args))
+         (with-active-participant (participant1 (apply #'make-participant
+                                                       kind scope args))
            (setf participant participant1)))
        (list (list participant expected))
        :test (lambda (calls expected)
@@ -223,7 +223,7 @@
                                    (lambda (&rest args)
                                      (declare (ignore args))
                                      (error 'buggy-handler-error))))
-              (with-participant (participant (make-participant :listener uri))
+              (with-participant (participant :listener uri)
                 (when thunk (funcall thunk participant)))))))
 
     ;; Without invoking restarts, the condition should be wrapped in a
@@ -254,8 +254,8 @@
     (let ((participant))
       (ensure-same
        (with-hook-call-tracking (*participant-state-change-hook*)
-         (with-participant (participant1 (apply #'make-participant
-                                                kind scope args))
+         (with-active-participant
+             (participant1 (apply #'make-participant kind scope args))
            (setf participant participant1)))
        (list (list participant :detached))
        :test #'equal))))

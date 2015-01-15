@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,10 +68,7 @@
 
   ;; Convenience and utility macros
   (:export
-   #:with-local-server
-   #:with-methods
-
-   #:with-remote-server)
+   #:with-methods)
 
   (:documentation
    "This package contains the request-reply communication pattern.

@@ -84,7 +84,7 @@ function."))
 instance.")
   handlers
 
-  (with-listener (listener "/foo")
+  (with-participant (listener :listener "/foo")
     ;; Initially, there should not be any handlers.
     (ensure-null (rsb.ep:handlers listener))
 
@@ -102,8 +102,8 @@ instance.")
           "Test receiving data sent by an informer.")
   receive
 
-  (with-informer (informer "/rsbtest/listener/receive" t)
-    (with-listener (listener "/rsbtest/listener/receive")
+  (with-participant (informer :informer "/rsbtest/listener/receive")
+    (with-participant (listener :listener "/rsbtest/listener/receive")
       ;; Test receive
       (send-some informer)
 

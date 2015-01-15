@@ -1,57 +1,77 @@
 ;;;; marcos.lisp --- Convenience marcos for RSB-related functionality.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb)
 
-(defun call-with-participant (participant thunk)
-  "Call THUNK with PARTICIPANT as the sole argument. Deactivate
-   PARTICIPANT when THUNK returns or a control transfer occurs."
+;;; Participants
+
+(defun call-with-active-participant (participant thunk)
+  "Call THUNK with PARTICIPANT as the sole argument.
+
+   Deactivate PARTICIPANT when THUNK returns or a control transfer
+   occurs."
   (declare (type function thunk))
   (unwind-protect
        (funcall thunk participant)
     (detach/ignore-errors participant)))
 
-(defmacro with-participant ((var participant) &body body)
-  "Execute BODY with VAR bound to PARTICIPANT; Deactivate the
-   participant when the execution of BODY ends normally or because of
-   a control transfer."
+(defmacro with-active-participant ((var participant-form) &body body)
+  "Execute BODY with VAR bound to the result of evaluating PARTICIPANT-FORM.
+
+   Deactivate the participant when the execution of BODY ends normally
+   or because of a control transfer."
+  (check-type var symbol)
   `(flet ((with-participant-thunk (,var) ,@body))
      (declare (dynamic-extent #'with-participant-thunk))
-     (call-with-participant ,participant #'with-participant-thunk)))
+     (call-with-active-participant ,participant-form #'with-participant-thunk)))
 
-(defmacro define-with-participant-macro (kind &rest extra-args)
-  (let ((name      (symbolicate "WITH-" kind))
-        (make-name (symbolicate "MAKE-" kind)))
-    `(defmacro ,name ((var scope-or-uri ,@extra-args
-                       &rest args
-                       &key
-                       transports
-                       converters
-                       transform
-                       error-policy
-                       &allow-other-keys)
-                      &body body)
+(defmacro with-active-participants (bindings &body body)
+  "Execute BODY with participant bindings according to BINDINGS.
 
-       ,(format nil "Execute BODY with VAR bound to a `~(~A~)' for the ~
-                     channel designated by SCOPE-OR-URI. The ~:*~(~A~) ~
-                     is destroyed when the execution of BODY ends ~
-                     normally or because of a control transfer."
-                kind)
-       (declare (ignore transports converters transform error-policy))
-       (check-type var symbol "a symbol")
+   Elements of BINDINGS are of the form
 
-       `(with-participant (,`,var (,',make-name ,`,scope-or-uri
-                                                ,,@(mapcar (lambda (arg) `,arg)
-                                                           extra-args)
-                                                ,@`,args))
-          ,@`,body))))
+     (VAR PARTICIPANT-FORM)
 
-(define-with-participant-macro listener)
-(define-with-participant-macro reader)
-(define-with-participant-macro informer type)
+   Deactivate all already constructed participants when constructing a
+   participant causes a control transfer or when the execution of BODY
+   ends normally or because of a control transfer."
+  (destructuring-bind (&optional first &rest rest) bindings
+    (if first
+        `(with-active-participant ,first
+           (with-active-participants ,rest ,@body))
+        `(progn ,@body))))
+
+(defmacro with-participant ((var kind scope
+                             &rest initargs &key &allow-other-keys)
+                            &body body)
+  "Execute BODY with VAR bound to the participant KIND, SCOPE, INITARGS.
+
+   Deactivate the participant when the execution of BODY ends normally
+   or because of a control transfer."
+  (check-type var symbol)
+  `(with-active-participant (,var (make-participant ,kind ,scope ,@initargs))
+     ,@body))
+
+(defmacro with-participants (bindings &body body)
+  "Execute BODY with participant bindings according to BINDINGS.
+
+   Elements of BINDINGS are of the form
+
+     (VAR KIND SCOPE &rest INITARGS &key &allow-other-keys)
+
+   Deactivate all already constructed participants when constructing a
+   participant causes a control transfer or when the execution of BODY
+   ends normally or because of a control transfer."
+  (destructuring-bind (&optional first &rest rest) bindings
+    (if first
+        `(with-participant ,first
+           (with-participants ,rest ,@body))
+        `(progn ,@body))))
+
+;;; Handlers
 
 (defun call-with-handler (listener handler thunk)
   "Call THUNK with HANDLER temporarily added to the handlers of
@@ -72,7 +92,6 @@
 
      (lambda (EVENT-VAR) HANDLER-BODY)"
   (check-type event-var symbol "a symbol")
-
   `(flet ((with-handler-handler (,event-var) ,@handler-body)
           (with-handler-thunk () ,@body))
      (declare (dynamic-extent #'with-handler-handler #'with-handler-thunk))

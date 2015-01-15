@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Unit tests for macros of the patterns module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,7 @@
           "Smoke test for the `with-methods' macro.")
   with-methods/smoke
 
-  (with-local-server (server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-methods/smoke")
+  (with-participant (server :local-server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-methods/smoke")
     (with-methods (server)
         ;; Normal method names
         (("mymethod"     (foo string) foo)
@@ -82,18 +82,20 @@
 (addtest (macros-root
           :documentation
           "Test handling of error-policy keyword parameter in
-           `with-local-server' macro.")
-  with-local-server/error-policy
+           `with-participant' macro when used with a :local-server
+           participant.")
+  with-participant/local-server/error-policy
 
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-local-server (local-server
-                                "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy"
-                                :transform `((:argument . ,#'mock-transform/error))
-                                ,@(when policy `(:error-policy ,policy)))
+           `(with-participant (local-server :local-server
+                                            "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy"
+                                            :transform `((:argument . ,#'mock-transform/error))
+                                     ,@(when policy `(:error-policy ,policy)))
               (with-methods (local-server) (("echo" (arg) arg))
-                (with-remote-server (remote-server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy")
+                (with-participant (remote-server :remote-server
+                                                 "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy")
                   (call remote-server "echo" 1))))))
 
       ;; Without an error policy, the transform error should just be
@@ -116,17 +118,19 @@
 (addtest (macros-root
           :documentation
           "Test handling of error-policy keyword parameter in
-           `with-remote-server' macro.")
-  with-remote-server/error-policy
+           `with-participant' macro when used with a :remote-server
+           participant.")
+  with-participant/remote-server/error-policy
 
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-remote-server (remote-server
-                                 "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
-                                 :transform `((:return . ,#'mock-transform/error))
-                                 ,@(when policy `(:error-policy ,policy)))
-              (with-local-server (local-server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy")
+           `(with-participant (remote-server :remote-server
+                                             "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
+                                             :transform `((:return . ,#'mock-transform/error))
+                                      ,@(when policy `(:error-policy ,policy)))
+              (with-participant (local-server :local-server
+                                              "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy")
                 (with-methods (local-server) (("echo" (arg) arg))
                   (call remote-server "echo" 1))))))
 

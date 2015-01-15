@@ -1,6 +1,6 @@
 ;;;; reader.lisp --- Unit tests for the reader class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,8 +68,8 @@
 mode.")
   receive/blocking
 
-  (with-informer (informer "/rsbtest/reader/receive/blocking" t)
-    (with-reader (reader "/rsbtest/reader/receive/blocking")
+  (with-participant (informer :informer "/rsbtest/reader/receive/blocking")
+    (with-participant (reader :reader "/rsbtest/reader/receive/blocking")
       (ensure-random-cases 32 ((data a-string))
         (send informer data)
         (check-event (receive reader :block? t)
@@ -81,8 +81,8 @@ mode.")
 mode.")
   receive/non-blocking
 
-  (with-informer (informer "/rsbtest/reader/receive/non-blocking" t)
-    (with-reader (reader "/rsbtest/reader/receive/non-blocking")
+  (with-participant (informer :informer "/rsbtest/reader/receive/non-blocking")
+    (with-participant (reader :reader "/rsbtest/reader/receive/non-blocking")
       (ensure-random-cases 32 ((data a-string))
         (send informer data)
         (let ((received

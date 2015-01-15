@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.patterns.request-reply)
 
-(define-with-participant-macro remote-server)
-(define-with-participant-macro local-server)
-
 (defun call-with-methods (server methods thunk)
   (declare (type function thunk))
   (let+ (((&flet+ add-one-method ((name request-type lambda))
