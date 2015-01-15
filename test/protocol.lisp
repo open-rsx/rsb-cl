@@ -144,7 +144,7 @@
          (:converters :transports :introspection?))
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :transform nil)
-         (:converters :transports :transform))
+         (:converters :transports :introspection? :transform))
 
         ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :type t)
@@ -157,7 +157,7 @@
          (:converters :transports :type :introspection?))
         ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :type t :transform nil)
-         (:converters :transports :type :transform))
+         (:converters :transports :type :introspection? :transform))
 
         ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :introspection?))
@@ -169,7 +169,7 @@
          (:converters :transports :introspection?))
         ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
                          :transform nil)
-         (:converters :transports :transform))
+         (:converters :transports :introspection? :transform))
 
         ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :introspection?))
@@ -181,7 +181,7 @@
          (:converters :transports :introspection?))
         ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
                          :transform nil)
-         (:converters :transports :transform)))
+         (:converters :transports :introspection? :transform)))
 
     (let ((participant))
       (ensure-same
