@@ -1,6 +1,6 @@
 ;;;; listener.lisp --- Unit tests for listener.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -61,6 +61,11 @@ function."))
 
   `("/rsbtest/listener/construction?foo=bar"
     () () ()
+    "/rsbtest/listener/construction")
+
+  ;; Handlers
+  `("/rsbtest/listener/construction"
+    () () (:handlers (list (lambda (event) (declare (ignore event)))))
     "/rsbtest/listener/construction")
 
   ;; No transports => error
