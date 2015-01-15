@@ -68,6 +68,11 @@ function."))
     () () (:handlers (list (lambda (event) (declare (ignore event)))))
     "/rsbtest/listener/construction")
 
+  ;; Filters
+  `("/rsbtest/listener/construction"
+    () () (:filters (list (lambda (event) (declare (ignore event)))))
+    "/rsbtest/listener/construction")
+
   ;; No transports => error
   '("/rsbtest/listener/construction"
     () () (:transports ((t :enabled nil)))
