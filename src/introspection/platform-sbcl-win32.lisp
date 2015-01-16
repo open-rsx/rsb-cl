@@ -64,6 +64,29 @@
           (filetime/integer->local-time
            (filetime/struct->filetime/integer create))))))
 
+;; User
+
+(sb-alien:load-shared-object "advapi32")
+
+(sb-alien:define-alien-routine ("GetUserNameW" get-user-name/w)
+    sb-alien:long
+  (buffer (array sb-alien:char))
+  (length (* sb-alien:long)))
+
+(defun %current-user ()
+  (with-platform-information-error-translation
+      ("determine username via GetUserNameW")
+    (sb-alien:with-alien ((buffer (array sb-alien:char 1024))
+                          (length  sb-alien:long             :local 1024))
+      (if (zerop (get-user-name/w (sb-alien:cast buffer (array sb-alien:char))
+                                  (sb-alien:addr length)))
+          (sb-win32::win32-error "GetUserNameW")
+          ;; The C-string in BUFFER is guaranteed to be
+          ;; NULL-terminated, doing this conversion without explicitly
+          ;; stopping after LENGTH characters is safe.
+          (sb-alien::c-string-to-string
+           (sb-alien:alien-sap buffer) :utf-16le 'character)))))
+
 ;;; Host information
 
 (sb-alien:load-shared-object "secur32")
