@@ -1,6 +1,6 @@
 ;;;; platform-common.lisp --- Utilities for platform-specific functions.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -61,6 +61,7 @@
         (declare (ignore condition))
         (or fallback (setf fallback (local-time:now)))))))
 
+#-win32
 (defun %current-user ()
   (with-platform-information-error-translation
       ("determine username from passwd database entry")
