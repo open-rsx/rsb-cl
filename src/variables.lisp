@@ -1,6 +1,6 @@
 ;;;; variables.lisp --- Global and special variables used within RSB.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -42,12 +42,12 @@ of random IDs and similar things requiring pseudo randomness.")
     "rsb.conf"
 
     ;; User-specific configuration
-    #+unix     #P"~/.config/rsb.conf"
-    #+windows  ,(merge-pathnames "rsb.conf" (user-homedir-pathname))
+    #+unix  #P"~/.config/rsb.conf"
+    #+win32 ,(merge-pathnames "rsb.conf" (user-homedir-pathname))
 
     ;; System-wide configuration
-    #+unix     #P"/etc/rsb.conf"
-    #+windows  #P"/rsb.conf")
+    #+unix  #P"/etc/rsb.conf"
+    #+win32 #P"/rsb.conf")
   "List of configuration file names in order of decreasing priority.")
 
 (declaim (type list *default-configuration*))
