@@ -1,6 +1,6 @@
 ;;;; platform-sbcl-win32.lisp --- Platform-specific functions for SBCL on Win32.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,8 +22,8 @@
 
 (sb-alien:define-alien-type nil
   (sb-alien:struct filetime
-    (low-date-time  sb-alien:long)
-    (high-date-time sb-alien:long)))
+    (low-date-time  sb-win32::dword)
+    (high-date-time sb-win32::dword)))
 
 (declaim (ftype (function ((sb-alien:alien (sb-alien:struct filetime))) integer)
                 filetime/struct->filetime/integer))
@@ -37,8 +37,9 @@
   :test #'local-time:timestamp=)
 
 (defun filetime/integer->local-time (nanoseconds/100)
-  (local-time:adjust-timestamp +filetime-base-time+
-    (:offset :nsec (* 100 nanoseconds/100))))
+  (let ((local-time:*default-timezone* local-time:+utc-zone+))
+    (local-time:adjust-timestamp +filetime-base-time+
+      (:offset :nsec (* 100 nanoseconds/100)))))
 
 ;; kernel32.dll
 (sb-alien:define-alien-routine ("GetProcessTimes" get-process-time)
@@ -70,7 +71,7 @@
 (sb-alien:define-alien-routine ("GetComputerObjectNameW" get-computer-object-name/w)
     sb-alien:int
   (format sb-alien:int)
-  (buffer (sb-alien:array sb-alien:char 1024))
+  (buffer (array sb-alien:char 1024))
   (length (* sb-alien:long)))
 
 (defun %current-host-id ()
@@ -80,4 +81,8 @@
                           (length sb-alien:long                       :local 1024))
       (if (zerop (get-computer-object-name/w 6 buffer (sb-alien:addr length)))
           (sb-win32::win32-error "GetComputerObjectNameW")
-          (values (sb-alien::c-string-to-string (alien-sap buffer) :utf-16le 'character) length)))))
+          ;; Hopefully, the C-string in BUFFER is guaranteed to be
+          ;; NULL-terminated, doing this conversion without explicitly
+          ;; stopping after LENGTH characters is safe.
+          (sb-alien::c-string-to-string
+           (sb-alien:alien-sap buffer) :utf-16le 'character)))))
