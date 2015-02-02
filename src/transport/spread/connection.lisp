@@ -100,13 +100,14 @@
           ,@body)))
 
   (defmethod receive-message ((connection connection) (block? t))
-    (declare (inline %ensure-receive-buffer))
-    (let+ (((&accessors-r/o (connection connection-%connection)
-                            (buffer     %ensure-receive-buffer))
-            connection))
+    (let+ (((&structure connection- %connection %receive-buffer) connection)
+           (buffer (or %receive-buffer
+                       (setf %receive-buffer
+                             (make-octet-vector
+                              network.spread:+maximum-message-data-length+)))))
       (with-spread-condition-translation
         (values buffer
-                (network.spread:receive-into connection buffer
+                (network.spread:receive-into %connection buffer
                                              :block?         block?
                                              :return-sender? nil
                                              :return-groups? nil)))))
@@ -126,12 +127,3 @@
      (format stream "~A (~D)"
              (network.spread:connection-name %connection)
              (hash-table-count %groups)))))
-
-;;; Utility functions
-
-(defun %ensure-receive-buffer (connection)
-  (let+ (((&structure connection- %receive-buffer) connection))
-    (or %receive-buffer
-        (setf %receive-buffer
-              (make-octet-vector
-               network.spread:+maximum-message-data-length+)))))
