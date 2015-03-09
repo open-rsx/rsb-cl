@@ -269,9 +269,6 @@
 
    #:uri-mixin
 
-   #:define-participant-creation-uri-methods
-   #:define-participant-creation-restart-method
-
    #:maybe-shorten-sequence)
 
   ;; Optimization settings
