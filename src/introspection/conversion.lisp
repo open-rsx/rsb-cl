@@ -55,7 +55,8 @@
              (commandline-arguments rsb.protocol.operatingsystem:process-commandline-arguments)
              (start-time            rsb.protocol.operatingsystem:process-start-time)
              (executing-user        rsb.protocol.operatingsystem:process-executing-user)
-             (rsb-version           rsb.protocol.operatingsystem:process-rsb-version))
+             (rsb-version           rsb.protocol.operatingsystem:process-rsb-version)
+             (display-name          rsb.protocol.operatingsystem:process-display-name))
             process)
            ((&accessors-r/o
              (host-id          rsb.protocol.operatingsystem:host-id)
@@ -96,7 +97,9 @@
                      :executing-user        (unless (emptyp executing-user)
                                               executing-user)
                      :rsb-version           (unless (emptyp rsb-version)
-                                              rsb-version))
+                                              rsb-version)
+                     :display-name          (unless (emptyp display-name)
+                                              display-name))
        :host        (make-instance
                      'host-info
                      :id               host-id
@@ -118,7 +121,8 @@
            ((&structure-r/o
              process-info-
              process-id program-name commandline-arguments
-             start-time executing-user rsb-version)
+             start-time executing-user rsb-version
+             display-name)
             process)
            ((&structure-r/o
              host-info- (host-id id) hostname
@@ -130,7 +134,8 @@
              :scope     (scope-string scope)
              :type      (prin1-to-string type)
              :transport (map 'vector #'princ-to-string transports)
-             :process   (make-instance
+             :process   (apply
+                         #'make-instance
                          'rsb.protocol.operatingsystem:process
                          :id                    (prin1-to-string process-id)
                          :program-name          program-name
@@ -139,7 +144,9 @@
                          :start-time            (timestamp->unix-microseconds
                                                  start-time)
                          :executing-user        executing-user
-                         :rsb-version           rsb-version)
+                         :rsb-version           rsb-version
+                         (when display-name
+                           (list :display-name display-name)))
              :host      (make-instance
                          'rsb.protocol.operatingsystem:host
                          :id               host-id
