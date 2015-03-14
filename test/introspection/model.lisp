@@ -1,6 +1,6 @@
 ;;;; model.lisp --- Tests for model classes.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -87,7 +87,8 @@
     (ensure (typep (process-info-program-name info)          'string))
     (ensure (typep (process-info-commandline-arguments info) 'list))
     (ensure (typep (process-info-start-time info)            'local-time:timestamp))
-    (ensure (typep (process-info-executing-user info)        'string))))
+    (ensure (typep (process-info-executing-user info)        'string))
+    (ensure (typep (process-info-rsb-version info)           '(or null string)))))
 
 (define-simple-model-class-tests remote-process-info
   ;; Missing required initargs.
