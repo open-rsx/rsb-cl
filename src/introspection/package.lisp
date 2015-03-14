@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the introspection module.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -65,6 +65,7 @@
    #:process-info-start-time
    #:process-info-executing-user
    #:process-info-rsb-version
+   #:process-info-display-name
    #:current-process-info
 
    #:host-info                          #:remote-host-info

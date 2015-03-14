@@ -483,7 +483,8 @@
   (let+ (((&structure-r/o
            process-info-
            process-id program-name commandline-arguments
-           start-time executing-user rsb-version)
+           start-time executing-user rsb-version
+           display-name)
           process)
          (transports (transport-specific-urls receiver))
          ((&flet update-transports (entry)
@@ -500,6 +501,7 @@
                                                    start-time)
                            :executing-user        executing-user
                            :rsb-version           rsb-version
+                           :display-name          display-name
                            :state                 :running
                            :transports            transports))))
     (if-let ((entry (find-process id introspection)))

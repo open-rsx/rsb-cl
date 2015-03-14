@@ -155,7 +155,13 @@
 
                            The version string is of the form
 
-                             MAJOR.MINOR.REVISION[-COMMIT]"))
+                             MAJOR.MINOR.REVISION[-COMMIT]")
+   (display-name          :initarg  :display-name
+                          :type     (or null string)
+                          :reader   process-info-display-name
+                          :documentation
+                          "If not null, stores a user-defined name for
+                           the process."))
   (:default-initargs
    :program-name (missing-required-initarg 'process-info :program-name)
    :process-id   (missing-required-initarg 'process-info :process-id))
@@ -163,8 +169,11 @@
    "Instances of this class store information of about processes."))
 
 (defmethod print-items:print-items append ((object process-info))
-  (let+ (((&structure-r/o process-info- program-name process-id) object))
-    `((:program-name ,program-name "~A"   ((:before :process-id)))
+  (let+ (((&structure-r/o process-info- program-name process-id display-name)
+          object))
+    `((:program-name ,(list display-name program-name)
+                     ,"~{~:[~A~:;~:*~A(~A)~]~}"
+                     ((:before :process-id)))
       (:process-id   ,process-id   "[~D]"))))
 
 (defun current-process-info ()
@@ -173,14 +182,16 @@
   (with-platform-information-fallback-values
     (let+ (((program-name &rest arguments)
             (current-program-name-and-commandline-arguments)))
-      (make-instance 'process-info
-                     :process-id            (current-process-id)
-                     :program-name          (pathname-name
-                                             (parse-namestring program-name))
-                     :commandline-arguments arguments
-                     :start-time            (current-process-start-time)
-                     :executing-user        (current-user)
-                     :rsb-version           (cl-rsb-system:version/string :commit? t)))))
+      (make-instance
+       'process-info
+       :process-id            (current-process-id)
+       :program-name          (pathname-name
+                               (parse-namestring program-name))
+       :commandline-arguments arguments
+       :start-time            (current-process-start-time)
+       :executing-user        (current-user)
+       :rsb-version           (cl-rsb-system:version/string :commit? t)
+       :display-name          (option-value '(:introspection :displayname))))))
 
 ;;; `remote-process-info'
 
