@@ -66,8 +66,8 @@
 ;; due to lazy initialization strategies.
 ;;
 ;; mark-start::variable
-(defvar *remote-server* (rsb.patterns.request-reply:make-remote-server
-                         "/example/clientserver"))
+(defvar *remote-server* (rsb:make-participant :remote-server
+                                              "/example/clientserver"))
 
 (rsb.patterns.request-reply:call *remote-server* "echo" "bla")
 

@@ -10,8 +10,7 @@
                              participant-suite)
   ()
   (:documentation
-   "Unit tests for the `informer' class and `make-informer'
-function."))
+   "Unit tests for the `informer' class."))
 
 (define-basic-participant-test-cases informer
   '("/rsbtest/informer/construction"

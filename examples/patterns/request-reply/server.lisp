@@ -36,8 +36,8 @@
 ;; are several ways to add methods.
 ;;
 ;; mark-start::variable
-(defvar *local-server* (rsb.patterns.request-reply:make-local-server
-                        "/example/clientserver"))
+(defvar *local-server* (rsb:make-participant :local-server
+                                             "/example/clientserver"))
 
 (setf (rsb.patterns.request-reply:server-method *local-server* "echo")
       (lambda (arg) arg))

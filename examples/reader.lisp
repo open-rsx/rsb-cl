@@ -28,7 +28,7 @@
 ;; Note: the `receive' call will block until an event is received.
 ;;
 ;; mark-start::variable
-(defvar *reader* (rsb:make-reader "/example/informer"))
+(defvar *reader* (rsb:make-participant :reader "/example/informer"))
 
 ;; mark-start::receive/block
 (let ((event (rsb:receive *reader* :block? t))) ; block? defaults to t

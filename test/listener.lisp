@@ -15,8 +15,7 @@
            (send informer "foo")
            (send informer "bar"))))
   (:documentation
-   "Unit tests for the `listener' class and `make-listener'
-function."))
+   "Unit tests for the `listener' class."))
 
 (define-basic-participant-test-cases listener
   '("/rsbtest/listener/construction"

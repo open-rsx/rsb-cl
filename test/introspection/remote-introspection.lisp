@@ -14,7 +14,6 @@
    "Unit test suite for the `introspection-receiver' class."))
 
 (define-basic-participant-test-cases (rsb.introspection::introspection-receiver
-                                      :named?                nil
                                       :check-transport-urls? nil)
   '("/rsbtest/introspection-receiver/construction"
     () () ()
@@ -71,8 +70,7 @@
   (:documentation
    "Unit test suite for the `remote-introspection' class."))
 
-(define-basic-participant-test-cases (rsb.introspection::remote-introspection
-                                      :named? nil)
+(define-basic-participant-test-cases (rsb.introspection::remote-introspection)
   '("/rsbtest/remote-introspection/construction"
     () () ()
     "/rsbtest/remote-introspection/construction")

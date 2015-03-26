@@ -172,6 +172,7 @@
   ;; Participant protocol and `participant' class
   (:export
    #:participant
+
    #:participant-kind
    #:participant-id
    #:participant-scope
@@ -189,27 +190,21 @@
   (:export
    #:receiver-filters)
 
-  ;; Listener
+  ;; `listener' class
   (:export
-   #:listener
-
-   #:make-listener)
+   #:listener)
 
   ;; Reader protocol and `reader' class
   (:export
    #:receive
 
-   #:reader
-
-   #:make-reader)
+   #:reader)
 
   ;; Send protocol and `informer' class
   (:export
    #:send
 
-   #:informer
-
-   #:make-informer)
+   #:informer)
 
   ;; Configuration
   (:export

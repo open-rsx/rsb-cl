@@ -107,32 +107,11 @@
 (defmacro define-basic-participant-test-cases (class-and-options &body cases)
   "Define basic test cases for the participant subclass designated by
    CLASS."
-  (let+ (((class &key (check-transport-urls? t) (named? t))
+  (let+ (((class &key (check-transport-urls? t))
           (ensure-list class-and-options))
          (suite-name (symbolicate class "-ROOT"))
-         (make-name  (symbolicate "MAKE-" class))
          (kind       (make-keyword class)))
     `(progn
-       ,@(when named?
-           `((addtest (,suite-name
-                       :documentation
-                       ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
-                                class make-name))
-               construction/named
-
-               (ensure-cases (uri args initargs common-initargs expected-scope)
-                   (list ,@cases)
-
-                 (let+ (((&flet do-it () (apply #',make-name uri
-                                                (append args common-initargs)))))
-                   (case expected-scope
-                     (error (ensure-condition error
-                              (detach/ignore-errors (do-it))))
-                     (t     (with-active-participant (participant (do-it))
-                              (check-participant
-                               participant ,kind expected-scope
-                               :check-transport-urls? ,check-transport-urls?)))))))))
-
        (addtest (,suite-name
                  :documentation
                  ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."

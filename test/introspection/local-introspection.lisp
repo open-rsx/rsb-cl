@@ -11,8 +11,7 @@
   (:documentation
    "Unit test suite for the `local-introspection' class."))
 
-(rsb.test:define-basic-participant-test-cases (rsb.introspection::local-introspection
-                                               :named? nil)
+(rsb.test:define-basic-participant-test-cases (rsb.introspection::local-introspection)
   '("/rsbtest/local-introspection/construction"
     () () ()
     "/rsbtest/local-introspection/construction")

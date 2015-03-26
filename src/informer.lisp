@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- Informers put events onto a bus.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -122,46 +122,3 @@ events sent by this informer."))
     (push (rsb.ep:configurator-processor configurator)
           (rsb.ep:handlers informer))
     informer))
-
-(defun make-informer (scope-or-uri type &rest args
-                      &key
-                      transports
-                      converters
-                      transform
-                      error-policy
-                      parent
-                      introspection?
-                      &allow-other-keys)
-  "Start publishing data of type TYPE on the channel designated by
-   SCOPE-OR-URI. If successful, return an `informer'
-   instance. Otherwise an error of type `participant-creation-error'
-   is signaled.
-
-   TRANSPORTS determines the transport configuration that is used to
-   participate in the channel. See `rsb.transport:make-connectors' for
-   details regarding acceptable values of TRANSPORTS.
-
-   CONVERTERS, if supplied, is an list that specifies a set of
-   converters for particular wire-types from which the converters that
-   are used in transports should be chosen. Items are of the
-   form (WIRE-TYPE . CONVERTER). If CONVERTERS is not supplied, a
-   default set of converters is derived from the default
-   configuration.
-
-   When non-nil, TRANSFORM is a transform object, usable with
-   `rsb.event-processing:transform!', that should be applied to sent
-   events.
-
-   ERROR-POLICY has to be nil or a function to be installed in the
-   error hook of the created `informer'.
-
-   If supplied, PARENT is a participant that should be considered the
-   parent of the created `informer'.
-
-   INTROSPECTION? controls whether the newly created informer
-   participates in the introspection machinery. Specifically, whether
-   it announces its creation and destruction and answers to
-   introspection queries."
-  (declare (ignore transports converters transform error-policy parent
-                   introspection?))
-  (apply #'make-participant :informer scope-or-uri :type type args))

@@ -26,7 +26,8 @@
 ;; informer participates.
 ;;
 ;; mark-start::variable
-(defvar *informer* (rsb:make-informer "/example/informer" 'string))
+(defvar *informer* (rsb:make-participant :informer "/example/informer"
+                                         :type 'string))
 
 (format t "Sending second event~%")
 (rsb:send *informer* "example payload")

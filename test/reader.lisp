@@ -10,7 +10,7 @@
                            participant-suite)
   ()
   (:documentation
-   "Unit tests for the `reader' class and `make-reader' function."))
+   "Unit tests for the `reader' class."))
 
 (define-basic-participant-test-cases reader
   '("/rsbtest/reader/construction"

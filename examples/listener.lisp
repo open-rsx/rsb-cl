@@ -28,7 +28,7 @@
 ;; options.
 ;;
 ;; mark-start::variable
-(defvar *listener* (rsb:make-listener "/example/informer"))
+(defvar *listener* (rsb:make-participant :listener "/example/informer"))
 
 ;; Just after creation, the listener will not act upon received
 ;; events. In order to process received events, handlers have to be

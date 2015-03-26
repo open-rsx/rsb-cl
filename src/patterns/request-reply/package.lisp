@@ -58,13 +58,11 @@
 
   ;; `local-server' class
   (:export
-   #:local-server
-   #:make-local-server)
+   #:local-server)
 
   ;; `remove-server' class
   (:export
-   #:remote-server
-   #:make-remote-server)
+   #:remote-server)
 
   ;; Convenience and utility macros
   (:export
