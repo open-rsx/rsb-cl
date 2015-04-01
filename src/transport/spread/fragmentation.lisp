@@ -14,14 +14,14 @@
                :reader   assembly-id
                :documentation
                "The id of notifications that are assembled in this
-assembly.")
+                assembly.")
    (birth-time :initarg  :birth-time
                :type     non-negative-real
                :reader   assembly-birth-time
                :initform (internal-real-time-in-seconds)
                :documentation
                "The time in \"internal\" seconds at which this
-assembly started.")
+                assembly started.")
    (fragments  :type     vector
                :reader   assembly-fragments
                :documentation
@@ -30,7 +30,7 @@ assembly started.")
    :num-fragments (missing-required-initarg 'assembly :num-fragments))
   (:documentation
    "Instances of this class represent assembly processes for events
-that have been split into multiple notifications."))
+    that have been split into multiple notifications."))
 
 (defmethod initialize-instance :after ((instance assembly)
                                        &key
@@ -64,10 +64,9 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 
 (defmethod add-fragment! ((assembly  assembly)
                           (fragment  fragmented-notification))
-  (let+ (((&accessors-r/o (fragments assembly-fragments)) assembly)
-         ((&accessors-r/o (id fragmented-notification-data-part)) fragment))
-    (log:trace "~@<~A is processing fragment ~D~@:>"
-               assembly id)
+  (let+ (((&structure-r/o assembly- fragments) assembly)
+         ((&structure-r/o fragmented-notification- (id data-part)) fragment))
+    (log:trace "~@<~A is processing fragment ~D~@:>" assembly id)
     (cond
       ;; Bounds check for fragment id.
       ((not (<= 0 id (1- (length fragments))))
@@ -116,7 +115,7 @@ necessary when fragments are submitted by calls to
 (defmethod ensure-assembly ((pool assembly-pool)
                             (id   simple-array)
                             (size integer))
-  (let+ (((&accessors-r/o (assemblies assembly-pool-%assemblies)) pool))
+  (let+ (((&structure-r/o assembly-pool- (assemblies %assemblies)) pool))
     (or (gethash id assemblies)
         (setf (gethash id assemblies)
               (make-instance 'assembly
@@ -125,15 +124,16 @@ necessary when fragments are submitted by calls to
 
 (defmethod merge-fragment ((pool     assembly-pool)
                            (fragment fragmented-notification))
-    (let+ (((&accessors-r/o (assemblies assembly-pool-%assemblies)) pool)
-           ((&accessors-r/o (notification fragmented-notification-notification)
-                            (size         fragmented-notification-num-data-parts)) fragment)
-           ((&accessors-r/o (id notification-event-id)) notification)
-           (id       (%make-key id))
-           (assembly (ensure-assembly pool id size)))
-      (when (assembly-complete? (add-fragment! assembly fragment))
-        (remhash id assemblies)
-        assembly)))
+  (let+ (((&structure-r/o assembly-pool- (assemblies %assemblies)) pool)
+         ((&structure-r/o
+           fragmented-notification- notification (size num-data-parts))
+          fragment)
+         ((&structure-r/o notification-event- id) notification)
+         (key      (%make-key id))
+         (assembly (ensure-assembly pool key size)))
+    (when (assembly-complete? (add-fragment! assembly fragment))
+      (remhash key assemblies)
+      assembly)))
 
 (defmethod print-object ((object assembly-pool) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -182,10 +182,11 @@ MIN-AGE."))
     (call-next-method)))
 
 (defun delete-partial-assemblies (pool min-age)
-  "Find `assembly' instance in POOL whose age is at least MIN-AGE and
-delete them."
-  (let+ (((&accessors-r/o (assemblies assembly-pool-%assemblies)
-                          (lock       assembly-pool-%lock)) pool)
+  ;; Find `assembly' instance in POOL whose age is at least MIN-AGE
+  ;; and delete them.
+  (let+ (((&structure-r/o assembly-pool- (assemblies %assemblies)
+                                         (lock       %lock))
+          pool)
          (string (princ-to-string pool)))
     (bt:with-lock-held (lock)
       (when-let ((old (remove min-age (hash-table-values assemblies)

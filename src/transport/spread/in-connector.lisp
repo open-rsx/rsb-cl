@@ -40,8 +40,7 @@ connector classes for Spread."))
 (defmethod notification->event ((connector    in-connector)
                                 (notification cons)
                                 (wire-schema  t))
-  (let+ (((&accessors-r/o (pool      connector-assembly-pool)
-                          (converter connector-converter)) connector)
+  (let+ (((&structure-r/o connector- assembly-pool converter) connector)
          ((buffer . length)    notification)
          (expose-wire-schema?  (connector-expose? connector :rsb.transport.wire-schema))
          (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
@@ -85,6 +84,6 @@ connector classes for Spread."))
                          :format-arguments `(,(with-output-to-string (stream)
                                                 (describe notification stream)))
                          :cause            condition))))
-      (notification->event* pool converter notification
+      (notification->event* assembly-pool converter notification
                             :expose-wire-schema?  expose-wire-schema?
                             :expose-payload-size? expose-payload-size?))))
