@@ -1,6 +1,6 @@
 ;;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -156,7 +156,7 @@ into one notification."
                                   (min (- room 4) remaining))))
 
             (setf (notification-data notification)
-                  (make-data-fragment wire-data offset fragment-size))
+                  (%make-data-fragment wire-data offset fragment-size))
             (incf offset    fragment-size)
             (decf remaining fragment-size)
 

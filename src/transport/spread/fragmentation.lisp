@@ -6,11 +6,25 @@
 
 (cl:in-package #:rsb.transport.spread)
 
+;;; Utility functions
+
+(declaim (inline %make-data-fragment))
+(defun %make-data-fragment (data offset chunk-size)
+  ;; Return a chunk of length CHUNK-SIZE from DATA starting at OFFSET.
+  (subseq data offset (+ offset chunk-size)))
+
+(declaim (inline %make-key))
+(defun %make-key (event-id)
+  ;; Return a vector that can be used to identify the notification
+  ;; from which SEQUENCE-NUMBER and SENDER-ID have been extracted.
+  (cons (event-id-sequence-number event-id)
+        (event-id-sender-id event-id)))
+
 ;;; `assembly' class
 
 (defclass assembly ()
   ((id         :initarg  :id
-               :type     simple-array
+               :type     (cons sequence-number simple-array)
                :reader   assembly-id
                :documentation
                "The id of notifications that are assembled in this
@@ -113,7 +127,7 @@ necessary when fragments are submitted by calls to
   (hash-table-count (assembly-pool-%assemblies pool)))
 
 (defmethod ensure-assembly ((pool assembly-pool)
-                            (id   simple-array)
+                            (id   cons)
                             (size integer))
   (let+ (((&structure-r/o assembly-pool- (assemblies %assemblies)) pool))
     (or (gethash id assemblies)
@@ -196,24 +210,3 @@ MIN-AGE."))
                   string (length old))
         (iter (for assembly in old)
               (remhash (assembly-id assembly) assemblies))))))
-
-;;; Fragmentation
-
-(declaim (ftype (function (simple-octet-vector non-negative-fixnum non-negative-fixnum)
-                          simple-octet-vector)
-                make-data-fragment)
-         (inline make-data-fragment))
-
-(defun make-data-fragment (data offset chunk-size)
-  "Return a chunk of length CHUNK-SIZE from DATA starting at OFFSET."
-  (subseq data offset (+ offset chunk-size)))
-
-;;; Utility functions
-
-(defun %make-key (event-id)
-  "Return a vector that can be used to identify the notification from
-which SEQUENCE-NUMBER and SENDER-ID have been extracted."
-  (concatenate 'simple-octet-vector
-               (nth-value 1 (binio:encode-uint32-be
-                             (event-id-sequence-number event-id)))
-               (event-id-sender-id event-id)))
