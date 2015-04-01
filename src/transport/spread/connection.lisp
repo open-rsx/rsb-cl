@@ -6,30 +6,6 @@
 
 (cl:in-package #:rsb.transport.spread)
 
-;;; Spread connection protocol
-
-(defgeneric ref-group (connection group)
-  (:documentation
-   "Increase the reference count of GROUP, causing CONNECTION to join
-GROUP in case of a 0 -> 1 transition."))
-
-(defgeneric unref-group (connection group)
-  (:documentation
-   "Decrease the reference count of GROUP, causing CONNECTION to leave
-GROUP in case of a 1 -> 0 transition."))
-
-(defgeneric receive-message (connection block?)
-  (:documentation
-   "Receive and return a message from CONNECTION.
-
-    BLOCK? controls whether the call should block until a message has
-    been received."))
-
-(defgeneric send-message (connection destination payload)
-  (:documentation
-   "Send the PAYLOAD to DESTINATION via CONNECTION in a Spread
-    message."))
-
 ;;; `connection' class
 
 (defclass connection ()

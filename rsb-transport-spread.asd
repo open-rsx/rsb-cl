@@ -31,6 +31,8 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "conditions")
+                              (:file       "protocol")
+
                               (:file       "util")
                               (:file       "fragmentation")
                               (:file       "conversion")
