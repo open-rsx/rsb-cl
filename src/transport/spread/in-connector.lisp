@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- Superclass for in-direction connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,7 +28,9 @@ connector classes for Spread."))
 (defmethod notify ((connector in-connector)
                    (scope     scope)
                    (action    (eql :detached)))
-  (unref-group (connector-connection connector) (scope->group scope)))
+  (when (zerop (nth-value 1 (unref-group (connector-connection connector)
+                                         (scope->group scope))))
+    (notify connector t :detached)))
 
 (defmethod receive-notification ((connector in-connector)
                                  (block?    t))

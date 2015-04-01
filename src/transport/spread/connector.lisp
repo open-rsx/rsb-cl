@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for spread connectors.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -70,3 +70,8 @@ supplied."
     (unless connection
       (setf (slot-value instance 'connection)
             (make-instance 'connection :name name)))))
+
+(defmethod notify ((connector connector)
+                   (scope     (eql t))
+                   (action    (eql :detached)))
+  (disconnect (connector-connection connector)))

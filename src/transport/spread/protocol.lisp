@@ -8,6 +8,10 @@
 
 ;;; Spread connection protocol
 
+(defgeneric disconnect (connection)
+  (:documentation
+   "Disconnect CONNECTION from the Spread daemon."))
+
 (defgeneric ref-group (connection group)
   (:documentation
    "Increase the reference count of GROUP, causing CONNECTION to join

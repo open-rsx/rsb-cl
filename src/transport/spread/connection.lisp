@@ -61,6 +61,9 @@
     (setf (connection-%connection instance)
           (network.spread:connect name))))
 
+(defmethod disconnect ((connection connection))
+  (network.spread:disconnect (connection-%connection connection)))
+
 (defmethod ref-group ((connection connection) (group string))
   (let+ (((&structure-r/o connection- %connection (groups %groups))
           connection))
@@ -76,11 +79,13 @@
 
 (defmethod unref-group ((connection connection) (group string))
   (let+ (((&structure-r/o connection- %connection (groups %groups))
-          connection))
-    (when (zerop (decf (gethash group groups 0)))
+          connection)
+         (new-value (decf (gethash group groups 0))))
+    (when (zerop new-value)
       (log:info "~@<~A is leaving group ~A~@:>" connection group)
       (remhash group groups)
-      (network.spread:leave %connection group))))
+      (network.spread:leave %connection group))
+    (values new-value (hash-table-count groups))))
 
 (macrolet
     ((with-spread-condition-translation (&body body)

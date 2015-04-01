@@ -1,6 +1,6 @@
 ;;;; out-connector.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,6 +25,11 @@
    (:max-fragment-size &slot))
   (:documentation
    "A connector for sending data over spread."))
+
+(defmethod notify ((connector out-connector)
+                   (scope     scope)
+                   (action    (eql :detached)))
+  (notify connector t :detached))
 
 (defmethod handle ((connector out-connector) (event event))
   (let ((group-names   (scope->groups (event-scope event)))
