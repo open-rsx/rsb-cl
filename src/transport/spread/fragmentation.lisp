@@ -123,6 +123,8 @@ instances."))
 necessary when fragments are submitted by calls to
 `merge-fragment'."))
 
+(defmethod detach ((participant assembly-pool)))
+
 (defmethod assembly-pool-count ((pool assembly-pool))
   (hash-table-count (assembly-pool-%assemblies pool)))
 
@@ -185,6 +187,9 @@ MIN-AGE."))
                        :interval (/ age-limit 4)
                        :function #'delete-partial-assemblies
                        :args     (list instance age-limit))))
+
+(defmethod detach ((participant pruning-assembly-pool))
+  (detach (assembly-pool-%executor participant)))
 
 (defmethod assembly-pool-count :around ((pool pruning-assembly-pool))
   (bt:with-lock-held ((assembly-pool-%lock pool))

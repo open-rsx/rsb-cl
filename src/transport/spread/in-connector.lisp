@@ -32,6 +32,12 @@ connector classes for Spread."))
                                          (scope->group scope))))
     (notify connector t :detached)))
 
+(defmethod notify ((connector in-connector)
+                   (scope     (eql t))
+                   (action    (eql :detached)))
+  (call-next-method)
+  (detach (connector-assembly-pool connector)))
+
 (defmethod receive-notification ((connector in-connector)
                                  (block?    t))
   ;; Delegate receiving a notification to the connection of CONNECTOR.
