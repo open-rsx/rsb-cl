@@ -54,6 +54,8 @@ module"))
 
 (cl:in-package #:rsb.transport.spread.test)
 
+;;; Root test suite
+
 (deftestsuite transport-spread-root (transport-root)
   ((spread-port (asdf:component-property
                  (asdf:find-system :rsb-transport-spread-test) :spread-port))
@@ -63,3 +65,31 @@ module"))
                        :converter :fundamental-null)))
   (:documentation
    "Root unit test suite for the transport.spread module."))
+
+;;; Test utilities
+
+(defun octetify (data)
+  (etypecase data
+    (string   (sb-ext:string-to-octets data))
+    (sequence (coerce data 'octet-vector))
+    (t        data)))
+
+(defun make-fragment (sequence-number length id data)
+  (let* ((event-id     (make-instance
+                        'rsb.protocol:event-id
+                        :sender-id       (uuid:uuid-to-byte-array
+                                          (uuid:make-null-uuid))
+                        :sequence-number sequence-number))
+         (notification (make-instance 'rsb.protocol:notification
+                                      :event-id event-id
+                                      :data     data)))
+    (make-instance 'rsb.protocol:fragmented-notification
+                   :notification   notification
+                   :num-data-parts length
+                   :data-part      id)))
+
+(defun make-event* (data)
+  (let ((event (make-event "/foo" (octetify data))))
+    (setf (event-origin event)          (uuid:make-null-uuid)
+          (event-sequence-number event) 0)
+    event))

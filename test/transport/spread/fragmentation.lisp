@@ -1,6 +1,6 @@
 ;;;; fragmentation.lisp --- Unit test for fragmentation/assembly.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,40 +8,9 @@
 
 (deftestsuite fragmentation-root (transport-spread-root)
   ()
-  (:function
-   (octetify (data)
-     (etypecase data
-       (string
-        (sb-ext:string-to-octets data))
-       (sequence
-        (coerce data 'octet-vector))
-       (t
-        data))))
-  (:function
-   (make-fragment (sequence-number length id data)
-     (let* ((event-id     (make-instance
-                           'rsb.protocol:event-id
-                           :sender-id       (uuid:uuid-to-byte-array
-                                             (uuid:make-null-uuid))
-                           :sequence-number sequence-number))
-            (notification (make-instance 'rsb.protocol:notification
-                                         :event-id event-id
-                                         :data     data)))
-       (make-instance 'rsb.protocol:fragmented-notification
-                      :notification   notification
-                      :num-data-parts length
-                      :data-part      id))))
-  (:function
-   (make-event* (data)
-     (let ((event (make-event "/foo" (octetify data))))
-       (setf (event-origin event)
-             (uuid:make-null-uuid)
-             (event-sequence-number event)
-             0)
-       event)))
   (:documentation
    "Unit tests for the fragmentation and assembly of
-data/notifications."))
+    data/notifications."))
 
 (addtest (fragmentation-root
           :documentation
@@ -149,9 +118,8 @@ are added to an assembly.")
           "Test `print-object' method on `assembly-pool'.")
   print-smoke
 
-  (let ((pool (make-instance 'assembly-pool)))
-    (with-output-to-string (stream)
-      (format stream "~A" pool))))
+  (ensure (not (emptyp (princ-to-string
+                        (make-instance 'assembly-pool))))))
 
 (deftestsuite pruning-assembly-pool-root (fragmentation-root)
   ()
@@ -187,6 +155,5 @@ are added to an assembly.")
           "Test `print-object' method on `pruning-assembly-pool'.")
   print-smoke
 
-  (let ((pool (make-instance 'pruning-assembly-pool)))
-    (with-output-to-string (stream)
-      (format stream "~A" pool))))
+  (ensure (not (emptyp (princ-to-string
+                        (make-instance 'pruning-assembly-pool))))))

@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
 
 (deftestsuite in-connector-root (transport-spread-root
                                  connector-suite)
-  ((a-string           (let ((buffer (sb-ext:string-to-octets "foobarbaz")))
+  ((a-string           (let ((buffer (octetify "foobarbaz")))
                          (cons buffer (length buffer))))
    (empty-notification (let+ (((&values length buffer)
                                (pb:pack (make-instance
