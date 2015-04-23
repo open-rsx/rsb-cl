@@ -11,70 +11,62 @@
 (defgeneric connector-url (connector)
   (:documentation
    "Return a base URL that can be used to locate resources via
-CONNECTOR."))
+    CONNECTOR."))
 
 (defgeneric connector-relative-url (connector thing)
   (:documentation
    "Return a complete URL suitable for locating the resource THING via
- CONNECTOR."))
+    CONNECTOR."))
 
 ;;; Connector introspection protocol
 
 (defgeneric connector-direction (connector)
   (:documentation
    "Return the communication direction of CONNECTOR.
-Connector can be a connector class or a connector instance."))
+
+    CONNECTOR can be a connector class or a connector instance."))
 
 (defgeneric connector-wire-type (connector)
   (:documentation
    "Return the wire-type of CONNECTOR.
-Connector can be a connector class or a connector instance."))
 
-(defgeneric connector-schemas (class)
-  (:documentation
-   "Return a list of the (URI-)schemas supported by the connector
-class CLASS."))
+    CONNECTOR can be a connector class or a connector instance."))
 
-(defgeneric connector-options (class)
+(defgeneric connector-schemas (connector)
   (:documentation
-   "Return a description of the options accepted by the connector
-class CLASS. The returned description is a list of items of the
-form (NAME TYPE &optional DOCUMENTATION) where name is a keyword which
-names the option and TYPE is the type of acceptable values of the
-option."))
+   "Return a list of the (URI-)schemas supported by CONNECTOR.
+
+    CONNECTOR can be a connector class or a connector instance."))
+
+(defgeneric connector-options (connector)
+  (:documentation
+   "Return a description of the options accepted connector.
+
+    The returned description is a list of items of the form
+
+      (NAME TYPE &optional DOCUMENTATION)
+
+    where NAME is a keyword which names the option and TYPE is the
+    type of acceptable values of the option.
+
+    CONNECTOR can be a connector class or a connector instance."))
 
 ;;; Default behavior
 
-(defmethod connector-direction ((connector standard-object))
-  "Default behavior is to retrieve the direction from the class of
-CONNECTOR."
-  (connector-direction (class-of connector)))
+(macrolet ((define-connector-class-accessor (name)
+             `(progn
+                (defmethod ,name ((connector standard-object))
+                  ;; Default behavior is to retrieve the value from
+                  ;; the class of CONNECTOR.
+                  (,name (class-of connector)))
 
-(defmethod connector-direction ((connector class))
-  "Stop if we hit a class which is not a `connector-class'."
-  (values))
-
-(defmethod connector-wire-type ((connector standard-object))
-  "Default behavior is to retrieve the wire-type from the class of
-CONNECTOR."
-  (connector-wire-type (class-of connector)))
-
-(defmethod connector-wire-type ((class class))
-  "Stop if we hit a class which is not a `connector-class'."
-  (values))
-
-(defmethod connector-schemas ((connector standard-object))
-  "Default behavior is to retrieve the list of schemas from the class
-of CONNECTOR."
-  (connector-schemas (class-of connector)))
-
-(defmethod connector-schemas ((class class))
-  "Default behavior is to claim to support no schemas."
-  '())
-
-(defmethod connector-options ((class class))
-  "Default behavior is to claim to accept no options."
-  '())
+                (defmethod ,name ((connector class))
+                  ;; Stop if we hit a class which is not a `connector-class'.
+                  (values)))))
+  (define-connector-class-accessor connector-direction)
+  (define-connector-class-accessor connector-wire-type)
+  (define-connector-class-accessor connector-schemas)
+  (define-connector-class-accessor connector-options))
 
 ;;; Notification receiver protocol
 
