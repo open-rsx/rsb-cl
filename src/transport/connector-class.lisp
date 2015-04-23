@@ -1,6 +1,6 @@
 ;;;; connector-class.lisp --- Metaclass for connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -48,44 +48,44 @@ options."))
     (setf (slot-value instance 'options) options)))
 
 (defmethod closer-mop:compute-default-initargs ((class connector-class))
-  (let ((default-initargs (call-next-method)))
-    ;; Added initargs for options with &slot specification.
-    (iter (for option in (connector-options class))
-          (let+ (((name &ign
-                   &key (default t default-supplied?) &allow-other-keys)
-                  option))
-            (when default-supplied?
-              (setf default-initargs
-                    (cons (list name default
-                                (compile nil `(lambda () ,default)))
-                          (remove name default-initargs :key #'first))))))
-    default-initargs))
+  ;; Added initargs for options with &slot specification.
+  (reduce (lambda+ (default-initargs
+                    (name &ign
+                     &key (default t default-supplied?) &allow-other-keys))
+            (log:info default-initargs name default)
+            (if default-supplied?
+                (list* (list name default
+                             (compile nil `(lambda () ,default)))
+                       (remove name default-initargs :key #'first))
+                default-initargs))
+          (connector-options class)
+          :initial-value (call-next-method)))
 
-(defmethod connector-wire-type ((class connector-class))
-  "Use wire-type stored in CLASS or retrieve from super-classes if
-necessary. "
-  (if (slot-boundp class 'wire-type)
-      (slot-value class 'wire-type)
+(defmethod connector-wire-type ((connector connector-class))
+  ;; Use wire-type stored in CONNECTOR or retrieve from superclasses
+  ;; if necessary.
+  (if (slot-boundp connector 'wire-type)
+      (slot-value connector 'wire-type)
       (some #'connector-wire-type
-            (closer-mop:class-direct-superclasses class))))
+            (closer-mop:class-direct-superclasses connector))))
 
-(defmethod connector-schemas ((class connector-class))
-  "Retrieve supported schemas from CLASS and its transitive
-super-classes."
-  (append (slot-value class 'schemas)
+(defmethod connector-schemas ((connector connector-class))
+  ;; Retrieve supported schemas from CONNECTOR and its transitive
+  ;; superclasses.
+  (append (slot-value connector 'schemas)
           (mappend #'connector-schemas
-                   (closer-mop:class-direct-superclasses class))))
+                   (closer-mop:class-direct-superclasses connector))))
 
-(defmethod connector-options ((class connector-class))
-  "Retrieve options from CLASS and its transitive super-classes.
-Option definitions in subclasses take precedence over definitions in
-super-classes."
-  (let+ (((&slots options) class))
-    (map-into options (curry #'%maybe-expand-option class) options)
+(defmethod connector-options ((connector connector-class))
+  ;; Retrieve options from CONNECTOR and its transitive super-classes.
+  ;; Option definitions in subclasses take precedence over definitions
+  ;; in super-classes.
+  (let+ (((&slots options) connector))
+    (map-into options (curry #'%maybe-expand-option connector) options)
     (remove-duplicates
-     (append (slot-value class 'options)
+     (append options
              (mappend #'connector-options
-                      (closer-mop:class-direct-superclasses class)))
+                      (closer-mop:class-direct-superclasses connector)))
      :key      #'first
      :from-end t)))
 
