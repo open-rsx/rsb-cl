@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.transport.spread)
 
-(defmethod find-transport-class ((spec (eql :spread-in-pull)))
-  (find-class 'in-pull-connector))
-
 (defclass in-pull-connector (error-handling-pull-receiver-mixin
                              in-connector)
   ()

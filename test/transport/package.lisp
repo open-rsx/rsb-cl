@@ -119,12 +119,11 @@
                    class))
        find-connector-class
 
-       (let* (#+later (transport (service-provider:find-provider
+       (let* ((transport (service-provider:find-provider
                           'rsb.transport::transport ',name))
-              #+later (provider  (service-provider:find-provider
+              (provider  (service-provider:find-provider
                           transport ,expected-direction))
-              (class     (find-connector-class ',name ,expected-direction)
-                         #+later (service-provider:provider-class provider)))
+              (class     (service-provider:provider-class provider)))
          (ensure-same (find-class ',class) class :test #'eq)))
 
      (addtest (,suite-name

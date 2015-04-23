@@ -63,13 +63,6 @@
 
    #:connector-options)
 
-  ;; Transport class family and connector creation
-  (:export
-   #:no-such-transport
-   #:find-transport-class
-   #:transport-classes
-   #:find-connector-class)
-
   ;; Transport and connector registration protocol
   (:export
    #:register-transport

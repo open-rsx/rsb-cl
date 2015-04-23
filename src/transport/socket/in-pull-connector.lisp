@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.transport.socket)
 
-(defmethod find-transport-class ((spec (eql :socket-in-pull)))
-  (find-class 'in-pull-connector))
-
 (defclass in-pull-connector (error-handling-pull-receiver-mixin
                              in-connector)
   ((queue :type     lparallel.queue:queue

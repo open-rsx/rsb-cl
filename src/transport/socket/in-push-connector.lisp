@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.transport.socket)
 
-(defmethod find-transport-class ((spec (eql :socket-in-push)))
-  (find-class 'in-push-connector))
-
 (defclass in-push-connector (error-policy-handler-mixin
                              restart-handler-mixin
                              in-connector)

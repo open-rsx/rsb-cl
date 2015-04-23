@@ -144,23 +144,6 @@ list."))
 
 ;;; Transport implementations
 
-(dynamic-classes:define-findable-class-family transport
-    "Transports are implemented by input and output connector
-classes. These are designated by names of the
-form :TRANSPORT-in-push, :TRANSPORT-in-pull and :TRANSPORT-out
-respectively.")
-
-(defun find-connector-class (name direction)
-  "Return the connector class designated by NAME for the direction
-designated by DIRECTION. DIRECTION has to be one of :in-push, :in-pull
-and :out. An error of type `no-such-transport-class' is signaled if
-the requested class cannot be found."
-  (check-type name      keyword   "a keyword")
-  (check-type direction direction "either :IN-PUSH, :IN-PULL or :OUT")
-
-  (find-transport-class
-   (format-symbol :keyword "~A-~A" name direction)))
-
 (defun make-connector (name direction converters
                        &rest args &key converter &allow-other-keys)
   "Create a connector instance for the direction designated by
@@ -183,8 +166,7 @@ the requested class cannot be found."
         :name      name
         :direction direction
         :args      args))
-    (let+ ((class     (find-connector-class name direction))
-           (wire-type (transport-wire-type name))
+    (let+ ((wire-type (transport-wire-type name))
            (converter (unless (eq wire-type t)
                         (or converter
                             (cdr (find wire-type converters
@@ -192,9 +174,8 @@ the requested class cannot be found."
                                        :test #'subtypep)))))
            (args      (remove-from-plist args :converter))
            ((&flet make-it (&rest more-args)
-              (apply #+later (#'service-provider:make-provider
-                              'transport (cons name direction))
-                     #'make-instance class
+              (apply #'service-provider:make-provider
+                     'transport (cons name direction)
                      (append args more-args)))))
       (cond
         ;; The connector does not require a converter.

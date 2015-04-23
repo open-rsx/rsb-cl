@@ -57,9 +57,6 @@
 
 ;;; `in-pull-connector' class
 
-(defmethod find-transport-class ((spec (eql :inprocess-in-pull)))
-  (find-class 'in-pull-connector))
-
 (defclass in-pull-connector (broadcast-processor
                              error-handling-pull-receiver-mixin
                              restart-dispatcher-mixin
@@ -112,9 +109,6 @@
 
 ;;; `in-push-connector' class
 
-(defmethod find-transport-class ((spec (eql :inprocess-in-push)))
-  (find-class 'in-push-connector))
-
 (defclass in-push-connector (broadcast-processor
                              error-policy-handler-mixin
                              restart-handler-mixin
@@ -134,9 +128,6 @@
   (setf (timestamp event :receive) (local-time:now)))
 
 ;;; `out-connector' class
-
-(defmethod find-transport-class ((spec (eql :inprocess-out)))
-  (find-class 'out-connector))
 
 (defclass out-connector (error-handling-sender-mixin
                          restart-handler-mixin

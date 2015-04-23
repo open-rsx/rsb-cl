@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.transport.socket)
 
-(defmethod find-transport-class ((spec (eql :socket-out)))
-  (find-class 'out-connector))
-
 (defclass out-connector (error-handling-sender-mixin
                          restart-notification-sender-mixin
                          timestamping-sender-mixin

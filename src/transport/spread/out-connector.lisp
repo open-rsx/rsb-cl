@@ -6,9 +6,6 @@
 
 (cl:in-package #:rsb.transport.spread)
 
-(defmethod find-transport-class ((spec (eql :spread-out)))
-  (find-class 'out-connector))
-
 (defclass out-connector (restart-notification-sender-mixin
                          error-handling-sender-mixin
                          timestamping-sender-mixin
