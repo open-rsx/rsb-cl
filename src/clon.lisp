@@ -169,10 +169,11 @@ have been excluded as a result of repeated occurrence."
 (defun make-options-for-connector-class (class)
   "Return a `clon:group' instances which contains configuration
 options for connector class CLASS."
-  (let+ (((&accessors-r/o
-           (schemas   rsb.transport:transport-schemas)
-           (direction rsb.transport:connector-direction)) class)
-         (name        (first schemas))
+  (let+ (((&accessors-r/o (transport rsb.transport:connector-transport)
+                          (schemas   rsb.transport:transport-schemas)
+                          (direction rsb.transport:connector-direction))
+          class)
+         (name        (service-provider:provider-name transport))
          (pretty-name (format nil "~:(~A~) ~:(~A~) Connector"
                               name direction))
          ((&values items repeated)
@@ -190,6 +191,12 @@ options for connector class CLASS."
   (let ((*emitted-options* (make-hash-table :test #'equal)))
     (apply #'net.didierverna.clon:make-group
            :header "Connector Options"
-           (iter (for (name class) in (rsb.transport:transport-classes))
-                 (appending
-                  (list :item (make-options-for-connector-class class)))))))
+           (iter outer
+                 (for (name . transport) in (service-provider:service-providers/alist
+                                             'rsb.transport::transport))
+                 (iter (for (name . provider) in (service-provider:service-providers/alist
+                                                  transport))
+                       (let ((class (service-provider:provider-class provider)))
+                         (in outer
+                             (appending
+                              (list :item (make-options-for-connector-class class))))))))))
