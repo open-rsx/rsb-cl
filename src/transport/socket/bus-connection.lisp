@@ -1,6 +1,6 @@
 ;;;; bus-connection.lisp --- Connection class used by bus provider.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -217,9 +217,7 @@ after calling NEW-VALUE."
                        handshake)
   (check-type handshake (member nil :send :receive))
 
-  (let+ (((&accessors (lock     connection-lock)
-                      (closing? connection-%closing?)
-                      (socket   connection-socket)) connection))
+  (let+ (((&structure connection- lock (closing? %closing?) socket) connection))
     ;; Ensure that CONNECTION is not already closing or being closed.
     (bt:with-lock-held (lock)
       (when closing?
@@ -253,16 +251,17 @@ after calling NEW-VALUE."
         (warn "~@<Did not receive acknowledgment of shutdown ~
                handshake.~@:>")))
 
-    ;; After the shutdown protocol has hopefully been completed, stop
-    ;; the receiver and close the socket.
-    (log:info "~@<~A is stopping receiver thread~@:>" connection)
+    ;; After the shutdown protocol has hopefully been completed, close
+    ;; the socket and wait for the receiver thread to exit.
     (unwind-protect
-         ;; If this is called from the receiver thread itself, it will
-         ;; just abort and unwind at this point.
-         (stop-receiver connection)
-      (ignore-errors
-       (log:info "~@<~A is closing socket~@:>" connection)
-       (usocket:socket-close socket)))
+         (ignore-errors
+           (log:info "~@<~A is closing socket~@:>" connection)
+           (usocket:socket-close socket))
+
+      ;; If this is called from the receiver thread itself, it will
+      ;; just abort and unwind at this point.
+      (log:info "~@<~A is stopping receiver thread~@:>" connection)
+      (stop-receiver connection))
     ;; Return t to indicate that we actually closed the connection.
     t))
 
