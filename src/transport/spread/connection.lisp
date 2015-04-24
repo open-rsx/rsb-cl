@@ -64,12 +64,37 @@
 (defmethod disconnect ((connection connection))
   (network.spread:disconnect (connection-%connection connection)))
 
-(defmethod ref-group ((connection connection) (group string))
+(defmethod ref-group ((connection connection) (group string)
+                      &key (waitable? nil))
   (let+ (((&structure-r/o connection- %connection (groups %groups))
-          connection))
-    (when (= (incf (gethash group groups 0)) 1)
-      (log:info "~@<~A is joining group ~A~@:>" connection group)
-      (network.spread:join %connection group))))
+          connection)
+         ((&flet join ()
+            (log:info "~@<~A is joining group ~A~@:>" connection group)
+            (network.spread:join %connection group)))
+         ((&flet join/waitable ()
+            (let+ ((hook    (hooks:object-hook
+                             %connection 'network.spread:join-hook))
+                   (promise (lparallel:promise))
+                   ((&labels notify-and-remove (joined-group members)
+                      (log:debug "~@<~A got join notification for ~
+                                  group ~S with members ~S.~@:>"
+                                 connection joined-group members)
+                      (when (and (string= joined-group group :end2 31)
+                                 (member (network.spread:connection-name
+                                          %connection)
+                                         members :test #'string=))
+                        (hooks:remove-from-hook hook #'notify-and-remove)
+                        (lparallel:fulfill promise)))))
+              (hooks:add-to-hook hook #'notify-and-remove)
+              (join)
+              promise)))
+         (new-value (incf (gethash group groups 0))))
+    (values new-value
+            (hash-table-count groups)
+            (cond
+              ((/= new-value 1) nil)
+              (waitable?        (join/waitable))
+              (t                (join))))))
 
 (defmethod unref-group :around ((connection connection) (group string))
   (if (gethash group (connection-%groups connection))

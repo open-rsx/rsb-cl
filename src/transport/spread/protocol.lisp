@@ -12,11 +12,24 @@
   (:documentation
    "Disconnect CONNECTION from the Spread daemon."))
 
-(defgeneric ref-group (connection group)
+(defgeneric ref-group (connection group &key waitable?)
   (:documentation
    "Increase the reference count of GROUP, causing CONNECTION to join
     the Spread group named GROUP in case of a 0 -> 1 transition of the
-    reference count."))
+    reference count.
+
+    Return three values: 1) new number of references to GROUP 2) new
+    number of referenced groups in CONNECTION 3) optionally a
+    promise (see below).
+
+    If WAITABLE? is true and actual joining occurs (as described
+    above), return as the third value an `lparallel:promise' instance
+    that can be forced to wait for the completion of the join
+    operation.
+
+    Note that `receive-message' has to be called (in blocking or
+    non-blocking mode) before or while forcing the promise since
+    otherwise Spread events for CONNECTION are not processed."))
 
 (defgeneric unref-group (connection group)
   (:documentation
