@@ -23,7 +23,16 @@ connector classes for Spread."))
 (defmethod notify ((connector in-connector)
                    (scope     scope)
                    (action    (eql :attached)))
-  (ref-group (connector-connection connector) (scope->group scope)))
+  (let+ (((&values ref-count group-count promise)
+          (ref-group (connector-connection connector) (scope->group scope)
+                     :waitable? t)))
+    ;; When this was the initial reference to the initial group of the
+    ;; connection, attach CONNECTOR.
+    (when (and (= ref-count 1) (= group-count 1))
+      (notify connector t :attached))
+    ;; If necessary, wait for the Spread group joining operation to
+    ;; complete.
+    (lparallel:force promise)))
 
 (defmethod notify ((connector in-connector)
                    (scope     scope)

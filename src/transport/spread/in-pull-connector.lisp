@@ -1,6 +1,6 @@
 ;;;; in-pull-connector.lisp --- An in-direction, pull-based connector for spread.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,6 +17,22 @@
   (:documentation
    "This class implements pull-style event receiving for the Spread
 transport."))
+
+(defmethod notify ((connector in-pull-connector)
+                   (scope     scope)
+                   (action    (eql :attached)))
+  (let+ (((&structure-r/o connector- connection) connector)
+         ((&values ref-count group-count promise)
+          (ref-group (connector-connection connector) (scope->group scope)
+                     :waitable? t)))
+    ;; When this was the initial reference to the initial group of the
+    ;; connection, attach CONNECTOR.
+    (when (and (= ref-count 1) (= group-count 1))
+      (notify connector t :attached))
+    ;; If necessary, wait for the Spread group joining operation to
+    ;; complete.
+    (iter (until (lparallel:fulfilledp promise))
+          (receive-message connection nil))))
 
 (defmethod emit ((connector in-pull-connector) (block? t))
   ;; Maybe block until a notification is received. Try to convert into

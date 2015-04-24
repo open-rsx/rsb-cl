@@ -39,9 +39,9 @@ Spread transport."))
       (call-next-method)))
 
 (defmethod notify ((connector in-push-connector)
-                   (scope     scope)
+                   (scope     (eql t))
                    (action    (eql :attached)))
-  ;; When attaching to SCOPE, start a receiver thread.
+  ;; When attaching, start a receiver thread.
   (call-next-method)
   (setf (connector-%state connector) :active)
   (start-receiver connector))
@@ -49,7 +49,7 @@ Spread transport."))
 (defmethod notify ((connector in-push-connector)
                    (scope     (eql t))
                    (action    (eql :detached)))
-  ;; When detaching from SCOPE, join the receiver thread.
+  ;; When detaching, join the receiver thread.
   (setf (connector-%state connector) :shutdown)
   (call-next-method)
   (stop-receiver connector)
