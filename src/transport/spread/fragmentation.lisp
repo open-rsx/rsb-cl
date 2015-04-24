@@ -102,12 +102,14 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 
 (defmethod print-object ((object assembly) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "~{~2,'0X~}:~{~2,'0X~} (~D/~D) age ~5,2F s"
-            (coerce (subseq (assembly-id object) 4 8) 'list)
-            (coerce (subseq (assembly-id object) 0 4) 'list)
-            (count-if-not #'null (assembly-fragments object))
-            (length (assembly-fragments object))
-            (assembly-age object))))
+    (let ((id (assembly-id object)))
+      (format stream "~{~2,'0X~}:~{~2,'0X~}:~D (~D/~D) age ~5,2F s"
+              (coerce (subseq (cdr id) 4 8) 'list)
+              (coerce (subseq (cdr id) 0 4) 'list)
+              (car id)
+              (count-if-not #'null (assembly-fragments object))
+              (length (assembly-fragments object))
+              (assembly-age object)))))
 
 ;;; Partial assembly storage
 
