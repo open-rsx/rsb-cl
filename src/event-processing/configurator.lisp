@@ -1,6 +1,6 @@
 ;;;; configurator.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -42,16 +42,15 @@ participant instance as its \"client\"."))
 
 (defmethod shared-initialize :after ((instance   configurator)
                                      (slot-names t)
-                                     &key
-                                     processor)
+                                     &key)
   ;; Create a processor if none has been supplied.
-  (unless processor
+  (unless (slot-boundp instance 'processor)
     (setf (slot-value instance 'processor)
           (apply #'make-processor instance
                  (when-let ((transform (configurator-transform instance)))
                    (list :transform transform)))))
 
-  ;; Propagate the selected error policy into the processor and
+  ;; Propagate the selected error-policy into the processor and
   ;; potentially connectors.
   (setf (processor-error-policy instance)
         (processor-error-policy instance)))
