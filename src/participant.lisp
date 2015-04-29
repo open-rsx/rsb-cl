@@ -35,43 +35,36 @@
 
 ;;; Participant creation
 
-(defmethod make-participant-using-class :around ((class     class)
-                                                 (prototype rsb.ep:client)
-                                                 (scope     scope)
-                                                 &rest args &key
-                                                 (transports '())
-                                                 (converters (default-converters)))
-  ;; This method performs defaulting of the TRANSPORTS and CONVERTERS
-  ;; keyword arguments.
-  (apply #'call-next-method class prototype scope
-         :transports (merge-transport-options transports (transport-options))
-         :converters converters
-         (remove-from-plist args :transports :converters)))
+(defmethod make-participant-using-class :around
+    ((class     class)
+     (prototype rsb.ep:client)
+     (scope     scope)
+     &rest args &key
+     (direction  (participant-direction prototype))
+     (transports '())
+     (converters (default-converters))
+     transform)
+  ;; The above keyword parameters perform defaulting of the TRANSPORTS
+  ;; and CONVERTERS keyword arguments.
 
-(defmethod make-participant-using-class ((class     class)
-                                         (prototype rsb.ep:client)
-                                         (scope     scope)
-                                         &rest args &key
-                                         (direction  (participant-direction prototype))
-                                         (transports (missing-required-argument :transports))
-                                         (converters (missing-required-argument :converters))
-                                         transform)
-  ;; Remove &inherit markers in transport options and select enabled
-  ;; transports. Removed :enabled option from options of enabled
-  ;; transports.
-  (setf transports (or (effective-transport-options transports)
-                       ;; Signal an error if no transports have been
-                       ;; supplied.
-                       (error 'no-transports-error
-                              :kind  (participant-kind prototype)
-                              :scope scope)))
-
-  ;; Ensure that CONVERTERS is an alist of items of the form
-  ;; (WIRE-TYPE . CONVERTER).
-  (unless (and (listp converters) (consp (first converters)))
-    (setf converters (list (cons t converters))))
-
-  (let* ((configurator (make-instance
+  ;; Instantiate configurator and connectors and set everything up.
+  (let* (;; Remove &inherit markers in transport options and select
+         ;; enabled transports. Remove :enabled option from options of
+         ;; enabled transports.
+         (transports   (or (effective-transport-options
+                            (merge-transport-options
+                             transports (transport-options)))
+                           ;; Signal an error if no transports have
+                           ;; been supplied.
+                           (error 'no-transports-error
+                                  :kind  (participant-kind prototype)
+                                  :scope scope)))
+         ;; Ensure that CONVERTERS is an alist of items of the form
+         ;; (WIRE-TYPE . CONVERTER).
+         (converters   (if (and (listp converters) (consp (first converters)))
+                           converters
+                           (list (cons t converters))))
+         (configurator (make-instance
                         (ecase direction
                           ((:in-push :in-pull) 'rsb.ep:in-route-configurator)
                           (:out                'rsb.ep:out-route-configurator))
@@ -80,23 +73,26 @@
                         :transform transform))
          (connectors   (rsb.transport:make-connectors
                         transports direction converters))
-         (participant  (apply #'make-instance class
-                              :scope        scope
+         (participant  (apply #'call-next-method class prototype scope
                               :converters   converters
                               :configurator configurator
                               (remove-from-plist
-                               args :direction :transports :converters
-                                    :parent :introspection?)))
+                               args :direction :transports :converters)))
          (error-hook   (participant-error-hook participant)))
-
-    ;; Associate constructed CONNECTORS to CONFIGURATOR instance.
-    (setf (rsb.ep:configurator-connectors configurator) connectors)
 
     ;; Setup the error hook of PARTICIPANT to be run for all errors
     ;; intercepted by CONFIGURATOR.
     (setf (rsb.ep:processor-error-policy configurator)
           (lambda (condition)
             (hooks:run-hook error-hook condition)))
+
+    ;; Associate constructed CONNECTORS to CONFIGURATOR. This attaches
+    ;; CONNECTORS to SCOPE, performing the respective initialization
+    ;; work.
+    ;;
+    ;; Note that this has to be done after the error-policy has been
+    ;; installed in CONFIGURATOR to avoid race conditions.
+    (setf (rsb.ep:configurator-connectors configurator) connectors)
 
     participant))
 

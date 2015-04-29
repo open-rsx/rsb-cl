@@ -1,6 +1,6 @@
 ;;;; participant.lisp --- Unit tests for the participant class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,3 +36,26 @@
                                                :error? error?)))
             (ensure-same result expected
                          :test #'set-equal))))))
+
+(addtest (participant-root
+          :documentation
+          "Ensure that the specified error policy is in effect when
+           connector-related errors become possible.")
+  error-policy-race
+
+  ;; The following code was previously racy and would sometimes signal
+  ;; an error because the error signaling event handler in HANDLERS
+  ;; would be executed before the `continue' error policy was
+  ;; installed in the listener.
+  (with-participant (informer :informer "inprocess:")
+    (let ((send      (lambda () (send informer "")))
+          (handlers  (list (lambda (event)
+                             (declare (ignore event))
+                             (error "~@<intentional error~@:>")))))
+      (iter (repeat 1000)
+            (iter (repeat 3) (bt:make-thread send))
+            (with-participant
+                (listener :listener "inprocess:"
+                          :error-policy #'continue
+                          :handlers     handlers)
+              (declare (ignore listener)))))))
