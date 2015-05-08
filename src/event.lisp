@@ -1,6 +1,6 @@
 ;;;; event.lisp --- RSB event class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -254,11 +254,14 @@ AT? is ignored."
          ((&flet make-printable (string)
             ;; Replace unprintable characters in STRING with ".".
             (substitute-if
-             #\. (lambda (char) (< (char-code char) 32)) string))))
-    (format stream "~S~@[ (~D)~]"
+             #\. (lambda (char) (< (char-code char) 32)) string)))
+         ((&flet print-string (string)
+            (make-printable (maybe-shorten-string string *print-length*)))))
+    (format stream "~:[~A~:;~S~]~@[ (~D)~]"
+            (stringp data)
             (etypecase data
-              (string (make-printable
-                       (maybe-shorten-string data *print-length*)))
+              (string (print-string data))
+              (scope  (print-string (scope-string data)))
               (t      data))
             (when (and colon? (typep data 'sequence))
               (length data)))))

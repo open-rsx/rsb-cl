@@ -1,6 +1,6 @@
 ;;;; fundamental.lisp --- Unit tests for "fundamental" converters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -105,6 +105,21 @@
     `((,(octetify #())         :bytes ,(octetify #()))
       (:not-applicable         :bytes :not-an-octet-vector)
       (,(octetify #(65 65 65)) :bytes ,(octetify #(65 65 65)))))
+
+;;; Converter fundamental-scope
+
+(deftestsuite fundamental-scope-root (fundamental-root)
+  ()
+  (:documentation
+   "Unit tests for the `fundamental-scope' converter."))
+
+(define-basic-converter-test-cases (:fundamental-scope
+                                    :domain-test #'scope=)
+    `((,(octetify #())                  :scope :error)
+      (,(octetify #(102 111 111))       :scope :error)
+      (:not-applicable                  :scope :not-a-scope)
+      (,(octetify #(47))                :scope ,(make-scope "/"))
+      (,(octetify #(47 102 111 111 47)) :scope ,(make-scope "/foo"))))
 
 ;; Local Variables:
 ;; coding: utf-8

@@ -1,6 +1,6 @@
 ;;;; event.lisp --- Unit tests for the event class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -164,8 +164,19 @@
           "Test `print-object' method on `event' class.")
   print
 
-  (check-print (make-event "/foo/bar" "baz"))
-  (check-print (make-event "/foo/bar" (make-string 1000
-                                                   :initial-element #\a)))
-  (check-print (make-event "/foo/bar" "with
-newline")))
+  (ensure-cases (args expected)
+      `((("/foo/bar" "baz")
+         "/foo/bar/ \"baz\" (3)")
+        (("/foo/bar" ,(make-string 1000 :initial-element #\a))
+         "/foo/bar/ \"aaaaaaaaaa...\" (1000)")
+        (("/foo/bar" "with
+newline")
+         "/foo/bar/ \"with.newli...\" (12)")
+        (("/" ,(make-scope "/foo/bar/"))
+         "/ /foo/bar/"))
+    (let+ ((event  (apply #'make-event args))
+           (string (let ((*print-length* 10))
+                     (princ-to-string event)))
+           ((&flet search/flipped (string expected)
+              (search expected string))))
+      (ensure-same string expected :test #'search/flipped))))

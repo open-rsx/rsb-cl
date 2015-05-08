@@ -168,7 +168,7 @@ CONFIG-FILES. Default:
    If supplied, CONFIG specifies the configuration that should be used
    to determine the set of default converters. if CONFIG is not
    supplied, the value of `*configuration*' is used."
-   '((nibbles:octet-vector . (:fundamental-void
+  '((nibbles:octet-vector . (:fundamental-void
                              :fundamental-bool
                              :fundamental-int64
                              :fundamental-uint32
@@ -178,6 +178,7 @@ CONFIG-FILES. Default:
                              :fundamental-float
                              :fundamental-utf-8-string
                              :fundamental-bytes
+                             :fundamental-scope
                              :protocol-buffer))))
 
 (defun default-converter (wire-type &key (config *configuration*))

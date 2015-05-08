@@ -1,6 +1,6 @@
 ;;;; fundamental.lisp --- Converters for fundamental types.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -78,3 +78,10 @@
      :data-type-class simple-array)
   (wire-data)
   ((coerce domain-object 'octet-vector)))
+
+;;; RSB objects
+
+(define-simple-converter
+    (:fundamental-scope :scope scope)
+  ((make-scope (sb-ext:octets-to-string wire-data :external-format :ascii)))
+  ((sb-ext:string-to-octets (scope-string domain-object))))
