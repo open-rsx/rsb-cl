@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions provided by the patterns module.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,15 +26,15 @@
   (:default-initargs
    :protocol (missing-required-initarg 'protocol-condition :protocol)
    :message  (missing-required-initarg 'protocol-condition :message))
-  (:report (lambda (condition stream)
-             (format stream "~@<The message ~A does not conform to ~
-                             ~@[the ~A role within ~]the ~A ~
-                             protocol.~
-                             ~/more-conditions:maybe-print-cause/~@:>"
-                     (protocol-condition-message  condition)
-                     (protocol-condition-role     condition)
-                     (protocol-condition-protocol condition)
-                     condition)))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The message ~A does not conform to ~
+                     ~@[the ~A role within ~]the ~A protocol.~
+                     ~/more-conditions:maybe-print-cause/~@:>"
+             (protocol-condition-message  condition)
+             (protocol-condition-role     condition)
+             (protocol-condition-protocol condition)
+             condition)))
   (:documentation
    "Subclasses of this condition class indicate violations of
     communication protocols."))
@@ -42,22 +42,22 @@
 (define-condition simple-protocol-condition (protocol-condition
                                              simple-condition)
   ()
-  (:report (lambda (condition stream)
-             (format stream "~@<The message ~A does not conform to ~
-                             ~@[the ~A role within ~]the ~A ~
-                             protocol~
-                             ~/more-conditions:maybe-print-explanation/~
-                             ~/more-conditions:maybe-print-cause/~@:>"
-                     (protocol-condition-message  condition)
-                     (protocol-condition-role     condition)
-                     (protocol-condition-protocol condition)
-                     condition
-                     condition)))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The message ~A does not conform to ~
+                     ~@[the ~A role within ~]the ~A protocol~
+                     ~/more-conditions:maybe-print-explanation/~
+                     ~/more-conditions:maybe-print-cause/~@:>"
+             (protocol-condition-message  condition)
+             (protocol-condition-role     condition)
+             (protocol-condition-protocol condition)
+             condition condition)))
   (:documentation
    "Subclasses of this condition class indicate violations of
     communication protocols."))
 
-(define-condition protocol-problem (protocol-condition)
+(define-condition protocol-problem (protocol-condition
+                                    rsb-problem-condition)
   ()
   (:documentation
    "Superclass for protocol problem conditions such as warnings and

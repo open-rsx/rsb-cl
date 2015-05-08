@@ -33,5 +33,5 @@
     request-reply (package rsb.patterns.request-reply)
 
       In this communication pattern, a client submits requests to a
-      servers which processes the requests and sends associated
-      replies to the client."))
+      server which processes the requests and sends associated replies
+      to the client."))
