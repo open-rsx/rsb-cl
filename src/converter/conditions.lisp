@@ -35,12 +35,17 @@
    (lambda (condition stream)
      (let+ (((&structure-r/o conversion-error- wire-schema encoded domain-type)
              condition)
-            ((&values data shortened?) (maybe-shorten-sequence encoded)))
-       (format stream "~@<The wire-data ~S~:[~; ...~] (in ~S ~
-                       wire-schema) could not be converted to domain ~
-                       type ~
-                       ~S~/more-conditions:maybe-print-cause/~@:>"
-                       data shortened? wire-schema domain-type condition))))
+            (octet-sequence? (and (typep encoded 'sequence)
+                                  (every (of-type 'octet) encoded))))
+       (format stream "~@<The wire-data~
+                       ~:@_~:@_~
+                       ~<│ ~@;~:[~S~:;~,,,16@:/utilities.binary-dump:print-binary-dump/~]~:>~
+                       ~:@_~:@_~
+                       (in ~S wire-schema) could not be converted to ~
+                       domain type ~:_~S.~
+                       ~/more-conditions:maybe-print-cause/~:>"
+               (list octet-sequence? encoded) wire-schema domain-type
+               condition))))
   (:documentation
    "This error is signaled when wire data cannot be converted to a
     domain object."))

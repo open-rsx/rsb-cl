@@ -134,6 +134,7 @@
                 (:version :let-plus                      "0.2")
                 :more-conditions
                 (:version :utilities.print-items         "0.1")
+                (:version :utilities.binary-dump         "0.1")
 
                 :bordeaux-threads
                 (:version :lparallel                     "2.3.2")

@@ -106,15 +106,6 @@
     instance fails because the list of available converters does not
     contain a suitable one for the requested connector."))
 
-(defun decoding-error-print-data (stream data &optional colon? at?)
-  (declare (ignore colon? at?))
-  (typecase data
-    (sequence
-     (let+ (((&values data shortened?) (maybe-shorten-sequence data)))
-       (format stream "~{~2,'0X~^ ~}~:[~; ...~]" (coerce data 'list) shortened?)))
-    (t
-     (format stream "~A" data))))
-
 (define-condition decoding-error (rsb-error
                                   simple-condition
                                   chainable-condition)
@@ -125,14 +116,17 @@
             "The encoded data, for which the decoding failed."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The encoded data~
-                     ~@:_~@:_~
-                     ~2@T~<~/rsb.transport::decoding-error-print-data/~:>~
-                     ~@:_~@:_~
-                     could not be decoded~
-                     ~/more-conditions:maybe-print-explanation/~
-                     ~:*~/more-conditions:maybe-print-cause/~@:>"
-             (list (decoding-error-encoded condition)) condition)))
+     (let+ (((&structure-r/o decoding-error- encoded) condition)
+            (octet-sequence? (and (typep encoded 'sequence)
+                                  (every (of-type 'octet) encoded))))
+      (format stream "~@<The encoded data~
+                      ~@:_~@:_~
+                      ~<│ ~@;~:[~S~:;~,,,16@:/utilities.binary-dump:print-binary-dump/~]~:>~
+                      ~@:_~@:_~
+                      could not be decoded~
+                      ~/more-conditions:maybe-print-explanation/~
+                      ~:*~/more-conditions:maybe-print-cause/~:>"
+              (list octet-sequence? encoded) condition))))
   (:documentation
    "This error is signaled when decoding one or more notifications
     into an `event' instance fails."))
