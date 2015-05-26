@@ -27,6 +27,9 @@
   (when filters-supplied?
     (setf (receiver-filters instance) filters)))
 
+(defmethod print-items:print-items append ((object receiving-client))
+  `((:num-filters ,(length (receiver-filters object)) " |(~D)")))
+
 (defmethod (setf receiver-filters) :around ((new-value   list)
                                             (participant receiving-client))
   ;; Notify interested parties of the change in the set of listeners.
@@ -45,9 +48,3 @@
             (rsb.ep:notify configurator filter :filter-added))
       (iter (for filter in removed)
             (rsb.ep:notify configurator filter :filter-removed)))))
-
-(defmethod print-object ((object receiving-client) stream)
-  (print-unreadable-id-object (object stream :type t)
-    (format stream "~A |(~D)"
-            (scope-string (participant-scope object))
-            (length (receiver-filters object)))))

@@ -35,6 +35,9 @@ events sent by this informer."))
 
 (register-participant-class 'informer)
 
+(defmethod print-items:print-items append ((object informer))
+  `((:type ,(informer-type object) " ~A")))
+
 (defmethod send :before ((informer informer) (data event)
                          &key
                          unchecked?)
@@ -102,12 +105,6 @@ events sent by this informer."))
   (apply #'send informer
          (make-event (participant-scope informer) data)
          args))
-
-(defmethod print-object ((object informer) stream)
-  (print-unreadable-id-object (object stream :type t)
-    (format stream "~A ~S"
-            (scope-string  (participant-scope object))
-            (informer-type object))))
 
 ;;; `informer' creation
 

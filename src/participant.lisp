@@ -31,7 +31,9 @@
 
 (defmethod print-object ((object participant) stream)
   (print-unreadable-id-object (object stream :type t)
-    (format stream "~A" (scope-string (participant-scope object)))))
+    (format stream "~A~@[~/print-items:format-print-items/~]"
+            (scope-string (participant-scope object))
+            (remove :id (print-items:print-items object) :key #'first))))
 
 ;;; Participant creation
 
