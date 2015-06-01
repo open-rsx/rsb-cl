@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for spread connectors.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,8 +14,7 @@
                :documentation
                ""))
   (:metaclass connector-class)
-  (:default-initargs
-   :schema :spread)
+  (:transport :spread)
   (:wire-type octet-vector)
   (:schemas   :spread)
   (:options
@@ -33,6 +32,8 @@
     :default t
     :description
     "Should the TCP_NODELAY option be set on the socket used for Spread communication? Note: currently ignored by Lisp implementation."))
+  (:default-initargs
+   :schema :spread)
   (:documentation
    "This class serves as a superclass for spread in and out
 connectors."))

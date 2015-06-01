@@ -1,6 +1,6 @@
 ;;;; in-pull-connector.lisp --- An in-direction, pull-based connector for spread.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,6 +17,8 @@
   (:documentation
    "This class implements pull-style event receiving for the Spread
 transport."))
+
+(register-connector :spread :in-pull 'in-pull-connector)
 
 (defmethod notify ((connector in-pull-connector)
                    (scope     scope)
