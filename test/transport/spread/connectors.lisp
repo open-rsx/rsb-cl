@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,8 +8,7 @@
 
 ;;; `in-connector' superclass
 
-(deftestsuite in-connector-root (transport-spread-root
-                                 connector-suite)
+(deftestsuite in-connector-root (transport-spread-root)
   ((a-string           (let ((buffer (octetify "foobarbaz")))
                          (cons buffer (length buffer))))
    (empty-notification (let+ (((&values length buffer)
@@ -50,8 +49,7 @@
        (let ((class-name (format-symbol :rsb.transport.spread "~A-CONNECTOR" direction))
              (suite-name (format-symbol *package* "~A-CONNECTOR-ROOT" direction)))
          `(progn
-            (deftestsuite ,suite-name (transport-spread-root
-                                       connector-suite)
+            (deftestsuite ,suite-name (transport-spread-root)
               ()
               (:documentation
                ,(format nil "Test suite for the `~(~A~)' class."
