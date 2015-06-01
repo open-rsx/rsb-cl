@@ -1,54 +1,35 @@
-;;;; connectors.lisp --- inprocess connector classes.
+;;;; connectors.lisp --- Connectors of the inprocess transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.inprocess)
 
-;;; Global scope -> in-connector mapping
-
-(#+sbcl sb-ext:defglobal #-sbcl defvar **by-scope** (rsb.ep:make-sink-scope-trie)
-  "Association of scopes to event sinks interested in the respective
-   scopes.")
-
-(declaim #+sbcl (sb-ext:always-bound **by-scope**)
-         (type rsb.ep:sink-scope-trie **by-scope**))
-
-;;; Global cache variables
-
-(#+sbcl sb-ext:defglobal #-sbcl defvar **cached-machine-instance**
-  (machine-instance))
-
-(#+sbcl sb-ext:defglobal #-sbcl defvar **cached-process-id**
-  (sb-posix:getpid))
-
-#+sbcl (declaim (sb-ext:always-bound **cached-machine-instance**
-                                     **cached-process-id**))
-
-(defun update-cached-machine-instance-and-process-id ()
-  (setf **cached-machine-instance** (machine-instance)
-        **cached-process-id**       (sb-posix:getpid)))
-
-#+sbcl (pushnew 'update-cached-machine-instance-and-process-id
-                sb-ext:*init-hooks*)
-#-sbcl (pushnew 'update-cached-machine-instance-and-process-id
-                uiop:*image-restore-hook*)
-
 ;;; `connector'
 
 (defclass connector (rsb.transport:connector)
-  ()
+  ((transport :initarg  %transport
+              :reader   connector-transport))
   (:metaclass connector-class)
-  (:default-initargs
-   :schema :inprocess
-   :host   **cached-machine-instance**
-   :port   **cached-process-id**)
+  (:transport :inprocess)
   (:wire-type t) ; The Lisp process is the medium, so t (any Lisp
                  ; object) should be a reasonable wire-type
   (:schemas   :inprocess)
+  (:default-initargs
+   :schema :inprocess)
   (:documentation
    "Superclass for connector classes of the inprocess transport."))
+
+(defmethod shared-initialize :around ((instance   connector)
+                                      (slot-names t)
+                                      &rest args &key)
+  (let ((transport (connector-transport (class-of instance))))
+    (apply #'call-next-method instance slot-names
+           '%transport transport
+           :host       (transport-machine-instance transport)
+           :port       (transport-process-id       transport)
+           args)))
 
 ;;; `in-connector'
 
@@ -62,18 +43,22 @@
 (defmethod notify ((connector in-connector)
                    (scope     scope)
                    (action    (eql :attached)))
-  (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
-  (rsb.ep:sink-scope-trie-add **by-scope** scope connector)
-  (log:debug "~@<Scope trie after adding ~A:~@:_~/rsb.ep::print-trie/~@:>"
-             connector **by-scope**))
+  (let+ (((&structure-r/o transport- scope-sinks)
+          (connector-transport connector)))
+    (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
+    (rsb.ep:sink-scope-trie-add scope-sinks scope connector)
+    (log:debug "~@<Scope trie after adding ~A:~@:_~/rsb.ep::print-trie/~@:>"
+               connector scope-sinks)))
 
 (defmethod notify ((connector in-connector)
                    (scope     scope)
                    (action    (eql :detached)))
-  (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
-  (rsb.ep:sink-scope-trie-remove **by-scope** scope connector)
-  (log:debug "~@<Scope trie after removing ~A:~@:_~/rsb.ep::print-trie/~@:>"
-             connector **by-scope**))
+  (let+ (((&structure-r/o transport- scope-sinks)
+          (connector-transport connector)))
+    (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
+    (rsb.ep:sink-scope-trie-remove scope-sinks scope connector)
+    (log:debug "~@<Scope trie after removing ~A:~@:_~/rsb.ep::print-trie/~@:>"
+               connector scope-sinks)))
 
 ;;; `in-pull-connector' class
 
@@ -94,6 +79,8 @@
   (:documentation
    "Instances of this connector class deliver RSB events within a
     process."))
+
+(register-connector :inprocess :in-pull 'in-pull-connector)
 
 (defmethod handle ((connector in-pull-connector)
                    (event     event))
@@ -145,6 +132,8 @@
    "Instances of this connector class deliver RSB events within a
     process."))
 
+(register-connector :inprocess :in-push 'in-push-connector)
+
 (defmethod handle :before ((connector in-push-connector)
                            (event     event))
   (setf (timestamp event :receive) (local-time:now)))
@@ -162,14 +151,18 @@
   (:direction :out)
   (:documentation
    "Instances of this connector class deliver RSB events within a
-process."))
+    process."))
+
+(register-connector :inprocess :out 'out-connector)
 
 (defmethod handle :before ((connector out-connector)
                            (event     event))
   (setf (timestamp event :send) (local-time:now)))
 
 (defmethod handle ((connector out-connector) (event event))
-  (flet ((do-scope (connectors)
-           (handle connectors event)))
+  (let+ (((&structure-r/o transport- scope-sinks)
+          (connector-transport connector))
+         ((&flet do-scope (connectors)
+            (handle connectors event))))
     (declare (dynamic-extent #'do-scope))
-    (rsb.ep:scope-trie-map #'do-scope (event-scope event) **by-scope**)))
+    (rsb.ep:scope-trie-map #'do-scope (event-scope event) scope-sinks)))
