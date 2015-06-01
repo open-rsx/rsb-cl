@@ -100,23 +100,23 @@ transport test suites."))
      expected-schemas)
   "Define basic test cases for the connector class CLASS.
 
-NAME is a keyword designating TRANSPORT e.g. in calls to
-`rsb.transport:make-transport'.
+   NAME is a keyword designating TRANSPORT e.g. in calls to
+   `rsb.transport:make-connector'.
 
-SUITE-NAME is a symbol naming the test suite part of which the
-generated test cases should be.
+   SUITE-NAME is a symbol naming the test suite part of which the
+   generated test cases should be.
 
-INITARGS are initargs which should be used when making connector
-instances.
+   INITARGS are initargs which should be used when making connector
+   instances.
 
-EXPECTED-DIRECTION specifies the expected direction of the connector
-class.
+   EXPECTED-DIRECTION specifies the expected direction of the
+   connector class.
 
-EXPECTED-WIRE-TYPE specifies the expected wire-type of the connector
-class.
+   EXPECTED-WIRE-TYPE specifies the expected wire-type of the
+   connector class.
 
-EXPECTED-SCHEMAS specifies the list of expected schemas of the
-connector class."
+   EXPECTED-SCHEMAS specifies the list of expected schemas of the
+   connector class."
   `(progn
      (addtest (,suite-name
           :documentation
@@ -136,11 +136,10 @@ connector class."
                         class))
        class
 
-       (check-connector-class
-        (find-class ',class)
-        ,expected-direction
-        ,expected-wire-type
-        ,expected-schemas))
+       (check-connector-class (find-class ',class)
+                              ,expected-direction
+                              ,expected-wire-type
+                              ,expected-schemas))
 
      (addtest (,suite-name
                :documentation
@@ -154,9 +153,9 @@ connector class."
           instance ,expected-direction ,expected-wire-type)))
 
      (addtest (,suite-name
-          :documentation
-          ,(format nil "Test printing a ~A connector instance."
-                   class))
+               :documentation
+               ,(format nil "Test printing a ~A connector instance."
+                        class))
        print
 
        (let ((instance (apply #'make-instance ',class ,initargs)))

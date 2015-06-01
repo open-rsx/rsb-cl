@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Unit tests for the connector class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,6 @@
   ()
   (:documentation
    "Unit test for the `connector' class."))
-
 
 (addtest (connector-root
           :documentation
