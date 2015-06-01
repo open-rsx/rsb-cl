@@ -1,31 +1,10 @@
 ;;;; bus.lisp --- Superclass for bus provider classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
-
-(defmacro with-locked-bus ((bus
-                            &rest args
-                            &key
-                            connections?
-                            connectors?)
-                           &body body)
-  "Execute BODY with BUS' lock held."
-  (check-type connections? boolean)
-  (check-type connectors?  boolean)
-
-  (flet ((maybe-with-lock (which requested? body)
-           (if requested?
-               `((bt:with-recursive-lock-held ((,which ,bus))
-                   ,@body))
-               body)))
-    `(progn
-       ,@(maybe-with-lock
-          'bus-connections-lock (or (not args) connections?)
-          (maybe-with-lock 'bus-connectors-lock (or (not args) connectors?)
-           body)))))
 
 (defclass bus (broadcast-processor)
   ((connections         :type     list

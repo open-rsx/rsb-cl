@@ -1,6 +1,6 @@
 ;;;; rsb-transport-socket.asd --- System containing the socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,6 +34,7 @@
                               (:file       "util")
                               (:file       "conversion")
 
+                              (:file       "transport")
                               (:file       "bus-connection")
                               (:file       "bus")
                               (:file       "bus-client")

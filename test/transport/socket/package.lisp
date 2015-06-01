@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -30,10 +30,7 @@
    #:bus-connectors
    #:bus-connections
 
-   #:*bus-clients*
-   #:*bus-servers*
-   #:ensure-bus-client
-   #:ensure-bus-server)
+   #:transport-ensure-bus)
 
   (:shadowing-import-from #:rsb.transport.socket
    #:connector
@@ -73,8 +70,10 @@ socket. Should be incremented after each use.")
   ;; Prior to running each individual test case, clear bus clients and
   ;; servers and choose a new port.
   (:setup
-   (clrhash *bus-clients*)
-   (clrhash *bus-servers*)
+   (let ((transport (service-provider:find-provider
+                     'rsb.transport:transport :socket)))
+     (clrhash (rsb.transport.socket::transport-clients transport))
+     (clrhash (rsb.transport.socket::transport-servers transport)))
    (next-port))
   (:run-setup :once-per-test-case)
   (:documentation

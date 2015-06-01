@@ -1,10 +1,33 @@
 ;;;; util.lisp --- Utilities used in the transport.socket module
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
+
+;;; Bus locking
+
+(defmacro with-locked-bus ((bus
+                            &rest args
+                            &key
+                            connections?
+                            connectors?)
+                           &body body)
+  "Execute BODY with BUS' lock held."
+  (check-type connections? boolean)
+  (check-type connectors?  boolean)
+
+  (flet ((maybe-with-lock (which requested? body)
+           (if requested?
+               `((bt:with-recursive-lock-held ((,which ,bus))
+                   ,@body))
+               body)))
+    `(progn
+       ,@(maybe-with-lock
+          'bus-connections-lock (or (not args) connections?)
+          (maybe-with-lock 'bus-connectors-lock (or (not args) connectors?)
+                           body)))))
 
 ;;; Connection options
 

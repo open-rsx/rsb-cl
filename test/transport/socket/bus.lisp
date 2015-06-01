@@ -1,6 +1,6 @@
 ;;;; bus.lisp --- Unit tests for the bus* classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -90,12 +90,14 @@ connection.")
 
     (let* ((host        "localhost")
            (port        *next-port*)
+           (transport   (service-provider:find-provider
+                         'rsb.transport:transport :socket))
            (connector-1 (make-socket-connector connector-class host port))
            (connector-2 (make-socket-connector connector-class host port)))
 
       ;; There is no server yet, so this has to signal an error.
       (ensure-condition 'usocket:connection-refused-error ; TODO(jmoringe): keep this condition type?
-        (ensure-bus-client host port connector-1))
+        (transport-ensure-bus transport host port :client! connector-1))
 
       ;; Create a bus server.
       (with-participant (dummy :reader (make-socket-url t nil)
@@ -105,8 +107,10 @@ connection.")
         ;; them. The first request should cause the bus client to be
         ;; created, while the second should just return the existing
         ;; bus client.
-        (let ((bus-1 (ensure-bus-client host port connector-1))
-              (bus-2 (ensure-bus-client host port connector-2)))
+        (let ((bus-1 (transport-ensure-bus
+                      transport host port :client! connector-1))
+              (bus-2 (transport-ensure-bus
+                      transport host port :client! connector-2)))
           (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 t))))))
 
 (addtest (transport-socket-bus-root
@@ -124,6 +128,8 @@ connection.")
 
     (let* ((host        "localhost")
            (port        *next-port*)
+           (transport   (service-provider:find-provider
+                         'rsb.transport:transport :socket))
            (connector-1 (make-socket-connector connector-class host port
                                                :server? t))
            (connector-2 (make-socket-connector connector-class host port
@@ -134,8 +140,10 @@ connection.")
       ;; created, while the second should just return the existing bus
       ;; server. Creating a bus server should succeed unless the port
       ;; is in use.
-      (let ((bus-1 (ensure-bus-server host port connector-1))
-            (bus-2 (ensure-bus-server host port connector-2)))
+      (let ((bus-1 (transport-ensure-bus
+                    transport host port :server! connector-1))
+            (bus-2 (transport-ensure-bus
+                    transport host port :server! connector-2)))
         (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil)))))
 
 (addtest (transport-socket-bus-root
@@ -146,6 +154,8 @@ connection.")
 
   (let* ((host        "localhost")
          (port        0)
+         (transport   (service-provider:find-provider
+                       'rsb.transport:transport :socket))
          (connector-1 (make-socket-connector
                        'connector host port :server? t :portfile "-"))
          (connector-2 (make-socket-connector
@@ -160,8 +170,8 @@ connection.")
               (let+ ((bus)
                      ((&flet make-bus (stream)
                         (progv (list stream-name) (list stream)
-                          (setf bus (ensure-bus-server
-                                     host port connector)))))
+                          (setf bus (transport-ensure-bus
+                                     transport host port :server! connector)))))
                      (port (with-output-to-string (stream)
                              (make-bus stream))))
                 (values bus port))))

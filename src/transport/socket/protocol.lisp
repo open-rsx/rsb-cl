@@ -1,10 +1,46 @@
 ;;;; protocol.lisp --- Protocol used in the socket transport module.
 ;;;;
-;;;; Copyright (C) 2013 Jan Moringen
+;;;; Copyright (C) 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
+
+;;; Transport protocol
+
+(defgeneric transport-ensure-bus (transport host port role connector)
+  (:documentation
+   "Return (creating it if necessary), a `bus-server' or `bus-client'
+    instance for the endpoint designated by HOST and PORT and attach
+    CONNECTOR to it.
+
+    Attaching CONNECTOR marks the `bus-client' or `bus-client'
+    instance as being in use and protects it from being destroyed in a
+    race condition situation.
+
+    ROLE can have the following values:
+
+    :auto
+
+      Automatically determine whether to act as server or client.
+
+    :server!
+
+      Act as server.
+
+    :server
+
+      Try to act as server, establishing a restart to try acting as
+      client in case of a problem.
+
+    :client!
+
+      Act as client
+
+    :client
+
+      Try to act as client, establishing a restart to try acting as
+      server in case of a problem."))
 
 ;;; Connection shutdown protocol
 

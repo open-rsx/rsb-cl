@@ -1,47 +1,10 @@
 ;;;; bus-server.lisp --- A class that accepts connections from bus clients.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
-
-;;; Global map of bus servers
-
-(defvar *bus-servers* (make-hash-table :test #'equalp)
-  "Map host names and ports to `bus-servers' instances.")
-
-(defvar *bus-servers-lock* (bt:make-recursive-lock "Bus servers lock")
-  "A lock that protects accesses to `*bus-servers*'.")
-
-(defun ensure-bus-server (host port connector)
-  "Return (creating it if necessary), a `bus-server' instance for the
-endpoint designated by HOST and PORT and attach CONNECTOR to it.
-Attaching CONNECTOR marks the `bus-server' instance as being in use
-and protects it from being destroyed in a race condition situation."
-  (declare (ignore host))
-  (let* ((options   (make-connection-options connector))
-         (port-file (getf options :portfile))
-         (host      "0.0.0.0")
-         (key       (cons host port)))
-    (log:trace "~@<Trying to obtain bus server ~A:~D for ~A~@:>"
-               host port connector)
-    (bt:with-recursive-lock-held (*bus-servers-lock*)
-      (or (when-let ((candidate (gethash key *bus-servers*)))
-            (with-locked-bus (candidate)
-              (when (bus-connectors candidate)
-                (check-connection-options (bus-options candidate) options)
-                (maybe-write-port-file
-                 port-file candidate (getf (bus-options candidate) :portfile))
-                (notify connector candidate :attached)
-                candidate)))
-          (let ((bus (make-instance 'bus-server
-                                    :host    host
-                                    :port    port
-                                    :options options)))
-            (maybe-write-port-file port-file bus)
-            (notify connector bus :attached)
-            (setf (gethash key *bus-servers*) bus))))))
 
 ;;; `bus-server' class
 

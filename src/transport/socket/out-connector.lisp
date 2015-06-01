@@ -1,6 +1,6 @@
 ;;;; out-connector.lisp --- Out-direction connector for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,6 +18,8 @@
   (:direction :out)
   (:documentation
    "Out-direction connector for socket transport."))
+
+(register-connector :socket :out 'out-connector)
 
 (defmethod handle ((connector out-connector)
                    (event     event))
