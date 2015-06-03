@@ -99,6 +99,7 @@
     (ensure-same (plist-alist (remove-from-plist result :error-policy))
                  '((:transports     . ((:inprocess :enabled t)
                                        (:socket    :enabled t :port 1020)))
+                   (:converters     . (:foo))
                    (:transform      . 1+)
                    (:introspection? . t))
                  :test (rcurry #'set-equal :test #'equal))))

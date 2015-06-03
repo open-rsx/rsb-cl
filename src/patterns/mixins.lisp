@@ -100,28 +100,25 @@
 
 ;;; `configuration-inheritance-mixin'
 
-;; TODO should also handle converters
 (defclass configuration-inheritance-mixin ()
-  ((transport-options     :initarg :transport-options
-                          :type    list
-                          :reader  participant-transport-options
+  ((transport-options     :initarg  :transport-options
+                          :type     list
+                          :reader   participant-transport-options
                           :documentation
                           "Stores the transport options that should be
-                           passed to the child participants when they
-                           are created.
+                           passed to child participants when they are
+                           created.
 
                            The stored options have already been merged
                            with defaults and thus make created child
                            participants ignore any special binding of
                            `*configuration*'.")
-   (introspection?-option :initarg  :introspection?-option
-                          :type     boolean
-                          :reader   participant-introspection?-option
-                          :initform t
+   (converter-options     :initarg  :converter-options
+                          :reader   participant-converter-options
                           :documentation
-                          "Stores a Boolean indicating whether
-                           introspection has enabled for the
-                           participant.
+                          "Stores the converter options that should be
+                           passed to child participants when they are
+                           created.
 
                            TODO this is a temporary workaround until
                            participant-configuration is ready.")
@@ -131,6 +128,17 @@
                           :documentation
                           "Stores the transform which should be applied to
                            processed events.
+
+                           TODO this is a temporary workaround until
+                           participant-configuration is ready.")
+   (introspection?-option :initarg  :introspection?-option
+                          :type     boolean
+                          :reader   participant-introspection?-option
+                          :initform t
+                          :documentation
+                          "Stores a Boolean indicating whether
+                           introspection has enabled for the
+                           participant.
 
                            TODO this is a temporary workaround until
                            participant-configuration is ready."))
@@ -174,20 +182,23 @@
              :scope scope))
 
     (apply #'call-next-method class prototype scope
-           :converters            converters
            :transport-options     transport-options
+           :converter-options     converters
            :transform-option      transform
            :introspection?-option introspection?
-           (remove-from-plist args :transports :transform))))
+           (remove-from-plist args :converters :transports :transform))))
 
 (defmethod make-child-initargs ((participant configuration-inheritance-mixin)
                                 (which       t)
                                 (kind        t)
                                 &key)
   (let+ (((&structure-r/o
-           participant- transport-options transform-option introspection?-option)
+           participant-
+           transport-options converter-options transform-option
+           introspection?-option)
           participant))
     (list* :transports     transport-options
+           :converters     converter-options
            :transform      transform-option
            :introspection? introspection?-option
            (when (next-method-p)
