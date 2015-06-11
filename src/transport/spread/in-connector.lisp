@@ -37,9 +37,16 @@ connector classes for Spread."))
 (defmethod notify ((connector in-connector)
                    (scope     scope)
                    (action    (eql :detached)))
-  (when (zerop (nth-value 1 (unref-group (connector-connection connector)
-                                         (scope->group scope))))
-    (notify connector t :detached)))
+  (let+ (((&values &ign group-count promise)
+          (unref-group (connector-connection connector) (scope->group scope)
+                       :waitable? t)))
+    ;; If necessary, wait for the Spread group leaving operation to
+    ;; complete.
+    (lparallel:force promise)
+    ;; If this was the final reference to the final group of the
+    ;; connection, detach CONNECTOR.
+    (when (zerop group-count)
+      (notify connector t :detached))))
 
 (defmethod notify ((connector in-connector)
                    (scope     (eql t))

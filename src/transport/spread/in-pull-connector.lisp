@@ -34,6 +34,22 @@ transport."))
     (iter (until (lparallel:fulfilledp promise))
           (receive-message connection nil))))
 
+(defmethod notify ((connector in-pull-connector)
+                   (scope     scope)
+                   (action    (eql :detached)))
+  (let+ (((&structure-r/o connector- connection) connector)
+         ((&values &ign group-count promise)
+          (unref-group (connector-connection connector) (scope->group scope)
+                       :waitable? t)))
+    ;; If necessary, wait for the Spread group leaving operation to
+    ;; complete.
+    (iter (until (lparallel:fulfilledp promise))
+          (receive-message connection nil))
+    ;; If this was the final reference to the final group of the
+    ;; connection, detach CONNECTOR.
+    (when (zerop group-count)
+      (notify connector t :detached))))
+
 (defmethod emit ((connector in-pull-connector) (block? t))
   ;; Maybe block until a notification is received. Try to convert into
   ;; an event and return the event in case of success. In blocking
