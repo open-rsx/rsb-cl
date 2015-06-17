@@ -139,6 +139,7 @@
    #:make-scope
    #:super-scopes
    #:merge-scopes
+   #:enough-scope
 
    #:intern-scope)
 

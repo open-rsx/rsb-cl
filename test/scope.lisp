@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Unit tests for scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -165,6 +165,51 @@ strings.")
       (ensure (typep result 'scope))
       (ensure-same result expected
                    :test (if (eq expected +root-scope+) #'eq #'scope=)))))
+
+(addtest (scope-root
+          :documentation
+          "Test `enough-scope' function.")
+  enough-scope
+
+  (ensure-cases (thing defaults expected)
+      `(;; Test coercion.
+        (,+root-scope+      ,+root-scope+ ,+root-scope+)
+        ("/"                ,+root-scope+ "/")
+        (()                 ,+root-scope+ "/")
+        (,+root-scope+      "/"           "/")
+        (,+root-scope+      ()            "/")
+
+        (,(make-scope "/a") ,+root-scope+ "/a")
+        ("/a"               ,+root-scope+ "/a")
+        (("a")              ,+root-scope+ "/a")
+        (,(make-scope "/a") "/"           "/a")
+        ("/a"               "/"           "/a")
+        (("a")              "/"           "/a")
+        (,(make-scope "/a") ()            "/a")
+        ("/a"               ()            "/a")
+        (("a")              ()            "/a")
+
+        ;; Test semantics.
+        ("/"                "/"           ,+root-scope+)
+        ("/a"               "/"           "/a")
+        ("/a/b"             "/"           "/a/b")
+
+        ("/"                "/a"          error)
+        ("/a"               "/a"          ,+root-scope+)
+        ("/a/b"             "/a"          "/b")
+
+        ("/"                "/a/b"        error)
+        ("/a"               "/a/b"        error)
+        ("/a/b"             "/a/b"        "/"))
+
+    (case expected
+      (error
+       (ensure-condition error (enough-scope thing defaults)))
+      (t
+       (let ((result (enough-scope thing defaults)))
+         (ensure (typep result 'scope))
+         (ensure-same result expected
+                      :test (if (eq expected +root-scope+) #'eq #'scope=)))))))
 
 (addtest (scope-root
           :documentation

@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -138,17 +138,50 @@
 (defun merge-scopes (thing1 thing2)
   "Return a `scope' instance that consists of the concatenated
    components of THING1 and THING2."
-  (let+ (((&flet make-result (scope1 scope2)
-            (make-instance 'scope
-                           :components (append (scope-components scope2)
-                                               (scope-components scope1))))))
-   (cond
-     ((eq thing1 +root-scope+)
-      (ensure-scope thing2))
-     ((eq thing2 +root-scope+)
-      (ensure-scope thing1))
-     (t
-      (make-result (ensure-scope thing1) (ensure-scope thing2))))))
+  (cond
+    ((eq thing1 +root-scope+)
+     (ensure-scope thing2))
+    ((eq thing2 +root-scope+)
+     (ensure-scope thing1))
+    (t
+     (make-instance
+      'scope
+      :components (append (scope-components (ensure-scope thing2))
+                          (scope-components (ensure-scope thing1)))))))
+
+(defun enough-scope (thing &optional (defaults +root-scope+))
+  "Return a `scope' that yields THING when merged with DEFAULTS.
+
+   That is, if THING is a sub-scope of DEFAULTS, the following
+   invariant holds:
+
+     (merge-scopes (enough-scope thing defaults) defaults) ≡ thing
+
+   If THING is a sub-scope of DEFAULTS an error is signaled."
+  (cond
+    ((eq thing +root-scope+)
+     thing)
+    ((eq defaults +root-scope+)
+     (ensure-scope thing))
+    (t
+     (let* ((thing              (ensure-scope thing))
+            (thing-components   (scope-components thing))
+            (defaults           (ensure-scope defaults))
+            (default-components (scope-components defaults))
+            (mismatch           (mismatch thing-components default-components
+                                          :test #'string=)))
+       (cond
+         ((not mismatch)
+          +root-scope+)
+         ((length= 0 default-components)
+          thing)
+         ((< mismatch (length default-components))
+          (error "~@<~A is not a sub-scope of ~A.~@:>"
+                 thing defaults))
+         (t
+          (make-instance
+           'scope
+           :components (subseq thing-components mismatch))))))))
 
 ;;; Interning scopes
 
