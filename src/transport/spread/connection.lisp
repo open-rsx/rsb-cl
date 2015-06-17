@@ -64,64 +64,87 @@
 (defmethod disconnect ((connection connection))
   (network.spread:disconnect (connection-%connection connection)))
 
-(defmethod ref-group ((connection connection) (group string)
-                      &key (waitable? nil))
-  (let+ (((&structure-r/o connection- %connection (groups %groups))
-          connection)
-         ((&flet join ()
-            (log:info "~@<~A is joining group ~A~@:>" connection group)
-            (network.spread:join %connection group)))
-         ((&flet join/waitable ()
-            (let+ ((hook    (hooks:object-hook
-                             %connection 'network.spread:join-hook))
-                   (promise (lparallel:promise))
-                   ((&labels notify-and-remove (joined-group members)
-                      (log:debug "~@<~A got join notification for ~
+(let+ (((&flet make-hook-promise (context connection hook group predicate)
+          (let+ ((hook    (hooks:object-hook connection hook))
+                 (promise (lparallel:promise))
+                 ((&labels notify-and-remove (message-group members)
+                    (log:debug "~@<~A got ~A notification for ~
                                   group ~S with members ~S.~@:>"
-                                 connection joined-group members)
-                      (when (and (string= joined-group group :end2 31)
-                                 (member (network.spread:connection-name
-                                          %connection)
-                                         members :test #'string=))
-                        (hooks:remove-from-hook hook #'notify-and-remove)
-                        (lparallel:fulfill promise)))))
-              (hooks:add-to-hook hook #'notify-and-remove)
-              (join)
-              promise)))
-         (new-value (incf (gethash group groups 0))))
-    (values new-value
-            (hash-table-count groups)
-            (cond
-              ((/= new-value 1) nil)
-              (waitable?        (join/waitable))
-              (t                (join))))))
+                               context connection message-group members)
+                    (when (and (string= message-group group :end2 31)
+                               (funcall predicate members))
+                      (hooks:remove-from-hook hook #'notify-and-remove)
+                      (lparallel:fulfill promise)))))
+            (hooks:add-to-hook hook #'notify-and-remove)
+            promise))))
 
-(defmethod unref-group :around ((connection connection) (group string))
-  (if (gethash group (connection-%groups connection))
-      (call-next-method)
-      (log:warn "~@<~A was asked to unreference unknown group ~A~@:>"
-                connection group)))
+  (defmethod ref-group ((connection connection) (group string)
+                        &key (waitable? nil))
+    (let+ (((&structure-r/o connection- %connection (groups %groups))
+            connection)
+           ((&flet join ()
+              (log:info "~@<~A is joining group ~A~@:>" connection group)
+              (network.spread:join %connection group)))
+           ((&flet join/waitable ()
+              (prog1
+                  (make-hook-promise
+                   "join" %connection 'network.spread:join-hook group
+                   (lambda (members)
+                     (member (network.spread:connection-name
+                              %connection)
+                             members :test #'string=)))
+                (join))))
+           (new-value (incf (gethash group groups 0))))
+      (values new-value
+              (hash-table-count groups)
+              (cond
+                ((/= new-value 1) nil)
+                (waitable?        (join/waitable))
+                (t                (join))))))
 
-(defmethod unref-group ((connection connection) (group string))
-  (let+ (((&structure-r/o connection- %connection (groups %groups))
-          connection)
-         (new-value (decf (gethash group groups 0))))
-    (when (zerop new-value)
-      (log:info "~@<~A is leaving group ~A~@:>" connection group)
-      (remhash group groups)
-      (network.spread:leave %connection group))
-    (values new-value (hash-table-count groups))))
+  (defmethod unref-group :around ((connection connection) (group string)
+                                  &key waitable?)
+    (declare (ignore waitable?))
+    (if (gethash group (connection-%groups connection))
+        (call-next-method)
+        (log:warn "~@<~A was asked to unreference unknown group ~A~@:>"
+                  connection group)))
+
+  (defmethod unref-group ((connection connection) (group string)
+                          &key (waitable? nil))
+    (let+ (((&structure-r/o connection- %connection (groups %groups))
+            connection)
+           ((&flet leave ()
+              (log:info "~@<~A is leaving group ~A~@:>" connection group)
+              (remhash group groups)
+              (network.spread:leave %connection group)))
+           ((&flet leave/waitable ()
+              (prog1
+                  (make-hook-promise
+                   "leave" %connection 'network.spread:leave-hook group
+                   (lambda (members)
+                     (not (member (network.spread:connection-name
+                                   %connection)
+                                  members :test #'string=))))
+                (leave))))
+           (new-ref-count   (decf (gethash group groups 0)))
+           (maybe-promise   (cond
+                              ((plusp new-ref-count) nil)
+                              (waitable?             (leave/waitable))
+                              (t                     (leave))))
+           (new-group-count (hash-table-count groups)))
+      (values new-ref-count new-group-count maybe-promise))))
 
 (macrolet
     ((with-spread-condition-translation (&body body)
        `(handler-bind
             ((network.spread:spread-error
-               (lambda (condition)
-                 (when (member (network.spread:spread-error-code condition)
-                               '(:net-error-on-session :connection-closed))
-                   (error 'connection-unexpectedly-closed
-                          :connection connection
-                          :cause      condition)))))
+              (lambda (condition)
+                (when (member (network.spread:spread-error-code condition)
+                              '(:net-error-on-session :connection-closed))
+                  (error 'connection-unexpectedly-closed
+                         :connection connection
+                         :cause      condition)))))
           ,@body)))
 
   (defmethod receive-message ((connection connection) (block? t))

@@ -31,14 +31,24 @@
     non-blocking mode) before or while forcing the promise since
     otherwise Spread events for CONNECTION are not processed."))
 
-(defgeneric unref-group (connection group)
+(defgeneric unref-group (connection group &key waitable?)
   (:documentation
    "Decrease the reference count of GROUP, causing CONNECTION to leave
     the Spread group named GROUP in case of a 1 -> 0 transition of the
     reference count.
 
     Return two values: 1) number of remaining references to GROUP 2)
-    number of remaining referenced groups in CONNECTION."))
+    number of remaining referenced groups in CONNECTION. 3) optionally
+    a promise (see below).
+
+    If WAITABLE? is true and actual leaving occurs (as described
+    above), return as the third value an `lparallel:promise' instance
+    that can be forced to wait for the completion of the leave
+    operation.
+
+    Note that `receive-message' has to be called (in blocking or
+    non-blocking mode) before or while forcing the promise since
+    otherwise Spread events for CONNECTION are not processed."))
 
 (defgeneric receive-message (connection block?)
   (:documentation
