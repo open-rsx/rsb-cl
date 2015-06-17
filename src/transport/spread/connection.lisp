@@ -153,12 +153,17 @@
                        (setf %receive-buffer
                              (make-octet-vector
                               network.spread:+maximum-message-data-length+)))))
+      ;; Use :when-membership for efficiency: we need join and leave
+      ;; hooks to run with sender and group information, but regular
+      ;; messages should be fast and do not need sender and group
+      ;; information.
       (with-spread-condition-translation
-        (values buffer
-                (network.spread:receive-into %connection buffer
-                                             :block?         block?
-                                             :return-sender? nil
-                                             :return-groups? nil)))))
+          (values buffer
+                  (network.spread:receive-into
+                   %connection buffer
+                   :block?         block?
+                   :return-sender? :when-membership
+                   :return-groups? :when-membership)))))
 
   (defmethod send-message ((connection  connection)
                            (destination list)
@@ -166,8 +171,8 @@
     (check-type payload simple-octet-vector "a simple-octet-vector")
 
     (with-spread-condition-translation
-       (network.spread:send-bytes
-        (connection-%connection connection) destination payload))))
+      (network.spread:send-bytes
+       (connection-%connection connection) destination payload))))
 
 (defmethod print-object ((object connection) stream)
   (print-unreadable-object (object stream :type t :identity t)
