@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocols used in the pattern.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -48,10 +48,6 @@ string or a list of the form (CONDITION-CLASS-NAME KW1 VALUE1
 ...). All three forms have to be usable as arguments to `error'."))
 
 ;;; Method protocol
-
-(defgeneric method-server (method)
-  (:documentation
-   "Return the server instance to which METHOD belongs."))
 
 (defgeneric method-name (method)
   (:documentation

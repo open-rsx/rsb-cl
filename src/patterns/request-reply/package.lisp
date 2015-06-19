@@ -44,7 +44,6 @@
 
   ;; Method protocol
   (:export
-   #:method-server
    #:method-name)
 
   ;; Remote method protocol
