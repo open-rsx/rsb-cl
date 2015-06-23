@@ -24,6 +24,26 @@ scopes.")
   (let ((key (%scope->key scope)))
     (setf (gethash key *by-scope*) new-value)))
 
+;;; Global cache variables
+
+(#+sbcl sb-ext:defglobal #-sbcl defvar **cached-machine-instance**
+  (machine-instance))
+
+(#+sbcl sb-ext:defglobal #-sbcl defvar **cached-process-id**
+  (sb-posix:getpid))
+
+#+sbcl (declaim (sb-ext:always-bound **cached-machine-instance**
+                                     **cached-process-id**))
+
+(defun update-cached-machine-instance-and-process-id ()
+  (setf **cached-machine-instance** (machine-instance)
+        **cached-process-id**       (sb-posix:getpid)))
+
+#+sbcl (pushnew 'update-cached-machine-instance-and-process-id
+                sb-ext:*init-hooks*)
+#-sbcl (pushnew 'update-cached-machine-instance-and-process-id
+                uiop:*image-restore-hook*)
+
 ;;; `connector'
 
 (defclass connector (rsb.transport:connector)
@@ -31,8 +51,8 @@ scopes.")
   (:metaclass connector-class)
   (:default-initargs
    :schema :inprocess
-   :host   (load-time-value (machine-instance) t)
-   :port   (load-time-value (sb-posix:getpid) t))
+   :host   **cached-machine-instance**
+   :port   **cached-process-id**)
   (:wire-type t) ; The Lisp process is the medium, so t (any Lisp
                  ; object) should be a reasonable wire-type
   (:schemas   :inprocess)
