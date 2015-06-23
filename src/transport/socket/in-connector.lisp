@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- In-direction connector for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,16 +26,25 @@ queue received events for delivery."))
                    (scope     scope)
                    (action    (eql :attached)))
   (setf (connector-scope connector) scope)
-  (call-next-method)
-  (with-locked-bus ((connector-bus connector))
-    (push connector (handlers (connector-bus connector)))))
-
-(defmethod notify ((connector in-connector)
-                   (scope     scope)
-                   (action    (eql :detached)))
-  (with-locked-bus ((connector-bus connector))
-    (removef (handlers (connector-bus connector)) connector))
   (call-next-method))
+
+(defmethod notify :after ((connector in-connector)
+                          (bus       bus)
+                          (action    (eql :attached)))
+  (rsb.ep:sink-scope-trie-add
+   (bus-%in-connectors bus) (connector-scope connector) connector)
+  (log:debug "~@<Scope trie of ~A after adding ~
+              ~A:~@:_~/rsb.ep::print-trie/~@:>"
+             bus connector (bus-%in-connectors bus)))
+
+(defmethod notify :after ((connector in-connector)
+                          (bus       bus)
+                          (action    (eql :detached)))
+  (rsb.ep:sink-scope-trie-remove
+   (bus-%in-connectors bus) (connector-scope connector) connector)
+  (log:debug "~@<Scope trie of ~A after removing ~
+              ~A:~@:_~/rsb.ep::print-trie/~@:>"
+             bus connector (bus-%in-connectors bus)))
 
 (defmethod notification->event ((connector    in-connector)
                                 (notification notification)

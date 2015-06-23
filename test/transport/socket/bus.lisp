@@ -7,14 +7,18 @@
 (cl:in-package #:rsb.transport.socket.test)
 
 (defun make-socket-connector (class host port &key server? portfile)
-  (apply #'make-instance class
-         :host      host
-         :port      port
-         :converter :fundamental-null
-         (append (when server?
-                   '(:server? t))
-                 (when portfile
-                   `(:portfile ,portfile)))))
+  (let ((connector (apply #'make-instance class
+                          :host      host
+                          :port      port
+                          :converter :fundamental-null
+                          (append (when server?
+                                    '(:server? t))
+                                  (when portfile
+                                    `(:portfile ,portfile))))))
+    (when (typep connector 'rsb.transport.socket::in-connector)
+      (setf (rsb.transport.socket::connector-scope connector)
+            (make-scope "/rsbtests/transport/socket/bus/")))
+    connector))
 
 (defun check-bus (bus expected-connections expected-connectors)
   (flet ((check-thing (title reader expected)

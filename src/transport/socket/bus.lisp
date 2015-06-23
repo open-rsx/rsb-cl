@@ -52,6 +52,12 @@
                         "Stores a lock that can be used to protect the
                          connector list of the bus from concurrent
                          modification.")
+   (in-connectors       :type     rsb.ep:sink-scope-trie
+                        :reader   bus-%in-connectors
+                        :initform (rsb.ep:make-sink-scope-trie)
+                        :documentation
+                        "Stores a trie of local in-direction
+                         connectors connected to the bus.")
    (options             :initarg  :options
                         :type     list
                         :accessor bus-options
@@ -189,18 +195,12 @@ connected to the bus."))
 (defmethod dispatch ((bus  bus)
                      (data notification))
   "Dispatch DATA to interested connectors."
-  (let* ((scope    (make-scope
-                    (bytes->string (notification-scope data))))
-         (handlers (with-locked-bus (bus :connectors? t)
-                     (copy-list (handlers bus))))
-         (sinks    (remove-if-not
-                    (lambda (connector)
-                      (and (member (connector-direction connector)
-                                   '(:in-push :in-pull))
-                           (sub-scope?/no-coerce
-                            scope (connector-scope connector))))
-                    handlers)))
-    (handle sinks data)))
+  (let+ ((scope (make-scope
+                 (bytes->string (notification-scope data))))
+         ((&flet do-scope (connectors)
+            (handle connectors data))))
+    (declare (dynamic-extent #'do-scope))
+    (rsb.ep:scope-trie-map #'do-scope scope (bus-%in-connectors bus))))
 
 (defmethod handle ((bus          bus)
                    (notification notification))
