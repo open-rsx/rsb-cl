@@ -194,6 +194,8 @@
                               (:file       "conditions")
                               (:file       "protocol")
 
+                              (:file       "scope-trie")
+
                               (:file       "broadcast-processor")
                               (:file       "pull-processor")
 
@@ -341,6 +343,9 @@
                  :components ((:file       "package")
                               (:file       "util")
                               (:file       "protocol")
+
+                              (:file       "scope-trie")
+
                               (:file       "processor-mixins")
                               (:file       "in-route-configurator")))
 

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for event-processing module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -125,6 +125,22 @@
   (:export
    #:client
    #:client-configurator)
+
+  ;; `scope-trie'
+  (:export
+   #:scope-trie
+   #:make-scope-trie
+   #:scope-trie-get                 ; also setf
+   #:scope-trie-rem
+   #:scope-trie-map
+   #:scope-trie-update)
+
+  ;; `sink-scope-trie'
+  (:export
+   #:sink-scope-trie
+   #:make-sink-scope-trie
+   #:sink-scope-trie-add
+   #:sink-scope-trie-remove)
 
   ;; Exported for unit test
   (:export
