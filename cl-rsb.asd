@@ -259,10 +259,7 @@
                  :depends-on ("transport" "filter")
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "connector")
-                              (:file       "in-push-connector")
-                              (:file       "in-pull-connector")
-                              (:file       "out-connector")))
+                              (:file       "connectors")))
 
                 (:module     "patterns"
                  :pathname   "src/patterns"
@@ -369,9 +366,7 @@
                  :depends-on ("test" "transport")
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "in-pull-connector")
-                              (:file       "in-push-connector")
-                              (:file       "out-connector")))
+                              (:file       "connectors")))
 
                 (:module     "patterns"
                  :pathname   "test/patterns"
