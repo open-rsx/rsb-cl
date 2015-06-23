@@ -6,23 +6,14 @@
 
 (cl:in-package #:rsb.transport.inprocess)
 
-;;;
+;;; Global scope -> in-connector mapping
 
-(defvar *by-scope* (make-hash-table :test     #'equal
-                                    ;:weakness :value
-                                    )
+(#+sbcl sb-ext:defglobal #-sbcl defvar **by-scope** (rsb.ep:make-sink-scope-trie)
   "Association of scopes to event sinks interested in the respective
-scopes.")
+   scopes.")
 
-(defun by-scope (scope)
-  "Return a list of connectors that are associated to SCOPE."
-  (let ((key (%scope->key scope)))
-    (gethash key *by-scope*)))
-
-(defun (setf by-scope) (new-value scope)
-  "Set the of handlers associated to SCOPE to NEW-VALUE."
-  (let ((key (%scope->key scope)))
-    (setf (gethash key *by-scope*) new-value)))
+(declaim #+sbcl (sb-ext:always-bound **by-scope**)
+         (type rsb.ep:sink-scope-trie **by-scope**))
 
 ;;; Global cache variables
 
@@ -72,13 +63,17 @@ scopes.")
                    (scope     scope)
                    (action    (eql :attached)))
   (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
-  (push connector (by-scope scope)))
+  (rsb.ep:sink-scope-trie-add **by-scope** scope connector)
+  (log:debug "~@<Scope trie after adding ~A:~@:_~/rsb.ep::print-trie/~@:>"
+             connector **by-scope**))
 
 (defmethod notify ((connector in-connector)
                    (scope     scope)
                    (action    (eql :detached)))
   (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
-  (removef (by-scope scope) connector :count 1))
+  (rsb.ep:sink-scope-trie-remove **by-scope** scope connector)
+  (log:debug "~@<Scope trie after removing ~A:~@:_~/rsb.ep::print-trie/~@:>"
+             connector **by-scope**))
 
 ;;; `in-pull-connector' class
 
@@ -174,12 +169,7 @@ process."))
   (setf (timestamp event :send) (local-time:now)))
 
 (defmethod handle ((connector out-connector) (event event))
-  (iter (for super in (super-scopes (event-scope event)
-                                    :include-self? t))
-        (handle (by-scope super) event)))
-
-;;; Utility functions
-
-(defun %scope->key (scope)
-  "Convert the URI object URI into a scope string. "
-  (scope-string scope))
+  (flet ((do-scope (connectors)
+           (handle connectors event)))
+    (declare (dynamic-extent #'do-scope))
+    (rsb.ep:scope-trie-map #'do-scope (event-scope event) **by-scope**)))
