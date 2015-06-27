@@ -126,15 +126,19 @@
   make-child-scope/smoke
 
   (ensure-cases (which expected)
-      `((nil                  "/parent")
-        (:foo                 "/parent/foo")
-        ("foo"                "/parent/foo")
-        (,(make-scope "/foo") "/parent/foo")
-        (,(puri:uri "/foo")   "/parent/foo"))
+      `((nil                               "/parent")
+        (:foo                              "/parent/foo")
+        ("foo"                             "/parent/foo")
+        (,(make-scope "/foo")              "/parent/foo")
+        (,(puri:uri "socket:/foo?baz=fez") ,(puri:uri "socket:/parent/foo/?baz=fez")))
     (let+ (((&flet do-it ()
               (let ((parent (make-participant :mock "/parent")))
                 (make-child-scope parent which :listener)))))
-      (ensure-same (do-it) expected :test #'scope=))))
+      (ensure-same (do-it) expected
+                   :test (lambda (left right)
+                           (etypecase left
+                             (scope    (scope= left right))
+                             (puri:uri (puri:uri= left right))))))))
 
 (addtest (rsb-patterns-protocol-root
           :documentation

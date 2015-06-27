@@ -156,8 +156,8 @@
 
 (defgeneric make-child-scope (participant which kind)
   (:documentation
-   "Return a suitable `scope' for the child participant of PARTICIPANT
-    identified by KIND and WHICH.
+   "Return a suitable `scope' or `puri:uri' for the child participant
+    of PARTICIPANT identified by KIND and WHICH.
 
     The default behavior consists in deriving a `scope-component' from
     WHICH and forming a sub-scope by merging the scope component with
@@ -211,7 +211,14 @@
 (defmethod make-child-scope ((participant t)
                              (which       puri:uri)
                              (kind        t))
-  (make-child-scope participant (uri->scope-and-options which) kind))
+  ;; Extract the path component of WHICH into a `scope', apply
+  ;; `make-child-scope' processing, stick the resulting `scope' back
+  ;; into a copy of WHICH, thus preserving all other components.
+  (let* ((scope  (make-scope (puri:uri-path which)))
+         (scope  (make-child-scope participant scope kind))
+         (result (puri:copy-uri which)))
+    (setf (puri:uri-path result) (scope-string scope))
+    result))
 
 (defmethod make-child-initargs ((participant t)
                                 (which       t)
