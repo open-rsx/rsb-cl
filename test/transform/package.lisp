@@ -9,8 +9,10 @@
    #:cl
    #:alexandria
    #:let-plus
+   #:more-conditions
    #:lift
 
+   #:rsb
    #:rsb.transform
 
    #:rsb.test)

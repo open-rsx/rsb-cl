@@ -191,7 +191,9 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "conditions")
-                              (:file       "protocol")))
+                              (:file       "protocol")
+
+                              (:file       "prefix-scope")))
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
@@ -347,7 +349,9 @@
                  :depends-on ("test")
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "protocol")))
+                              (:file       "protocol")
+
+                              (:file       "prefix-scope")))
 
                 (:module     "event-processing"
                  :pathname   "test/event-processing"
