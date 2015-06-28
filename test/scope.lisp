@@ -33,7 +33,7 @@
 (addtest (scope-root
           :documentation
           "Test constructing `scope' instances from lists of component
-strings.")
+           strings.")
   construction/from-components
 
   (ensure-cases (input expected-components)
@@ -91,6 +91,16 @@ strings.")
       (t          (ensure-same (scope-components (make-scope string))
                                expected-components
                                :test #'equal)))))
+
+(addtest (scope-root
+          :documentation
+          "Test attempting to construct `scope' instance from
+           unsuitable objects.")
+  construction/invalid
+
+  (ensure-cases (input)
+      '(5 t :foo #\a)
+    (ensure-condition 'type-error (make-scope input))))
 
 (addtest (scope-root
           :documentation

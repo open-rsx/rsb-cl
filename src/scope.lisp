@@ -56,6 +56,12 @@
 
 ;; scope methods
 
+(defmethod make-scope ((thing t) &key intern?)
+  (declare (ignore intern?))
+  (error 'type-error
+         :datum         thing
+         :expected-type '(or scope string scope-components)))
+
 (defmethod make-scope ((thing scope) &key intern?)
   (if intern?
       (intern-scope thing)
@@ -86,14 +92,14 @@
   (let ((components (split-sequence #\/ thing :remove-empty-subseqs t)))
     (make-scope components :intern? intern?)))
 
-(declaim (ftype (function (t) (values scope &rest nil)) ensure-scope)
+(declaim (ftype (function (t) (values scope &optional)) ensure-scope)
          (inline ensure-scope))
 (defun ensure-scope (thing)
   (if (typep thing 'scope)
       thing
-      (the (values scope &rest nil) (make-scope thing))))
+      (the (values scope &optional) (make-scope thing))))
 
-(declaim (ftype (function (scope scope) (values * &rest nil)) scope=/no-coerce)
+(declaim (ftype (function (scope scope) (values * &optional)) scope=/no-coerce)
          (inline scope=/no-coerce))
 (defun scope=/no-coerce (scope1 scope2)
   (or (eq scope1 scope2)
@@ -104,7 +110,7 @@
   "Return non-nil if THING1 is the same scope as THING2."
   (scope=/no-coerce (ensure-scope thing1) (ensure-scope thing2)))
 
-(declaim (ftype (function (scope scope) (values * &rest nil)) sub-scope?/no-coerce)
+(declaim (ftype (function (scope scope) (values * &optional)) sub-scope?/no-coerce)
          (inline sub-scope?/no-coerce))
 (defun sub-scope?/no-coerce (scope1 scope2)
   (or (eq scope1 scope2)
@@ -116,7 +122,7 @@
   "Return non-nil if SUB is a sub-scope of SUPER."
   (sub-scope?/no-coerce (ensure-scope sub) (ensure-scope super)))
 
-(declaim (ftype (function (scope scope) (values * &rest nil)) super-scope?/no-coerce)
+(declaim (ftype (function (scope scope) (values * &optional)) super-scope?/no-coerce)
          (inline super-scope?/no-coerce))
 (defun super-scope?/no-coerce (super sub)
   (sub-scope?/no-coerce sub super))
