@@ -92,9 +92,7 @@
                               (:file       "remote-introspection")
 
                               (:file       "reloading"
-                               :if-feature :sbcl))))
-
-  :in-order-to ((test-op (load-op :rsb-introspection-test))))
+                               :if-feature :sbcl)))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rsb-introspection-test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
