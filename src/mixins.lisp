@@ -35,7 +35,7 @@
 
 (defmethod print-items:print-items append ((object uuid-mixin))
   (let+ (((&slots-r/o id) object))
-    `((:id ,id "~/rsb::print-id/"))))
+    `((:id ,id " ~/rsb::print-id/"))))
 
 ;;; `scope-mixin'
 

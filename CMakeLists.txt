@@ -171,6 +171,8 @@ test(test-filter-xpath     rsb-filter-xpath)
 
 test(test-introspection    rsb-introspection)
 
+test(test-model            rsb-model)
+
 # Installation
 file(GLOB ASD_FILES
      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
