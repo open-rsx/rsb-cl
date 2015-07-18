@@ -12,7 +12,11 @@
    #:more-conditions
 
    #:rsb
+   #:rsb.model
    #:rsb.patterns)
+
+  (:shadowing-import-from #:rsb.patterns
+   #:child-container-mixin)
 
   (:import-from #:rsb.patterns.request-reply
    #:remote-call-error

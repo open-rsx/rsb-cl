@@ -134,22 +134,6 @@
 ;;; instances of the associated `remote-participant-info',
 ;;; `remote-process-info' and `remote-host-info' classes.
 
-;;; `info-mixin'
-
-(defclass info-mixin ()
-  ((info :initarg  :info
-         :reader   entry-info
-         :documentation
-         "Stores the `*-info' instance associated to the entry."))
-  (:default-initargs
-   :info (missing-required-initarg 'info-mixin :info))
-  (:documentation
-   "This class is intended to be mixed into database entry classes
-    that store and manage an associated `*-info' instance."))
-
-(defmethod print-items:print-items append ((object info-mixin))
-  (print-items:print-items (entry-info object)))
-
 ;;; `inactivity-threshold-mixin'
 
 (defclass inactivity-threshold-mixin ()
@@ -182,9 +166,10 @@
     associated remote objects using `timing-tracker' instances. "))
 
 (flet ((update (sink data)
-         (let+ (((&accessors-r/o (info        entry-info)
+         (let+ (((&accessors-r/o (info        node-info)
                                  (tracker     entry-%tracker)
-                                 (change-hook database-change-hook)) sink))
+                                 (change-hook database-change-hook))
+                 sink))
            ;; Forward DATA to TRACKER which will update its estimations.
            (rsb.ep:handle tracker data)
 
@@ -213,7 +198,7 @@
     (update sink data)
 
     ;; Record activity-tracking-mixin
-    (let+ (((&structure-r/o entry- info (tracker %tracker)) sink))
+    (let+ (((&accessors-r/o (info node-info) (tracker entry-%tracker)) sink))
       (setf (info-most-recent-activity info)
             (timing-tracker-to-local-clock tracker (timestamp data :create)))))
 
@@ -223,34 +208,18 @@
 ;;; `participant-entry'
 
 (defclass participant-entry (info-mixin
+                             participant-node
+                             parented-mixin
+                             rsb.model:child-container-mixin
                              print-items:print-items-mixin)
-  ((info     :type     participant-info)
-   (parent   :initarg  :parent
-             :type     (or null participant-entry)
-             :reader   entry-parent
-             :initform nil
-             :documentation
-             "Stores the `participant-entry' (or
-              `participant-entry-proxy') representing the parent
-              participant of the participant.")
-   (children :initarg  :children
-             :type     list #| of participant-entry |#
-             :accessor entry-children
-             :initform '()
-             :documentation
-             "Stores a list of `participant-entry' instances
-              representing the child participants of the
-              participant."))
+  ((rsb.model::info :type     participant-info))
   (:documentation
    "Instances of this class represent and manage
     `remote-participant-info' instances in the hierarchy of database
     objects."))
 
 (defmethod participant-info-id ((object participant-entry)) ; TODO avoid
-  (participant-info-id (entry-info object)))
-
-(defmethod print-items:print-items append ((object participant-entry))
-  `((:num-children ,(length (entry-children object)) " (C ~D)" ((:after :transports)))))
+  (participant-info-id (node-info object)))
 
 ;;; `participant-entry-proxy'
 
@@ -275,21 +244,24 @@
                                      &key
                                      id)
   (when id
-    (reinitialize-instance (entry-info instance) :id id)))
+    (reinitialize-instance (node-info instance) :id id)))
 
 ;;; `process-entry'
 
 (defclass process-entry (info-mixin
+                         process-node
+                         parented-mixin
                          timing-tracking-mixin
                          participant-table-mixin
                          change-hook-mixin
                          print-items:print-items-mixin)
-  ((info     :type     remote-process-info)
-   (receiver :initarg  :receiver
-             :reader   entry-receiver
-             :documentation
-             "Stores the introspection receiver through which the
-              associated remote process has been discovered."))
+  ((rsb.model::info   :type     process-info)
+   (rsb.model::parent :type     (or null host-node))
+   (receiver          :initarg  :receiver
+                      :reader   entry-receiver
+                      :documentation
+                      "Stores the introspection receiver through which the
+                       associated remote process has been discovered."))
   (:default-initargs
    :receiver (missing-required-initarg 'process-entry :receiver))
   (:documentation
@@ -298,17 +270,20 @@
     using a `timing-tracker' instances to track clock offset and
     communication latency."))
 
+(defmethod print-items:print-items append ((object process-entry))
+  `((:num-participants nil "")))
+
 (defmethod (setf process-info-state) ((new-value t) (info process-entry))
-  (setf (process-info-state (entry-info info)) new-value))
+  (setf (process-info-state (node-info info)) new-value))
 
 (defmethod (setf process-info-state) :around ((new-value t) (info process-entry))
-  (let ((old-value (process-info-state (entry-info info))))
+  (let ((old-value (process-info-state (node-info info))))
     (prog1
         (call-next-method)
       (unless (eq old-value new-value)
         (hooks:run-hook (database-change-hook info) new-value :state-changed)))))
 
-(defmethod entry-children ((entry process-entry))
+(defmethod node-children ((entry process-entry))
   (introspection-participants/roots entry))
 
 (defmethod (setf find-participant) :after ((new-value     t)
@@ -333,19 +308,21 @@
                                              :if-does-not-exist nil)))
         ;; Remove EXISTING form its parent and remove the parent if it is
         ;; a proxy.
-        (when-let ((parent (entry-parent existing)))
-          (let+ (((&accessors (children  entry-children)
-                              (parent-id participant-info-id)) parent))
-            (removef children existing)
-            (when (and (typep parent 'participant-entry-proxy)
-                       (emptyp children))
-              (setf (find-participant parent-id introspection) nil))))
+        (let ((parent (node-parent existing)))
+          (unless (eq parent introspection)
+            (let+ (((&accessors (children  node-children)
+                                (parent-id participant-info-id))
+                    parent))
+              (removef children existing)
+              (when (and (typep parent 'participant-entry-proxy)
+                         (emptyp children))
+                (setf (find-participant parent-id introspection) nil)))))
 
         ;; When EXISTING still has children, turn it into a proxy.
-        (when (entry-children existing)
+        (when (node-children existing)
           (change-class existing 'participant-entry-proxy
                         :info   (make-participant-entry-proxy-info id)
-                        :parent nil)))
+                        :parent introspection)))
 
       (call-next-method)))
 
@@ -387,15 +364,16 @@
                                 :scope      scope
                                 :type       type
                                 :transports transports))
-         (parent (when parent-id
-                   (ensure-participant
-                    parent-id sink (list 'participant-entry-proxy
-                                         :id parent-id))))
+         (parent (if parent-id
+                     (ensure-participant
+                      parent-id sink (list 'participant-entry-proxy
+                                           :id parent-id))
+                     sink))
          (entry  (ensure-participant id sink (list 'participant-entry
                                                    :info   info
                                                    :parent parent))))
-    (when parent
-      (pushnew entry (entry-children parent)))
+    (when (and parent (not (eq parent sink)))
+      (pushnew entry (node-children parent)))
     entry))
 
 (defmethod rsb.ep:handle ((sink process-entry) (data bye))
@@ -411,38 +389,36 @@
 ;;; `host-entry'
 
 (defclass host-entry (info-mixin
+                      host-node
                       timing-tracking-mixin
                       inactivity-threshold-mixin
                       change-hook-mixin
                       print-items:print-items-mixin)
-  ((info      :type     remote-host-info)
-   (processes :type     hash-table
-              :accessor introspection-%processes
-              :initform (make-hash-table)
-              :documentation
-              "Maps numeric process ids to `process-entry'
-               instances."))
+  ((rsb.model::info :type     host-info)
+   (processes       :type     hash-table
+                    :accessor introspection-%processes
+                    :initform (make-hash-table)
+                    :documentation
+                    "Maps numeric process ids to `process-entry'
+                     instances."))
   (:documentation
    "Instances of this class represent and manage `remote-host-info'
     instances in the hierarchy of database objects. This includes
     using a `timing-tracker' instances to track clock offset and
     communication latency."))
 
-(defmethod print-items:print-items append ((object host-entry))
-  `((:num-processes ,(length (introspection-processes object)) " (~D)" ((:after :host-state)))))
-
 (defmethod (setf host-info-state) ((new-value t) (info host-entry))
-  (setf (host-info-state (entry-info info)) new-value))
+  (setf (host-info-state (node-info info)) new-value))
 
 (defmethod (setf host-info-state) :around ((new-value t) (info host-entry)) ; TODO generic info-state-mixin
-  (let ((old-value (host-info-state (entry-info info))))
+  (let ((old-value (host-info-state (node-info info))))
     (prog1
         (call-next-method)
       (unless (eq old-value new-value)
         (hooks:run-hook (database-change-hook info)
                         new-value :state-changed)))))
 
-(defmethod entry-children ((entry host-entry))
+(defmethod node-children ((entry host-entry))
   (introspection-processes entry))
 
 (defmethod introspection-processes ((host host-entry))
@@ -491,7 +467,7 @@
           process)
          (transports (transport-specific-urls receiver))
          ((&flet update-transports (entry)
-            (unionf (process-info-transports (entry-info entry))
+            (unionf (process-info-transports (node-info entry))
                     transports :test #'puri:uri=)
             entry))
          ((&flet make-info ()
@@ -512,7 +488,8 @@
       (setf (find-process id introspection)
             (make-instance 'process-entry
                            :info     (make-info)
-                           :receiver receiver)))))
+                           :receiver receiver
+                           :parent   introspection)))))
 
 (defmethod rsb.ep:handle ((sink host-entry) (data event))
   (when-let ((sinks (if (typep (event-data data) 'hello)
@@ -537,9 +514,9 @@
 
   (let+ (((&structure introspection- processes inactivity-threshold) sink)
          ((&flet process-running? (entry)
-            (eq (process-info-state (entry-info entry)) :running)))
+            (eq (process-info-state (node-info entry)) :running)))
          ((&flet remove-process (entry)
-            (let ((id (process-info-process-id (entry-info entry))))
+            (let ((id (process-info-process-id (node-info entry))))
               (setf (find-process id sink) nil)))))
 
     ;; Remove processes which have no remaining participants or have
@@ -550,9 +527,9 @@
         ((emptyp (introspection-participants process))
          (remove-process process))
         ((and (not (process-running? process))
-              (> (info-most-recent-activity-difference (entry-info process))
+              (> (info-most-recent-activity-difference (node-info process))
                  inactivity-threshold))
-         (remove-process process))))
+         (remove-process process)))) ; TODO compare to event timestamp, not now, to allow offline use
 
     ;; After updating and potentially removing processes, compute the
     ;; new effective state of SINK.
@@ -584,7 +561,7 @@
   `((:num-hosts        ,(length (introspection-hosts object))        " (H ~D)")
     (:num-participants ,(length (introspection-participants object)) " (P ~D)")))
 
-(defmethod entry-children ((entry remote-introspection-database))
+(defmethod node-children ((entry remote-introspection-database))
   (introspection-hosts entry))
 
 (defmethod introspection-participants ((introspection remote-introspection-database))
@@ -632,7 +609,7 @@
                                      software-type software-version)
           host)
          ((&flet update-entry (entry)
-            (let+ ((info (entry-info entry))
+            (let+ ((info (node-info entry))
                    ((&flet new-slot-value (slot current new)
                       (cond
                         ((emptyp current)
@@ -841,8 +818,8 @@
       (dolist (host (introspection-hosts database))
         (dolist (process (introspection-processes host))
           (let ((future (introspection-ping (entry-receiver process)
-                                            (entry-info host)
-                                            (entry-info process))))
+                                            (node-info host)
+                                            (node-info process))))
             (push (list host process future) futures)))))
     ;; Give in-progress calls some time to complete.
     (sleep response-timeout)

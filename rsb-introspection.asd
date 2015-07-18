@@ -18,9 +18,10 @@
   :description "Introspection support for RSB."
   :defsystem-depends-on (:cl-protobuf)
   :depends-on  (:utilities.print-items
-                (:version :uiop   "3") ; for portable platform information
+                (:version :uiop      "3") ; for portable platform information
 
-                (:version :cl-rsb #.(version/string)))
+                (:version :cl-rsb    #.(version/string))
+                (:version :rsb-model #.(version/string)))
   :encoding    :utf-8
   :components  ((:protocol-buffer-descriptor-directory "protocol"
                  :pathname   #.+protocol-directory+
@@ -49,7 +50,6 @@
                                                       (:not :darwin)
                                                       (:not :win32))))
 
-                              (:file       "types")
                               (:file       "conditions")
                               (:file       "protocol")
                               (:file       "variables")
@@ -76,7 +76,8 @@
 
                 (:version :rsb-introspection #.(version/string))
 
-                (:version :cl-rsb-test       #.(version/string)))
+                (:version :cl-rsb-test       #.(version/string))
+                (:version :rsb-model-test    #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "introspection"
                  :pathname   "test/introspection"
