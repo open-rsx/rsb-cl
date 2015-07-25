@@ -123,7 +123,7 @@ CONFIG-FILES. Default:
               (butlast options)
               options)))
        ((&flet inherit (options defaults)
-          (let ((result (deinherit defaults)))
+          (let ((result (copy-list (deinherit defaults))))
             (iter (for (value key) on (reverse (deinherit options)) :by #'cddr)
                   (setf (getf result key) value))
             result)))
@@ -149,7 +149,7 @@ CONFIG-FILES. Default:
     (let+ ((generic (find-transport t options))
            (rest    (if generic
                         (mapcar (rcurry #'merge-entries generic) options)
-                        options))
+                        (copy-list options)))
            ((&flet merge-one-default (default)
               (let ((intermediate (if generic
                                       (merge-entries generic default)

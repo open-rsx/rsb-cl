@@ -80,8 +80,10 @@
       (((:socket :enabled t &inherit)           (t :enabled nil)) ((:socket)))
       (((:socket :enabled t :port 1 &inherit)   (t :enabled nil)) ((:socket :port 1))))
 
-    (let ((result (rsb::effective-transport-options options)))
-      (ensure-same result expected :test #'equal))))
+    (let ((original (copy-tree options))
+          (result   (rsb::effective-transport-options options)))
+      (ensure-same result expected :test #'equal)
+      (ensure-same options original :test #'equal))))
 
 (addtest (configuration-root
           :documentation
@@ -115,5 +117,9 @@
          ((:socket :host "foo"))
          ((:socket :port 1 :host "foo"))))
 
-    (let ((result (rsb::merge-transport-options left right)))
-      (ensure-same result expected :test #'equal))))
+    (let ((original-left  (copy-tree left))
+          (original-right (copy-tree right))
+          (result         (rsb::merge-transport-options left right)))
+      (ensure-same result expected :test #'equal)
+      (ensure-same left  original-left  :test #'equal)
+      (ensure-same right original-right :test #'equal))))
