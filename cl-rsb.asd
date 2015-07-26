@@ -215,6 +215,7 @@
 
                               (:file       "sequence")
                               (:file       "force-wire-schema")
+                              (:file       "annotating")
 
                               (:file       "fundamental")
 
@@ -346,6 +347,7 @@
                  :depends-on ("test")
                  :serial     t
                  :components ((:file       "package")
+                              (:file       "annotating")
                               (:file       "fundamental")
                               (:file       "reader")))
 
