@@ -145,8 +145,13 @@
           "Smoke test for the `make-child-participant' generic function.")
   make-child-participant/smoke
 
-  (let* ((parent (make-participant :mock "/parent"))
-         (child  (make-child-participant parent "foo" :mock)))
-    (ensure-same (participant-kind child) :mock)
-    (ensure-same (participant-scope child) (make-scope "/parent/foo")
-                 :test #'scope=)))
+  (ensure-cases (initargs expected-kind expected-scope)
+      '(;; Simplest case.
+        (()                         :mock "/parent/foo")
+        ;; Supply scope.
+        ((:scope "/differentscope") :mock "/differentscope"))
+    (let* ((parent (make-participant :mock "/parent"))
+           (child  (apply #'make-child-participant parent "foo" :mock
+                          initargs)))
+      (ensure-same (participant-kind child) expected-kind)
+      (ensure-same (participant-scope child) expected-scope :test #'scope=))))

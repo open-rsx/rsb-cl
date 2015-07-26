@@ -238,10 +238,12 @@
            (when (next-method-p)
              (call-next-method)))))
 
-(defmethod make-child-participant ((participant t)
-                                   (which       t)
-                                   (kind        t)
-                                   &rest args &key)
-  (let ((scope    (make-child-scope participant which kind))
-        (initargs (apply #'make-child-initargs participant which kind args)))
+(defmethod make-child-participant
+    ((participant t)
+     (which       t)
+     (kind        t)
+     &rest args &key
+     (scope (make-child-scope participant which kind)))
+  (let ((initargs (apply #'make-child-initargs participant which kind
+                         (remove-from-plist args :scope))))
     (apply #'make-participant kind scope :parent participant initargs)))
