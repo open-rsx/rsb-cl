@@ -80,14 +80,15 @@
                 (t
                  ;; Extract the call id, look up the call, store the
                  ;; result and notify the caller.
-                 (when-let* ((key (%event-id->key (first (event-causes event))))
+                 (when-let* ((event-id (first (event-causes event)))
+                             (key      (%event-id->key event-id))
                              ;; Find and maybe remove the call. Then
                              ;; store the received reply in the result
                              ;; future.
-                             (call (bt:with-lock-held (lock)
-                                     (when-let ((call (gethash key calls)))
-                                       (remhash key calls)
-                                       call))))
+                             (call     (bt:with-lock-held (lock)
+                                         (when-let ((call (gethash key calls)))
+                                           (remhash key calls)
+                                           call))))
                    (update-call call))))))))
     ;; Filter: ignore events which do have a suitable method to be
     ;; considered replies.
