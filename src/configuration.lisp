@@ -136,28 +136,30 @@ CONFIG-FILES. Default:
                                '(&inherit)))
                      options)))))
 
- (defun effective-transport-options (options)
-   (iter (for (transport . options*) in options)
-         (unless (or (eq transport t) (not (enabled? options*)))
-           (let ((effective-options
-                  (remove-from-plist (deinherit options*) :enabled)))
-             (collect (list* transport effective-options))))))
+  ;; Assumes that &inherit has already been processed (but &inherit
+  ;; markers may still be present).
+  (defun effective-transport-options (options)
+    (iter (for (transport . options*) in options)
+          (let ((options* (deinherit options*)))
+            (unless (or (eq transport t) (not (enabled? options*)))
+              (let ((effective-options (remove-from-plist options* :enabled)))
+                (collect (list* transport effective-options)))))))
 
- (defun merge-transport-options (options defaults)
-   (let+ ((generic (find-transport t options))
-          (rest    (if generic
-                       (mapcar (rcurry #'merge-entries generic) options)
-                       options))
-          ((&flet merge-one-default (default)
-             (let ((intermediate (if generic
-                                     (merge-entries generic default)
-                                     default)))
-               (if-let ((entry (find-transport (first intermediate) rest)))
-                 (progn
-                   (removef rest entry)
-                   (merge-entries entry intermediate))
-                 intermediate)))))
-     (append (mapcar #'merge-one-default defaults) rest))))
+  (defun merge-transport-options (options defaults)
+    (let+ ((generic (find-transport t options))
+           (rest    (if generic
+                        (mapcar (rcurry #'merge-entries generic) options)
+                        options))
+           ((&flet merge-one-default (default)
+              (let ((intermediate (if generic
+                                      (merge-entries generic default)
+                                      default)))
+                (if-let ((entry (find-transport (first intermediate) rest)))
+                  (progn
+                    (removef rest entry)
+                    (merge-entries entry intermediate))
+                  intermediate)))))
+      (append (mapcar #'merge-one-default defaults) rest))))
 
 ;;; Converter configuration
 
