@@ -190,6 +190,22 @@
     (send informer (make-event "/rsbtest/informer/send/unchecked" 1)
           :unchecked? t)))
 
+(addtest (informer-root
+          :documentation
+          "Test the \"unchecked\" mode of operation of the `send'
+           method.")
+  send/no-fill
+
+  (with-participant (informer :informer "/rsbtest/informer/send/no-fill")
+    (let* ((event  (make-event "/rsbtest/informer/send/no-fill" "foo"))
+           (event* (send informer event :no-fill? t)))
+      (setf (event-origin event)          (uuid:make-null-uuid)
+            (event-sequence-number event) 1234)
+      (ensure-same (event-origin event*) (event-origin event)
+                   :test #'uuid:uuid=)
+      (ensure-same (event-sequence-number event*)
+                   (event-sequence-number event)))))
+
 (define-error-hook-test-case (informer :participant? nil)
   ;; We cannot currently cause the informer case to fail when using
   ;; inprocess transport. So we just add the error handler without

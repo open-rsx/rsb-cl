@@ -38,73 +38,70 @@ events sent by this informer."))
 (defmethod print-items:print-items append ((object informer))
   `((:type ,(informer-type object) " ~A")))
 
-(defmethod send :before ((informer informer) (data event)
-                         &key
-                         unchecked?)
-  (when unchecked?
-    (return-from send))
+(declaim (inline %check-send-event))
 
-  (let+ (((&accessors-r/o (scope participant-scope)
-                          (type  informer-type)) informer))
-    ;; Ensure that the type of DATA is a subtype of INFORMER's type.
-    (unless (typep (event-data data) type)
+(defun %check-send-event (informer-scope informer-type event)
+  (let+ (((&structure-r/o event- data scope) event))
+    ;; Ensure that the type of DATA is a subtype of INFORMER-TYPE.
+    (unless (typep data informer-type)
       (error 'event-type-error
-             :event         data
+             :event         event
              :datum         data
-             :expected-type type))
+             :expected-type informer-type))
 
     ;; Ensure that the destination scope of DATA is identical to
-    ;; INFORMER's scope.
-    (unless (sub-scope?/no-coerce (event-scope data) scope)
+    ;; INFORMER-SCOPE.
+    (unless (sub-scope?/no-coerce scope informer-scope)
       (error 'event-scope-error
-             :event          data
+             :event          event
              :expected-scope scope))))
 
-(defmethod send ((informer informer) (event event)
-                 &rest meta-data
+(defmethod send ((informer informer) (data event)
+                 &rest meta-data  ; TODO make this a keyword parameter
                  &key
                  method
                  timestamps
-                 causes)
-  ;; Set EVENT's sequence number to our next sequence number and
-  ;; origin to our id.
-  (setf (event-sequence-number event)
-        (funcall (informer-%sequence-number-generator informer))
-        (event-origin event)
-        (participant-id informer))
+                 causes
+                 unchecked?
+                 no-fill?)
+  (let ((meta-data (remove-from-plist
+                    meta-data :method :timestamps :causes
+                              :unchecked? :no-fill?)))
+    ;; Check the event w.r.t. to restrictions imposed by INFORMER.
+    (unless unchecked?
+      (%check-event-arguments timestamps meta-data causes)
+      (let ((informer-scope (participant-scope informer))
+            (informer-type  (informer-type     informer)))
+        (%check-send-event informer-scope informer-type data)))
 
-  ;; Set method if supplied.
-  (when method
-    (setf (event-method event) method))
+    ;; Set DATA's sequence number to our next sequence number and
+    ;; origin to our id.
+    (unless no-fill?
+      (setf (event-sequence-number data)
+            (funcall (informer-%sequence-number-generator informer))
+            (event-origin data)
+            (participant-id informer)))
 
-  ;; Additional timestamps.
-  (iter (for (key value) on timestamps :by #'cddr)
-        (check-type value local-time:timestamp)
-        (setf (timestamp event key) value))
+    ;; Set method, additional timestamps, meta-data and causes, if
+    ;; supplied.
+    (when method
+      (setf (event-method data) method))
+    (when timestamps
+      (appendf (slot-value data 'timestamp) timestamps))
+    (when meta-data
+      (appendf (slot-value data 'meta-data) meta-data))
+    (when causes
+      (appendf (event-causes data) causes))
 
-  ;; Additional meta-data.
-  (iter (for (key value) on meta-data :by #'cddr)
-        (unless (member key '(:method :timestamps :causes :unchecked?)
-                        :test #'eq)
-          (check-type value (or string keyword real))
-          (setf (meta-data event key) value)))
+    ;; Send the event and return it to the caller.
+    (rsb.ep:handle informer data)
+    data))
 
-  ;; Additional causes.
-  (when causes
-    (appendf (event-causes event) causes))
-
-  ;; Send EVENT.
-  (rsb.ep:handle informer event)
-
-  ;; Return EVENT to the client in case we created it on the fly.
-  event)
-
-(defmethod send ((informer informer) (data t)
-                 &rest args
-                 &key)
-  (apply #'send informer
-         (make-event (participant-scope informer) data)
-         args))
+(defmethod send ((informer informer) (data t) &rest args &key)
+  (let ((event (make-instance 'event
+                              :scope (participant-scope informer)
+                              :data  data)))
+    (apply #'send informer event args)))
 
 ;;; `informer' creation
 

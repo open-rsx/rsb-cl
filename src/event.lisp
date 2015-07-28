@@ -172,7 +172,49 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
             (scope-string (event-scope object))
             (event-data object))))
 
-;;; Convenience
+;;; Construction
+
+(declaim (inline %check-event-timestamp %check-event-meta-data
+                 %check-event-cause %check-event-arguments))
+
+(defun %check-event-timestamp (key value)
+ (unless (typep value 'local-time:timestamp)
+   (error 'simple-type-error
+          :datum            value
+          :expected-type    'local-time:timestamp
+          :format-control   "~@<The value ~S supplied for timestamp ~
+                             key ~S is not a ~S.~@:>"
+          :format-arguments (list value key 'local-time:timestamp))))
+
+(defun %check-event-meta-data (key value)
+  (unless (typep value '(or string keyword real))
+    (error 'simple-type-error
+           :datum            value
+           :expected-type    '(or string keyword real)
+           :format-control   "~@<The value ~S supplied for meta-data key ~
+                              ~S is not of type ~S.~@:>"
+           :format-arguments (list value key '(or string keyword real)))))
+
+(defun %check-event-cause (value)
+  (unless (typep value 'event-id)
+    (error 'simple-type-error
+           :datum            value
+           :expected-type    'event-id
+           :format-control   "~@<The value ~S as cause is not of type ~
+                              ~S.~@:>"
+           :format-arguments (list value 'event-id))))
+
+(defun %check-event-arguments (timestamps meta-data causes)
+  ;; Check timestamps.
+  (iter (for (key value) on timestamps :by #'cddr)
+        (%check-event-timestamp key value))
+
+  ;; Check meta-data items.
+  (iter (for (key value) on meta-data :by #'cddr)
+        (%check-event-meta-data key value))
+
+  ;; Check causes.
+  (mapc #'%check-event-cause causes))
 
 (defun make-event (scope data
                    &rest meta-data
@@ -181,6 +223,7 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
                    causes
                    timestamps
                    (create-timestamp? t)
+                   unchecked?
                    &allow-other-keys)
   "Construct an event addressed at SCOPE with payload DATA and,
    optionally, meta-data consisting of the keys and values in the
@@ -196,16 +239,19 @@ that DATA-TEST, if supplied, returns non-nil if LEFT and RIGHT are
 
    CREATE-TIMESTAMP? controls whether a :create timestamp for the
    current time is added to the event."
-  (make-instance 'event
-                 :scope             (make-scope scope)
-                 :method            method
-                 :data              data
-                 :meta-data         (remove-from-plist
-                                     meta-data :method :causes :timestamps
-                                               :create-timestamp?)
-                 :causes            causes
-                 :timestamp         timestamps
-                 :create-timestamp? create-timestamp?))
+  (let ((meta-data (remove-from-plist
+                    meta-data :method :causes :timestamps
+                              :create-timestamp? :unchecked?)))
+    (unless unchecked?
+      (%check-event-arguments timestamps meta-data causes))
+    (make-instance 'event
+                   :scope             (make-scope scope)
+                   :method            method
+                   :data              data
+                   :meta-data         meta-data
+                   :causes            causes
+                   :timestamp         timestamps
+                   :create-timestamp? create-timestamp?)))
 
 ;;; Utility functions
 

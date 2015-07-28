@@ -28,6 +28,9 @@
         ((:scope "/baz"            :data "bar" :create-timestamp? nil)
          ("/baz/" "bar" ((not :create))))
 
+        ((:scope "/baz"            :data "bar" :unchecked? t)
+         ("/baz" "bar" (:create)))
+
         ((:scope "/"               :data "foo" :timestamps (:foo ,(local-time:now)))
          ("/" "foo" (:create :foo))))
 
@@ -52,7 +55,8 @@
                        ((cons (eql not) (cons keyword null))
                         (ensure-null
                          (timestamp event (second expected-timestamp)))))))))
-           (check (via-make-instance))
+           (unless (getf initargs :unchecked?)
+             (check (via-make-instance)))
            (when-let ((scope (getf initargs :scope))
                       (data  (getf initargs :data)))
              (check
