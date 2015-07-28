@@ -118,10 +118,15 @@
             ("error"       "foo" :none  string))
 
         (setf argument :none)
-        (let* ((scope       (make-scope (list "rsbtest" "localserver" "call" method)))
-               (result      (call server
-                                  (server-method server method)
-                                  (make-event scope arg)))
+        (let* ((scope       (merge-scopes
+                             (list method) "/rsbtest/localserver/call"))
+               (event       (let ((event (make-event scope arg)))
+                              (setf (event-sequence-number event)
+                                    0
+                                    (event-origin event)
+                                    (uuid:make-v4-uuid))
+                              event))
+               (result      (call server (server-method server method) event))
                (result-data (event-data result)))
           (if (typep expected-argument '(and symbol (not keyword)))
               (ensure (typep argument expected-argument))
