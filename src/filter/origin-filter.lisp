@@ -1,6 +1,6 @@
 ;;;; origin-filter.lisp --- Event filtering based on origin id.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,7 +11,7 @@
            :reader   filter-origin
            :writer   (setf filter-%origin)
            :documentation
-           "Stores the origin to which the filter should restrict
+           "Stores the origin id to which the filter should restrict
             events."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
