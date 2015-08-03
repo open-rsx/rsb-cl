@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocols provided by the event-processing module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -109,20 +109,13 @@ the fact."
                             &key &allow-other-keys)
   (:documentation
    "Make and return a suitable processor instance for
-CONFIGURATOR. Methods of this generic function will usually call
-`collect-processor-mixins' and `ensure-processor-class' obtain the
-desired class of the processor being made. ARGS are passed to
-`make-instance' after the class has been determined."))
+    CONFIGURATOR. Methods of this generic function will usually call
+    `collect-processor-mixins' and `ensure-processor-class' obtain the
+    desired class of the processor being made. ARGS are passed to
+    `make-instance' after the class has been determined."))
 
 (defgeneric collect-processor-mixins (configurator)
   (:method-combination append)
   (:documentation
    "Return a list of names of mixin classes which should be combined
-to make the processor class for CONFIGURATOR."))
-
-;;; Processor classes
-
-(dynamic-classes:define-dynamic-class-family processor
-    "This class family consists of dynamically constructed processor
-classes. This facility can be used to construct appropriate processor
-classes based on configuration information supplied at runtime.")
+    to make the processor class for CONFIGURATOR."))

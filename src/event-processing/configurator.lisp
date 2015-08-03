@@ -1,6 +1,6 @@
 ;;;; configurator.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -87,6 +87,26 @@ participant instance as its \"client\"."))
 (defmethod collect-processor-mixins append ((configurator configurator))
   (append '(error-policy-mixin)
           (when (configurator-transform configurator) '(transform-mixin))))
+
+
+(#+sbcl sb-ext:defglobal #-sbcl defvar **processor-classes**
+  (make-hash-table :test #'equal))
+
+(#+sbcl sb-ext:defglobal #-sbcl defvar **processor-classes-lock**
+        (bt:make-lock "Processor classes"))
+
+#+sbcl (declaim (sb-ext:always-bound **processor-classes**
+                                     **processor-classes-lock**))
+
+(defun ensure-processor-class (mixins)
+  (bt:with-lock-held (**processor-classes-lock**)
+    (ensure-gethash
+     mixins **processor-classes**
+     (make-instance 'standard-class
+                    :name                (with-standard-io-syntax
+                                           (let ((*print-pretty* nil))
+                                             (prin1-to-string mixins)))
+                    :direct-superclasses (mapcar #'find-class mixins)))))
 
 (defmethod make-processor ((configurator configurator)
                            &rest args
