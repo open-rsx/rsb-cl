@@ -198,13 +198,12 @@
    if it becomes or already is the canonical instance."
   (if (scope-interned? scope)
       scope
-      (let+ (((&values interned found?)
-              (bt:with-lock-held (*scopes-lock*)
-                (ensure-gethash
-                 (scope-components scope) *scopes* scope))))
-        (unless found?
-          (setf (scope-interned? interned) t))
-        interned)))
+      (bt:with-lock-held (*scopes-lock*)
+        (ensure-gethash (scope-components scope) *scopes*
+                        (progn
+                          (scope-string scope) ; force cache
+                          (setf (scope-interned? scope) t)
+                          scope)))))
 
 (defmethod relative-url ((scope scope))
   (make-instance 'puri:uri :path (scope-string scope)))

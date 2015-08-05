@@ -247,3 +247,26 @@ strings.")
         ("/foo"      nil) ("/foo"      t)
         ("/foo/bar/" nil) ("/foo/bar/" t))
    (check-print (make-scope scope :intern? intern?))))
+
+(addtest (scope-root
+          :documentation
+          "Stress test for the `intern-scope' function.")
+  intern-scope/stress
+
+  (loop :repeat 1000 :do
+     (let+ ((table      (make-hash-table :test #'equal))
+            (components (list "a" "b")) ; TODO use a random list
+            (string     (format nil "~{/~A~}/" components))
+            ((&flet intern-one ()
+               (let* ((rsb::*scopes* table)
+                      (scope         (intern-scope (make-scope components))))
+                 (values scope (princ-to-string scope)))))
+            (interned (mapcar #'bt:join-thread
+                              (map-into (make-list 10)
+                                        (curry #'bt:make-thread #'intern-one)))))
+       (ensure-same (hash-table-count table) 1)
+       (ensure (every (compose (curry #'string= string) #'scope-string)
+                      interned))
+       (ensure (every (compose (curry #'equal components) #'scope-components)
+                      interned))
+       (ensure-same (length (remove-duplicates interned :test #'eq)) 1))))
