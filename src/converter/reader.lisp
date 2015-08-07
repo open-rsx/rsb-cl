@@ -1,10 +1,21 @@
 ;;;; reader.lisp --- A converter that uses the Lisp reader/printer.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter)
+
+(defun %normalize-type (type-specifier)
+  (cond
+    ((subtypep type-specifier 'string)
+     'string)
+    ((subtypep type-specifier 'vector)
+     'vector)
+    ((subtypep type-specifier 'integer)
+     'integer)
+    (t
+     type-specifier)))
 
 (defmethod wire->domain? ((converter   (eql :reader))
                           (wire-data   string)
@@ -13,7 +24,9 @@
 
 (defmethod domain->wire? ((converter     (eql :reader))
                           (domain-object t))
-  (values converter 'string (type-of domain-object)))
+  (values converter
+          'string
+          (%normalize-type (type-of domain-object))))
 
 (defmethod wire->domain ((converter   (eql :reader))
                          (wire-data   string)
@@ -32,7 +45,7 @@
              :encoded          wire-data
              :domain-type      expected-type
              :format-control   "~@<The value is not ~A is not of the ~
-expected type ~A.~@:>"
+                                expected type ~A.~@:>"
              :format-arguments `(,result ,expected-type)))
     result))
 
@@ -41,4 +54,4 @@ expected type ~A.~@:>"
   (values
    (with-standard-io-syntax
      (prin1-to-string domain-object))
-   (type-of domain-object)))
+   (%normalize-type (type-of domain-object))))
