@@ -40,9 +40,10 @@
 (defmacro define-basic-converter-test-cases
     ((converter
       &key
-      (suite-name  (symbolicate converter "-ROOT"))
-      (domain-test 'equalp))
-     cases)
+      (suite-name     (symbolicate converter "-ROOT"))
+      (make-converter converter)
+      (domain-test    'equalp))
+      cases)
   "Emit basic test cases for CONVERTER in test suite SUITE-NAME."
   `(progn
 
@@ -54,7 +55,7 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (let+ ((converter ,converter)
+         (let+ ((converter ,make-converter)
                 ((&flet do-it ()
                    (wire->domain? converter wire-data wire-schema))))
            (cond
@@ -72,7 +73,7 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (let+ ((converter ,converter)
+         (let+ ((converter ,make-converter)
                 ((&flet do-it ()
                    (domain->wire? converter domain-object))))
           (cond
@@ -94,7 +95,7 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (let+ ((converter ,converter)
+         (let+ ((converter ,make-converter)
                 ((&flet do-it ()
                    (wire->domain converter wire-data wire-schema))))
           (cond
@@ -113,7 +114,7 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (let+ ((converter ,converter)
+         (let+ ((converter ,make-converter)
                 ((&flet do-it ()
                    (domain->wire converter domain-object))))
           (cond
@@ -134,7 +135,7 @@
            ,cases
          (unless (or (member wire-data '(:error :not-applicable))
                      (member domain-object '(:error :not-applicable)))
-           (let+ ((converter ,converter)
+           (let+ ((converter ,make-converter)
                   ((&values encoded encoded-wire-schema)
                    (domain->wire converter domain-object))
                   (decoded (wire->domain converter encoded encoded-wire-schema)))
