@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Macros related to defining converters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,10 +36,11 @@ serialized representation of the domain object."
 
        (defmethod domain->wire? ((converter     (eql ,name))
                                  (domain-object ,data-type-class))
-         ,(if data-type-class-supplied?
-              `(when (typep domain-object ',data-type)
-                 (values converter 'octet-vector ,wire-schema))
-              `(values converter 'octet-vector ,wire-schema)))
+         ,(let ((return `(values converter ',wire-type ,wire-schema)))
+            (if data-type-class-supplied?
+                `(when (typep domain-object ',data-type)
+                   ,return)
+                return)))
 
        (defmethod wire->domain ((converter   (eql ,name))
                                 (wire-data   ,wire-type-class)
