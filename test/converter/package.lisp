@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the converter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 
@@ -54,15 +54,15 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (cond
-           ((member wire-data '(:error :not-applicable)))
-           ((eq domain-object :not-applicable)
-            (let ((result (wire->domain? ,converter wire-data wire-schema)))
-              (ensure-null result)))
-           (t
-            (let ((result (wire->domain? ,converter wire-data wire-schema)))
-              (ensure-same result ,converter
-                           :ignore-multiple-values? t))))))
+         (let+ ((converter ,converter)
+                ((&flet do-it ()
+                   (wire->domain? converter wire-data wire-schema))))
+           (cond
+             ((member wire-data '(:error :not-applicable)))
+             ((eq domain-object :not-applicable)
+              (ensure-null (do-it)))
+             (t
+              (ensure-same (do-it) converter :ignore-multiple-values? t))))))
 
      (addtest (,suite-name
                :documentation
@@ -72,14 +72,19 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (cond
-           ((member domain-object '(:error :not-applicable)))
-           ((eq wire-data :not-applicable)
-            (let ((result (domain->wire? ,converter domain-object)))
-              (ensure-null result)))
-           (t
-            (let ((result (domain->wire? ,converter domain-object)))
-              (ensure-same result (values ,converter wire-schema)))))))
+         (let+ ((converter ,converter)
+                ((&flet do-it ()
+                   (domain->wire? converter domain-object))))
+          (cond
+            ((member domain-object '(:error :not-applicable)))
+            ((eq wire-data :not-applicable)
+             (ensure-null (do-it)))
+            (t
+             (let+ (((&values converter* wire-type* wire-schema*) (do-it)))
+               (ensure-same converter converter*)
+               (unless (eq wire-data :error)
+                 (ensure (typep wire-data wire-type*)))
+               (ensure-same wire-schema wire-schema*)))))))
 
      (addtest (,suite-name
                :documentation
@@ -89,15 +94,16 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (cond
-           ((member wire-data '(:error :not-applicable)))
-           ((member domain-object '(:error :not-applicable))
-            (ensure-condition 'error
-              (wire->domain ,converter wire-data wire-schema)))
-           (t
-            (let ((result (wire->domain ,converter wire-data wire-schema)))
-              (ensure-same result domain-object
-                           :test (function ,domain-test)))))))
+         (let+ ((converter ,converter)
+                ((&flet do-it ()
+                   (wire->domain converter wire-data wire-schema))))
+          (cond
+            ((member wire-data '(:error :not-applicable)))
+            ((member domain-object '(:error :not-applicable))
+             (ensure-condition 'error (do-it)))
+            (t
+             (ensure-same (do-it) domain-object
+                          :test (function ,domain-test)))))))
 
      (addtest (,suite-name
                :documentation
@@ -107,15 +113,16 @@
 
        (ensure-cases (wire-data wire-schema domain-object)
            ,cases
-         (cond
-           ((member domain-object '(:error :not-applicable)))
-           ((member wire-data '(:error :not-applicable))
-            (ensure-condition 'error
-              (domain->wire ,converter domain-object)))
-           (t
-            (let ((result (domain->wire ,converter domain-object)))
-              (ensure-same result (values wire-data wire-schema)
-                           :test #'equalp))))))
+         (let+ ((converter ,converter)
+                ((&flet do-it ()
+                   (domain->wire converter domain-object))))
+          (cond
+            ((member domain-object '(:error :not-applicable)))
+            ((member wire-data '(:error :not-applicable))
+             (ensure-condition 'error (do-it)))
+            (t
+             (ensure-same (do-it) (values wire-data wire-schema)
+                          :test #'equalp))))))
 
      (addtest (,suite-name
                :documentation
@@ -127,8 +134,9 @@
            ,cases
          (unless (or (member wire-data '(:error :not-applicable))
                      (member domain-object '(:error :not-applicable)))
-           (let+ (((&values encoded encoded-wire-schema)
-                   (domain->wire ,converter domain-object))
-                  (decoded (wire->domain ,converter encoded encoded-wire-schema)))
+           (let+ ((converter ,converter)
+                  ((&values encoded encoded-wire-schema)
+                   (domain->wire converter domain-object))
+                  (decoded (wire->domain converter encoded encoded-wire-schema)))
              (ensure-same domain-object decoded
                           :test (function ,domain-test))))))))
