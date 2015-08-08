@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition filter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -84,6 +84,12 @@
   (:export
    #:method-filter
    #:filter-method)
+
+  ;; `meta-data-filter' class
+  (:export
+   #:meta-data-filter
+   #:filter-key
+   #:filter-predicate)
 
   ;; `xpath-filter' class
   (:export

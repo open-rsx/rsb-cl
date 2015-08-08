@@ -182,7 +182,8 @@
                               (:file       "scope-filter")
                               (:file       "type-filter")
                               (:file       "origin-filter")
-                              (:file       "method-filter")))
+                              (:file       "method-filter")
+                              (:file       "meta-data-filter")))
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
@@ -330,7 +331,8 @@
                               (:file       "protocol")
                               (:file       "composite-filter")
                               (:file       "scope-filter")
-                              (:file       "method-filter")))
+                              (:file       "method-filter")
+                              (:file       "meta-data-filter")))
 
                 (:module     "event-processing"
                  :pathname   "test/event-processing"

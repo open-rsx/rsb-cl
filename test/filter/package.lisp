@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the filter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,7 +32,7 @@
   ((events (list (make-event "/"        "bar")
                  (make-event "/foo/bar" "baz")
                  (make-event "/foo/bar" 1)
-                 (make-event "/foo"     1))))
+                 (make-event "/foo"     1 :foo 1))))
   (:documentation
    "This class can be mixed into test suite classes which contain
 tests for filters."))
