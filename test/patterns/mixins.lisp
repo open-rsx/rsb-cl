@@ -86,23 +86,41 @@
            on the `configuration-inheritance-mixin' class.")
   make-child-initargs/smoke
 
-  (let* ((class  (find-class 'mock-composite-participant/configuration-inheritance-mixin))
-         (parent (progn
-                   (c2mop:finalize-inheritance class)
-                   (make-participant-using-class
-                    class (c2mop:class-prototype class) (make-scope "/foo")
-                    :transports     '((:socket :enabled t :port 1020))
-                    :converters     '(:foo)
-                    :transform      '1+
-                    :introspection? t)))
-         (result (make-child-initargs parent :foo :mock)))
-    (ensure-same (plist-alist (remove-from-plist result :error-policy))
-                 '((:transports     . ((:inprocess :enabled t)
-                                       (:socket    :enabled t :port 1020)))
-                   (:converters     . (:foo))
-                   (:transform      . 1+)
-                   (:introspection? . t))
-                 :test (rcurry #'set-equal :test #'equal))))
+  (ensure-cases (parent-initargs override-initargs expected)
+      '(;; Everything in parent initargs, no override initargs.
+        ((:transports     ((:socket :enabled t :port 1020))
+          :converters     (:foo)
+          :transform      1+
+          :introspection? t)
+         ()
+         ((:transports     . ((:inprocess :enabled t)
+                              (:socket    :enabled t :port 1020)))
+          (:converters     . (:foo))
+          (:transform      . 1+)
+          (:introspection? . t)))
+        ;; Some override initargs.
+        ((:transports     ((:socket :enabled t :port 1020))
+          :converters     (:foo)
+          :transform      1+
+          :introspection? t)
+         (:transform      1-
+          :introspection? nil)
+         ((:transports     . ((:inprocess :enabled t)
+                              (:socket    :enabled t :port 1020)))
+          (:converters     . (:foo))
+          (:transform      . 1-)
+          (:introspection? . nil))))
+
+    (let* ((class  (find-class 'mock-composite-participant/configuration-inheritance-mixin))
+           (parent (progn
+                     (c2mop:finalize-inheritance class)
+                     (apply #'make-participant-using-class
+                            class (c2mop:class-prototype class)
+                            (make-scope "/foo") parent-initargs)))
+           (result (apply #'make-child-initargs parent :foo :mock
+                          override-initargs))
+           (result (plist-alist (remove-from-plist result :error-policy))))
+      (ensure-same result expected :test (rcurry #'set-equal :test #'equal)))))
 
 ;;; `lazy-child-making-mixin'
 

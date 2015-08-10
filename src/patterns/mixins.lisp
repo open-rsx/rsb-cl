@@ -191,18 +191,27 @@
 (defmethod make-child-initargs ((participant configuration-inheritance-mixin)
                                 (which       t)
                                 (kind        t)
-                                &key)
+                                &key
+                                (transports     nil transports-supplied?)
+                                (converters     nil converters-supplied?)
+                                (transform      nil transform-supplied?)
+                                (introspection? nil introspection?-supplied?))
+  (declare (ignore transports converters transform introspection?))
   (let+ (((&structure-r/o
            participant-
            transport-options converter-options transform-option
            introspection?-option)
           participant))
-    (list* :transports     transport-options
-           :converters     converter-options
-           :transform      transform-option
-           :introspection? introspection?-option
-           (when (next-method-p)
-             (call-next-method)))))
+    (append (unless transports-supplied?
+              (list :transports transport-options))
+            (unless converters-supplied?
+              (list :converters converter-options))
+            (unless transform-supplied?
+              (list :transform transform-option))
+            (unless introspection?-supplied?
+              (list :introspection? introspection?-option))
+            (when (next-method-p)
+              (call-next-method)))))
 
 ;;; `lazy-child-making-mixin'
 
