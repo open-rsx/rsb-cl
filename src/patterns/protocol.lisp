@@ -194,13 +194,12 @@
 (defmethod make-child-scope ((participant t)
                              (which       symbol)
                              (kind        t))
-  (make-child-scope participant (string which) kind))
+  (make-child-scope participant (string-downcase which) kind))
 
 (defmethod make-child-scope ((participant t)
                              (which       string)
                              (kind        t))
-  (let ((scope (make-scope (list (derive-scope-component
-                                  (string-downcase which))))))
+  (let ((scope (make-scope (list (derive-scope-component which)))))
     (make-child-scope participant scope kind)))
 
 (defmethod make-child-scope ((participant t)
