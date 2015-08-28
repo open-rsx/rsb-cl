@@ -30,7 +30,16 @@
                               (:file       "types")
                               (:file       "protocol")
                               (:file       "mixins")
-                              (:file       "classes"))))
+                              (:file       "classes")))
+
+                (:module     "model-inference"
+                 :pathname   "src/model/inference"
+                 :depends-on ("model")
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "protocol")
+                              (:file       "util")
+                              (:file       "inference"))))
 
   :in-order-to ((test-op (test-op :rsb-model-test))))
 
@@ -50,7 +59,14 @@
                  :pathname   "test/model"
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "classes")))))
+                              (:file       "classes")))
+
+                (:module     "model-inference"
+                 :pathname   "test/model/inference"
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "util")
+                              (:file       "inference")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rsb-model-test))))
   (eval (read-from-string "(lift:run-tests :config
