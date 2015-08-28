@@ -630,21 +630,53 @@
          ((&structure-r/o host-info- (id1 id) hostname
                                      machine-type machine-version
                                      software-type software-version)
-          host))
-    (or (find-host id introspection)
-        (setf (find-host id introspection)
-              (make-instance
-               'host-entry
-               :info                 (make-instance
-                                      'remote-host-info
-                                      :id               id1
-                                      :hostname         hostname
-                                      :machine-type     machine-type
-                                      :machine-version  machine-version
-                                      :software-type    software-type
-                                      :software-version software-version
-                                      :state            :up)
-               :inactivity-threshold inactivity-threshold)))))
+          host)
+         ((&flet update-entry (entry)
+            (let+ ((info (entry-info entry))
+                   ((&flet new-slot-value (slot current new)
+                      (cond
+                        ((emptyp current)
+                         new)
+                        ((equal current new)
+                         new)
+                        (t
+                         (warn "~@<In ~A slot ~A: new value ~S is ~
+                                different from current value ~S.~@:>"
+                               info slot new current)
+                         current)))))
+              (macrolet
+                  ((update ()
+                     (flet ((make-initarg (name)
+                              (let ((keyword  (make-keyword name))
+                                    (accessor (symbolicate
+                                               '#:host-info- name)))
+                                `(,keyword (new-slot-value
+                                            ',name (,accessor info) ,name)))))
+                       `(reinitialize-instance
+                         info
+                         ,@(make-initarg 'hostname)
+                         ,@(make-initarg 'machine-type)
+                         ,@(make-initarg 'machine-version)
+                         ,@(make-initarg 'software-type)
+                         ,@(make-initarg 'software-version)))))
+                (update)))
+            entry))
+         ((&flet make-info ()
+            (make-instance 'remote-host-info
+                           :id               id1
+                           :hostname         hostname
+                           :machine-type     machine-type
+                           :machine-version  machine-version
+                           :software-type    software-type
+                           :software-version software-version
+                           :state            :up))))
+    (if-let ((entry (find-host id introspection)))
+      (update-entry entry)
+      (setf (find-host id introspection)
+            (make-instance
+             'host-entry
+             :info                 (make-info)
+             :inactivity-threshold inactivity-threshold)))))
 
 (defmethod rsb.ep:handle ((sink remote-introspection-database) ; TODO mixin
                           (data event))
