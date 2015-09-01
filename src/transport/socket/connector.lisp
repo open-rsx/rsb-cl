@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for socket-based connectors.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -72,7 +72,7 @@ employ socked-based bus access."))
         (etypecase port
           (string
            (read-from-string port))
-          (non-negative-integer
+          ((unsigned-byte 16)
            port))
         (slot-value instance 'server?)
         (let ((value (or server? server)))
