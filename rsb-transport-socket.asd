@@ -25,7 +25,9 @@
   :components  ((:module     "socket"
                  :pathname   "src/transport/socket"
                  :serial     t
-                 :components ((:file       "package")
+                 :components ((:file       "puri-patch")
+
+                              (:file       "package")
                               (:file       "protocol")
                               (:file       "conditions")
 
