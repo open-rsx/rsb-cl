@@ -1,12 +1,34 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket.test)
 
-;;; Connector classes
+;;; `connector' class
+
+(deftestsuite connector-root (transport-socket-root)
+  ()
+  (:documentation
+   "Unit tests for the `connector' class."))
+
+(addtest (connector-root
+          :documentation
+          "Test constructing instances of the `connector' class.")
+  construction/smoke
+
+  (flet ((do-it (server?)
+           (make-instance 'connector
+                          :host      "localhost"
+                          :port      1
+                          :converter nil
+                          :server?   server?
+                          :portfile  "-")))
+    (ensure-condition 'incompatible-initargs (do-it nil))
+    (ensure-condition 'incompatible-initargs (do-it :auto))))
+
+;;; Connector subclasses
 
 (macrolet
     ((define-connector-suite (direction)

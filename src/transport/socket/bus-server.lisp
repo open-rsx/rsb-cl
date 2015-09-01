@@ -19,22 +19,27 @@
 endpoint designated by HOST and PORT and attach CONNECTOR to it.
 Attaching CONNECTOR marks the `bus-server' instance as being in use
 and protects it from being destroyed in a race condition situation."
-  (setf host "0.0.0.0")
-  (log:trace "~@<Trying to obtain bus server ~A:~D for ~A~@:>"
-             host port connector)
-  (let ((options (make-connection-options connector))
-        (key     (cons host port)))
+  (declare (ignore host))
+  (let* ((options   (make-connection-options connector))
+         (port-file (getf options :portfile))
+         (host      "0.0.0.0")
+         (key       (cons host port)))
+    (log:trace "~@<Trying to obtain bus server ~A:~D for ~A~@:>"
+               host port connector)
     (bt:with-recursive-lock-held (*bus-servers-lock*)
       (or (when-let ((candidate (gethash key *bus-servers*)))
             (with-locked-bus (candidate)
               (when (bus-connectors candidate)
                 (check-connection-options (bus-options candidate) options)
+                (maybe-write-port-file
+                 port-file candidate (getf (bus-options candidate) :portfile))
                 (notify connector candidate :attached)
                 candidate)))
           (let ((bus (make-instance 'bus-server
                                     :host    host
                                     :port    port
                                     :options options)))
+            (maybe-write-port-file port-file bus)
             (notify connector bus :attached)
             (setf (gethash key *bus-servers*) bus))))))
 
@@ -125,7 +130,7 @@ closed."))
               (push (apply #'make-instance 'bus-connection
                            :socket    client-socket
                            :handshake :send
-                           options)
+                           (remove-from-plist options :portfile))
                     connections))
             (log:info "~@<~A accepted bus client ~
                        ~/rsb.transport.socket::print-socket/~@:>"

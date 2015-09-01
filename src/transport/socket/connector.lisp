@@ -31,6 +31,12 @@ bus to which the connector provides access.")
              :initform *default-port*
              :documentation
              "The port on which the server is listening in case of clients and the port on which connections should be accepted in case of the server.")
+   (portfile :initarg  :portfile
+             :type     (or null string)
+             :reader   connector-portfile
+             :initform nil
+             :documentation
+             "Optionally stores the name of a file (or \"-\" for standard-output) into which an automatically assigned port number should be written when acting as server on an arbitrary free port (indicated by port number 0).")
    (server?  :initarg  :server
              :initarg  :server?
              :type     t ;; TODO (or boolean (eql :auto))
@@ -54,46 +60,52 @@ bus to which the connector provides access.")
   (:options
    (:host       &slot)
    (:port       &slot)
+   (:portfile   &slot)
    (:server     &slot)
    (:tcpnodelay &slot))
   (:documentation
    "This class serves as a superclass for connector classes that
-employ socked-based bus access."))
+    employ socked-based bus access."))
 
 ;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
 (defmethod initialize-instance :after ((instance connector)
                                        &key
                                        port
+                                       portfile
                                        server?
                                        server
                                        tcpnodelay
                                        nodelay?)
-  (setf (slot-value instance 'port)
-        (etypecase port
-          (string
-           (read-from-string port))
-          ((unsigned-byte 16)
-           port))
-        (slot-value instance 'server?)
-        (let ((value (or server? server)))
-          (etypecase value
-            ((member t nil :auto)
-             value)
-            (string
-             (cond
-               ((string= value "0")    nil)
-               ((string= value "1")    t)
-               ((string= value "auto") :auto)))))
-        (slot-value instance 'nodelay?)
-        (let ((value (or tcpnodelay nodelay?)))
-          (etypecase value
-            (boolean value)
-            (string
-             (cond
-               ((string= value "0") nil)
-               ((string= value "1") t)
-               (t                   (error "~@<Invalid value ~S.~@:>"
-                                           value))))))))
+  (let ((port     (etypecase port
+                    (string
+                     (read-from-string port))
+                    ((unsigned-byte 16)
+                     port)))
+        (server?  (let ((value (or server? server)))
+                    (etypecase value
+                      ((member t nil :auto)
+                       value)
+                      (string
+                       (cond
+                         ((string= value "0")    nil)
+                         ((string= value "1")    t)
+                         ((string= value "auto") :auto))))))
+        (nodelay? (let ((value (or tcpnodelay nodelay?)))
+                    (etypecase value
+                      (boolean value)
+                      (string
+                       (cond
+                         ((string= value "0") nil)
+                         ((string= value "1") t)
+                         (t                   (error "~@<Invalid value ~S.~@:>"
+                                                     value))))))))
+    (when (and (not (eq server? t)) portfile)
+      (incompatible-initargs 'connector
+                             :portfile portfile
+                             :server?  server?))
+    (setf (slot-value instance 'port)     port
+          (slot-value instance 'server?)  server?
+          (slot-value instance 'nodelay?) nodelay?)))
 
 (defmethod notify ((connector connector)
                    (scope     scope)

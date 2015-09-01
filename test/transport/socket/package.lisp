@@ -9,6 +9,7 @@
    #:cl
    #:alexandria
    #:iterate
+   #:let-plus
    #:more-conditions
    #:lift
 

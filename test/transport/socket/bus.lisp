@@ -133,3 +133,40 @@ connection.")
       (let ((bus-1 (ensure-bus-server host port connector-1))
             (bus-2 (ensure-bus-server host port connector-2)))
         (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil)))))
+
+(addtest (transport-socket-bus-root
+          :documentation
+          "Test automatically assigned ports and the portfile
+           option.")
+  server/automatic-port
+
+  (let* ((host        "localhost")
+         (port        0)
+         (connector-1 (make-socket-connector
+                       'connector host port :server? t :portfile "-"))
+         (connector-2 (make-socket-connector
+                       'connector host port :server? t :portfile "-2")))
+
+    ;; Create two connectors and request a bus server with automatic
+    ;; port assignment for each of them. The first request should
+    ;; cause the bus server to be created, while the second should
+    ;; just return the existing bus server. Creating a bus server
+    ;; should succeed unless the port is in use.
+    (let+ (((&flet ensure-bus (connector stream-name)
+              (let+ ((bus)
+                     ((&flet make-bus (stream)
+                        (progv (list stream-name) (list stream)
+                          (setf bus (ensure-bus-server
+                                     host port connector)))))
+                     (port (with-output-to-string (stream)
+                             (make-bus stream))))
+                (values bus port))))
+           ((&values bus-1 port-1)
+            (ensure-bus connector-1 '*standard-output*))
+           ((&values bus-2 port-2)
+            (ensure-bus connector-2 '*error-output*)))
+      ;; Make sure that both connectors got the same port via their
+      ;; respective "portfile" outputs.
+      (ensure-same port-1 port-2 :test #'string=)
+
+      (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil))))
