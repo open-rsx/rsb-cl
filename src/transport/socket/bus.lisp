@@ -1,6 +1,6 @@
 ;;;; bus.lisp --- Superclass for bus provider classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -93,8 +93,7 @@ connected to the bus."))
 
 (defmethod (setf bus-connections) :around ((new-value   list)
                                            (bus         bus))
-  (let+ (((&accessors-r/o (old-value bus-connections)
-                          (proxy     bus-%proxy)) bus))
+  (let+ (((&structure-r/o bus- (old-value connections) (proxy %proxy)) bus))
     (declare (type function proxy))
     (prog1
         (call-next-method)
