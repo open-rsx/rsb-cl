@@ -6,16 +6,51 @@
 
 (cl:in-package #:rsb.transport.socket.test)
 
+(defun make-socket-connector (class host port &key server? portfile)
+  (apply #'make-instance class
+         :host      host
+         :port      port
+         :converter :fundamental-null
+         (append (when server?
+                   '(:server? t))
+                 (when portfile
+                   `(:portfile ,portfile)))))
+
+(defun check-bus (bus expected-connections expected-connectors)
+  (flet ((check-thing (title reader expected)
+           (etypecase expected
+             (list
+              (ensure-same (funcall reader bus) expected
+                           :test (rcurry #'set-equal :test #'eq)))
+             (number
+              (let ((num (length (funcall reader bus))))
+                (ensure-same num expected
+                             :test      #'=
+                             :report    "~@<Bus was expected to have ~
+                                         ~D ~(~A~)~:P (not ~D)~:@>"
+                             :arguments (expected title num)))))))
+    ;; Ensure that connections of BUS match EXPECTED-CONNECTIONS.
+    (check-thing :connection #'bus-connections expected-connections)
+    ;; Ensure that connectors of BUS match EXPECTED-CONNECTORS.
+    (check-thing :connector  #'bus-connectors  expected-connectors)))
+
+(defun check-buses-and-connectors (bus-1 bus-2 connector-1 connector-2
+                                   expect-connection?)
+  ;; Make sure that both connectors got the same bus server.
+  (check-bus bus-1 (if expect-connection? 1 0) (list connector-1 connector-2))
+  (check-bus bus-2 (if expect-connection? 1 0) (list connector-1 connector-2))
+  (ensure-same bus-1 bus-2 :test #'eq)
+
+  ;; Detach connector-1 and check the resulting state.
+  (notify connector-1 bus-1 :detached)
+  (check-bus bus-1 (if expect-connection? 1 0) (list connector-2))
+
+  ;; Detach connector-2 and check the resulting state.
+  (notify connector-2 bus-1 :detached)
+  (check-bus bus-1 0 0))
+
 (deftestsuite transport-socket-bus-root (transport-socket-root)
   (deadlock-detector)
-  (:function
-   (make-socket-connector (class host port server?)
-     (apply #'make-instance class
-            :host      host
-            :port      port
-            :converter :fundamental-null
-            (when server?
-              '(:server? t)))))
   #+sbcl
   (:setup
    ;; As a workaround for https://bugs.launchpad.net/asdf/+bug/507378,
@@ -41,7 +76,7 @@
        (setf (fdefinition 'sb-thread::check-deadlock) deadlock-detector))))
   (:documentation
    "Unit tests for the `bus', `bus-client' and `bus-server'
-classes."))
+    classes."))
 
 (addtest (transport-socket-bus-root
           :documentation
@@ -62,10 +97,11 @@ connection.")
 (addtest (transport-socket-bus-root
           :documentation
           "Test creating `bus-client' instances and attaching and
-detaching connectors to them. Try multiple connectors of different
-classes which also causes the test case to be repeated without a fresh
-port. This helps ensuring proper cleanup.")
-  smoke/client
+           detaching connectors to them. Try multiple connectors of
+           different classes which also causes the test case to be
+           repeated without a fresh port. This helps ensuring proper
+           cleanup.")
+  client/smoke
 
   (ensure-cases (connector-class)
       (mappend (lambda (class) (make-list 10 :initial-element class))
@@ -73,8 +109,8 @@ port. This helps ensuring proper cleanup.")
 
     (let* ((host        "localhost")
            (port        *next-port*)
-           (connector-1 (make-socket-connector connector-class host port nil))
-           (connector-2 (make-socket-connector connector-class host port nil)))
+           (connector-1 (make-socket-connector connector-class host port))
+           (connector-2 (make-socket-connector connector-class host port)))
 
       ;; There is no server yet, so this has to signal an error.
       (ensure-condition 'usocket:connection-refused-error ; TODO(jmoringe): keep this condition type?
@@ -90,29 +126,16 @@ port. This helps ensuring proper cleanup.")
         ;; bus client.
         (let ((bus-1 (ensure-bus-client host port connector-1))
               (bus-2 (ensure-bus-client host port connector-2)))
-          ;; Make sure that both connectors got the same bus client.
-          (check-bus bus-1 1 (list connector-1 connector-2))
-          (check-bus bus-2 1 (list connector-1 connector-2))
-          (ensure-same bus-1 bus-2 :test #'eq)
-
-          ;; Detach connector-1 and check the resulting state.
-          (notify connector-1 bus-1 :detached)
-          (check-bus bus-1 1 (list connector-2))
-
-          ;; Detach connector-2 and check the resulting
-          ;; state. Detaching connector-2 (since it is the last
-          ;; remaining connector) should cause the connection to be
-          ;; disconnected.
-          (notify connector-2 bus-1 :detached)
-          (check-bus bus-1 0 0))))))
+          (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 t))))))
 
 (addtest (transport-socket-bus-root
           :documentation
           "Test creating `bus-server' instances and attaching and
-detaching connectors to them. Try multiple connectors of different
-classes which also causes the test case to be repeated without a fresh
-port. This helps ensuring proper cleanup.")
-  smoke/server
+           detaching connectors to them. Try multiple connectors of
+           different classes which also causes the test case to be
+           repeated without a fresh port. This helps ensuring proper
+           cleanup.")
+  server/smoke
 
   (ensure-cases (connector-class)
       (mappend (lambda (class) (make-list 10 :initial-element class))
@@ -120,8 +143,10 @@ port. This helps ensuring proper cleanup.")
 
     (let* ((host        "localhost")
            (port        *next-port*)
-           (connector-1 (make-socket-connector connector-class host port t))
-           (connector-2 (make-socket-connector connector-class host port t)))
+           (connector-1 (make-socket-connector connector-class host port
+                                               :server? t))
+           (connector-2 (make-socket-connector connector-class host port
+                                               :server? t)))
 
       ;; Create two connectors and request a bus server for each of
       ;; them. The first request should cause the bus server to be
@@ -130,15 +155,4 @@ port. This helps ensuring proper cleanup.")
       ;; is in use.
       (let ((bus-1 (ensure-bus-server host port connector-1))
             (bus-2 (ensure-bus-server host port connector-2)))
-        ;; Make sure that both connectors got the same bus server.
-        (check-bus bus-1 0 (list connector-1 connector-2))
-        (check-bus bus-2 0 (list connector-1 connector-2))
-        (ensure-same bus-1 bus-2 :test #'eq)
-
-        ;; Detach connector-1 and check the resulting state.
-        (notify connector-1 bus-1 :detached)
-        (check-bus bus-1 0 (list connector-2))
-
-        ;; Detach connector-2 and check the resulting state.
-        (notify connector-2 bus-1 :detached)
-        (check-bus bus-1 0 0)))))
+        (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil)))))

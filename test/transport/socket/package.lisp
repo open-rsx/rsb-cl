@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -69,24 +69,6 @@ socket. Should be incremented after each use.")
    (make-socket-url (server? options)
      (format nil "socket://localhost:~D/rsbtest/transport/socket~@[?~{~A=~A~^&~}~]"
              *next-port* (append (when server? (list "server" "1")) options))))
-  (:function
-   (check-bus (bus expected-connections expected-connectors)
-     (flet ((check-thing (title reader expected)
-              (etypecase expected
-                (list
-                 (ensure-same (funcall reader bus) expected
-                              :test (rcurry #'set-equal :test #'eq)))
-                (number
-                 (let ((num (length (funcall reader bus))))
-                   (ensure-same num expected
-                                :test      #'=
-                                :report    "~@<Bus was expected to have ~
-                                            ~D ~(~A~)~:P (not ~D)~:@>"
-                                :arguments (expected title num)))))))
-       ;; Ensure that connections of BUS match EXPECTED-CONNECTIONS.
-       (check-thing :connection #'bus-connections expected-connections)
-       ;; Ensure that connectors of BUS match EXPECTED-CONNECTORS.
-       (check-thing :connector  #'bus-connectors  expected-connectors))))
   ;; Prior to running each individual test case, clear bus clients and
   ;; servers and choose a new port.
   (:setup
