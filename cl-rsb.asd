@@ -303,6 +303,9 @@
   :components  ((:module     "test"
                  :serial     t
                  :components ((:file       "package")
+
+                              (:file       "random")
+
                               (:file       "protocol")
                               (:file       "scope")
                               (:file       "event")

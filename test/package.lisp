@@ -20,6 +20,9 @@
   (:import-from #:rsb
    #:+root-scope+)
 
+  (:shadow
+   #:random-element)
+
   ;; Root test suite
   (:export
    #:root)
@@ -45,6 +48,21 @@
    #:mock-participant-state
 
    #:*simple-parent*)
+
+  ;; Random testing utilities
+  (:export
+   #:random-boolean
+   #:random-integer
+   ; #:random-element TODO later
+   #:random-sequence
+   #:random-character
+   #:random-string
+   #:random-list
+
+   #:random-scope-component
+   #:random-scope
+
+   #:random-kind)
 
   (:documentation
    "This package contains unit tests for the cl-rsb system."))
