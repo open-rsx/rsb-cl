@@ -11,7 +11,7 @@
   (:documentation
    "Unit test suite for the model classes."))
 
-(eval-when (:compile-toplevel :execute)
+(eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro define-simple-model-class-tests (class-and-options &body cases)
     (let+ (((class &key (suite-prefix '#:rsb-model-classes-))
             (ensure-list class-and-options))
