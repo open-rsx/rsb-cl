@@ -39,6 +39,27 @@ scopes.")
   (:documentation
    "Superclass for connector classes of the inprocess transport."))
 
+;;; `in-connector'
+
+(defclass in-connector (connector)
+  ()
+  (:metaclass connector-class)
+  (:documentation
+   "Superclass for in-direction connector classes of the inprocess
+    transport."))
+
+(defmethod notify ((connector in-connector)
+                   (scope     scope)
+                   (action    (eql :attached)))
+  (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
+  (push connector (by-scope scope)))
+
+(defmethod notify ((connector in-connector)
+                   (scope     scope)
+                   (action    (eql :detached)))
+  (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
+  (removef (by-scope scope) connector :count 1))
+
 ;;; `in-pull-connector' class
 
 (defmethod find-transport-class ((spec (eql :inprocess-in-pull)))
@@ -47,7 +68,7 @@ scopes.")
 (defclass in-pull-connector (broadcast-processor
                              error-handling-pull-receiver-mixin
                              restart-dispatcher-mixin
-                             connector)
+                             in-connector)
   ((queue :type     lparallel.queue:queue
           :reader   connector-queue
           :initform (lparallel.queue:make-queue)
@@ -58,18 +79,6 @@ scopes.")
   (:documentation
    "Instances of this connector class deliver RSB events within a
     process."))
-
-(defmethod notify ((connector in-pull-connector)
-                   (scope     scope)
-                   (action    (eql :attached)))
-  (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
-  (push connector (by-scope scope)))
-
-(defmethod notify ((connector in-pull-connector)
-                   (scope     scope)
-                   (action    (eql :detached)))
-  (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
-  (removef (by-scope scope) connector :count 1))
 
 (defmethod handle ((connector in-pull-connector)
                    (event     event))
@@ -113,25 +122,13 @@ scopes.")
                              error-policy-handler-mixin
                              restart-handler-mixin
                              restart-dispatcher-mixin
-                             connector)
+                             in-connector)
   ()
   (:metaclass connector-class)
   (:direction :in-push)
   (:documentation
    "Instances of this connector class deliver RSB events within a
     process."))
-
-(defmethod notify ((connector in-push-connector)
-                   (scope     scope)
-                   (action    (eql :attached)))
-  (log:debug "~@<~A is attaching to scope ~A~@:>" connector scope)
-  (push connector (by-scope scope)))
-
-(defmethod notify ((connector in-push-connector)
-                   (scope     scope)
-                   (action    (eql :detached)))
-  (log:debug "~@<~A is detaching from scope ~A~@:>" connector scope)
-  (removef (by-scope scope) connector :count 1))
 
 (defmethod handle :before ((connector in-push-connector)
                            (event     event))
