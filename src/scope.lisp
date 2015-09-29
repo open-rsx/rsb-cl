@@ -36,7 +36,10 @@
   (or (scope-%string scope)
       (setf (scope-%string scope)
             (with-output-to-string (stream)
-              (format stream "/~{~A/~}" (scope-components scope))))))
+              (write-char #\/ stream)
+              (dolist (component (scope-components scope))
+                (write-string component stream)
+                (write-char #\/ stream))))))
 
 (defmethod print-object ((object scope) stream)
   (print-unreadable-object (object stream :type t :identity t)
