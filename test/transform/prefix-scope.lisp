@@ -37,10 +37,17 @@
         ("/baz/fez" "/foo"     "/baz/fez/foo")
         ("/baz/fez" "/foo/bar" "/baz/fez/foo/bar"))
 
-    (let* ((event     (make-event event-scope ""))
-           (transform (make-transform :prefix-scope :prefix prefix))
-           (result    (transform! transform event)))
-      (ensure-same expected (event-scope result) :test #'scope=))))
+    (let+ (((&flet check (funcall?)
+              (let+ ((event     (make-event event-scope ""))
+                     (transform (make-transform :prefix-scope :prefix prefix))
+                     ((&flet do-it ()
+                        (if funcall?
+                            (funcall transform event)
+                            (transform! transform event)))))
+                (ensure-same expected (event-scope (do-it))
+                             :test #'scope=)))))
+      (check nil)
+      (check t))))
 
 (addtest (rsb.transform.prefix-scope-root
           :documentation

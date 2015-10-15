@@ -6,13 +6,15 @@
 
 (cl:in-package #:rsb.transform)
 
-(defclass prefix-scope (print-items:print-items-mixin)
+(defclass prefix-scope (funcallable-transform-mixin
+                        print-items:print-items-mixin)
   ((prefix :type     scope
            :reader   transform-prefix
            :writer   (setf transform-%prefix)
            :documentation
            "Stores the prefix that should be added to the scopes of
             transformed events."))
+  (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :prefix (missing-required-initarg 'prefix-scope :prefix))
   (:documentation

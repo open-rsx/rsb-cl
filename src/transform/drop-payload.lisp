@@ -13,8 +13,9 @@
   "Instances of this type represent removed payloads."
   '(eql %payload-dropped))
 
-(defclass drop-payload ()
+(defclass drop-payload (funcallable-transform-mixin)
   ()
+  (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Removes payloads from events.
 

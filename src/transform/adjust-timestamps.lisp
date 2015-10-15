@@ -92,7 +92,8 @@
 
 ;;; `adjust-timestamps' transform
 
-(defclass adjust-timestamps (print-items:print-items-mixin)
+(defclass adjust-timestamps (funcallable-transform-mixin
+                             print-items:print-items-mixin)
   ((adjustments :type     list
                 :accessor transform-adjustments
                 :initform '()
@@ -104,6 +105,7 @@
                  where TIMESTAMP is a keyword designating a timestamp
                  and NEW-VALUE is a specification of type
                  `timestamp-adjustment-value' for the new value."))
+  (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Adjusts event timestamps according to given rules.
 

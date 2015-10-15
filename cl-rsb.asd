@@ -192,6 +192,7 @@
                  :components ((:file       "package")
                               (:file       "conditions")
                               (:file       "protocol")
+                              (:file       "mixins")
 
                               (:file       "prefix-scope")
                               (:file       "drop-payload")

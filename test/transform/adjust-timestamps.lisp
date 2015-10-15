@@ -76,17 +76,22 @@
         (((:create (+ :self -1)))
          (:create)))
 
-    (let+ ((event     (make-event "/" 5))
-           (transform (make-transform :adjust-timestamps
-                                      :adjustments adjustments))
-           ((&flet do-it ()
-              (transform! transform event))))
-      (case expected
-        (error (ensure-condition 'error (do-it)))
-        (t     (let ((result (do-it)))
-                 (dolist (expected expected)
-                   (ensure (typep (timestamp result expected)
-                                  'local-time:timestamp)))))))))
+    (let+ (((&flet check (funcall?)
+              (let+ ((event     (make-event "/" 5))
+                     (transform (make-transform :adjust-timestamps
+                                                :adjustments adjustments))
+                     ((&flet do-it ()
+                        (if funcall?
+                            (funcall transform event)
+                            (transform! transform event)))))
+                (case expected
+                  (error (ensure-condition 'error (do-it)))
+                  (t     (let ((result (do-it )))
+                           (dolist (expected expected)
+                             (ensure (typep (timestamp result expected)
+                                            'local-time:timestamp))))))))))
+      (check nil)
+      (check t))))
 
 (addtest (rsb.transform.adjust-timestamps-root
           :documentation

@@ -16,7 +16,13 @@
           "Smoke test for the `drop-payload' transform.")
   smoke
 
-  (let ((transform (make-transform :drop-payload))
-        (event     (make-event "/" 5)))
-    (ensure-same (event-data (transform! transform event))
-                 +dropped-payload+)))
+  (let+ (((&flet check (funcall?)
+            (let+ ((transform (make-transform :drop-payload))
+                   (event     (make-event "/" 5))
+                   ((&flet do-it ()
+                      (if funcall?
+                          (funcall transform event)
+                          (transform! transform event)))))
+              (ensure-same (event-data (do-it)) +dropped-payload+)))))
+    (check nil)
+    (check t)))
