@@ -86,9 +86,8 @@
   (ppcre:scan (filter-scanner filter) payload))
 
 (defmethod print-object ((object regex-filter) stream)
-  (let+ (((&accessors-r/o (regex           filter-regex)
-                          (case-sensitive? filter-case-sensitive?)
-                          (fallback-policy filter-fallback-policy)) object))
+  (let+ (((&structure-r/o filter- regex case-sensitive? fallback-policy)
+          object))
    (print-unreadable-object (object stream :type t :identity t)
      (format stream "~S~:[/i~;~] or ~A"
              regex case-sensitive? fallback-policy))))
