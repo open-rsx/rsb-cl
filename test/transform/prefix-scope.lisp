@@ -1,6 +1,6 @@
 ;;;; prefix-scope.lisp --- Unit tests for the prefix-scope transform.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -37,17 +37,11 @@
         ("/baz/fez" "/foo"     "/baz/fez/foo")
         ("/baz/fez" "/foo/bar" "/baz/fez/foo/bar"))
 
-    (let+ (((&flet check (funcall?)
-              (let+ ((event     (make-event event-scope ""))
-                     (transform (make-transform :prefix-scope :prefix prefix))
-                     ((&flet do-it ()
-                        (if funcall?
-                            (funcall transform event)
-                            (transform! transform event)))))
-                (ensure-same expected (event-scope (do-it))
-                             :test #'scope=)))))
-      (check nil)
-      (check t))))
+    (call-with-transform-checking-thunk
+     (lambda (do-it)
+       (ensure-same expected (event-scope (funcall do-it)) :test #'scope=))
+     (list :prefix-scope :prefix prefix)
+     (list event-scope ""))))
 
 (addtest (rsb.transform.prefix-scope-root
           :documentation

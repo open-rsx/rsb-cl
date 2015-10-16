@@ -1,6 +1,6 @@
 ;;;; adjust-timestamps.lisp --- Unit tests for the adjust-timestamps transform.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -76,22 +76,16 @@
         (((:create (+ :self -1)))
          (:create)))
 
-    (let+ (((&flet check (funcall?)
-              (let+ ((event     (make-event "/" 5))
-                     (transform (make-transform :adjust-timestamps
-                                                :adjustments adjustments))
-                     ((&flet do-it ()
-                        (if funcall?
-                            (funcall transform event)
-                            (transform! transform event)))))
-                (case expected
-                  (error (ensure-condition 'error (do-it)))
-                  (t     (let ((result (do-it )))
-                           (dolist (expected expected)
-                             (ensure (typep (timestamp result expected)
-                                            'local-time:timestamp))))))))))
-      (check nil)
-      (check t))))
+    (call-with-transform-checking-thunk
+     (lambda (do-it)
+       (case expected
+         (error (ensure-condition 'error (funcall do-it)))
+         (t     (let ((result (funcall do-it)))
+                  (dolist (expected expected)
+                    (ensure (typep (timestamp result expected)
+                                   'local-time:timestamp)))))))
+     (list :adjust-timestamps :adjustments adjustments)
+     (list "/" 5))))
 
 (addtest (rsb.transform.adjust-timestamps-root
           :documentation

@@ -1,6 +1,6 @@
 ;;;; prefix-scope.lisp --- Transform that add a prefix to scopes of transformed events.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,6 +34,11 @@
   (:method ((new-value t) (object prefix-scope))
     (setf (transform-%prefix object) (make-scope new-value))
     new-value))
+
+(defmethod rsb.ep:access? ((transform prefix-scope)
+                           (part      (eql :scope))
+                           (mode      t))
+  t)
 
 (defmethod transform! ((transform prefix-scope) (event event))
   (let+ (((&structure-r/o transform- prefix) transform))

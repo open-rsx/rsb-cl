@@ -1,6 +1,6 @@
 ;;;; drop-payload.lisp --- A transform that removes payloads from events.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,6 +25,11 @@
 
 (service-provider:register-provider/class
  'transform :drop-payload :class 'drop-payload)
+
+(defmethod rsb.ep:access? ((transform drop-payload)
+                           (part      (eql :data))
+                           (mode      (eql :write)))
+  t)
 
 (defmethod transform! ((transform drop-payload) (event event))
   (setf (event-data event) +dropped-payload+)

@@ -1,6 +1,6 @@
 ;;;; adjust-timestamps.lisp --- Transform that modifies event timestamps.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -129,6 +129,11 @@
     (error 'type-error
            :datum         new-value
            :expected-type '(or null (cons timestamp-adjustment-spec)))))
+
+(defmethod rsb.ep:access? ((transform adjust-timestamps)
+                           (part      (eql :timestamp))
+                           (mode      t))
+  t)
 
 (defmethod transform! ((transform adjust-timestamps) (event event))
   (adjust-timestamps! (transform-adjustments transform) event))
