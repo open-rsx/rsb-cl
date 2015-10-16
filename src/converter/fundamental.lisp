@@ -15,12 +15,21 @@
   "Instances of this type represent the absence of a value."
   '(eql %no-value))
 
+;; "No payload" case. Lisp: `+no-value+' marker. Wire: empty octet
+;; vector.
+(define-constant +empty-wire-data+
+    (make-array 0 :element-type '(unsigned-byte 8))
+  :test #'equalp)
+
 (define-simple-converter (:fundamental-void :void no-value
                           :wire-type       (simple-array (unsigned-byte 8) (0))
                           :data-type-class (eql +no-value+))
   (+no-value+)
-  ((make-array 0 :element-type '(unsigned-byte 8))))
+  (+empty-wire-data+))
 
+
+;; "No conversion" case. Use domain object as wire data and vice
+;; versa.
 (define-simple-converter (:fundamental-null t t
                           :wire-type       t
                           :wire-type-class t)
