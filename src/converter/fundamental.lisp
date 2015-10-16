@@ -27,6 +27,21 @@
   (+no-value+)
   (+empty-wire-data+))
 
+;; In some settings (e.g. bridge), it can happen that we want to send
+;; an event containing the `%dropped-payload' marker as its
+;; payload. These methods translate such a payload into a void payload
+;; on the wire. The reason for identifying the marker via `string=' is
+;; avoiding dependencies between the converter and transform modules.
+(defmethod domain->wire? ((converter     (eql :fundamental-void))
+                          (domain-object symbol))
+  (when (string= domain-object '#:%dropped-payload)
+    (values converter '(simple-array (unsigned-byte 8) (0)) :void)))
+
+(defmethod domain->wire ((converter     (eql :fundamental-void))
+                         (domain-object symbol))
+  (if (string= domain-object '#:%dropped-payload)
+      (values +empty-wire-data+ :void)
+      (error "~<Cannot convert domain object: ~S.~@:>" domain-object)))
 
 ;; "No conversion" case. Use domain object as wire data and vice
 ;; versa.
