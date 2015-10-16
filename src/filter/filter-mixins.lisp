@@ -29,22 +29,22 @@
                     :initform :match
                     :documentation
                     "The value of this slots determines the behavior
-of the filter in case it primary discrimination mechanism is not
-applicable to an event."))
+                     of the filter in case it primary discrimination
+                     mechanism is not applicable to an event."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This mixin class is intended to be mixed into filter classes that
-cannot process all events using their primary discrimination method
-and thus need a fallback policy."))
+    cannot process all events using their primary discrimination
+    method and thus need a fallback policy."))
 
 (service-provider:register-provider/class 'filter :constant
   :class 'fallback-policy-mixin)
 
 (defmethod matches? ((filter fallback-policy-mixin)
                      (event  t))
-  "Decide whether EVENT should match FILTER based on FILTER's fallback
-policy. This method is only called, if no more specific method on
-`matches?' made a decision."
+  ;; Decide whether EVENT should match FILTER based on FILTER's
+  ;; fallback policy. This method is only called, if no more specific
+  ;; method on `matches?' made a decision.
   (ecase (filter-fallback-policy filter)
     (:match        t)
     (:do-not-match nil)))
@@ -60,11 +60,11 @@ policy. This method is only called, if no more specific method on
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "This mixin class is intended to be mixed into filter classes that
-discriminate event based on their payload."))
+    discriminate event based on their payload."))
 
 (defmethod matches? ((filter payload-matching-mixin) (event event))
-  "Decide whether EVENT matches FILTER by calling `payload-matches?'
-on the payload of EVENT."
+  ;; Decide whether EVENT matches FILTER by calling `payload-matches?'
+  ;; on the payload of EVENT.
   (case (payload-matches? filter (event-data event))
     ((nil)        nil)
     (:cannot-tell (call-next-method))
@@ -72,5 +72,5 @@ on the payload of EVENT."
 
 (defmethod payload-matches? ((filter payload-matching-mixin) (payload t)
                              &key &allow-other-keys)
-  "The default behavior is not to decide based on the payload."
+  ;; The default behavior is not to decide based on the payload.
   :cannot-tell)

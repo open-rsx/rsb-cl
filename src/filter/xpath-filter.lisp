@@ -1,6 +1,6 @@
 ;;;; xpath-filter.lisp --- XPath-based filtering.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,7 +11,7 @@
 (defgeneric compile-xpath (filter xpath)
   (:documentation
    "Produce and return a compiled representation of XPATH that can be
-used with FILTER."))
+    used with FILTER."))
 
 ;;; `xpath-filter' class
 
@@ -22,7 +22,7 @@ used with FILTER."))
                    :accessor filter-xpath
                    :documentation
                    "The XPath used by the filter to discriminate
-events.")
+                    events.")
    (compiled-xpath :type     function
                    :reader   filter-compiled-xpath
                    :writer   (setf filter-%compiled-xpath)
@@ -32,10 +32,11 @@ events.")
   (:default-initargs
    :xpath (missing-required-initarg 'xpath-filter :xpath))
   (:documentation
-   "This filter discriminates events based on XPath expressions. It is
-applicable to payloads for which an implementation of the XPath
-interface is available. Examples include strings (via XML parsing),
-XML DOM objects and protocol buffer messages."))
+   "Discriminate events based on XPath expressions.
+
+    It is applicable to payloads for which an implementation of the
+    XPath interface is available. Examples include strings (via XML
+    parsing), XML DOM objects and protocol buffer messages."))
 
 (service-provider:register-provider/class 'filter :xpath
   :class 'xpath-filter)
@@ -51,7 +52,7 @@ XML DOM objects and protocol buffer messages."))
 
 (defmethod (setf filter-xpath) :before ((new-value string)
                                         (filter    xpath-filter))
-  "Compile the XPath."
+  ;; Compile the XPath.
   (setf (filter-%compiled-xpath filter)
         (compile-xpath filter new-value)))
 
@@ -67,7 +68,7 @@ XML DOM objects and protocol buffer messages."))
 
 (defun xpath-result->filter-result (result)
   "Return a non-nil if RESULT represents a matching XPath result and
-nil otherwise."
+   nil otherwise."
   (typecase result
     (xpath:node-set (not (xpath:node-set-empty-p result)))
     (string         (emptyp result))

@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the filter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,7 +13,7 @@
          :reader   filter-construction-error-spec
          :documentation
          "The filter specification for which the attempt to construct
-a filter instance failed."))
+          a filter instance failed."))
   (:default-initargs
    :spec (missing-required-initarg 'filter-construction-error :spec))
   (:report
@@ -25,4 +25,4 @@ a filter instance failed."))
              condition)))
   (:documentation
    "This error is signaled when an attempt to construct a filter
-instance based on a filter specification fails."))
+    instance based on a filter specification fails."))

@@ -1,6 +1,6 @@
 ;;;; type-filter.lisp --- A filter that discriminates event based on their type.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -16,8 +16,7 @@
   (:default-initargs
    :type (missing-required-initarg 'type-filter :type))
   (:documentation
-   "Instances of this filter class discriminate based on the type of
-events."))
+   "Discriminate based on the type of event payloads."))
 
 (service-provider:register-provider/class 'filter :type
   :class 'type-filter)

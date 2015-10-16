@@ -29,7 +29,7 @@
   :class 'scope-filter)
 
 (defmethod matches? ((filter scope-filter) (event event))
-  "EVENT is matched by comparing its scope to the scope of FILTER."
+  ;; EVENT is matched by comparing its scope to the scope of FILTER.
   (let+ (((&structure-r/o filter- scope exact?) filter))
     (if exact?
         (scope=/no-coerce (event-scope event) scope)

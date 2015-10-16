@@ -16,9 +16,9 @@
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
    "Instances of subclasses of this class implement complex filtering
-behavior by combining decisions of a set of subordinate filters. On
-rare occasions is it useful to make instances of this class itself
-rather than subclasses."))
+    behavior by combining decisions of a set of subordinate
+    filters. On rare occasions is it useful to make instances of this
+    class itself rather than subclasses."))
 
 (defmethod print-object ((object composite-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)

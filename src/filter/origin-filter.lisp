@@ -10,7 +10,8 @@
   ((origin :type     uuid:uuid
            :accessor filter-origin
            :documentation
-           ""))
+           "Stores the origin to which the filter should restrict
+            events."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :origin (missing-required-initarg 'origin-filter :origin))
