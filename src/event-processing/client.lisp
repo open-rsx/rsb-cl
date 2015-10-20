@@ -1,6 +1,6 @@
 ;;;; client.lisp --- A client that knows its configurator.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,12 +20,13 @@ client."))
 subsystem in the sense that they have an associated `configurator'."))
 
 (defmethod transport-specific-urls ((component client))
-  "Return a list of transport URLs for connectors used by COMPONENT."
-  (iter (for connector in (configurator-connectors
-                           (client-configurator component)))
-        (collect
-            (funcall (find-symbol "CONNECTOR-RELATIVE-URL" :rsb.transport)
-                     connector component))))
+  ;; Return a list of transport URLs for connectors used by COMPONENT.
+  (remove-duplicates
+   (mapcar (lambda (connector)
+             (uiop:symbol-call '#:rsb.transport '#:connector-relative-url
+                               connector component))
+           (configurator-connectors (client-configurator component)))
+   :test #'puri:uri=))
 
 (defmethod detach ((participant client))
   ;; Let PARTICIPANT's configurator do the heavy lifting.
