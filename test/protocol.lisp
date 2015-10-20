@@ -123,41 +123,41 @@
 
   (ensure-cases ((kind scope &rest args) expected)
       `(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:configurator :converters :introspection?))
+         (:converters :transports :introspection?))
         ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
                          :parent ,*simple-parent*)
-         (:configurator :converters :introspection? :parent))
+         (:converters :transports :introspection? :parent))
         ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
                          :introspection? t)
-         (:configurator :converters :introspection?))
+         (:converters :transports :introspection?))
         ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
                          :transform nil)
-         (:configurator :converters :introspection? :transform))
+         (:converters :transports :introspection? :transform))
 
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:configurator :converters :introspection?))
+         (:converters :transports :introspection?))
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :parent ,*simple-parent*)
-         (:configurator :converters :introspection? :parent))
+         (:converters :transports :introspection? :parent))
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :introspection? t)
-         (:configurator :converters :introspection?))
+         (:converters :transports :introspection?))
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :transform nil)
-         (:configurator :converters :introspection? :transform))
+         (:converters :transports :introspection? :transform))
 
         ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :type t)
-         (:configurator :converters :type :introspection?))
+         (:converters :transports :type :introspection?))
         ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :type t :parent ,*simple-parent*)
-         (:configurator :converters :type :introspection? :parent))
+         (:converters :transports :type :introspection? :parent))
         ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :type t :introspection? t)
-         (:configurator :converters :type :introspection?))
+         (:converters :transports :type :introspection?))
         ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
                          :type t :transform nil)
-         (:configurator :converters :type :introspection? :transform))
+         (:converters :transports :type :introspection? :transform))
 
         ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :introspection?))

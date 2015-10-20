@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Main client-facing protocol provided by cl-rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -312,20 +312,16 @@ converter."
                                :cause      condition)))))
           (call-next-method)))))
 
-(defmethod make-participant ((kind t) (scope scope) &rest args &key)
-  (let ((*make-participant-nesting*
-         (cons nil (cdr *make-participant-nesting*))))
-    (apply #'service-provider:make-provider 'participant kind scope args)))
-
-(defmethod make-participant-using-class :around
-    ((class     class)
-     (prototype t)
-     (scope     scope)
+(defmethod make-participant
+    ((kind t) (scope scope)
      &rest args &key
      (introspection? (when (member (option-value '(:introspection :enabled)) '(t "1")
                                    :test #'equal)
                        t)))
-  (let ((participant (call-next-method)))
+  (let* ((*make-participant-nesting*
+          (cons nil (cdr *make-participant-nesting*)))
+         (participant (apply #'service-provider:make-provider
+                             'participant kind scope args)))
     (if *make-participant-hook*
         ;; When the hook returns anything but nil, use it as
         ;; replacement for PARTICIPANT. Otherwise use PARTICIPANT.
