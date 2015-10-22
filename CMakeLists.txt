@@ -163,8 +163,9 @@ endfunction()
 
 test(test                  ${SYSTEM_NAME})
 
-test(test-transport-socket rsb-transport-socket)
-test(test-transport-spread rsb-transport-spread)
+test(test-transport-inprocess rsb-transport-inprocess)
+test(test-transport-socket    rsb-transport-socket)
+test(test-transport-spread    rsb-transport-spread)
 
 test(test-filter-regex     rsb-filter-regex)
 test(test-filter-xpath     rsb-filter-xpath)

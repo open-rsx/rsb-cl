@@ -267,13 +267,6 @@
 
                               (:file       "reloading")))
 
-                (:module     "transport-inprocess"
-                 :pathname   "src/transport/inprocess"
-                 :depends-on ("transport" "filter")
-                 :serial     t
-                 :components ((:file       "package")
-                              (:file       "connectors")))
-
                 (:module     "patterns"
                  :pathname   "src/patterns"
                  :depends-on ("src")
@@ -309,9 +302,10 @@
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
   :description "Unit tests for the cl-rsb system."
-  :depends-on  ((:version :lift   "1.7.1")
+  :depends-on  ((:version :lift                    "1.7.1")
 
-                (:version :cl-rsb #.(version/string)))
+                (:version :cl-rsb                  #.(version/string))
+                (:version :rsb-transport-inprocess #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "test"
                  :serial     t
@@ -389,13 +383,6 @@
                               (:file       "error-handling-mixins")
                               (:file       "restart-mixins")
                               (:file       "connector")))
-
-                (:module     "inprocess"
-                 :pathname   "test/transport/inprocess"
-                 :depends-on ("test" "transport")
-                 :serial     t
-                 :components ((:file       "package")
-                              (:file       "connectors")))
 
                 (:module     "patterns"
                  :pathname   "test/patterns"
