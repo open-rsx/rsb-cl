@@ -18,7 +18,7 @@
   :description "Generate clon option descriptions based on
                 introspection of RSB configuration options."
   :depends-on  ((:version :cl-rsb #.(version/string :revision? t))
-                :com.dvlsoft.clon)
+                :net.didierverna.clon)
   :encoding    :utf-8
   :components  ((:file       "clon"
                  :pathname   "src/clon")))

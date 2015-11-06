@@ -1,6 +1,6 @@
 ;;;; clon.lisp --- Commandline option definitions for cl-rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,9 +9,9 @@
 (defun make-options (&key
                      show?)
   "Make and return commandline option definitions. The returned option
-tree has a `com.dvlsoft.clon:group' instance at its root. SHOW? can be
+tree has a `net.didierverna.clon:group' instance at its root. SHOW? can be
 used to control whether the options should be included in help texts."
-  (com.dvlsoft.clon:defgroup (:header "RSB Options"
+  (net.didierverna.clon:defgroup (:header "RSB Options"
                               :hidden (not show?))
 
     (group (:header "Plugins")
@@ -71,19 +71,19 @@ initargs as multiple values."
           (eq (first type) 'member)
           (every #'symbolp (rest type)))
      (values
-      #'com.dvlsoft.clon:make-enum
+      #'net.didierverna.clon:make-enum
       :enum (rest type)))
     ((subtypep type 'boolean)
-     #'com.dvlsoft.clon:make-switch)
+     #'net.didierverna.clon:make-switch)
     ((subtypep type 'string)
-     #'com.dvlsoft.clon:make-stropt)
+     #'net.didierverna.clon:make-stropt)
     ((subtypep type 'integer)
      (values
-      #'com.dvlsoft.clon:make-lispobj
+      #'net.didierverna.clon:make-lispobj
       :typespec type))
     (t
      (values
-      #'com.dvlsoft.clon:make-lispobj
+      #'net.didierverna.clon:make-lispobj
       :typespec type))))
 
 (defun make-connector-option (class name type
@@ -145,13 +145,13 @@ strings."
 ;;; Connector-level functions
 
 (defparameter +no-options-text+
-  (com.dvlsoft.clon:make-text
+  (net.didierverna.clon:make-text
    :contents "This connector does not have any configuration options."))
 
 (defun make-schemas-text (schemas)
   "Return a `clon:text' instance that describes the list of supported
 schemas SCHEMAS."
-  (com.dvlsoft.clon:make-text
+  (net.didierverna.clon:make-text
    :contents (format nil "This connector ~:[does not support any ~
                           schemas~;supports the following schema~P: ~
                           ~2:*~{~(~A~)~^, ~}~]."
@@ -160,7 +160,7 @@ schemas SCHEMAS."
 (defun make-repeated-text (names)
   "Make and return a `clon:text' instance that lists options which
 have been excluded as a result of repeated occurrence."
-  (com.dvlsoft.clon:make-text
+  (net.didierverna.clon:make-text
    :contents (format nil "This connector also supports the following ~
                           option~P which ~:[have~;has~] been described ~
                           above: ~{~(~A~)~^, ~}."
@@ -177,7 +177,7 @@ options for connector class CLASS."
                               name direction))
          ((&values items repeated)
           (make-connector-options name class)))
-    (apply #'com.dvlsoft.clon:make-group
+    (apply #'net.didierverna.clon:make-group
            :header pretty-name
            :item   (make-schemas-text schemas)
            (append
@@ -188,7 +188,7 @@ options for connector class CLASS."
 
 (defun make-options-for-connector-classes ()
   (let ((*emitted-options* (make-hash-table :test #'equal)))
-    (apply #'com.dvlsoft.clon:make-group
+    (apply #'net.didierverna.clon:make-group
            :header "Connector Options"
            (iter (for (name class) in (rsb.transport:transport-classes))
                  (appending
