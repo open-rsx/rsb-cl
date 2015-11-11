@@ -89,7 +89,7 @@ closed."))
        (let+ (((&structure bus- socket state) bus))
          (setf state :shutdown)
          #+sbcl (sb-bsd-sockets:socket-shutdown
-                 (usocket:socket socket) :direction :io)
+                 (usocket:socket socket) :direction :input)
          (usocket:socket-close socket)) ; TODO ignore errors?
 
     ;; Wait for the acceptor thread to exit.
