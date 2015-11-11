@@ -1,6 +1,6 @@
 ;;;; model.lisp --- Model classes used by the introspection module.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,12 +13,13 @@
    process."
   (with-platform-information-fallback-values
     (let+ (((program-name &rest arguments)
-            (current-program-name-and-commandline-arguments)))
+            (current-program-name-and-commandline-arguments))
+           ((&structure-r/o pathname- name type)
+            (uiop:parse-native-namestring program-name)))
       (make-instance
        'process-info
        :process-id            (current-process-id)
-       :program-name          (pathname-name
-                               (parse-namestring program-name))
+       :program-name          (format nil "~A~@[.~A~]" name type)
        :commandline-arguments arguments
        :start-time            (current-process-start-time)
        :executing-user        (current-user)

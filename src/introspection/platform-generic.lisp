@@ -1,6 +1,6 @@
 ;;;; platform-generic.lisp --- Generic platform.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,7 @@
   0)
 
 (defun current-program-name-and-commandline-arguments ()
-  (list* "<unknown program>" uiop:*command-line-arguments*))
+  (list* (uiop:argv0) (uiop:command-line-arguments)))
 
 (defun %current-process-start-time ()
   (with-platform-information-error-translation
