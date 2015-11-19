@@ -1,6 +1,6 @@
 ;;;; timing-tracking.lisp --- Track timing properties of remote processes, hosts.
 ;;;;
-;;;; Copyright (C) 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,9 +36,10 @@
 
 (defstruct (tracked-quantity
              (:constructor make-tracked-quantity
-                           (&optional (capacity 100) (history '())))
+                           (&key name (capacity 100) (history '())))
              (:copier nil))
   "Instances of this track measured values of a quantity over time."
+  (name     nil :type (or null string))
   ;; Stores the maximum number of offset samples to keep for median,
   ;; mean, etc. calculation.
   (capacity 100 :type positive-integer)
@@ -61,8 +62,9 @@
   (setf (tracked-quantity-history quantity) '()))
 
 (defmethod print-items:print-items append ((object tracked-quantity))
-  `((:value       ,(tracked-quantity-value object)            "~:[n/a~:;~:*~A~]")
-    (:num-entries ,(length (tracked-quantity-history object)) " (~D)"            ((:after :value)))))
+  `((:name        ,(tracked-quantity-name object),            "~S")
+    (:value       ,(tracked-quantity-value object)            " ~:[n/a~:;~:*~A~]" ((:after :name)))
+    (:num-entries ,(length (tracked-quantity-history object)) " (~D)"             ((:after :value)))))
 
 (defmethod print-object ((object tracked-quantity) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -74,13 +76,13 @@
 (defclass timing-tracker ()
   ((clock-offset :type     tracked-quantity
                  :reader   timing-tracker-%clock-offset
-                 :initform (make-tracked-quantity)
+                 :initform (make-tracked-quantity :name "clock-offset")
                  :documentation
                  "Stores the clock offset estimation as a
                  `tracked-quantity' instance.")
    (latency      :type     tracked-quantity
                  :reader   timing-tracker-%latency
-                 :initform (make-tracked-quantity)
+                 :initform (make-tracked-quantity :name "latency")
                  :documentation
                  "Stores the latency estimation as a
                  `tracked-quantity' instance."))
