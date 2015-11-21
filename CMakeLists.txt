@@ -167,12 +167,15 @@ test(test-transport-inprocess rsb-transport-inprocess)
 test(test-transport-socket    rsb-transport-socket)
 test(test-transport-spread    rsb-transport-spread)
 
-test(test-filter-regex     rsb-filter-regex)
-test(test-filter-xpath     rsb-filter-xpath)
+test(test-filter-regex        rsb-filter-regex)
+test(test-filter-xpath        rsb-filter-xpath)
 
-test(test-introspection    rsb-introspection)
+test(test-introspection       rsb-introspection)
 
-test(test-model            rsb-model)
+test(test-model               rsb-model)
+
+test(test-builder             rsb-builder)
+test(test-model-builder       rsb-model-builder)
 
 # Installation
 file(GLOB ASD_FILES
