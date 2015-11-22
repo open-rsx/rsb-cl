@@ -29,9 +29,7 @@
               the problem."))
   (:report
    (lambda (condition stream)
-     (let+ (((&accessors-r/o
-              (assembly assembly-problem-assembly)
-              (fragment assembly-problem-fragment)) condition))
+     (let+ (((&structure-r/o assembly-problem- assembly fragment) condition))
       (format stream "~@<The fragment ~D of event ~/rsb::print-id/ ~
                       caused a problem in assembly ~A.~@:>"
               (rsb.protocol::fragmented-notification-data-part fragment)
@@ -46,9 +44,7 @@
   ()
   (:report
    (lambda (condition stream)
-     (let+ (((&accessors-r/o
-              (assembly assembly-problem-assembly)
-              (fragment assembly-problem-fragment)) condition))
+     (let+ (((&structure-r/o assembly-problem- assembly fragment) condition))
        (format stream "~@<Received illegal fragment ~D of event ~
                        ~/rsb::print-id/ with ~D parts in assembly ~
                        ~A.~@:>"
@@ -65,9 +61,7 @@
   ()
   (:report
    (lambda (condition stream)
-     (let+ (((&accessors-r/o
-              (assembly assembly-problem-assembly)
-              (fragment assembly-problem-fragment)) condition))
+     (let+ (((&structure-r/o assembly-problem- assembly fragment) condition))
        (format stream "~@<Received fragment ~D of event ~
                        ~/rsb::print-id/ more than once in assembly ~
                        ~A.~@:>"
@@ -105,10 +99,11 @@
               ""))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Insufficient room (~:D byte~:P) for fragment ~
-                     requiring ~:D byte~:P.~@:>"
-             (fragmentation-problem-available condition)
-             (fragmentation-problem-required  condition))))
+     (let+ (((&structure-r/o fragmentation-problem- available required)
+             condition))
+       (format stream "~@<Insufficient room (~:D byte~:P) for fragment ~
+                       requiring ~:D byte~:P.~@:>"
+               available required))))
   (:documentation
    "This error is signaled when a notification fragment of an event
     cannot be created because it would exceed the maximum allowed
