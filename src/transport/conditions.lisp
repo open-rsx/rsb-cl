@@ -148,10 +148,8 @@
    (lambda (condition stream)
      (format stream "~@<The event ~A could not be encoded into an ~
                      octet-vector~/more-conditions:maybe-print-explanation/~
-                     ~/more-conditions:maybe-print-cause/~@:>"
-             (encoding-error-event      condition)
-             condition
-             condition)))
+                     ~:*~/more-conditions:maybe-print-cause/~@:>"
+             (encoding-error-event condition) condition)))
   (:documentation
    "This error is signaled when encoding an `event' instance into one
     or more notifications fails."))
