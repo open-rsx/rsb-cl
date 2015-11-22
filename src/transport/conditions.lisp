@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the transport module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,19 +13,19 @@
               :reader   connector-construction-failed-name
               :documentation
               "Name of the connector class that should have been
-used.")
+               used.")
    (direction :initarg  :direction
               :type     keyword
               :reader   connector-construction-failed-direction
               :documentation
               "Desired direction of the connector instance that should
-have been constructed.")
+               have been constructed.")
    (args      :initarg  :args
               :type     list
               :reader   connector-construction-failed-args
               :documentation
               "Arguments for the connector instance that should have
-been constructed."))
+               been constructed."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for direction ~A~
@@ -38,7 +38,7 @@ been constructed."))
              condition)))
   (:documentation
    "This error is signaled when the construction of a connector
-instance fails."))
+    instance fails."))
 
 ;;;
 
@@ -55,7 +55,7 @@ instance fails."))
              (connection-closed-connection condition))))
   (:documentation
    "This condition and subclasses are signaled when a connection is
-closed."))
+    closed."))
 
 (define-condition connection-unexpectedly-closed (communication-error
                                                   connection-closed
@@ -69,8 +69,8 @@ closed."))
              condition)))
   (:documentation
    "This error is signaled when a connection is closed
-unexpectedly. In contrast to the more generic `connection-closed'
-condition, this is considered an error."))
+    unexpectedly. In contrast to the more generic `connection-closed'
+    condition, this is considered an error."))
 
 ;;; Conversion-related errors
 ;;;
@@ -81,13 +81,13 @@ condition, this is considered an error."))
                :reader   connector-construction-failed-wire-type
                :documentation
                "Stores the wire-type for which a converter could not
-be found.")
+                be found.")
    (candidates :initarg  :candidates
                :type     list
                :reader   connector-construction-failed-candidates
                :documentation
                "Stores an a list of converter candidates of the
-form (WIRE-TYPE . CONVERTER)."))
+                form (WIRE-TYPE . CONVERTER)."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Failed to construct ~A connector for direction ~
@@ -103,8 +103,8 @@ form (WIRE-TYPE . CONVERTER)."))
              (connector-construction-failed-candidates condition))))
   (:documentation
    "This error is signaled when the construction of a connector
-instance fails because the list of available converters does not
-contain a suitable one for the requested connector."))
+    instance fails because the list of available converters does not
+    contain a suitable one for the requested connector."))
 
 (defun decoding-error-print-data (stream data &optional colon? at?)
   (declare (ignore colon? at?))
@@ -135,7 +135,7 @@ contain a suitable one for the requested connector."))
              (list (decoding-error-encoded condition)) condition)))
   (:documentation
    "This error is signaled when decoding one or more notifications
-into an `event' instance fails."))
+    into an `event' instance fails."))
 
 (define-condition encoding-error (rsb-error
                                   simple-condition
@@ -154,4 +154,4 @@ into an `event' instance fails."))
              condition)))
   (:documentation
    "This error is signaled when encoding an `event' instance into one
-or more notifications fails."))
+    or more notifications fails."))
