@@ -14,12 +14,6 @@
                 :documentation
                 "This wire-schema to or from which the failed
                  conversion would have converted."))
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<A conversion to or from wire-schema ~S~
-                     failed~/more-conditions:maybe-print-cause/~@:>"
-             (conversion-error-wire-schema condition)
-             condition)))
   (:documentation
    "This condition class can be used as a superclass for
     conversion-related condition classes."))
@@ -39,17 +33,14 @@
                  been produced by a successful conversion."))
   (:report
    (lambda (condition stream)
-     (let+ (((&values data shortened?)
-             (maybe-shorten-sequence
-              (conversion-error-encoded condition))))
-       (format stream "~@<The wire data ~S~:[~; ...~] (in ~S ~
+     (let+ (((&structure-r/o conversion-error- wire-schema encoded domain-type)
+             condition)
+            ((&values data shortened?) (maybe-shorten-sequence encoded)))
+       (format stream "~@<The wire-data ~S~:[~; ...~] (in ~S ~
                        wire-schema) could not be converted to domain ~
                        type ~
                        ~S~/more-conditions:maybe-print-cause/~@:>"
-                       data shortened?
-               (conversion-error-wire-schema condition)
-               (conversion-error-domain-type condition)
-               condition))))
+                       data shortened? wire-schema domain-type condition))))
   (:documentation
    "This error is signaled when wire data cannot be converted to a
     domain object."))
@@ -69,14 +60,13 @@
                    produced by a successful conversion."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<The domain object ~S could not be converted to ~
-                     a wire-type ~S representation using the ~
-                     wire-schema ~
-                     ~S~/more-conditions:maybe-print-cause/~@:> "
-             (conversion-error-domain-object condition)
-             (conversion-error-wire-type     condition)
-             (conversion-error-wire-schema   condition)
-             condition)))
+     (let+ (((&structure-r/o conversion-error- wire-schema domain-object wire-type)
+             condition))
+       (format stream "~@<The domain object ~S could not be converted ~
+                       to a wire-type ~S representation using the ~
+                       wire-schema ~
+                       ~S.~/more-conditions:maybe-print-cause/~@:> "
+                       domain-object wire-type wire-schema condition))))
   (:documentation
    "This error is signaled when a domain object cannot be converted to
     a wire-type representation."))

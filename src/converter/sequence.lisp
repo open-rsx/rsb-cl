@@ -1,6 +1,6 @@
 ;;;; sequence.lisp --- Sequences of alternative converters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,18 +34,16 @@
 (defmethod wire->domain ((converter   sequence)
                          (wire-data   t)
                          (wire-schema t))
-  (let ((child (wire->domain? converter wire-data wire-schema)))
-    (unless child
-      (error "~@<No converter could handle the wire-data ~S (in ~S ~
-              wire-schema). Tried ~{~A~^, ~_~}~@:>"
-             wire-data wire-schema converter)) ; TODO(jmoringe): more precise condition
-    (wire->domain child wire-data wire-schema)))
+  (if-let ((child (wire->domain? converter wire-data wire-schema)))
+    (wire->domain child wire-data wire-schema)
+    (error "~@<None of the available converters could handle the ~
+            wire-data. Tried ~{~A~^, ~}~@:>"
+           converter)))
 
 (defmethod domain->wire ((converter     sequence)
                          (domain-object t))
-  (let ((child (domain->wire? converter domain-object)))
-    (unless child
-      (error "~@<No converter could handle the domain-object ~S. Tried ~
-              ~{~A~^, ~_~}~@:>"
-             domain-object converter)) ; TODO(jmoringe): more precise condition
-    (domain->wire child domain-object)))
+  (if-let ((child (domain->wire? converter domain-object)))
+    (domain->wire child domain-object)
+    (error "~@<None of the available converters could handle the ~
+            domain-object. Tried ~{~A~^, ~}~@:>"
+           converter)))
