@@ -8,7 +8,7 @@
 
 ;;; Assembly-related conditions
 
-(define-condition assembly-problem (condition)
+(define-condition assembly-problem (rsb-problem-condition)
   ((assembly :initarg  :assembly
              :reader   assembly-problem-assembly
              :documentation
@@ -40,7 +40,7 @@
     fragment causes a problem in an assembly."))
 
 (define-condition invalid-fragment-id (fragment-problem
-                                       warning)
+                                       rsb-warning)
   ()
   (:report
    (lambda (condition stream)
@@ -57,7 +57,7 @@
     with an invalid part id to an assembly."))
 
 (define-condition duplicate-fragment (fragment-problem
-                                      warning)
+                                      rsb-warning)
   ()
   (:report
    (lambda (condition stream)
@@ -74,7 +74,7 @@
 
 ;;; Fragmentation-related conditions
 
-(define-condition fragmentation-problem (condition)
+(define-condition fragmentation-problem (rsb-problem-condition)
   ()
   (:report
    (lambda (condition stream)
@@ -86,7 +86,7 @@
     encountered."))
 
 (define-condition insufficient-room (fragmentation-problem
-                                     error)
+                                     rsb-error)
   ((required  :initarg  :required
               :type     positive-integer
               :reader   fragmentation-problem-required
