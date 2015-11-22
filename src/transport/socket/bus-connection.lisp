@@ -170,9 +170,9 @@ after calling NEW-VALUE."
     (with-condition-translation
         (((error decoding-error)
           :encoded          (subseq data 0 length)
-          :format-control   "~@<The wire-data ~S could not be unpacked ~
-                             as a protocol buffer of kind ~S.~:@>"
-          :format-arguments (list (subseq data 0 length) 'notification)))
+          :format-control   "~@<The wire-data could not be unpacked as a ~
+                             protocol buffer of kind ~S.~:@>"
+          :format-arguments (list 'notification)))
       (pb:unpack data 'notification 0 length))))
 
 ;;; Sending
