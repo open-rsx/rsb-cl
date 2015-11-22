@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the converter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,7 +13,7 @@
                 :reader   conversion-error-wire-schema
                 :documentation
                 "This wire-schema to or from which the failed
-conversion would have converted."))
+                 conversion would have converted."))
   (:report
    (lambda (condition stream)
      (format stream "~@<A conversion to or from wire-schema ~S~
@@ -22,7 +22,7 @@ conversion would have converted."))
              condition)))
   (:documentation
    "This condition class can be used as a superclass for
-conversion-related condition classes."))
+    conversion-related condition classes."))
 
 (define-condition wire->domain-conversion-error (conversion-error)
   ((encoded     :initarg  :encoded
@@ -30,13 +30,13 @@ conversion-related condition classes."))
                 :reader   conversion-error-encoded
                 :documentation
                 "The wire-data that could not be converted into a
-domain object.")
+                 domain object.")
    (domain-type :initarg  :domain-type
                 :type     t
                 :reader   conversion-error-domain-type
                 :documentation
                 "The type of the domain object object that would have
-been produced by a successful conversion."))
+                 been produced by a successful conversion."))
   (:report
    (lambda (condition stream)
      (let+ (((&values data shortened?)
@@ -52,7 +52,7 @@ been produced by a successful conversion."))
                condition))))
   (:documentation
    "This error is signaled when wire data cannot be converted to a
-domain object."))
+    domain object."))
 
 (define-condition domain->wire-conversion-error (conversion-error)
   ((domain-object :initarg  :domain-object
@@ -60,13 +60,13 @@ domain object."))
                   :reader   conversion-error-domain-object
                   :documentation
                   "The domain object that could not be converter into
-a wire representation.")
+                   a wire representation.")
    (wire-type     :initarg  :wire-type
                   :type     t
                   :reader   conversion-error-wire-type
                   :documentation
                   "The type of the wire-data that would have been
-produced by a successful conversion."))
+                   produced by a successful conversion."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The domain object ~S could not be converted to ~
@@ -79,4 +79,4 @@ produced by a successful conversion."))
              condition)))
   (:documentation
    "This error is signaled when a domain object cannot be converted to
-a wire-type representation."))
+    a wire-type representation."))
