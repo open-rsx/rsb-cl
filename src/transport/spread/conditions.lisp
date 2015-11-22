@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the spread transport implementation.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,14 +19,14 @@
              (assembly-problem-assembly condition))))
   (:documentation
    "Instance of subclasses of this condition are signaled if a problem
-occurs during the assembly of fragments into complete events."))
+    occurs during the assembly of fragments into complete events."))
 
 (define-condition fragment-problem (assembly-problem)
   ((fragment :initarg  :fragment
              :reader   assembly-problem-fragment
              :documentation
              "The notification representing the fragment that caused
-the problem."))
+              the problem."))
   (:report
    (lambda (condition stream)
      (let+ (((&accessors-r/o
@@ -39,7 +39,7 @@ the problem."))
               assembly))))
   (:documentation
    "Instance of subclasses of this condition are signaled if a
-fragment causes a problem in an assembly."))
+    fragment causes a problem in an assembly."))
 
 (define-condition invalid-fragment-id (fragment-problem
                                        warning)
@@ -58,7 +58,7 @@ fragment causes a problem in an assembly."))
                assembly))))
   (:documentation
    "This warning is signaled when an attempt is made to add a fragment
-with an invalid part id to an assembly."))
+    with an invalid part id to an assembly."))
 
 (define-condition duplicate-fragment (fragment-problem
                                       warning)
@@ -76,7 +76,7 @@ with an invalid part id to an assembly."))
                assembly))))
   (:documentation
    "This warning is signaled when an attempt is made to add a fragment
-to an assembly that has already been added."))
+    to an assembly that has already been added."))
 
 ;;; Fragmentation-related conditions
 
@@ -88,8 +88,8 @@ to an assembly that has already been added."))
      (format stream "~@<A fragmentation operation failed~@:>")))
   (:documentation
    "Conditions of this class and subclasses are signaled when problems
-related to fragmenting events into multiple notifications are
-encountered."))
+    related to fragmenting events into multiple notifications are
+    encountered."))
 
 (define-condition insufficient-room (fragmentation-problem
                                      error)
@@ -111,5 +111,5 @@ encountered."))
              (fragmentation-problem-required  condition))))
   (:documentation
    "This error is signaled when a notification fragment of an event
-cannot be created because it would exceed the maximum allowed fragment
-size."))
+    cannot be created because it would exceed the maximum allowed
+    fragment size."))
