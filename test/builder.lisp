@@ -48,14 +48,14 @@
   (check-un-build-calls
    t 'string
    `(,(let ((scope (make-scope "/")))
-        `(,scope ((:peek  () ,scope)
-                  (:visit () ,scope rsb:scope ((:component . *)) ()))))
+        `(,scope ((:peek  nil        () ,scope)
+                  (:visit nil        () ,scope rsb:scope ((:component . *)) ()))))
 
      ,(let ((scope (make-scope "/foo/bar")))
-        `(,scope ((:peek  () ,scope)
-                  (:visit () ,scope rsb:scope ((:component . *)) ())
-                  (:peek  () "foo")
-                  (:peek  () "bar")))))))
+        `(,scope ((:peek  nil        () ,scope)
+                  (:visit nil        () ,scope rsb:scope ((:component . *)) ())
+                  (:peek  :component () "foo")
+                  (:peek  :component () "bar")))))))
 
 (addtest (rsb-builder-root
           :documentation
@@ -73,13 +73,13 @@
                                  :timestamps        (list :create create)
                                  :create-timestamp? nil
                                  :foo               "bar")))
-        `(,event ((:peek  () ,event)
-                  (:visit () ,event rsb:event
+        `(,event ((:peek  nil        () ,event)
+                  (:visit nil        () ,event rsb:event
                           ((:meta-data . (:map . :key))
                            (:timestamp . (:map . :key))
                            (:cause     . *)
                            (:data      . 1))
                           (:scope ,scope :method :|request|))
-                  (:peek  (:key :foo)    "bar")
-                  (:peek  (:key :create) ,create)
-                  (:peek  ()             "baz")))))))
+                  (:peek  :meta-data (:key :foo)    "bar")
+                  (:peek  :timestamp (:key :create) ,create)
+                  (:peek  :data      ()             "baz")))))))

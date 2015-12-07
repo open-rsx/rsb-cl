@@ -63,9 +63,9 @@
      `(,(let ((info (apply #'make-instance 'participant-info
                            :transports (list transport-uri)
                            initargs)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :participant ((:transports . *)) ,initargs)
-                   (:peek  () ,transport-uri)))))))
+          `(,info ((:peek  nil         () ,info)
+                   (:visit nil         () ,info :participant ((:transports . *)) ,initargs)
+                   (:peek  :transports () ,transport-uri)))))))
 
   (addtest (rsb-model-builder-root)
     participant-node/smoke
@@ -76,9 +76,9 @@
                             :transports (list transport-uri)
                             initargs))
                (node (make-instance 'basic-participant-node :info info)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :participant ((:transports . *)) ,initargs)
-                   (:peek  () ,transport-uri))))))))
+          `(,info ((:peek  nil         () ,info)
+                   (:visit nil         () ,info :participant ((:transports . *)) ,initargs)
+                   (:peek  :transports () ,transport-uri))))))))
 
 (let* ((start-time            (local-time:now))
        (commandline-arguments '("a" "b"))
@@ -99,10 +99,10 @@
                (info       (apply #'make-instance 'process-info
                                   :commandline-arguments commandline-arguments
                                   initargs)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :process ((:commandline-arguments . *))
+          `(,info ((:peek  nil () ,info)
+                   (:visit nil () ,info :process ((:commandline-arguments . *))
                            ,initargs)
-                   ,@(mapcar (lambda (x) `(:peek  () ,x))
+                   ,@(mapcar (lambda (x) `(:peek :commandline-arguments () ,x))
                              commandline-arguments)))))))
 
   (addtest (rsb-model-builder-root)
@@ -115,12 +115,12 @@
                             :state                 :running
                             :transports            (list transport)
                             initargs)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :process ((:transports            . *)
-                                              (:commandline-arguments . *))
+          `(,info ((:peek  nil         () ,info)
+                   (:visit nil         () ,info :process ((:transports            . *)
+                                                          (:commandline-arguments . *))
                            ( :state :running ,@initargs))
-                   (:peek  () ,transport)
-                   ,@(mapcar (lambda (x) `(:peek  () ,x))
+                   (:peek  :transports () ,transport)
+                   ,@(mapcar (lambda (x) `(:peek :commandline-arguments () ,x))
                              commandline-arguments)))))))
 
   (addtest (rsb-model-builder-root)
@@ -132,11 +132,11 @@
                             :commandline-arguments commandline-arguments
                             initargs))
                (node (make-instance 'basic-process-node :info info)))
-          `(,node ((:peek  () ,node)
-                   (:visit () ,node :process ((:children              . *)
-                                              (:commandline-arguments . *))
+          `(,node ((:peek  nil () ,node)
+                   (:visit nil () ,node :process ((:children              . *)
+                                                  (:commandline-arguments . *))
                            ,initargs)
-                   ,@(mapcar (lambda (x) `(:peek  () ,x))
+                   ,@(mapcar (lambda (x) `(:peek :commandline-arguments () ,x))
                              commandline-arguments))))))))
 
 (let* ((initargs '(:id               "1"
@@ -152,8 +152,8 @@
     (check-un-build-calls
      t *stop-type*
      `(,(let ((info (apply #'make-instance 'host-info initargs)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :host () ,initargs)))))))
+          `(,info ((:peek  nil () ,info)
+                   (:visit nil () ,info :host () ,initargs)))))))
 
   (addtest (rsb-model-builder-root)
     remote-host-info/smoke
@@ -162,8 +162,8 @@
      t *stop-type*
      `(,(let ((info (apply #'make-instance 'remote-host-info
                            :state :up initargs)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :host () (:state :up ,@initargs))))))))
+          `(,info ((:peek  nil () ,info)
+                   (:visit nil () ,info :host () (:state :up ,@initargs))))))))
 
   (addtest (rsb-model-builder-root)
     host-node/smoke
@@ -172,5 +172,5 @@
      t *stop-type*
      `(,(let* ((info (apply #'make-instance 'host-info initargs))
                (node (make-instance 'basic-host-node :info info)))
-          `(,info ((:peek  () ,info)
-                   (:visit () ,info :host () ,initargs))))))))
+          `(,info ((:peek  nil () ,info)
+                   (:visit nil () ,info :host () ,initargs))))))))
