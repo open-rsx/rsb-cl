@@ -1,6 +1,6 @@
 ;;;; builder.lisp --- Builder support for event class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,10 @@
 
    #:architecture.builder-protocol
 
-   #:rsb))
+   #:rsb)
+
+  (:export
+   #:universal-builder-for-event-data))
 
 (cl:in-package #:rsb.builder)
 
@@ -75,3 +78,20 @@
                           (relation (eql :data))
                           (node     event))
   (event-data node))
+
+;;; Utility functions
+
+(declaim (ftype (function * (values function &optional))
+                universal-builder-for-event-data))
+
+(defun universal-builder-for-event-data ()
+  "Return a \"peek function\"[1] that switches to the universal
+   builder[2] for event data.
+
+   [1] See `architecture.builder-protocol:walk-nodes'
+   [2] See `architecture.builder-protocol.universal-builder' package."
+  (let ((universal (make-instance 'architecture.builder-protocol.universal-builder:universal-builder)))
+    (lambda (builder relation relation-args node)
+      (if (eq relation :data)
+          (values t nil nil nil universal)
+          t))))

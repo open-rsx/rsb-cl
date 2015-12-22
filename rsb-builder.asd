@@ -1,6 +1,6 @@
 ;;;; rsb-builder.asd --- Builder support for RSB objects.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,9 +19,10 @@
   :depends-on  (:alexandria
                 :let-plus
 
-                (:version :architecture.builder-protocol "0.3")
+                (:version :architecture.builder-protocol                   "0.3")
+                (:version :architecture.builder-protocol.universal-builder "0.3")
 
-                (:version :cl-rsb                        #.(version/string)))
+                (:version :cl-rsb                                          #.(version/string)))
   :components  ((:module     "src"
                  :components ((:file       "builder"))))
 
