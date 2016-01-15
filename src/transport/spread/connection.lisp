@@ -1,6 +1,6 @@
 ;;;; connection.lisp --- Spread connections with membership management.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -61,6 +61,15 @@
     (setf (connection-%connection instance)
           (network.spread:connect name))))
 
+(defmethod connection-name ((connection connection))
+  (network.spread:connection-name (connection-%connection connection)))
+
+(defmethod connection-daemon-name ((connection connection))
+  (network.spread:connection-daemon-name (connection-%connection connection)))
+
+(defmethod connection-groups ((connection connection))
+  (hash-table-keys (connection-%groups connection)))
+
 (defmethod disconnect ((connection connection))
   (network.spread:disconnect (connection-%connection connection)))
 
@@ -69,7 +78,7 @@
                  (promise (lparallel:promise))
                  ((&labels notify-and-remove (message-group members)
                     (log:debug "~@<~A got ~A notification for ~
-                                  group ~S with members ~S.~@:>"
+                                group ~S with members ~S.~@:>"
                                context connection message-group members)
                     (when (and (string= message-group group :end2 31)
                                (funcall predicate members))
@@ -176,7 +185,8 @@
 
 (defmethod print-object ((object connection) stream)
   (print-unreadable-object (object stream :type t :identity t)
-    (let+ (((&structure-r/o connection- %connection %groups) object))
-     (format stream "~A (~D)"
-             (network.spread:connection-name %connection)
-             (hash-table-count %groups)))))
+    (let+ (((&structure-r/o connection- %groups) object))
+      (format stream "~A@~A (~D)"
+              (connection-name object)
+              (connection-daemon-name object)
+              (hash-table-count %groups)))))

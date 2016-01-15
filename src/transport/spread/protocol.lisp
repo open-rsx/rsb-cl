@@ -1,12 +1,25 @@
 ;;;; protocol.lisp --- Protocol used by the spread transport implementation.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.spread)
 
 ;;; Spread connection protocol
+
+(defgeneric connection-name (connection)
+  (:documentation
+   "Return local name of CONNECTION."))
+
+(defgeneric connection-daemon-name (connection)
+  (:documentation
+   "Return name of the daemon to which CONNECTION is connected."))
+
+(defgeneric connection-groups (connection)
+  (:documentation
+   "Return list of names of Spread groups in which CONNECTION is a
+    member."))
 
 (defgeneric disconnect (connection)
   (:documentation
