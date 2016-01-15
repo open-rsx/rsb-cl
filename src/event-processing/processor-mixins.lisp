@@ -1,6 +1,6 @@
 ;;;; processor-mixins.lisp --- Mixin classes for processor classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,20 +32,25 @@ handle conditions according to a client-supplied policy."))
                unwinding~@:>"
               processor)))
 
-(defun call-with-error-policy (processor thunk)
-  "Call THUNK with a handler that applies PROCESSOR's error policy."
-  (declare (type function thunk))
-  (flet ((apply-policy (condition)
-           (apply-error-policy processor condition)))
-    (declare (dynamic-extent #'apply-policy))
-    (handler-bind ((error #'apply-policy)) (funcall thunk))))
-
 (defmacro with-error-policy ((processor) &body body)
   "Execute BODY with a condition handler that applies the error policy
    of processor."
   `(flet ((with-error-policy-thunk () ,@body))
      (declare (dynamic-extent #'with-error-policy-thunk))
      (call-with-error-policy ,processor #'with-error-policy-thunk)))
+
+(defun call-with-error-policy (processor thunk)
+  "Call THUNK with a handler that applies PROCESSOR's error policy.
+
+   While PROCESSOR's error policy is applied, an equivalent handler is
+   established allow error during application of the error policy to
+   be handle by the error policy."
+  (declare (type function thunk))
+  (flet ((apply-policy (condition)
+           (with-error-policy (processor)
+             (apply-error-policy processor condition))))
+    (declare (dynamic-extent #'apply-policy))
+    (handler-bind ((error #'apply-policy)) (funcall thunk))))
 
 ;; Mixin classes `{error-policy,restart}-{dispatcher,handler}-mixin'
 

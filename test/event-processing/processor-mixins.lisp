@@ -1,6 +1,6 @@
 ;;;; processor-mixins.lisp --- Unit tests for processor mixin classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,12 +13,15 @@
   (:documentation
    "Test suite for the `error-policy-mixin' class."))
 
-(defun error-policy-mixin.signaling-function ()
+(defun error-policy-mixin.signaling-function (&optional recursive?)
   "A function that unconditionally signals an error."
   (restart-case
       (error "~@<I like to signal.~@:>")
     (continue (&optional condition)
       (declare (ignore condition))
+      (when recursive?
+        (with-simple-restart (continue "Nested Continue")
+          (error "~@<Another error.~@:>")))
       nil)))
 
 (macrolet
@@ -40,12 +43,16 @@
           ,@call-form)))
 
   (define-smoke-test smoke/function
-      (call-with-error-policy
-       simple-processor #'error-policy-mixin.signaling-function))
+    (call-with-error-policy
+     simple-processor #'error-policy-mixin.signaling-function))
 
   (define-smoke-test smoke/macro
-      (with-error-policy (simple-processor)
-        (error-policy-mixin.signaling-function))))
+    (with-error-policy (simple-processor)
+      (error-policy-mixin.signaling-function)))
+
+  (define-smoke-test recursive-eror
+    (with-error-policy (simple-processor)
+      (error-policy-mixin.signaling-function t))))
 
 ;;; {error-policy,restart}-{dispatcher,handler}-mixin test suites
 
