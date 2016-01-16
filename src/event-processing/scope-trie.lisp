@@ -19,12 +19,50 @@
 ;;;   │ node     │     ┌──────────┐
 ;;;   ├──────────┤     │ state    │
 ;;;   │ state ●──┼────▶├──────────┤
-;;;   └──────────┘     │ value    │
-;;;                    │ edges    │
-;;;                    └──────────┘
+;;;   └──────────┘     │ value    │     ┌──────────────────┐
+;;;                    │ edges ●──┼────▶│ scope-node-edges │
+;;;                    └──────────┘     └──────────────────┘
 ;;;
 ;;; The state is separate from the node to allow compare-and-swapping
-;;; the value and edges simultaneously.
+;;; the value and edges simultaneously. scope-node-edges is an
+;;; abstract data structure mapping scope components to child nodes of
+;;; the node.
+
+(deftype scope-node-edges ()
+  `list)
+
+(declaim (ftype (function () (values scope-node-edges &optional))
+                make-empty-scope-node-edges)
+         (inline make-empty-scope-node-edges))
+(defun make-empty-scope-node-edges ()
+  '())
+
+(declaim (ftype (function (scope-node-edges) (values boolean &optional))
+                scope-node-edges-empty?)
+         (inline scope-node-edges-empty?))
+(defun scope-node-edges-empty? (edges)
+  (null edges))
+
+(declaim (ftype (function (string scope-node-edges) (values t &optional))
+                scope-node-edges-find-edge)
+         (inline scope-node-edges-find-edge))
+(defun scope-node-edges-find-edge (component edges)
+  (cdr (assoc component edges :test #'string=)))
+
+(declaim (ftype (function (string t scope-node-edges)
+                          (values scope-node-edges &optional))
+                scope-node-edges-add-edge)
+         (inline scope-node-edges-add-edge))
+(defun scope-node-edges-add-edge (component node edges)
+  (acons component node edges))
+
+(declaim (ftype (function (string t scope-node-edges)
+                          (values scope-node-edges &optional))
+                scope-node-edges-remove-edge)
+         (inline scope-node-edges-remove-edge))
+(defun scope-node-edges-remove-edge (component node edges)
+  (declare (ignore component))
+  (remove node edges :test #'eq :key #'cdr :count 1))
 
 (declaim (inline make-node-state make-empty-node-state))
 (defstruct (node-state
@@ -32,8 +70,8 @@
              (:constructor make-empty-node-state ())
              (:predicate   nil)
              (:copier      nil))
-  (value +no-value+            :read-only t)
-  (edges ()         :type list :read-only t))
+  (value +no-value+                        :read-only t)
+  (edges ()         :type scope-node-edges :read-only t))
 
 (declaim (inline make-node))
 (defstruct (node
@@ -88,18 +126,15 @@
                       ((not component))
                       ;; A node corresponding to COMPONENT does
                       ;; already exist => descend into that node.
-                      ((when-let ((cell (assoc component old-edges
-                                               :test #'string=)))
-                         (setf next (cdr cell))))
+                      ((setf next (scope-node-edges-find-edge component old-edges)))
                       ;; Such a node does not exist, but we are
                       ;; supposed to extend the trie => create a new
                       ;; node.
                       (extend?
                        (let ((new-child (make-node (make-empty-node-state))))
                          (setf new-state (make-node-state
-                                          old-value (list* (cons component
-                                                                 new-child)
-                                                           old-edges))
+                                          old-value (scope-node-edges-add-edge
+                                                     component new-child old-edges))
                                next      new-child))))
                     ;; if we have a next node to visit, do it
                     ;; (including ancestors), then check whether it
@@ -108,12 +143,11 @@
                       (let ((child (visit rest next)))
                         (unless (node-state child)
                           (setf deleting? t)
-                          (let ((new-edges (remove child old-edges
-                                                   :test #'eq :key #'cdr
-                                                   :count 1)))
+                          (let ((new-edges (scope-node-edges-remove-edge
+                                            component child old-edges)))
                             (setf new-state
-                                  (when (or (not (eq old-value +no-value+))
-                                            new-edges)
+                                  (unless (and (eq old-value +no-value+)
+                                               (scope-node-edges-empty? new-edges))
                                     (make-node-state old-value new-edges)))))))
                     ;; Cannot delete root.
                     (when (and (not new-state) (eq node trie))
@@ -166,8 +200,9 @@
   (define-scope-trie-function scope-trie-rem ()
     "Remove the value associated with SCOPE in TRIE, if any."
     (visit (state nil t)
-      (when-let ((old-edges (node-state-edges state)))
-        (make-node-state +no-value+ old-edges))))
+      (let ((old-edges (node-state-edges state)))
+        (unless (scope-node-edges-empty? old-edges)
+          (make-node-state +no-value+ old-edges)))))
 
   (define-scope-trie-function scope-trie-map (function)
     "Call FUNCTION for values associated to super-scopes of SCOPE in
