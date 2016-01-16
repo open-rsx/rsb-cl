@@ -1,6 +1,6 @@
 ;;;; scope-trie.lisp --- [sink-]scope-trie data structures.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,17 +12,28 @@
 (define-constant +no-value+ '%no-value)
 
 ;;; Scope trie data structure
+;;;
+;;; A tree of nodes of the form
+;;;
+;;;   ┌──────────┐
+;;;   │ node     │     ┌──────────┐
+;;;   ├──────────┤     │ state    │
+;;;   │ state ●──┼────▶├──────────┤
+;;;   └──────────┘     │ value    │
+;;;                    │ edges    │
+;;;                    └──────────┘
+;;;
+;;; The state is separate from the node to allow compare-and-swapping
+;;; the value and edges simultaneously.
 
 (declaim (inline make-node-state make-empty-node-state))
 (defstruct (node-state
              (:constructor make-node-state (value edges))
+             (:constructor make-empty-node-state ())
              (:predicate   nil)
              (:copier      nil))
   (value +no-value+            :read-only t)
   (edges ()         :type list :read-only t))
-
-(defun make-empty-node-state ()
-  (make-node-state +no-value+ '()))
 
 (declaim (inline make-node))
 (defstruct (node
@@ -71,7 +82,7 @@
                                         old-state))
                          (old-value (node-state-value (or new-state old-state)))
                          (old-edges (node-state-edges (or new-state old-state)))
-                         (next))
+                         (next      nil))
                     (cond
                       ;; End of COMPONENTS => stop traversal.
                       ((not component))
