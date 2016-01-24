@@ -1,6 +1,6 @@
 ;;;; remote-introspection.lisp --- Classes and functions for remote introspection.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -617,9 +617,10 @@
                         ((equal current new)
                          new)
                         (t
-                         (warn "~@<In ~A slot ~A: new value ~S is ~
-                                different from current value ~S.~@:>"
-                               info slot new current)
+                         (log:info "~@<In ~A slot ~A: new value ~S is ~
+                                    different from current value ~
+                                    ~S.~@:>"
+                                   info slot new current)
                          current)))))
               (macrolet
                   ((update ()
