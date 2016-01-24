@@ -1,10 +1,60 @@
 ;;;; bus-connection.lisp --- Connection class used by bus provider.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
+
+;;; Utility functions
+
+(defun %make-error-policy (connection &optional function)
+  ;; Return a error policy function that calls FUNCTION and closes
+  ;; CONNECTION when invoked.
+  (named-lambda bus-connection-error-policy (condition)
+    ;; Closing CONNECTION can fail (or at least signal an error) for
+    ;; various reasons. Make sure the installed error policy is
+    ;; still called.
+    (unwind-protect ; needed because `disconnect' may unwind.
+         (handler-case
+             ;; `disconnect' returns nil if CONNECTION was already
+             ;; being closed. In that case, we do not have to call
+             ;; FUNCTION (because somebody else did/does) and can
+             ;; abort the receiver thread right away.
+             (let ((handshake (shutdown-handshake-for condition)))
+               (log:info "~@<~A is maybe disconnecting ~
+                          ~:[without~;~:*with ~A role of~] shutdown ~
+                          handshake and executing error policy ~A ~
+                          due to condition: ~A~@:>"
+                         connection handshake function condition)
+               (when (not (disconnect connection :handshake handshake))
+                 (setf function nil)))
+           (error (condition)
+             (log:warn "~@<When ~A executed error policy, error ~
+                        closing connection: ~A~@:>"
+                       connection condition)))
+      ;; If necessary, execute the original error policy, FUNCTION.
+      (when function
+        (funcall function condition)))))
+
+;; Return a suitable send/receive buffer for a given size, creating or
+;; enlarging it first, if necessary.
+(macrolet
+    ((define-ensure-buffer (name accessor)
+       `(progn
+          (declaim (inline ,name))
+          (defun ,name (connection size)
+            (or (when-let ((buffer (,accessor connection)))
+                  (locally (declare (type octet-vector buffer))
+                    (when (>= (length buffer) size)
+                      buffer)))
+                (setf (,accessor connection)
+                      (make-octet-vector size)))))))
+
+  (define-ensure-buffer %ensure-receive-buffer connection-%receiver-buffer)
+  (define-ensure-buffer %ensure-send-buffer    connection-%send-buffer))
+
+;;; `bus-connection'
 
 (defclass bus-connection (broadcast-processor
                           threaded-message-receiver-mixin
@@ -274,52 +324,3 @@ after calling NEW-VALUE."
       (format stream "~:[open~;closing: ~:*~S~] ~
                       ~/rsb.transport.socket::print-socket/"
               closing? socket))))
-
-;;; Utility functions
-
-(defun %make-error-policy (connection &optional function)
-  "Return a error policy function that calls FUNCTION and closes
-CONNECTION when invoked. "
-  (named-lambda bus-connection-error-policy (condition)
-      ;; Closing CONNECTION can fail (or at least signal an error) for
-      ;; various reasons. Make sure the installed error policy is
-      ;; still called.
-      (unwind-protect ; needed because `disconnect' may unwind.
-           (handler-case
-               ;; `disconnect' returns nil if CONNECTION was already
-               ;; being closed. In that case, we do not have to call
-               ;; FUNCTION (because somebody else did/does) and can
-               ;; abort the receiver thread right away.
-               (let ((handshake (shutdown-handshake-for condition)))
-                 (log:info "~@<~A is maybe disconnecting ~
-                            ~:[without~;~:*with ~A role of~] shutdown ~
-                            handshake and executing error policy ~A ~
-                            due to condition: ~A~@:>"
-                           connection handshake function condition)
-                 (when (not (disconnect connection :handshake handshake))
-                   (setf function nil)))
-             (error (condition)
-               (log:warn "~@<When ~A executed error policy, error ~
-                          closing connection: ~A~@:>"
-                         connection condition)))
-        ;; If necessary, execute the original error policy, FUNCTION.
-        (when function
-          (funcall function condition)))))
-
-(macrolet
-    ((define-ensure-buffer (name accessor)
-       `(progn
-          (declaim (inline ,name))
-
-          (defun ,name (connection size)
-            "Return a suitable buffer for SIZE, creating or enlarging
-it first, if necessary."
-            (or (when-let ((buffer (,accessor connection)))
-                  (locally (declare (type octet-vector buffer))
-                    (when (>= (length buffer) size)
-                      buffer)))
-                (setf (,accessor connection)
-                      (make-octet-vector size)))))))
-
-  (define-ensure-buffer %ensure-receive-buffer connection-%receiver-buffer)
-  (define-ensure-buffer %ensure-send-buffer    connection-%send-buffer))
