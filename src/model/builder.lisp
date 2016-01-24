@@ -1,6 +1,6 @@
 ;;;; builder.lisp --- (un)builder support for model classes.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -47,7 +47,8 @@
   (node-initargs builder (node-info node)))
 
 (defmethod node-relations ((builder t) (node node))
-  (list* '(:children . *) (node-relations builder (node-info node))))
+  (append (list* '(:children . *) (node-relations builder (node-info node)))
+          (call-next-method)))
 
 (defmethod node-relation ((builder  t)
                           (relation (eql :children))
