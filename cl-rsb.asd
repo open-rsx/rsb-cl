@@ -139,7 +139,6 @@
                 :trivial-garbage
                 :closer-mop
                 :cl-hooks
-                :cl-dynamic-classes
                 (:version :architecture.service-provider "0.1")
                 :log4cl
 
