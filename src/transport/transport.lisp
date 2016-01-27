@@ -43,7 +43,13 @@
    (wire-type :initarg  :wire-type
               :reader   transport-wire-type
               :documentation
-              "Stores the wire-type of the transport."))
+              "Stores the wire-type of the transport.")
+   (remote?   :initarg  :remote?
+              :reader   transport-remote?
+              :initform t
+              :documentation
+              "True if the transport implements remote
+               communication."))
   (:default-initargs
    :schemas   (missing-required-initarg 'transport :schemas)
    :wire-type (missing-required-initarg 'transport :wire-type))
@@ -61,15 +67,21 @@
   (when schemas-supplied?
     (setf (transport-%schemas instance) (ensure-list schemas))))
 
+(defmethod print-items:print-items append ((object transport))
+  `((:remote? ,(transport-remote? object) " ~:[local~:;remote~]"
+              ((:after :provider-count)))))
+
 (defmethod describe-object ((object transport) stream)
   (format stream "~A~
                   ~2&Schemas: ~{~S~^, ~}~
                   ~&Wire-type: ~S~
+                  ~&Remote: ~S~
                   ~@[~2&Connectors:~
                   ~&~{~A~^~&~}~]"
           object
           (transport-schemas object)
           (transport-wire-type object)
+          (transport-remote? object)
           (service-provider:service-providers object)))
 
 (defmethod service-provider:provider-name ((provider transport))

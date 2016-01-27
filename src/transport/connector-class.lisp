@@ -105,6 +105,7 @@
 
   (define-connector-class-accessor transport-schemas   t)
   (define-connector-class-accessor transport-wire-type t)
+  (define-connector-class-accessor transport-remote?   t)
 
   (define-connector-class-accessor connector-transport)
   (define-connector-class-accessor connector-direction)

@@ -43,6 +43,7 @@
    :schemas         :inprocess
    :wire-type       t ; The Lisp process is the medium, so t (any Lisp
                       ; object) should be a reasonable wire-type
+   :remote?         nil
    :documentation
    "Transport for communication within one process.
 

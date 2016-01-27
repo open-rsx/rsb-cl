@@ -10,6 +10,7 @@
  :spread
  :schemas   :spread
  :wire-type 'nibbles:octet-vector
+ :remote?   t
  :documentation
  "A transport implementation using the Spread group communication framework.
 

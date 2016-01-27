@@ -42,9 +42,11 @@
 (defun check-connector-class (class
                               expected-schemas
                               expected-wire-type
+                              expected-remote?
                               expected-direction)
   (let ((schemas   (transport-schemas class))
         (wire-type (transport-wire-type class))
+        (remote?   (transport-remote? class))
         (direction (connector-direction class))
         (options   (connector-options class)))
     ;; Check schemas.
@@ -54,6 +56,8 @@
     ;; Check wire-type.
     (ensure (typep wire-type 'wire-type))
     (ensure-same wire-type expected-wire-type :test #'type=)
+    ;; Check remote.
+    (ensure-same remote? expected-remote? :test #'eq)
     ;; Check direction.
     (ensure (typep direction 'direction))
     (ensure-same direction expected-direction
@@ -64,14 +68,18 @@
 
 (defun check-connector (connector
                         expected-wire-type
+                        expected-remote?
                         expected-direction )
   (let ((wire-type (transport-wire-type connector))
+        (remote?   (transport-remote?   connector))
         (direction (connector-direction connector))
         (url       (connector-url connector))
         (rel-url   (connector-relative-url connector "/foo")))
     ;; Check wire-type.
     (ensure (typep wire-type 'wire-type))
     (ensure-same wire-type expected-wire-type :test #'type=)
+    ;; Check remote.
+    (ensure-same remote? expected-remote? :test #'eq)
     ;; Check direction.
     (ensure (typep direction 'direction))
     (ensure-same direction expected-direction :test #'eq)
@@ -89,6 +97,7 @@
      initargs
      expected-schemas
      expected-wire-type
+     expected-remote?
      expected-direction)
   "Define basic test cases for the connector class CLASS.
 
@@ -106,6 +115,9 @@
 
    EXPECTED-WIRE-TYPE specifies the expected wire-type of the
    connector class.
+
+   EXPECTED-REMOTE? specifies whether CLASS is expected to belong to a
+   remote transport.
 
    EXPECTED-DIRECTION specifies the expected direction of the
    connector class. "
@@ -134,6 +146,7 @@
        (check-connector-class (find-class ',class)
                               ,expected-schemas
                               ,expected-wire-type
+                              ,expected-remote?
                               ,expected-direction))
 
      (addtest (,suite-name
@@ -146,6 +159,7 @@
        (let ((instance (apply #'make-instance ',class ,initargs)))
          (check-connector instance
                           ,expected-wire-type
+                          ,expected-remote?
                           ,expected-direction)))
 
      (addtest (,suite-name

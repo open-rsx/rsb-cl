@@ -47,6 +47,7 @@
                                        :converter :fundamental-null)
              :expected-schemas   '(:socket)
              :expected-wire-type 'octet-vector
+             :expected-remote?   t
 
              :expected-direction ,(make-keyword direction))
 

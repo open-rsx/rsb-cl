@@ -22,6 +22,10 @@
     TRANSPORT can be a symbol designating a transport, a transport
     object, a connector class or a connector instance."))
 
+(defgeneric transport-remote? (transport)
+  (:documentation
+   "Return true if TRANSPORT implements remote communication."))
+
 ;; Default behavior
 
 (macrolet ((define-transport-accessor (name)
@@ -31,7 +35,8 @@
                 ;; from it.
                 (,name (service-provider:find-provider 'transport transport)))))
   (define-transport-accessor transport-schemas)
-  (define-transport-accessor transport-wire-type))
+  (define-transport-accessor transport-wire-type)
+  (define-transport-accessor transport-remote?))
 
 ;;; Connector protocol
 

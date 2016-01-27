@@ -60,6 +60,7 @@
 
               :expected-schemas   '(:spread)
               :expected-wire-type 'octet-vector
+              :expected-remote?   t
 
               :expected-direction ,(make-keyword direction))
 

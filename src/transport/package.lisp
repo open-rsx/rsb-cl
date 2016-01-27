@@ -49,8 +49,8 @@
   ;; Transport protocol
   (:export
    #:transport-schemas              ; work on transport names,
-   #:transport-wire-type)           ; transport instances, connector
-                                    ; classes and connector instances
+   #:transport-wire-type            ; transport instances, connector
+   #:transport-remote?)             ; classes and connector instances
 
   ;; Connector protocol
   (:export

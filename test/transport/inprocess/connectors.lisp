@@ -16,6 +16,7 @@
 (define-basic-connector-test-cases in-pull-connector
   :expected-schemas   '(:inprocess)
   :expected-wire-type 't
+  :expected-remote?    nil
 
   :expected-direction :in-pull)
 
@@ -29,6 +30,7 @@
 (define-basic-connector-test-cases in-push-connector
   :expected-schemas   '(:inprocess)
   :expected-wire-type 't
+  :expected-remote?    nil
 
   :expected-direction :in-push)
 
@@ -42,5 +44,6 @@
 (define-basic-connector-test-cases out-connector
   :expected-schemas   '(:inprocess)
   :expected-wire-type 't
+  :expected-remote?   nil
 
   :expected-direction :out)
