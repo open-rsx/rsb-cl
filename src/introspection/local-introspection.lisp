@@ -1,6 +1,6 @@
 ;;;; local-introspection.lisp --- Classes and functions for local introspection.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -234,7 +234,7 @@
                                lockable-database-mixin)
   ()
   (:documentation
-   "Instances of this class broadbast introspection information
+   "Instances of this class broadcast introspection information
     regarding the local host, the current process and participants in
     the current process."))
 
