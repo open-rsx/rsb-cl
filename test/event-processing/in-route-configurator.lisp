@@ -15,7 +15,6 @@
   ()
   (:metaclass rsb.transport:connector-class)
   (:transport :mock)
-  (:wire-type 'string)
   (:direction :in-pull))
 
 (deftestsuite in-route-configurator-root (event-processing-root)

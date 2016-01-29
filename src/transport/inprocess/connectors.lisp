@@ -13,8 +13,6 @@
               :reader   connector-transport))
   (:metaclass connector-class)
   (:transport :inprocess)
-  (:wire-type t) ; The Lisp process is the medium, so t (any Lisp
-                 ; object) should be a reasonable wire-type
   (:schemas   :inprocess)
   (:default-initargs
    :schema :inprocess)

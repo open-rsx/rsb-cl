@@ -12,7 +12,8 @@
   (:documentation
    "Return the wire-type of TRANSPORT.
 
-    TRANSPORT can be a connector class or a connector instance."))
+    TRANSPORT can be a symbol designating a transport, a transport
+    object, a connector class or a connector instance."))
 
 ;; Default behavior
 
@@ -41,12 +42,6 @@
 (defgeneric connector-transport (connector)
   (:documentation
    "Return the transport of CONNECTOR.
-
-    CONNECTOR can be a connector class or a connector instance."))
-
-(defgeneric connector-wire-type (connector)
-  (:documentation
-   "Return the wire-type of CONNECTOR.
 
     CONNECTOR can be a connector class or a connector instance."))
 
@@ -187,8 +182,7 @@ the requested class cannot be found."
         :direction direction
         :args      args))
     (let+ ((class     (find-connector-class name direction))
-           (wire-type (connector-wire-type class)
-                      #+later (transport-wire-type name))
+           (wire-type (transport-wire-type name))
            (converter (unless (eq wire-type t)
                         (or converter
                             (cdr (find wire-type converters

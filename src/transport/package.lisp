@@ -57,7 +57,6 @@
    #:connector-transport
 
    #:connector-direction            ; work on connector classes and instances
-   #:connector-wire-type
 
    #:connector-url                  ; work on connector instances
    #:connector-relative-url

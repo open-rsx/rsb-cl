@@ -48,7 +48,6 @@ bus to which the connector provides access.")
   (:metaclass connector-class)
   (:transport :socket)
   (:schemas   :socket)
-  (:wire-type octet-vector)
   (:default-initargs
    :host (missing-required-initarg 'connector :host)
    :port (missing-required-initarg 'connector :port))

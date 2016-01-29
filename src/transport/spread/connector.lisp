@@ -15,7 +15,6 @@
                ""))
   (:metaclass connector-class)
   (:transport :spread)
-  (:wire-type octet-vector)
   (:schemas   :spread)
   (:options
    (:name string

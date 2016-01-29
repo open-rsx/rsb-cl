@@ -30,14 +30,13 @@
       (:metaclass connector-class)
       (:transport :mock)
       (:direction :in-push)
-      (:wire-type string)
       (:schemas   :whoop)
       (:options
        (:an-option &slot))))
 
   (let ((class (find-class 'foo)))
     (ensure-same (connector-direction class) :in-push)
-    (ensure-same (connector-wire-type class) 'string)
+    (ensure-same (transport-wire-type class) 'string)
     (ensure-same (connector-schemas class)   '(:whoop))
     (ensure-same (connector-options class)   '((:an-option boolean
                                                 :default     t
