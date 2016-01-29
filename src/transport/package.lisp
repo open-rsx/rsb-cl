@@ -48,8 +48,8 @@
 
   ;; Transport protocol
   (:export
-   #:transport-wire-type)           ; works on transport names,
-                                    ; transport instances, connector
+   #:transport-schemas              ; work on transport names,
+   #:transport-wire-type)           ; transport instances, connector
                                     ; classes and connector instances
 
   ;; Connector protocol
@@ -61,7 +61,6 @@
    #:connector-url                  ; work on connector instances
    #:connector-relative-url
 
-   #:connector-schemas              ; work on connector classes, not instances
    #:connector-options)
 
   ;; Transport class family and connector creation

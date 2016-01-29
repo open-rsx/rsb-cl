@@ -40,6 +40,7 @@
   (register-transport
    :inprocess
    :transport-class 'inprocess-transport
+   :schemas         :inprocess
    :wire-type       t ; The Lisp process is the medium, so t (any Lisp
                       ; object) should be a reasonable wire-type
    :documentation

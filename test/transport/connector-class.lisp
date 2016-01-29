@@ -18,6 +18,7 @@
 
   (register-transport
    :mock
+   :schemas   :whoop
    :wire-type 'string)
 
   (eval
@@ -30,14 +31,13 @@
       (:metaclass connector-class)
       (:transport :mock)
       (:direction :in-push)
-      (:schemas   :whoop)
       (:options
        (:an-option &slot))))
 
   (let ((class (find-class 'foo)))
-    (ensure-same (connector-direction class) :in-push)
+    (ensure-same (transport-schemas class)   '(:whoop))
     (ensure-same (transport-wire-type class) 'string)
-    (ensure-same (connector-schemas class)   '(:whoop))
+    (ensure-same (connector-direction class) :in-push)
     (ensure-same (connector-options class)   '((:an-option boolean
                                                 :default     t
                                                 :description "doc")))))

@@ -1,6 +1,6 @@
 ;;;; clon.lisp --- Commandline option definitions for cl-rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -170,7 +170,7 @@ have been excluded as a result of repeated occurrence."
   "Return a `clon:group' instances which contains configuration
 options for connector class CLASS."
   (let+ (((&accessors-r/o
-           (schemas   rsb.transport:connector-schemas)
+           (schemas   rsb.transport:transport-schemas)
            (direction rsb.transport:connector-direction)) class)
          (name        (first schemas))
          (pretty-name (format nil "~:(~A~) ~:(~A~) Connector"

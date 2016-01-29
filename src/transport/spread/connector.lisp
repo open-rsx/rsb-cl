@@ -15,7 +15,6 @@
                ""))
   (:metaclass connector-class)
   (:transport :spread)
-  (:schemas   :spread)
   (:options
    (:name string
     :description
@@ -31,8 +30,6 @@
     :default t
     :description
     "Should the TCP_NODELAY option be set on the socket used for Spread communication? Note: currently ignored by Lisp implementation."))
-  (:default-initargs
-   :schema :spread)
   (:documentation
    "This class serves as a superclass for spread in and out
 connectors."))

@@ -13,9 +13,6 @@
               :reader   connector-transport))
   (:metaclass connector-class)
   (:transport :inprocess)
-  (:schemas   :inprocess)
-  (:default-initargs
-   :schema :inprocess)
   (:documentation
    "Superclass for connector classes of the inprocess transport."))
 

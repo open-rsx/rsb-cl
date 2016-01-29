@@ -8,6 +8,7 @@
 
 (register-transport
  :spread
+ :schemas   :spread
  :wire-type 'nibbles:octet-vector
  :documentation
  "A transport implementation using the Spread group communication framework.

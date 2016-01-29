@@ -41,6 +41,7 @@
   (register-transport
    :socket
    :transport-class 'socket-transport
+   :schemas         :socket
    :wire-type       'nibbles:octet-vector
    :documentation
    "TCP-Socket-based transport for small numbers of communicating processes.

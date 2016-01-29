@@ -35,11 +35,17 @@
 ;;; `transport' class
 
 (defclass transport (service-provider:standard-service)
-  ((wire-type :initarg  :wire-type
+  ((schemas   :type     list
+              :reader   transport-schemas
+              :accessor transport-%schemas
+              :documentation
+              "Stores a list of schemas supported by the transport.")
+   (wire-type :initarg  :wire-type
               :reader   transport-wire-type
               :documentation
               "Stores the wire-type of the transport."))
   (:default-initargs
+   :schemas   (missing-required-initarg 'transport :schemas)
    :wire-type (missing-required-initarg 'transport :wire-type))
   (:documentation
    "Instances of this class represent transport implementations.
@@ -48,12 +54,21 @@
     `transport' but is also itself a service and the associated
     connectors are providers of that service."))
 
+(defmethod shared-initialize :after ((instance   transport)
+                                     (slot-names t)
+                                     &key
+                                     (schemas nil schemas-supplied?))
+  (when schemas-supplied?
+    (setf (transport-%schemas instance) (ensure-list schemas))))
+
 (defmethod describe-object ((object transport) stream)
   (format stream "~A~
+                  ~2&Schemas: ~{~S~^, ~}~
                   ~&Wire-type: ~S~
                   ~@[~2&Connectors:~
                   ~&~{~A~^~&~}~]"
           object
+          (transport-schemas object)
           (transport-wire-type object)
           (service-provider:service-providers object)))
 
@@ -63,7 +78,9 @@
 (defmethod service-provider:make-provider
     ((service t) (provider transport)
      &rest args &key
+     (schema    (missing-required-argument :schema))
      (direction (missing-required-argument :direction)))
+  (declare (ignore schema))
   ;; PROVIDER is also a service:
   (apply #'service-provider:make-provider provider direction
          (remove-from-plist args :direction)))
@@ -80,13 +97,35 @@
     connector classes of a particular transport are created to
     actually perform communication."))
 
+(defmethod service-provider:find-provider
+    ((service  (eql (service-provider:find-service 'transport)))
+     (provider symbol)
+     &key if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+  (or (call-next-method)
+      (find provider (service-provider:service-providers service)
+            :test #'member :key #'transport-schemas)))
+
+(defmethod service-provider:find-provider
+    ((service  (eql (service-provider:find-service 'transport)))
+     (provider cons)
+     &key if-does-not-exist)
+  (let+ (((schema . direction) provider))
+    (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
+    (when-let ((provider (service-provider:find-provider
+                          service schema
+                          :if-does-not-exist if-does-not-exist)))
+      (service-provider:find-provider
+       provider direction :if-does-not-exist if-does-not-exist))))
+
 (defmethod service-provider:make-provider
     ((service  (eql (service-provider:find-service 'transport)))
      (provider cons)
      &rest args &key)
-  (let ((direction (cdr provider)))
+  (let+ (((schema . direction) provider))
     (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
-    (apply #'service-provider:make-provider service (car provider)
+    (apply #'call-next-method service provider
+           :schema    schema
            :direction direction
            args)))
 

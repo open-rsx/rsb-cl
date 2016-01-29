@@ -8,6 +8,13 @@
 
 ;;; Transport protocol
 
+(defgeneric transport-schemas (transport)
+  (:documentation
+   "Return a list of the (URI-)schemas supported by TRANSPORT.
+
+    TRANSPORT can be a symbol designating a transport, a transport
+    object, a connector class or a connector instance."))
+
 (defgeneric transport-wire-type (transport)
   (:documentation
    "Return the wire-type of TRANSPORT.
@@ -23,6 +30,7 @@
                 ;; transport and retrieving the requested slot value
                 ;; from it.
                 (,name (service-provider:find-provider 'transport transport)))))
+  (define-transport-accessor transport-schemas)
   (define-transport-accessor transport-wire-type))
 
 ;;; Connector protocol
@@ -42,12 +50,6 @@
 (defgeneric connector-transport (connector)
   (:documentation
    "Return the transport of CONNECTOR.
-
-    CONNECTOR can be a connector class or a connector instance."))
-
-(defgeneric connector-schemas (connector)
-  (:documentation
-   "Return a list of the (URI-)schemas supported by CONNECTOR.
 
     CONNECTOR can be a connector class or a connector instance."))
 
@@ -193,7 +195,6 @@ the requested class cannot be found."
               (apply #+later (#'service-provider:make-provider
                               'transport (cons name direction))
                      #'make-instance class
-                     :schema name
                      (append args more-args)))))
       (cond
         ;; The connector does not require a converter.

@@ -43,7 +43,7 @@
                               expected-direction
                               expected-wire-type
                               expected-schemas)
-  (let ((schemas   (connector-schemas class))
+  (let ((schemas   (transport-schemas class))
         (wire-type (transport-wire-type class))
         (direction (connector-direction class))
         (options   (connector-options class)))

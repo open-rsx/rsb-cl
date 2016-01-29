@@ -11,12 +11,6 @@
               :documentation
               "Stores the transport instance to which the transport
                class and its instances belong.")
-   (schemas   :initarg  :schemas
-              :type     list
-              :initform '()
-              :documentation
-              "Stores a list of schemas provided by the connector
-               class.")
    (direction :type     direction
               :reader   connector-direction
               :documentation
@@ -77,13 +71,6 @@
       (some #'connector-transport
             (closer-mop:class-direct-superclasses connector))))
 
-(defmethod connector-schemas ((connector connector-class))
-  ;; Retrieve supported schemas from CONNECTOR and its transitive
-  ;; superclasses.
-  (append (slot-value connector 'schemas)
-          (mappend #'connector-schemas
-                   (closer-mop:class-direct-superclasses connector))))
-
 (defmethod connector-options ((connector connector-class))
   ;; Retrieve options from CONNECTOR and its transitive super-classes.
   ;; Option definitions in subclasses take precedence over definitions
@@ -116,11 +103,11 @@
                     ;; `connector-class'.
                     (values))))))
 
+  (define-connector-class-accessor transport-schemas   t)
   (define-connector-class-accessor transport-wire-type t)
 
   (define-connector-class-accessor connector-transport)
   (define-connector-class-accessor connector-direction)
-  (define-connector-class-accessor connector-schemas)
   (define-connector-class-accessor connector-options))
 
 ;;; Utility functions

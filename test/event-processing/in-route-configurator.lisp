@@ -8,6 +8,7 @@
 
 (rsb.transport:register-transport
  :mock
+ :schemas   :mock
  :wire-type 'string)
 
 (defclass mock-connector (rsb.transport:connector
