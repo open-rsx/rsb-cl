@@ -52,7 +52,6 @@ options."))
   (reduce (lambda+ (default-initargs
                     (name &ign
                      &key (default t default-supplied?) &allow-other-keys))
-            (log:info default-initargs name default)
             (if default-supplied?
                 (list* (list name default
                              (compile nil `(lambda () ,default)))
