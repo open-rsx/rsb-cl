@@ -42,9 +42,11 @@
                                   rsb.ep:restart-handler-mixin)
   ()
   (:documentation
-   "Instances of this class receive broadcasted introspection events,
-    apply filtering and error handling to deal with invalid events and
-    dispatch valid events to consumers of introspection events such as
+   "Receives broadcasted introspection events for processing.
+
+    Received events are filtered and error handling to deal with
+    invalid events is performed. Remaining valid events are dispatched
+    to consumers of introspection events such as
     `remote-introspection-database'."))
 
 (rsb::register-participant-class 'introspection-receiver)
@@ -704,8 +706,12 @@
    :response-timeout     .5
    :inactivity-threshold 60)
   (:documentation
-   "Instances of this class track participants in remote processes,
-    potentially on remote hosts."))
+   "Tracks remote participants, processes and hosts.
+
+    One or more `introspection-receiver' instances are used to gather
+    introspection events which are aggregated into a database
+    describing the remote participants, the containing processes and,
+    potentially, the remote hosts running the processes."))
 
 (rsb::register-participant-class 'remote-introspection)
 

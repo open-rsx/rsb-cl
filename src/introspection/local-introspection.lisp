@@ -22,9 +22,10 @@
             :documentation
             "Stores information about the local host."))
   (:documentation
-   "Instances of this class publish introspection information for the
-    local host, the current process and participants existing within
-    it."))
+   "Publishes introspection information for the current process.
+
+    The published information describes the local host, the current
+    process and participants existing within it."))
 
 (defmethod initialize-instance :after ((instance introspection-sender)
                                        &key
@@ -234,9 +235,10 @@
                                lockable-database-mixin)
   ()
   (:documentation
-   "Instances of this class broadcast introspection information
-    regarding the local host, the current process and participants in
-    the current process."))
+   "Broadcasts introspection information regarding the current process.
+
+    The published information describes the local host, the current
+    process and participants existing in the current process."))
 
 (rsb::register-participant-class 'local-introspection)
 
