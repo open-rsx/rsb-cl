@@ -60,6 +60,10 @@ options."))
           (connector-options class)
           :initial-value (call-next-method)))
 
+(defmethod closer-mop:validate-superclass ((class      connector-class)
+                                           (superclass standard-class))
+  t)
+
 (defmethod connector-wire-type ((connector connector-class))
   ;; Use wire-type stored in CONNECTOR or retrieve from superclasses
   ;; if necessary.
@@ -87,10 +91,6 @@ options."))
                       (closer-mop:class-direct-superclasses connector)))
      :key      #'first
      :from-end t)))
-
-(defmethod closer-mop:validate-superclass ((class      connector-class)
-                                           (superclass standard-class))
-  t)
 
 ;;; Utility functions
 
