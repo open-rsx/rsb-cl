@@ -1,10 +1,28 @@
 ;;;; protocol.lisp --- Protocol of the transport module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport)
+
+;;; Transport protocol
+
+(defgeneric transport-wire-type (transport)
+  (:documentation
+   "Return the wire-type of TRANSPORT.
+
+    TRANSPORT can be a connector class or a connector instance."))
+
+;; Default behavior
+
+(macrolet ((define-transport-accessor (name)
+             `(defmethod ,name ((transport symbol))
+                ;; When given a symbol, try to look up the designated
+                ;; transport and retrieving the requested slot value
+                ;; from it.
+                (,name (service-provider:find-provider 'transport transport)))))
+  (define-transport-accessor transport-wire-type))
 
 ;;; Connector protocol
 
@@ -140,46 +158,51 @@ the requested class cannot be found."
   (find-transport-class
    (format-symbol :keyword "~A-~A" name direction)))
 
-(defun make-connector (name direction converters &rest args)
+(defun make-connector (name direction converters
+                       &rest args &key converter &allow-other-keys)
   "Create a connector instance for the direction designated by
-DIRECTION of the kind the designated by NAME. Pass ARGS to the
-constructed instance.
-CONVERTERS is an alist of items of the form (WIRE-TYPE
-. CONVERTER). If the requested connector does not require a converter,
-CONVERTERS can be nil.
-An error of type `connector-constructor-failed' is signaled if the
-requested connector instance cannot be constructed. If the
-construction fails due to the lack of a suitable converter, an error
-of the subtype `no-suitable-converter' is signaled."
-  (handler-bind
-      (((and error (not no-suitable-converter))
-        (lambda (condition)
-          (error 'connector-construction-failed
-                 :name      name
-                 :direction direction
-                 :args      args
-                 :cause     condition))))
-    (let* ((class     (find-connector-class name direction))
-           (wire-type (connector-wire-type class))
+   DIRECTION of the kind the designated by NAME. Pass ARGS to the
+   constructed instance.
+
+   CONVERTERS is an alist of items of the form
+
+     (WIRE-TYPE . CONVERTER)
+
+   . If the requested connector does not require a converter,
+   CONVERTERS can be nil.
+
+   An error of type `connector-constructor-failed' is signaled if the
+   requested connector instance cannot be constructed. If the
+   construction fails due to the lack of a suitable converter, an
+   error of the subtype `no-suitable-converter' is signaled."
+  (with-condition-translation
+      (((error connector-construction-failed)
+        :name      name
+        :direction direction
+        :args      args))
+    (let+ ((class     (find-connector-class name direction))
+           (wire-type (connector-wire-type class)
+                      #+later (transport-wire-type name))
            (converter (unless (eq wire-type t)
-                        (or (getf args :converter)
+                        (or converter
                             (cdr (find wire-type converters
                                        :key  #'car
                                        :test #'subtypep)))))
-           (args      (remove-from-plist args :converter)))
+           (args      (remove-from-plist args :converter))
+           ((&flet make-it (&rest more-args)
+              (apply #+later (#'service-provider:make-provider
+                              'transport (cons name direction))
+                     #'make-instance class
+                     :schema name
+                     (append args more-args)))))
       (cond
         ;; The connector does not require a converter.
         ((eq wire-type t)
-         (apply #'make-instance class
-                :schema name
-                args))
+         (make-it))
         ;; The connector requires a converter and we found a suitable
         ;; one.
         (converter
-         (apply #'make-instance class
-                :schema    name
-                :converter converter
-                args))
+         (make-it :converter converter))
         ;; The connector requires a converter, but we did not find a
         ;; suitable one.
         (t
@@ -192,16 +215,17 @@ of the subtype `no-suitable-converter' is signaled."
 
 (defun make-connectors (specs direction &optional converters)
   "Create and return zero or more connector instances for the
-direction designated by DIRECTION according to SPECS. Each element of
-SPECS has to be of the form
+   direction designated by DIRECTION according to SPECS.
 
-  (NAME . ARGS)
+   Each element of SPECS has to be of the form
 
-where NAME and ARGS have to acceptable for calls to
-`make-connector'. For CONVERTERS, see `make-connector'."
+     (NAME . ARGS)
+
+   where NAME and ARGS have to acceptable for calls to
+   `make-connector'. For CONVERTERS, see `make-connector'."
   ;; Check direction here in order to signal a appropriate type error
   ;; even if SPECS is nil.
-  (check-type direction direction "either :IN-PUSH, :IN-PULL or :OUT")
+  (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
 
   (iter (for (name . args) in specs)
         (collect (apply #'make-connector

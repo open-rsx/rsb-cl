@@ -106,6 +106,7 @@ options."))
                   ;; `connector-class'.
                   (values)))))
 
+  (define-connector-class-accessor transport-wire-type)
   (define-connector-class-accessor connector-direction)
   (define-connector-class-accessor connector-wire-type)
   (define-connector-class-accessor connector-schemas)

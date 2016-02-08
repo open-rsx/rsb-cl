@@ -244,6 +244,7 @@
                               (:file       "variables")
                               (:file       "conditions")
                               (:file       "protocol")
+                              (:file       "transport")
                               (:file       "connector-class")
                               (:file       "connector")
 
