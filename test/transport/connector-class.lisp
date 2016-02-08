@@ -16,6 +16,10 @@
           "Test constructing an instance of `connector-class'.")
   construction/valid
 
+  (register-transport
+   :mock
+   :wire-type 'string)
+
   (eval
    '(defclass foo ()
       ((an-option :initarg  :an-option
@@ -24,6 +28,7 @@
                   :documentation
                   "doc"))
       (:metaclass connector-class)
+      (:transport :mock)
       (:direction :in-push)
       (:wire-type string)
       (:schemas   :whoop)

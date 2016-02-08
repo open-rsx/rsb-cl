@@ -54,6 +54,8 @@
 
   ;; Connector protocol
   (:export
+   #:connector-transport
+
    #:connector-direction            ; work on connector classes and instances
    #:connector-wire-type
 

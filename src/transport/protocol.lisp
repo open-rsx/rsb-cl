@@ -38,9 +38,9 @@
 
 ;;; Connector introspection protocol
 
-(defgeneric connector-direction (connector)
+(defgeneric connector-transport (connector)
   (:documentation
-   "Return the communication direction of CONNECTOR.
+   "Return the transport of CONNECTOR.
 
     CONNECTOR can be a connector class or a connector instance."))
 
@@ -53,6 +53,12 @@
 (defgeneric connector-schemas (connector)
   (:documentation
    "Return a list of the (URI-)schemas supported by CONNECTOR.
+
+    CONNECTOR can be a connector class or a connector instance."))
+
+(defgeneric connector-direction (connector)
+  (:documentation
+   "Return the communication direction of CONNECTOR.
 
     CONNECTOR can be a connector class or a connector instance."))
 

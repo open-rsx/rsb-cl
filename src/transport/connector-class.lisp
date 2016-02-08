@@ -7,40 +7,55 @@
 (cl:in-package #:rsb.transport)
 
 (defclass connector-class (standard-class)
-  ((direction :type     direction
-              :reader   connector-direction
+  ((transport :accessor connector-%transport
               :documentation
-              "Stores the direction of instances of the connector
-class.")
-   (wire-type :type     (or symbol list)
-              :documentation
-              "Stores the wire-type of instance of the connector
-class.")
+              "Stores the transport instance to which the transport
+               class and its instances belong.")
    (schemas   :initarg  :schemas
               :type     list
               :initform '()
               :documentation
               "Stores a list of schemas provided by the connector
-class.")
+               class.")
+   (direction :type     direction
+              :reader   connector-direction
+              :documentation
+              "Stores the direction of instances of the connector
+               class.")
+   (wire-type :type     (or symbol list)
+              :documentation
+              "Stores the wire-type of instance of the connector
+               class.")
    (options   :type     list
               :documentation
               "Stores options accepted by the connector class. Options
-are mapped to initargs."))
+               are mapped to initargs."))
   (:documentation
    "This metaclass can be used as the class of connector classes in
-order to provide storage and retrieval (via methods on
-`connector-direction', `connector-wire-type', `connector-schemas' and
-`connector-options') for connector direction, wire-type, schemas and
-options."))
+    order to provide storage and retrieval (via methods on
+    `connector-direction', `connector-wire-type', `connector-schemas'
+    and `connector-options') for connector direction, wire-type,
+    schemas and options."))
 
 (defmethod shared-initialize :before ((instance   connector-class)
-                                     (slot-names t)
-                                     &key
-                                     wire-type
-                                     direction
-                                     (options nil options-supplied?))
+                                      (slot-names t)
+                                      &key
+                                      transport
+                                      direction
+                                      wire-type
+                                      (options nil options-supplied?))
+  (when transport
+    (setf (connector-%transport instance)
+          (let ((transport (first transport)))
+            (typecase transport
+              ((or symbol cons)
+               (service-provider:find-provider 'transport transport))
+              (t
+               transport)))))
+
   (when wire-type
     (setf (slot-value instance 'wire-type) (first wire-type)))
+
   (when direction
     (setf (slot-value instance 'direction) (first direction)))
 
@@ -63,6 +78,12 @@ options."))
 (defmethod closer-mop:validate-superclass ((class      connector-class)
                                            (superclass standard-class))
   t)
+
+(defmethod connector-transport ((connector connector-class))
+  (if (slot-boundp connector 'transport)
+      (slot-value connector 'transport)
+      (some #'connector-transport
+            (closer-mop:class-direct-superclasses connector))))
 
 (defmethod connector-wire-type ((connector connector-class))
   ;; Use wire-type stored in CONNECTOR or retrieve from superclasses
@@ -107,6 +128,7 @@ options."))
                   (values)))))
 
   (define-connector-class-accessor transport-wire-type)
+  (define-connector-class-accessor connector-transport)
   (define-connector-class-accessor connector-direction)
   (define-connector-class-accessor connector-wire-type)
   (define-connector-class-accessor connector-schemas)
