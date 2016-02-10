@@ -57,9 +57,11 @@
 
             (define-basic-connector-test-cases ,class-name
               :initargs           common-args
-              :expected-direction ,(make-keyword direction)
+
+              :expected-schemas   '(:spread)
               :expected-wire-type 'octet-vector
-              :expected-schemas   '(:spread))
+
+              :expected-direction ,(make-keyword direction))
 
             (addtest (,suite-name
                       :documentation

@@ -40,43 +40,41 @@
 ;;; Test utilities
 
 (defun check-connector-class (class
-                              expected-direction
+                              expected-schemas
                               expected-wire-type
-                              expected-schemas)
+                              expected-direction)
   (let ((schemas   (transport-schemas class))
         (wire-type (transport-wire-type class))
         (direction (connector-direction class))
         (options   (connector-options class)))
+    ;; Check schemas.
+    (iter (for schema in schemas)
+          (ensure (typep schema 'keyword)))
+    (ensure-same schemas expected-schemas :test #'set-equal)
+    ;; Check wire-type.
+    (ensure (typep wire-type 'wire-type))
+    (ensure-same wire-type expected-wire-type :test #'type=)
     ;; Check direction.
     (ensure (typep direction 'direction))
     (ensure-same direction expected-direction
                  :test #'eq)
-    ;; Check wire-type
-    (ensure (typep wire-type 'wire-type))
-    (ensure-same wire-type expected-wire-type
-                 :test #'type=)
-    ;; Check schemas.
-    (iter (for schema in schemas)
-          (ensure (typep schema 'keyword)))
-    (ensure-same schemas expected-schemas
-                 :test #'set-equal)
     ;; Check options.
     (iter (for option in options)
           (ensure (typep option 'list)))))
 
-(defun check-connector (connector expected-direction expected-wire-type)
+(defun check-connector (connector
+                        expected-wire-type
+                        expected-direction )
   (let ((wire-type (transport-wire-type connector))
         (direction (connector-direction connector))
         (url       (connector-url connector))
         (rel-url   (connector-relative-url connector "/foo")))
+    ;; Check wire-type.
+    (ensure (typep wire-type 'wire-type))
+    (ensure-same wire-type expected-wire-type :test #'type=)
     ;; Check direction.
     (ensure (typep direction 'direction))
-    (ensure-same direction expected-direction
-                 :test #'eq)
-    ;; Check wire-type
-    (ensure (typep wire-type 'wire-type))
-    (ensure-same wire-type expected-wire-type
-                 :test #'equal)
+    (ensure-same direction expected-direction :test #'eq)
     ;; Check URLs.
     (ensure (typep url 'puri:uri))
     (ensure (typep rel-url 'puri:uri))
@@ -89,9 +87,9 @@
      (name              (%guess-connector-name class))
      (suite-name        (symbolicate class "-ROOT"))
      initargs
-     expected-direction
+     expected-schemas
      expected-wire-type
-     expected-schemas)
+     expected-direction)
   "Define basic test cases for the connector class CLASS.
 
    NAME is a keyword designating TRANSPORT e.g. in calls to
@@ -103,14 +101,14 @@
    INITARGS are initargs which should be used when making connector
    instances.
 
-   EXPECTED-DIRECTION specifies the expected direction of the
+   EXPECTED-SCHEMAS specifies the list of expected schemas of the
    connector class.
 
    EXPECTED-WIRE-TYPE specifies the expected wire-type of the
    connector class.
 
-   EXPECTED-SCHEMAS specifies the list of expected schemas of the
-   connector class."
+   EXPECTED-DIRECTION specifies the expected direction of the
+   connector class. "
   `(progn
      (addtest (,suite-name
           :documentation
@@ -134,9 +132,9 @@
        class
 
        (check-connector-class (find-class ',class)
-                              ,expected-direction
+                              ,expected-schemas
                               ,expected-wire-type
-                              ,expected-schemas))
+                              ,expected-direction))
 
      (addtest (,suite-name
                :documentation
@@ -146,8 +144,9 @@
        construct
 
        (let ((instance (apply #'make-instance ',class ,initargs)))
-         (check-connector
-          instance ,expected-direction ,expected-wire-type)))
+         (check-connector instance
+                          ,expected-wire-type
+                          ,expected-direction)))
 
      (addtest (,suite-name
                :documentation

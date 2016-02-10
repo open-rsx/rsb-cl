@@ -14,9 +14,10 @@
    "Root unit tests suite for the `in-pull-connector' class."))
 
 (define-basic-connector-test-cases in-pull-connector
-    :expected-direction :in-pull
-    :expected-wire-type 't
-    :expected-schemas   '(:inprocess))
+  :expected-schemas   '(:inprocess)
+  :expected-wire-type 't
+
+  :expected-direction :in-pull)
 
 ;;; `in-push-connector'
 
@@ -26,9 +27,10 @@
    "Root unit tests suite for the `in-push-connector' class."))
 
 (define-basic-connector-test-cases in-push-connector
-    :expected-direction :in-push
-    :expected-wire-type 't
-    :expected-schemas   '(:inprocess))
+  :expected-schemas   '(:inprocess)
+  :expected-wire-type 't
+
+  :expected-direction :in-push)
 
 ;;; `out-connector'
 
@@ -38,6 +40,7 @@
    "Root unit tests suite for the `out-connector' class."))
 
 (define-basic-connector-test-cases out-connector
-    :expected-direction :out
-    :expected-wire-type 't
-    :expected-schemas   '(:inprocess))
+  :expected-schemas   '(:inprocess)
+  :expected-wire-type 't
+
+  :expected-direction :out)

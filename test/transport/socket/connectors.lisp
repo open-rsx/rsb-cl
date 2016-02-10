@@ -45,9 +45,10 @@
              :initargs           (list :host      "localhost"
                                        :port      *next-port*
                                        :converter :fundamental-null)
-             :expected-direction ,(make-keyword direction)
+             :expected-schemas   '(:socket)
              :expected-wire-type 'octet-vector
-             :expected-schemas   '(:socket))
+
+             :expected-direction ,(make-keyword direction))
 
            (addtest (,suite-name
                      :documentation
