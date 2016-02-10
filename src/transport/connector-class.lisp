@@ -92,6 +92,25 @@ options."))
      :key      #'first
      :from-end t)))
 
+;;; Delegations
+
+(macrolet ((define-connector-class-accessor (name)
+             `(progn
+                (defmethod ,name ((connector standard-object))
+                  ;; Default behavior is to retrieve the value from
+                  ;; the class of CONNECTOR.
+                  (,name (class-of connector)))
+
+                (defmethod ,name ((connector class))
+                  ;; Stop if we hit a class which is not a
+                  ;; `connector-class'.
+                  (values)))))
+
+  (define-connector-class-accessor connector-direction)
+  (define-connector-class-accessor connector-wire-type)
+  (define-connector-class-accessor connector-schemas)
+  (define-connector-class-accessor connector-options))
+
 ;;; Utility functions
 
 (defun+ %maybe-expand-option (class (&whole option name type &rest &ign))
