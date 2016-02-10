@@ -43,9 +43,9 @@
                               expected-direction
                               expected-wire-type
                               expected-schemas)
-  (let ((direction (connector-direction class))
+  (let ((schemas   (connector-schemas class))
         (wire-type (connector-wire-type class))
-        (schemas   (connector-schemas class))
+        (direction (connector-direction class))
         (options   (connector-options class)))
     ;; Check direction.
     (ensure (typep direction 'direction))
@@ -65,9 +65,8 @@
           (ensure (typep option 'list)))))
 
 (defun check-connector (connector expected-direction expected-wire-type)
-  ;; Check direction.
-  (let ((direction (connector-direction connector))
-        (wire-type (connector-wire-type connector))
+  (let ((wire-type (connector-wire-type connector))
+        (direction (connector-direction connector))
         (url       (connector-url connector))
         (rel-url   (connector-relative-url connector "/foo")))
     ;; Check direction.
