@@ -1,13 +1,10 @@
 ;;;; annotating.lisp --- Annotates unconverted wire-data with wire-schema
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter)
-
-(defmethod find-converter-class ((spec (eql :annotating)))
-  (find-class 'annotating))
 
 (defclass annotating ()
   ()
@@ -15,8 +12,8 @@
    "This converter returns the unconverted wire-data annotated with
     the wire-schema."))
 
-#+no (service-provider:register-provider/class
-      'converter :annotating :class 'annotating)
+(service-provider:register-provider/class
+ 'converter :annotating :class 'annotating)
 
 (defstruct (annotated
              (:constructor make-annotated (wire-data wire-schema))
