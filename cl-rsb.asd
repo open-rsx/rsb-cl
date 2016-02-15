@@ -134,7 +134,7 @@
                 (:version :utilities.print-items         "0.1")
                 (:version :utilities.binary-dump         "0.1")
 
-                :bordeaux-threads
+                (:version :bordeaux-threads              "0.8.4")
                 (:version :lparallel                     "2.3.2")
                 :trivial-garbage
                 :closer-mop

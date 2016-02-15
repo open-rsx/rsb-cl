@@ -73,47 +73,28 @@
             (future-failure-tag value)
             :done)))))
 
-(defmethod future-result :around ((future future)
-                                  &key
-                                  timeout
-                                  (error? t))
-  (check-type timeout (or null timeout))
-
-  (cond
-    ;; If TIMEOUT has not been supplied, avoid the overhead and just
-    ;; call the next method.
-    ((not timeout)
-     (call-next-method))
-
-    ;; If TIMEOUT has been supplied and errors should be signaled,
-    ;; only wait for the specified amount of time and let the timeout
-    ;; condition through, should it be signaled.
-    (error?
-     (bt:with-timeout (timeout)
-       (call-next-method)))
-
-    ;; If TIMEOUT has been supplied, but error signaling is not
-    ;; desired, handle timeout conditions turning them into result
-    ;; values.
-    (t
-     (handler-case
-         (bt:with-timeout (timeout)
-           (call-next-method))
-       (bt:timeout (condition)
-         (declare (ignore condition))
-         (values nil :timeout))))))
-
 (defmethod future-result ((future future)
                           &key
+                          timeout
                           (error? t)
                           &allow-other-keys)
+  (check-type timeout (or null timeout))
+
   (let+ (((&structure-r/o future- (lock %lock) (condition %condition))
           future)
+         ((&flet timeout ()
+            (if error?
+                #+sbcl (error 'sb-ext:timeout :seconds timeout)
+                ; #-sbcl #-sbcl #.(error "not implemented")
+                (return-from future-result (values nil :timeout)))))
          (value (progn
                   (bt:with-lock-held (lock)
                     (iter (until (slot-boundp future 'result))
-                          (bt:condition-wait condition lock)))
+                          (unless (bt:condition-wait
+                                   condition lock :timeout timeout)
+                            (timeout))))
                   (slot-value future 'result))))
+    #+later (declare (dynamic-extent #'timeout))
     ;; Return the result stored in VALUE or signal an error, depending
     ;; on ERROR?
     (cond
