@@ -1,6 +1,6 @@
 ;;;; connector-mixins.lisp --- Mixin for connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -308,8 +308,9 @@ thread."))
                (handler-case
                    (when
                        #-sbcl (bt:with-timeout (2) (bt:join-thread thread) t)
-                       #+sbcl (not (eq (sb-thread:join-thread
-                                        thread :timeout 2 :default :timeout)
+                       #+sbcl (not (eq (nth-value
+                                        1 (sb-thread:join-thread
+                                           thread :timeout 2 :default nil))
                                        :timeout))
                        (return))
                  #-sbcl (bt:timeout ())
