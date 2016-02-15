@@ -141,6 +141,19 @@
            :direction direction
            args)))
 
+;;; `connector-provider'
+
+(defclass connector-provider (service-provider:class-provider)
+  ()
+  (:documentation
+   "Provider class for connector classes."))
+
+(defmethod shared-initialize :after ((instance   connector-provider)
+                                     (slot-names t)
+                                     &key)
+  (closer-mop:finalize-inheritance
+   (service-provider:provider-class instance)))
+
 ;;; Registration
 
 (defun register-transport (name &rest initargs
@@ -155,5 +168,5 @@
   (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
   (service-provider::register-provider
    (service-provider:find-provider 'transport transport-name)
-   direction 'service-provider:class-provider
+   direction 'connector-provider
    `(:class ,class-name)))
