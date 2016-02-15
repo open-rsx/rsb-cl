@@ -1,6 +1,6 @@
 ;;;; future.lisp --- A simple implementation of the future pattern.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -21,42 +21,47 @@
               :writer   (setf future-%result)
               :documentation
               "Stores the result of the operation associated to the
-future. Remains unbound until the operation completes successfully or
-fails.")
+               future. Remains unbound until the operation completes
+               successfully or fails.")
    (lock      :reader   future-%lock
               :initform (bt:make-lock "Future lock")
               :documentation
               "Stores the lock that protects access to the result
-slot.")
+               slot.")
    (condition :reader   future-%condition
               :initform (bt:make-condition-variable
                          :name "Future condition")
               :documentation
               "Stores the condition variable which can be used to wait
-for the result slot to be set."))
+               for the result slot to be set."))
   (:documentation
    "Instances of this class represent results of operations that are
-still in progress when the respective instances are made. Instances
-can therefore be considered placeholders for the actual results which
-may or may not (when the producing operation fails) become available
-later.
+    still in progress when the respective instances are
+    made. Instances can therefore be considered placeholders for the
+    actual results which may or may not (when the producing operation
+    fails) become available later.
 
-Interaction with `future' instances is done using methods on the
-following protocol functions:
-+ `future-done?' :: Check whether the associated operation finished or
-    failed.
-+ `future-result' :: Obtained the result, potentially waiting for it
-    to become available.
-+ `(setf future-result)' :: Supply a result for the `future' instance.
-+ `(setf future-error)' :: Indicate that the operation associated to
-    the `future' instance failed.
+    Interaction with `future' instances is done using methods on the
+    following protocol functions:
 
-It is possible to supply values for the result, lock and condition
-slots of new `future' instance using initargs. The former may be
-useful when a result is immediately available but the future protocol
-has to be obeyed. The latter two may be useful when the lock and
-condition objects have to be available to some code outside the future
-or for performance reasons."))
+    + `future-done?' :: Check whether the associated operation
+      finished or failed.
+
+    + `future-result' :: Obtained the result, potentially waiting for
+      it to become available.
+
+    + `(setf future-result)' :: Supply a result for the `future'
+      instance.
+
+    + `(setf future-error)' :: Indicate that the operation associated
+      to the `future' instance failed.
+
+    It is possible to supply values for the result, lock and condition
+    slots of new `future' instance using initargs. The former may be
+    useful when a result is immediately available but the future
+    protocol has to be obeyed. The latter two may be useful when the
+    lock and condition objects have to be available to some code
+    outside the future or for performance reasons."))
 
 (defmethod future-done? ((future future))
   (bt:with-lock-held ((future-%lock future))
@@ -102,8 +107,8 @@ or for performance reasons."))
                           &key
                           (error? t)
                           &allow-other-keys)
-  (let+ (((&accessors-r/o (lock      future-%lock)
-                          (condition future-%condition)) future)
+  (let+ (((&structure-r/o future- (lock %lock) (condition %condition))
+          future)
          (value (progn
                   (bt:with-lock-held (lock)
                     (iter (until (slot-boundp future 'result))

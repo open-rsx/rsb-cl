@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,7 +31,7 @@
             :reader   remote-call-error-request
             :documentation
             "Stores the request object that was passed to the method
-in the failed call."))
+             in the failed call."))
   (:default-initargs
    :method  (missing-required-initarg 'remote-call-error :method)
    :request (missing-required-initarg 'remote-call-error :request))

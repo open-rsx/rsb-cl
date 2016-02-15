@@ -1,6 +1,6 @@
 ;;;; local-server.lisp --- The local-server class is used to provide a service.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,14 +20,14 @@
              :reader   method-callback
              :documentation
              "Stores the function that is called to perform the actual
-processing of the method.")
+              processing of the method.")
    (argument :initarg  :argument
              :type     argument-style
              :reader   method-argument
              :initform :payload
              :documentation
              "Stores the kind of argument (event vs. payload) that
-should be passed to the callback function."))
+              should be passed to the callback function."))
   (:default-initargs
    :callback (missing-required-initarg 'local-method :callback))
   (:documentation

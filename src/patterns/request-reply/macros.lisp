@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Convenience macros provided by the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,21 +32,21 @@
 
 (defmacro with-methods ((server) methods &body body)
   "Execute body with the methods defined by METHODS added to
-SERVER. METHODS is a list of items of the form
+   SERVER. METHODS is a list of items of the form
 
-  \(NAME ([ARG REQUEST-TYPE]) BODY)
+     \(NAME ([ARG REQUEST-TYPE]) BODY)
 
-where NAME is the name of the method, ARG is a symbol which will be
-bound to the request data during the execution of the method body
-BODY.
+   where NAME is the name of the method, ARG is a symbol which will be
+   bound to the request data during the execution of the method body
+   BODY.
 
-REQUEST-TYPE specifies the type of acceptable requests. If
-REQUEST-TYPE is the keyword :event, BODY is called with ARG bound to
-the request event (instead of just the payload).
+   REQUEST-TYPE specifies the type of acceptable requests. If
+   REQUEST-TYPE is the keyword :event, BODY is called with ARG bound
+   to the request event (instead of just the payload).
 
-If ARG and REQUEST-TYPE are omitted, the method does not accept
-arguments and consequently BODY cannot access any argument binding
-variable."
+   If ARG and REQUEST-TYPE are omitted, the method does not accept
+   arguments and consequently BODY cannot access any argument binding
+   variable."
   (let+ (((&flet+ process-one ((name (&optional arg (request-type t))
                                 &rest body))
             (let+ ((name/thunk  (symbolicate name '#:-method-body))

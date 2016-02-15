@@ -1,6 +1,6 @@
 ;;;; remote-server.lisp --- The remote-server class is used to access a service.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -140,8 +140,8 @@
                          (block?  t)
                          timeout
                          &allow-other-keys)
-  "Establish restarts and take care retrieving future results if
-BLOCK? is non-nil."
+  ;; Establish restarts and take care retrieving future results if
+  ;; BLOCK? is non-nil.
   (check-type timeout (or null timeout))
 
   (iter (restart-case
@@ -210,13 +210,13 @@ BLOCK? is non-nil."
 (declaim (ftype (function (event-id) (cons sequence-number string)) %event-id->key))
 
 (defun %event-id->key (event-id)
-  "Return an `equall'-comparable object representing EVENT-ID."
+  ;; Return an `equal'-comparable object representing EVENT-ID.
   (cons (cdr event-id) (princ-to-string (car event-id))))
 
 (defun %call-result->future (method request event return future)
-  "Store data from METHOD, REQUEST and EVENT in FUTURE taking into
-account whether EVENT represents an error. Return the modified
-FUTURE."
+  ;; Store data from METHOD, REQUEST and EVENT in FUTURE taking into
+  ;; account whether EVENT represents an error. Return the modified
+  ;; FUTURE.
   (if (meta-data event :|rsb:error?|)
       (setf (future-error future)
             (list 'remote-method-execution-error
