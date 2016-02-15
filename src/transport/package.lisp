@@ -61,6 +61,7 @@
    #:connector-url                  ; work on connector instances
    #:connector-relative-url
 
+   #:connector-direct-options
    #:connector-options)
 
   ;; Transport and connector registration protocol

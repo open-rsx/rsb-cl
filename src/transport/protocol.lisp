@@ -64,16 +64,36 @@
 
     CONNECTOR can be a connector class or a connector instance."))
 
+(defgeneric connector-direct-options (connector)
+  (:documentation
+   "Return a description of the options defined in CONNECTOR.
+
+    The returned description is a list of \"direct\" options, i.e.
+    defined in CONNECTOR but not its superclasses. Items are of the
+    form
+
+      (NAME TYPE &key DEFAULT DESCRIPTION)
+
+    where NAME is a keyword which names the option, TYPE is the type
+    of acceptable values of the option, DEFAULT is a form that
+    computes a default value and description is a description of the
+    option.
+
+    CONNECTOR can be a connector class or a connector instance."))
+
 (defgeneric connector-options (connector)
   (:documentation
-   "Return a description of the options accepted connector.
+   "Return a description of the options accepted by CONNECTOR.
 
-    The returned description is a list of items of the form
+    The returned description is a list of \"transitive\" options,
+    i.e. accumulated along superclasses. Items are of the form
 
-      (NAME TYPE &optional DOCUMENTATION)
+      (NAME TYPE &key DEFAULT DESCRIPTION)
 
-    where NAME is a keyword which names the option and TYPE is the
-    type of acceptable values of the option.
+    where NAME is a keyword which names the option, TYPE is the type
+    of acceptable values of the option, DEFAULT is a form that
+    computes a default value and description is a description of the
+    option.
 
     CONNECTOR can be a connector class or a connector instance."))
 

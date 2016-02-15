@@ -48,8 +48,8 @@
   (when (or options-supplied? (not (slot-boundp instance 'options)))
     (setf (slot-value instance 'options) options)))
 
-(defmethod closer-mop:compute-default-initargs ((class connector-class))
-  ;; Added initargs for options with &slot specification.
+(defmethod closer-mop:class-direct-default-initargs ((class connector-class))
+  ;; Add initargs for options with &slot specification.
   (reduce (lambda+ (default-initargs
                     (name &ign
                      &key (default t default-supplied?) &allow-other-keys))
@@ -58,7 +58,7 @@
                              (compile nil `(lambda () ,default)))
                        (remove name default-initargs :key #'first))
                 default-initargs))
-          (connector-options class)
+          (connector-direct-options class)
           :initial-value (call-next-method)))
 
 (defmethod closer-mop:validate-superclass ((class      connector-class)
@@ -71,18 +71,20 @@
       (some #'connector-transport
             (closer-mop:class-direct-superclasses connector))))
 
+(defmethod connector-direct-options ((connector connector-class))
+  (mapcar (curry #'%maybe-expand-option connector)
+          (slot-value connector 'options)))
+
 (defmethod connector-options ((connector connector-class))
   ;; Retrieve options from CONNECTOR and its transitive super-classes.
   ;; Option definitions in subclasses take precedence over definitions
   ;; in super-classes.
-  (let+ (((&slots options) connector))
-    (map-into options (curry #'%maybe-expand-option connector) options)
-    (remove-duplicates
-     (append options
-             (mappend #'connector-options
-                      (closer-mop:class-direct-superclasses connector)))
-     :key      #'first
-     :from-end t)))
+  (remove-duplicates
+   (append (connector-direct-options connector)
+           (mappend #'connector-options
+                    (closer-mop:class-direct-superclasses connector)))
+   :key      #'first
+   :from-end t))
 
 ;;; Delegations
 
@@ -114,8 +116,8 @@
 ;;; Utility functions
 
 (defun+ %maybe-expand-option (class (&whole option name type &rest &ign))
-  "Potentially expand the options description OPTION using information
-from CLASS."
+  ;; Potentially expand the options description OPTION using
+  ;; information from CLASS.
   (or (unless (eq type '&slot)
         option)
       (when-let ((slot (find name (closer-mop:class-direct-slots class)
