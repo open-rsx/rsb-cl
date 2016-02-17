@@ -70,8 +70,8 @@
              (:constructor make-empty-node-state ())
              (:predicate   nil)
              (:copier      nil))
-  (value +no-value+                        :read-only t)
-  (edges ()         :type scope-node-edges :read-only t))
+  (value +no-value+                                           :read-only t)
+  (edges (make-empty-scope-node-edges) :type scope-node-edges :read-only t))
 
 (declaim (inline make-node))
 (defstruct (node
