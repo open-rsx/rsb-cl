@@ -1,6 +1,6 @@
 ;;;; builder.lisp --- Tests for model (un)builder.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -42,8 +42,9 @@
 
 (defun check-un-build-calls (builder atom-type cases)
   (mapc (lambda+ ((object expected-calls))
-          (let ((calls (record-un-build-calls/peeking
-                        builder atom-type object)))
+          (let+ (((&values &ign calls)
+                  (record-un-build-calls/peeking
+                   #'bp:walk-nodes builder atom-type object)))
             (ensure-same calls expected-calls :test #'equal)))
         cases))
 
