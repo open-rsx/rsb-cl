@@ -13,7 +13,17 @@
 
 ;;; Scope trie data structure
 ;;;
-;;; A tree of nodes of the form
+;;; A trie using the components of scopes:
+;;;
+;;;   /          ->  %NO-VALUE
+;;;   ├─foo      ->  %NO-VALUE
+;;;   │ ├─bar    ->  "/foo/bar"
+;;;   │ └─baz    ->  "/foo/baz"
+;;;   └─fez      ->  %NO-VALUE
+;;;     ├─whoop  ->  "/fez/whoop"
+;;;     └─moo    ->  "/fez/moo"
+;;;
+;;; The trie is represented as a tree of nodes of the form
 ;;;
 ;;;   ┌──────────┐
 ;;;   │ node     │     ┌──────────┐
@@ -24,7 +34,7 @@
 ;;;                    └──────────┘     └──────────────────┘
 ;;;
 ;;; The state is separate from the node to allow compare-and-swapping
-;;; the value and edges simultaneously. scope-node-edges is an
+;;; the value and edges simultaneously. `scope-node-edges' is an
 ;;; abstract data structure mapping scope components to child nodes of
 ;;; the node.
 
