@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol for event filtering.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,8 +20,7 @@
 
 ;;; Payload matching protocol
 
-(defgeneric payload-matches? (filter payload
-                              &key &allow-other-keys)
+(defgeneric payload-matches? (filter payload)
   (:documentation
    "Return non-nil if PAYLOAD matches the criteria of FILTER."))
 

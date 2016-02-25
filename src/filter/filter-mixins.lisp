@@ -1,6 +1,6 @@
 ;;;; filter-mixins.lisp --- Mixin classes for filters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -70,7 +70,6 @@
     (:cannot-tell (call-next-method))
     (t            t)))
 
-(defmethod payload-matches? ((filter payload-matching-mixin) (payload t)
-                             &key &allow-other-keys)
+(defmethod payload-matches? ((filter payload-matching-mixin) (payload t))
   ;; The default behavior is not to decide based on the payload.
   :cannot-tell)
