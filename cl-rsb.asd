@@ -336,7 +336,9 @@
                  :components ((:file       "package")
                               (:file       "protocol")
                               (:file       "composite-filter")
+
                               (:file       "scope-filter")
+                              (:file       "type-filter")
                               (:file       "method-filter")
                               (:file       "meta-data-filter")))
 
