@@ -1,4 +1,4 @@
-;;;; out-connector.lisp ---
+;;;; out-connector.lisp --- Out-direction connector for Spread transport.
 ;;;;
 ;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
@@ -21,7 +21,7 @@
   (:options
    (:max-fragment-size &slot))
   (:documentation
-   "A connector for sending data over spread."))
+   "A connector for sending data over Spread."))
 
 (register-connector :spread :out 'out-connector)
 
@@ -39,15 +39,17 @@
 
 (defmethod event->notification ((connector out-connector)
                                 (event     event))
-  "Delegate conversion to `event->notifications'. The primary purpose
-of this method is performing the conversion with restarts installed."
+  ;; Delegate conversion to `event->notifications'. The primary
+  ;; purpose of this method is performing the conversion with restarts
+  ;; installed.
   (event->notifications
    connector event (connector-max-fragment-size connector)))
 
 (defmethod send-notification ((connector                out-connector)
                               (groups-and-notifications cons))
-  "Send each notification using `send-message'. The primary purpose of
-this method is sending the notifications with restarts installed."
+  ;; Send each notification using `send-message'. The primary purpose
+  ;; of this method is sending the notifications with restarts
+  ;; installed.
   (let+ (((&accessors-r/o (connection connector-connection)) connector)
          ((group-names . notifications) groups-and-notifications))
     (iter (for notification in notifications)

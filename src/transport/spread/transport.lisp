@@ -1,4 +1,4 @@
-;;;; connector.lisp --- Superclass for spread connectors.
+;;;; transport.lisp --- Spread transport.
 ;;;;
 ;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;

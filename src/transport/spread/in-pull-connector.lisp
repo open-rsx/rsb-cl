@@ -12,8 +12,7 @@
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
-   "This class implements pull-style event receiving for the Spread
-transport."))
+   "Pull-style event receiving for the Spread transport."))
 
 (register-connector :spread :in-pull 'in-pull-connector)
 

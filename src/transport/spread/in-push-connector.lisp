@@ -20,8 +20,7 @@
   (:metaclass connector-class)
   (:direction :in-push)
   (:documentation
-   "This connector class implements push-style event receiving for the
-Spread transport."))
+   "Push-style event receiving for the Spread transport."))
 
 (register-connector :spread :in-push 'in-push-connector)
 
@@ -55,6 +54,6 @@ Spread transport."))
   (setf (connector-%state connector) :inactive))
 
 (defmethod receive-messages :around ((connector in-push-connector))
-  "Create a thread-local scope->groups cache for this connector."
+  ;; Create a thread-local scope->groups cache for this connector.
   (let ((*scope->groups-cache* (make-scope->groups-cache)))
     (call-next-method)))

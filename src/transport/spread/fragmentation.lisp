@@ -1,6 +1,6 @@
 ;;;; fragmentation.lisp --- Fragmentation and assembly of data/notifications.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -41,6 +41,7 @@
                :documentation
                "Ordered fragments that have been received so far."))
   (:default-initargs
+   :id            (missing-required-initarg 'assembly :id)
    :num-fragments (missing-required-initarg 'assembly :num-fragments))
   (:documentation
    "Instances of this class represent assembly processes for events
@@ -176,9 +177,9 @@ instances have to reach before they can be pruned."))
   (:default-initargs
    :age-limit 10)
   (:documentation
-   "This instances of this subclass of `assembly-pool' manage a thread
-that periodically deletes partial assemblies which are older than
-MIN-AGE."))
+   "Instances of this subclass of `assembly-pool' manage a thread that
+    periodically deletes partial assemblies which are older than
+    a given threshold."))
 
 (defmethod initialize-instance :after ((instance pruning-assembly-pool)
                                        &key
@@ -203,7 +204,7 @@ MIN-AGE."))
     (call-next-method)))
 
 (defun delete-partial-assemblies (pool min-age)
-  ;; Find `assembly' instance in POOL whose age is at least MIN-AGE
+  ;; Find `assembly' instances in POOL whose age is at least MIN-AGE
   ;; and delete them.
   (let+ (((&structure-r/o assembly-pool- (assemblies %assemblies)
                                          (lock       %lock))

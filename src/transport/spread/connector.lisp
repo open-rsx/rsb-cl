@@ -11,8 +11,9 @@
   ((connection :initarg  :connection
                :type     connection
                :reader   connector-connection
+               :accessor connector-%connection
                :documentation
-               ""))
+               "Stores the connection used by this connector."))
   (:metaclass connector-class)
   (:transport :spread)
   (:options
@@ -39,8 +40,8 @@ connectors."))
                                         connection
                                         name
                                         port)
-  "Make sure that at least one of CONNECTION, NAME and PORT is
-supplied."
+  ;; Make sure that at least one of CONNECTION, NAME and PORT is
+  ;; supplied.
   (unless (or connection name port)
     (missing-required-initarg
      'connector :either-connection-or-name-or-port)))
@@ -51,21 +52,16 @@ supplied."
                                      name
                                      host
                                      port)
-  (let+ (((&values host port)
-          (cond
-            (name            (network.spread:parse-daemon-name name))
-            ((and host port) (values host port))
-            (port            (values nil  port))))
-         (name (format nil "~D~@[@~A~]" port host))
-         ((&accessors-r/o (uri connector-url)) instance))
+  (let+ (((&values name host port) (normalize-daemon-endpoint name host port))
+         ((&structure-r/o connector- url) instance))
     (when host
-      (setf (puri:uri-host uri) host))
-    (setf (puri:uri-port uri) port)
+      (setf (puri:uri-host url) host))
+    (setf (puri:uri-port url) port)
 
     ;; Unless a connection has been supplied, connect to the spread
     ;; daemon designated by NAME.
     (unless connection
-      (setf (slot-value instance 'connection)
+      (setf (connector-%connection instance)
             (make-instance 'connection :name name)))))
 
 (defmethod notify ((connector connector)

@@ -1,6 +1,6 @@
-;;;; util.lisp --- Utility functions used in the spread backend.
+;;;; util.lisp --- Utility functions used in the transport.spread module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,6 +11,20 @@
 (defun internal-real-time-in-seconds ()
   "Return the current \"internal\" time in seconds."
   (/ (get-internal-real-time) internal-time-units-per-second))
+
+;;; Daemon name
+
+(defun normalize-daemon-endpoint (name host port)
+  "As three values return normalized daemon name, host and port.
+
+   Exactly one of NAME and PORT has to be non-nil."
+  (let+ (((&values host port)
+          (cond
+            (name            (network.spread:parse-daemon-name name))
+            ((and host port) (values host port))
+            (port            (values nil  port))))
+         (name (format nil "~D~@[@~A~]" port host)))
+    (values name host port)))
 
 ;;; Scope -> spread group mapping
 
