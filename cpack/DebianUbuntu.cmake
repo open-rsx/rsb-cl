@@ -20,7 +20,7 @@ else()
     set(PREFIX "\\\${CMAKE_INSTALL_PREFIX}/usr")
 endif()
 foreach(NAME ${ASD_FILES})
-    set(COMMANDS "${COMMANDS} && ln -fs \\\"../source/${CMAKE_PROJECT_NAME}/${NAME}\\\" \\\"${PREFIX}/share/common-lisp/systems/${NAME}\\\"")
+    set(COMMANDS "${COMMANDS} && ln -fs \\\"../source/${CMAKE_PROJECT_NAME}${VERSION_SUFFIX}/${NAME}\\\" \\\"${PREFIX}/share/common-lisp/systems/${NAME}\\\"")
 endforeach()
 set(CPACK_INSTALL_COMMANDS "sh -c 'mkdir -p \\\"${PREFIX}/share/common-lisp/systems\\\" ${COMMANDS}'")
 
