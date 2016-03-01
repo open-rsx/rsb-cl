@@ -1,6 +1,6 @@
 ;;;; configuration.lisp --- Configuration of RSB participants.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -163,13 +163,7 @@ CONFIG-FILES. Default:
 
 ;;; Converter configuration
 
-(defun default-converters (&key (config *configuration*))
-  "Return an alist of default converters for particular wire-types
-   with items of the form (WIRE-TYPE . CONVERTER).
-
-   If supplied, CONFIG specifies the configuration that should be used
-   to determine the set of default converters. if CONFIG is not
-   supplied, the value of `*configuration*' is used."
+(defvar *default-converters*
   '((nibbles:octet-vector . (:fundamental-void
                              :fundamental-bool
                              :fundamental-int64
@@ -182,6 +176,15 @@ CONFIG-FILES. Default:
                              :fundamental-bytes
                              :fundamental-scope
                              :protocol-buffer))))
+
+(defun default-converters (&key (config *configuration*))
+  "Return an alist of default converters for particular wire-types
+   with items of the form (WIRE-TYPE . CONVERTER).
+
+   If supplied, CONFIG specifies the configuration that should be used
+   to determine the set of default converters. if CONFIG is not
+   supplied, the value of `*configuration*' is used."
+  *default-converters*)
 
 (defun default-converter (wire-type &key (config *configuration*))
   "Return the default converter for WIRE-TYPE.
