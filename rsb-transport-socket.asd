@@ -4,24 +4,19 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:rsb-system)
-    (load (merge-pathnames "rsb.asd" *load-truename*))
-    (values))
-
-(cl:in-package #:rsb-system)
-
 (defsystem "rsb-transport-socket"
   :description "Socket-based transport for RSB."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "usocket"      "0.6.4") ; for `socket-shutdown'
                 "cl-protobuf"
 
-                (:version "rsb"          #.(version/string :revision? t))
-                (:version "rsb-protocol" #.(version/string :revision? t)))
+                (:version "rsb"          (:read-file-form "version-string.sexp"))
+                (:version "rsb-protocol" (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "socket"
                  :pathname   "src/transport/socket"
@@ -62,12 +57,13 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "lift"                 "1.7.1")
 
-                (:version "rsb-transport-socket" #.(version/string))
+                (:version "rsb-transport-socket" (:read-file-form "version-string.sexp"))
 
-                (:version "rsb/test"             #.(version/string)))
+                (:version "rsb/test"             (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "socket"
                  :pathname   "test/transport/socket"

@@ -4,27 +4,22 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:rsb-system)
-    (load (merge-pathnames "rsb.asd" *load-truename*))
-    (values))
-
-(cl:in-package #:rsb-system)
-
 (defsystem "rsb-transport-spread"
   :description "RSB transport based on the Spread group communication system."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ("nibbles"
                 "ironclad"
                 "cl-protobuf"
 
                 (:version "network.spread" "0.3")
 
-                (:version "rsb"            #.(version/string :revision? t))
-                (:version "rsb-protocol"   #.(version/string :revision? t)))
+                (:version "rsb"            (:read-file-form "version-string.sexp"))
+                (:version "rsb-protocol"   (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "spread"
                  :pathname   "src/transport/spread"
@@ -55,13 +50,14 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "lift"                 "1.7.1")
 
-                (:version "rsb"                  #.(version/string))
-                (:version "rsb-transport-spread" #.(version/string))
+                (:version "rsb"                  (:read-file-form "version-string.sexp"))
+                (:version "rsb-transport-spread" (:read-file-form "version-string.sexp"))
 
-                (:version "rsb/test"             #.(version/string)))
+                (:version "rsb/test"             (:read-file-form "version-string.sexp")))
 
   :properties  ((:spread-port  . #.(or (let ((value (uiop:getenv "SPREAD_PORT")))
                                          (when value (read-from-string value)))

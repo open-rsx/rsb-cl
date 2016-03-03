@@ -4,27 +4,21 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:rsb-system)
-    (load (merge-pathnames "rsb.asd" *load-truename*))
-    (values))
-
-(cl:in-package #:rsb-system)
-
 (defsystem "rsb-builder"
   :description "Builder support for RSB objects such as events."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ("alexandria"
                 "let-plus"
 
                 (:version "architecture.builder-protocol"                   "0.3")
                 (:version "architecture.builder-protocol.universal-builder" "0.3")
 
-                (:version "rsb"                                             #.(version/string)))
-
+                (:version "rsb"                                             (:read-file-form "version-string.sexp")))
   :components  ((:module     "src"
                  :components ((:file       "builder"))))
 
@@ -36,15 +30,15 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "lift"                               "1.7.1")
 
                 (:version "architecture.builder-protocol/test" "0.3")
 
-                (:version "rsb-builder"                        #.(version/string))
+                (:version "rsb-builder"                        (:read-file-form "version-string.sexp"))
 
-                (:version "rsb/test"                           #.(version/string)))
-
+                (:version "rsb/test"                           (:read-file-form "version-string.sexp")))
   :components  ((:module     "test"
                  :components ((:file       "builder"))))
 

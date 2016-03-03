@@ -23,25 +23,6 @@
 
 ;;; Version stuff
 
-(defparameter +version-major+ 0
-  "Major component of version number.")
-
-(defparameter +version-minor+ 18
-  "Minor component of version number.")
-
-(let* ((version-file (merge-pathnames "version.sexp" *load-truename*))
-       stream)
-  (when (probe-file version-file)
-    (setf stream (open version-file)))
-
-  (defparameter +version-revision+ (if stream (read stream) 0)
-    "Revision component of version number.")
-
-  (defparameter +version-commit+ (when stream (read stream))
-    "Commit component of version number.")
-
-  (when stream (close stream)))
-
 (defun version/list (&key
                      (revision? t)
                      commit?)
@@ -53,22 +34,21 @@
 
    COMMIT? controls whether COMMIT should be included. Default
    behavior is to not include COMMIT."
-  (append (list +version-major+ +version-minor+)
-          (when revision? (list +version-revision+))
-          (when (and commit? +version-commit+)
-            (list +version-commit+))))
+  (declare (ignore revision? commit?))
+  (error "should not be called"))
 
-(defun version/string (&rest args
-                       &key
-                       revision?
-                       commit?)
+(defun version/string (&key revision? commit?)
   "Return a version string of the form
    \"MAJOR.MINOR[.REVISION[-.COMMIT]]\" where REVISION and COMMIT are
    optional.
 
    See `version/list' for details on keyword parameters."
   (declare (ignore revision? commit?))
-  (format nil "~{~A.~A~^.~A~^-~A~}" (apply #'version/list args)))
+  (component-version (find-system :rsb)))
+
+#+sbcl (declaim (sb-ext:deprecated :late ("rsb" "0.18")
+                                   (function version/list)
+                                   (function version/string)))
 
 ;;; Settings
 
@@ -126,7 +106,8 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ("alexandria"
                 "split-sequence"
                 "iterate"
@@ -294,11 +275,12 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "lift"                    "1.7.1")
 
-                (:version "rsb"                     #.(version/string))
-                (:version "rsb-transport-inprocess" #.(version/string)))
+                (:version "rsb"                     (:read-file-form "version-string.sexp"))
+                (:version "rsb-transport-inprocess" (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "test"
                  :serial     t

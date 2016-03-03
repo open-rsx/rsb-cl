@@ -4,20 +4,15 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:rsb-system)
-    (load (merge-pathnames "rsb.asd" *load-truename*))
-    (values))
-
-(cl:in-package #:rsb-system)
-
 (defsystem "rsb-converter-protocol-buffer"
   :description "Converter for Google protocol buffer payloads."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
-  :depends-on  ((:version "rsb" #.(version/string :revision? t))
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
+  :depends-on  ((:version "rsb" (:read-file-form "version-string.sexp"))
                 "cl-protobuf")
 
   :components  ((:module     "converter"

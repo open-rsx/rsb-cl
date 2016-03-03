@@ -4,26 +4,21 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:rsb-system)
-    (load (merge-pathnames "rsb.asd" *load-truename*))
-    (values))
-
-(cl:in-package #:rsb-system)
-
 (defsystem "rsb-introspection"
   :description "Introspection support for RSB."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
-  :defsystem-depends-on ("cl-protobuf")
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version"
+                         "cl-protobuf")
   :depends-on  ("utilities.print-items"
                 (:version "uiop"                       "3") ; for portable platform information
 
-                (:version "rsb"                        #.(version/string))
-                (:version "rsb-model"                  #.(version/string))
-                (:version "rsb-patterns-request-reply" #.(version/string)))
+                (:version "rsb"                        (:read-file-form "version-string.sexp"))
+                (:version "rsb-model"                  (:read-file-form "version-string.sexp"))
+                (:version "rsb-patterns-request-reply" (:read-file-form "version-string.sexp")))
 
   :components  ((:protocol-buffer-descriptor-directory "protocol"
                  :pathname   #.rsb-system:+protocol-directory+
@@ -74,13 +69,14 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "lift"              "1.7.1")
 
-                (:version "rsb-introspection" #.(version/string))
+                (:version "rsb-introspection" (:read-file-form "version-string.sexp"))
 
-                (:version "rsb/test"          #.(version/string))
-                (:version "rsb-model/test"    #.(version/string)))
+                (:version "rsb/test"          (:read-file-form "version-string.sexp"))
+                (:version "rsb-model/test"    (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "introspection"
                  :pathname   "test/introspection"

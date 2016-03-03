@@ -4,25 +4,20 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:rsb-system)
-    (load (merge-pathnames "rsb.asd" *load-truename*))
-    (values))
-
-(cl:in-package #:rsb-system)
-
 (defsystem "rsb-model"
   :description "Modeling of and inference on RSB systems."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ("alexandria"
                 "let-plus"
                 "more-conditions"
                 "utilities.print-items"
 
-                (:version "rsb" #.(version/string)))
+                (:version "rsb" (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "model"
                  :pathname   "src/model"
@@ -50,12 +45,13 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
+  :defsystem-depends-on ("rsb-version")
   :depends-on  ((:version "lift"      "1.7.1")
 
-                (:version "rsb-model" #.(version/string))
+                (:version "rsb-model" (:read-file-form "version-string.sexp"))
 
-                (:version "rsb/test"  #.(version/string)))
+                (:version "rsb/test"  (:read-file-form "version-string.sexp")))
 
   :components  ((:module     "model"
                  :pathname   "test/model"
