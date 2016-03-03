@@ -1,4 +1,4 @@
-;;;; conditions.lisp --- Conditions used in cl-rsb.
+;;;; conditions.lisp --- Conditions used in rsb.
 ;;;;
 ;;;; Copyright (C) 2010-2017 Jan Moringen
 ;;;;

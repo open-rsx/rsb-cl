@@ -1,4 +1,4 @@
-;;;; clon.lisp --- Commandline option definitions for cl-rsb.
+;;;; clon.lisp --- Commandline option definitions for rsb.
 ;;;;
 ;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;

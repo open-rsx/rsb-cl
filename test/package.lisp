@@ -1,4 +1,4 @@
-;;;; package.lisp --- Package definition cl-rsb unit tests.
+;;;; package.lisp --- Package definition rsb unit tests.
 ;;;;
 ;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
@@ -78,7 +78,7 @@
    #:random-kind)
 
   (:documentation
-   "This package contains unit tests for the cl-rsb system."))
+   "This package contains unit tests for the rsb system."))
 
 (cl:in-package #:rsb.test)
 
@@ -95,7 +95,7 @@
      (uuid:make-uuid-from-string source)))
   (:timeout 60)
   (:documentation
-   "Root unit test suite of the cl-rsb system."))
+   "Root unit test suite of the rsb system."))
 
 ;;; Tests Utilities
 

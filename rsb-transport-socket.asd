@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-transport-socket"
   :description "Socket-based transport for RSB."
@@ -20,7 +20,7 @@
   :depends-on  ((:version "usocket"      "0.6.4") ; for `socket-shutdown'
                 "cl-protobuf"
 
-                (:version "cl-rsb"       #.(version/string :revision? t))
+                (:version "rsb"          #.(version/string :revision? t))
                 (:version "rsb-protocol" #.(version/string :revision? t)))
 
   :components  ((:module     "socket"
@@ -67,7 +67,7 @@
 
                 (:version "rsb-transport-socket" #.(version/string))
 
-                (:version "cl-rsb/test"          #.(version/string)))
+                (:version "rsb/test"             #.(version/string)))
 
   :components  ((:module     "socket"
                  :pathname   "test/transport/socket"

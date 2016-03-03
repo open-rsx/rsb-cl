@@ -1,10 +1,10 @@
-;;;; cl-rsb.asd --- Common Lisp implementation of RSB.
+;;;; rsb.asd --- Common Lisp implementation of RSB.
 ;;;;
 ;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:cl-rsb-system
+(cl:defpackage #:rsb-system
   (:use
    #:cl
    #:asdf)
@@ -19,7 +19,7 @@
   (:export
    #:+optimization-fast+unsafe+))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 ;;; Version stuff
 
@@ -120,7 +120,7 @@
 
 ;;; System definitions
 
-(defsystem "cl-rsb"
+(defsystem "rsb"
   :description "Common Lisp implementation of RSB."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
@@ -286,10 +286,10 @@
                               (:file       "protocol")
                               (:file       "mixins"))))
 
-  :in-order-to ((test-op (test-op "cl-rsb/test"))))
+  :in-order-to ((test-op (test-op "rsb/test"))))
 
-(defsystem "cl-rsb/test"
-  :description "Unit tests for the cl-rsb system."
+(defsystem "rsb/test"
+  :description "Unit tests for the rsb system."
   :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
@@ -297,7 +297,7 @@
   :version     #.(version/string)
   :depends-on  ((:version "lift"                    "1.7.1")
 
-                (:version "cl-rsb"                  #.(version/string))
+                (:version "rsb"                     #.(version/string))
                 (:version "rsb-transport-inprocess" #.(version/string)))
 
   :components  ((:module     "test"

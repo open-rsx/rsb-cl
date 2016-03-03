@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-introspection"
   :description "Introspection support for RSB."
@@ -21,12 +21,12 @@
   :depends-on  ("utilities.print-items"
                 (:version "uiop"                       "3") ; for portable platform information
 
-                (:version "cl-rsb"                     #.(version/string))
+                (:version "rsb"                        #.(version/string))
                 (:version "rsb-model"                  #.(version/string))
                 (:version "rsb-patterns-request-reply" #.(version/string)))
 
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-                 :pathname   #.+protocol-directory+
+                 :pathname   #.rsb-system:+protocol-directory+
                  :components ((:file       "Hello"
                                :pathname   "rsb/protocol/introspection/Hello")
                               (:file       "Bye"
@@ -79,7 +79,7 @@
 
                 (:version "rsb-introspection" #.(version/string))
 
-                (:version "cl-rsb/test"       #.(version/string))
+                (:version "rsb/test"          #.(version/string))
                 (:version "rsb-model/test"    #.(version/string)))
 
   :components  ((:module     "introspection"

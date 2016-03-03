@@ -10,7 +10,7 @@
                            participant-suite)
   ()
   (:documentation
-   "Unit tests for macros provided by the cl-rsb system."))
+   "Unit tests for macros provided by the rsb system."))
 
 (addtest (macros-root
           :documentation

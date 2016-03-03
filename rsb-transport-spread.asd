@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-transport-spread"
   :description "RSB transport based on the Spread group communication system."
@@ -23,7 +23,7 @@
 
                 (:version "network.spread" "0.3")
 
-                (:version "cl-rsb"         #.(version/string :revision? t))
+                (:version "rsb"            #.(version/string :revision? t))
                 (:version "rsb-protocol"   #.(version/string :revision? t)))
 
   :components  ((:module     "spread"
@@ -58,10 +58,10 @@
   :version     #.(version/string)
   :depends-on  ((:version "lift"                 "1.7.1")
 
-                (:version "cl-rsb"               #.(version/string))
+                (:version "rsb"                  #.(version/string))
                 (:version "rsb-transport-spread" #.(version/string))
 
-                (:version "cl-rsb/test"          #.(version/string)))
+                (:version "rsb/test"             #.(version/string)))
 
   :properties  ((:spread-port  . #.(or (let ((value (uiop:getenv "SPREAD_PORT")))
                                          (when value (read-from-string value)))

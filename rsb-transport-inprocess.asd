@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-transport-inprocess"
   :description "Simple and efficient in-process transport."
@@ -17,7 +17,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "cl-rsb" #.(version/string :revision? t)))
+  :depends-on  ((:version "rsb" #.(version/string :revision? t)))
 
   :components  ((:module     "inprocess"
                  :pathname   "src/transport/inprocess"
@@ -35,11 +35,11 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"                 "1.7.1")
+  :depends-on  ((:version "lift"                    "1.7.1")
 
                 (:version "rsb-transport-inprocess" #.(version/string))
 
-                (:version "cl-rsb/test"          #.(version/string)))
+                (:version "rsb/test"                #.(version/string)))
 
   :components  ((:module     "inprocess"
                  :pathname   "test/transport/inprocess"

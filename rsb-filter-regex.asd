@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-filter-regex"
   :description "Regular expression filter for events with text payloads."
@@ -19,7 +19,7 @@
   :version     #.(version/string)
   :depends-on  ("cl-ppcre"
 
-                (:version "cl-rsb" #.(version/string :revision? t)))
+                (:version "rsb" #.(version/string :revision? t)))
 
   :components  ((:module     "filter"
                  :pathname   "src/filter"
@@ -36,10 +36,10 @@
   :version     #.(version/string)
   :depends-on  ((:version "lift"             "1.7.1")
 
-                (:version "cl-rsb"           #.(version/string))
+                (:version "rsb"              #.(version/string))
                 (:version "rsb-filter-regex" #.(version/string))
 
-                (:version "cl-rsb/test"      #.(version/string)))
+                (:version "rsb/test"         #.(version/string)))
 
   :components  ((:module     "filter"
                  :pathname   "test/filter"

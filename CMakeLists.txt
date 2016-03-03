@@ -111,7 +111,7 @@ endfunction()
 
 # Project definition (version is grovelled from asd system definition,
 # possibly in combination with version.sexp file written below).
-set(SYSTEM_NAME "cl-rsb")
+set(SYSTEM_NAME "rsb")
 project(${SYSTEM_NAME} NONE)
 
 # Determine at least major and minor version components.

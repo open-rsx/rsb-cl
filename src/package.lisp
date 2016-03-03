@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Main package definition for the rsb system.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2010-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -269,7 +269,7 @@
    #:maybe-shorten-sequence)
 
   ;; Optimization settings
-  (:import-from #:cl-rsb-system
+  (:import-from #:rsb-system
    #:+optimization-fast+unsafe+)
 
   (:documentation
