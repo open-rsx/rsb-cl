@@ -192,7 +192,8 @@
                               (:file       "type-filter")
                               (:file       "origin-filter")
                               (:file       "method-filter")
-                              (:file       "meta-data-filter")))
+                              (:file       "meta-data-filter")
+                              (:file       "cause-filter")))
 
                 (:module     "transform"
                  :pathname   "src/transform"
@@ -347,7 +348,8 @@
                               (:file       "type-filter")
                               (:file       "origin-filter")
                               (:file       "method-filter")
-                              (:file       "meta-data-filter")))
+                              (:file       "meta-data-filter")
+                              (:file       "cause-filter")))
 
                 (:module     "transform"
                  :pathname   "test/transform"

@@ -102,6 +102,11 @@
    #:filter-key
    #:filter-predicate)
 
+  ;; `cause-filter' class
+  (:export
+   #:cause-filter
+   #:filter-cause)
+
   ;; `xpath-filter' class
   (:export
    #:xpath-filter
