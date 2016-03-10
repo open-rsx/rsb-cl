@@ -57,10 +57,6 @@ a socket."))
           (when (or event (not block?))
             (return event)))))
 
-(defmethod print-object ((object in-pull-connector) stream)
-  (print-unreadable-object (object stream :identity t)
-    (format stream "~A ~A (~D)"
-            (connector-direction object)
-            (connector-relative-url object "/")
-            (lparallel.queue:queue-count
-             (connector-queue object)))))
+(defmethod print-items:print-items append ((object in-pull-connector))
+  (let ((count (lparallel.queue:queue-count (connector-queue object))))
+    `((:queue-count ,count " (~D)" ((:after :url))))))

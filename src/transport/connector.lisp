@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for connector classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -40,8 +40,16 @@ group communication framework."))
                                    (thing     t))
   (connector-relative-url connector (relative-url thing)))
 
+(defmethod print-items:print-items append ((object connector))
+  `((:direction ,(connector-direction object)        "~A")
+    (:url       ,(connector-relative-url object "/") " ~A"
+     ((:after :direction)))))
+
 (defmethod print-object ((object connector) stream)
-  (print-unreadable-object (object stream :identity t)
-    (format stream "~A ~A"
-            (connector-direction object)
-            (connector-relative-url object "/"))))
+  (cond
+    (*print-readably*
+     (call-next-method))
+    (t
+     (print-unreadable-object (object stream :identity t)
+       (print-items:format-print-items
+        stream (print-items:print-items object))))))
