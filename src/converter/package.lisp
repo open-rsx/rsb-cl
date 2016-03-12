@@ -51,5 +51,5 @@
 
   (:documentation
    "This package contains mechanisms for converting between domain
-object (which are Lisp object) and data representation in different
-kinds of wire formats."))
+    object (which are Lisp object) and data representation in
+    different kinds of wire formats."))

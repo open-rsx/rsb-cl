@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Macros related to defining converters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,16 +14,18 @@
                                    (&body wire->domain)
                                    (&body domain->wire))
   "Define a converter named NAME that acts on the triple
-\(WIRE-TYPE WIRE-SCHEMA DATA-TYPE) as specified by the forms
-WIRE->DOMAIN and DOMAIN->WIRE.
 
-The WIRE->DOMAIN form receives the wire-data and wire-schema in
-variables called WIRE-DATA and WIRE-SCHEMA. The form should return a
-single value which is the deserialized domain object.
+     \(WIRE-TYPE WIRE-SCHEMA DATA-TYPE)
 
-The DOMAIN->WIRE form receives the domain object in a variable called
-DOMAIN-OBJECT. The form has to return a single value which is the
-serialized representation of the domain object."
+   as specified by the forms WIRE->DOMAIN and DOMAIN->WIRE.
+
+   The WIRE->DOMAIN form receives the wire-data and wire-schema in
+   variables called WIRE-DATA and WIRE-SCHEMA. The form should return
+   a single value which is the deserialized domain object.
+
+   The DOMAIN->WIRE form receives the domain object in a variable
+   called DOMAIN-OBJECT. The form has to return a single value which
+   is the serialized representation of the domain object."
   (let ((specializer (typecase wire-schema
                        (keyword `(eql ,wire-schema))
                        (t        wire-schema))))

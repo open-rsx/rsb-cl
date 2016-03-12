@@ -1,6 +1,6 @@
 ;;;; sequence.lisp --- Sequences of alternative converters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,7 @@
 (defmethod wire->domain? ((converter   sequence)
                           (wire-data   t)
                           (wire-schema t))
-  "Check whether any child can handle the requested conversion."
+  ;; Check whether any child can handle the requested conversion.
   (iter (for child in converter)
         (let+ (((&values use? domain-type)
                 (wire->domain? child wire-data wire-schema)))
@@ -24,7 +24,7 @@
 
 (defmethod domain->wire? ((converter     sequence)
                           (domain-object t))
-  "Check whether any child can handle the requested conversion."
+  ;; Check whether any child can handle the requested conversion.
   (iter (for child in converter)
         (let+ (((&values use? wire-type wire-schema)
                 (domain->wire? child domain-object)))
