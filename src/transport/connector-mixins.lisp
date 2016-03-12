@@ -17,8 +17,8 @@ for the `emit' method."))
 
 (defmethod emit :around ((connector error-handling-pull-receiver-mixin)
                          (block?    t))
-  "Call the actual `emit' method with a condition handler that applies
-   the error policy of CONNECTOR."
+  ;; Call the actual `emit' method with a condition handler that
+  ;; applies the error policy of CONNECTOR.
   (with-error-policy (connector) (call-next-method)))
 
 ;;; Mixin class `error-handling-push-receiver-mixin'
@@ -31,8 +31,8 @@ connector classes to provide client-supplied error handling policies
 for the `receive-messages' method."))
 
 (defmethod receive-messages :around ((connector error-handling-push-receiver-mixin))
-  "Call the actual `receive-messages' method with a condition handler
-  that applies the error policy of CONNECTOR."
+  ;; Call the actual `receive-messages' method with a condition
+  ;; handler that applies the error policy of CONNECTOR.
   (with-error-policy (connector) (call-next-method)))
 
 ;;; Mixin class `error-handling-sender-mixin'
@@ -50,8 +50,8 @@ for the `receive-messages' method."))
 
 (defmethod handle :around ((sink error-handling-sender-mixin)
                            (data event))
-  "Call the actual `handle' method with a condition handler that
-   applies the error policy of CONNECTOR."
+  ;; Call the actual `handle' method with a condition handler that
+  ;; applies the error policy of CONNECTOR.
   (with-error-policy (sink) (call-next-method)))
 
 ;;; Mixin class `restart-notification-sender-mixin'
@@ -146,15 +146,15 @@ converter."))
 
 (defmethod domain->wire ((connector     conversion-mixin)
                          (domain-object t))
-  "Delegate conversion of DOMAIN-OBJECT to the converter stored in
-CONNECTOR."
+  ;; Delegate conversion of DOMAIN-OBJECT to the converter stored in
+  ;; CONNECTOR.
   (domain->wire (connector-converter connector) domain-object))
 
 (defmethod wire->domain ((connector   conversion-mixin)
                          (wire-data   t)
                          (wire-schema t))
-  "Delegate the conversion of WIRE-DATA, WIRE-SCHEMA to the converter
-stored in CONNECTOR."
+  ;; Delegate the conversion of WIRE-DATA, WIRE-SCHEMA to the
+  ;; converter stored in CONNECTOR.
   (wire->domain (connector-converter connector) wire-data wire-schema))
 
 (defmethod print-object ((object conversion-mixin) stream)
@@ -338,8 +338,9 @@ thread."))
     (setf thread nil)))
 
 (defmethod receive-messages :around ((connector threaded-receiver-mixin))
-  "Catch the 'terminate tag that is thrown to indicate interruption
-requests."
+  ;; Catch the 'terminate tag that is thrown to indicate interruption
+  ;; requests.
+  ;;
   ;; Notify the thread which is waiting in `start-receiver'.
   (restart-case
       (let+ (((&structure connector- thread control-mutex control-condition)
@@ -356,8 +357,8 @@ requests."
   (log:debug "~@<~A left receive loop~@:>" connector))
 
 (defun exit-receiver ()
-  "Cause a receiver thread to exit. Has to be called from the receiver
-thread."
+  ;; Cause a receiver thread to exit. Has to be called from the
+  ;; receiver thread.
   (ignore-errors (abort)))
 
 ;;; `threaded-message-receiver-mixin'
@@ -371,8 +372,8 @@ default implementation of the receive loop which runs in the receiver
 thread."))
 
 (defmethod receive-messages ((connector threaded-message-receiver-mixin))
-  "Receive a message that can be decoded into an event. Return the
-event."
+  ;; Receive a message that can be decoded into an event. Return the
+  ;; event.
   (iter (let+ (((&values notification wire-schema)
                 (receive-notification connector t))
                ;; Try to convert NOTIFICATION into one or zero events
