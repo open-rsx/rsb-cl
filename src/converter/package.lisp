@@ -38,6 +38,12 @@
    #:domain->wire
    #:wire->domain)
 
+  ;; Converter service and creation
+  (:export
+   #:converter ; service
+
+   #:make-converter)
+
   ;; void converter
   (:export
    #:+no-value+ ; marker value

@@ -134,3 +134,8 @@
 (service-provider:define-service converter
   (:documentation
    "Providers convert payload to a particular wire-type."))
+
+(defun make-converter (name &rest args)
+  "Construct an instance of the converter class designated by NAME
+   using ARGS as initargs."
+  (apply #'service-provider:make-provider 'converter name args))
