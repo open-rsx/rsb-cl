@@ -1,6 +1,6 @@
 ;;;; origin-filter.lisp --- Event filtering based on origin id.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,6 +38,11 @@
     (if (typep new-value 'nibbles:octet-vector)
         (setf (filter-%origin filter) (uuid:byte-array-to-uuid new-value))
         (call-next-method))))
+
+(defmethod rsb.ep:access? ((transform origin-filter)
+                           (part      (eql :origin))
+                           (mode      (eql :read)))
+  t)
 
 (defmethod matches? ((filter origin-filter) (event event))
   (uuid:uuid= (filter-origin filter) (event-origin event)))

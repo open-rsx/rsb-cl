@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the filter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,6 +8,7 @@
   (:use
    #:cl
    #:alexandria
+   #:let-plus
    #:lift
 
    #:rsb
@@ -19,7 +20,7 @@
    #:define-basic-filter-test-cases)
 
   (:documentation
-   "This package contains unit tests for the filter module"))
+   "This package contains unit tests for the filter module."))
 
 (cl:in-package #:rsb.filter.test)
 
@@ -37,13 +38,37 @@
    "This class can be mixed into test suite classes which contain
 tests for filters."))
 
+;;; Utilities
+
+(defun call-with-filter-checking-thunk
+    (thunk filter-spec event-spec)
+  "Call THUNK with a function as the sole argument, that
+   1. Constructs a filter according to FILTER-SPEC
+   2. Constructs an `access-checking-event' according to EVENT-SPEC
+   3. Applies the filter rule to the event
+   4. Returns the filter result"
+  (let+ (((&flet check (funcall?)
+            (let+ ((filter filter-spec #+later (apply #'make-filter
+                                                      (ensure-list filter-spec)))
+                   (event  (apply #'make-access-checking-event-for-processor
+                                  filter event-spec))
+                   ((&flet do-it ()
+                      (with-access-checking ()
+                        (if funcall?
+                            (funcall filter event)
+                            (matches? filter event))))))
+              (funcall thunk #'do-it)))))
+    (check nil)
+    (check t)))
+
 (defmacro define-basic-filter-test-cases ((class spec) construct-cases &rest matches)
   "Define basic test cases for the filter class CLASS."
   (let ((suite-name (symbolicate class "-ROOT")))
     `(progn
        (addtest (,suite-name
                  :documentation
-                 ,(format nil "Test construction instances of the `~(~A~)' filter class."
+                 ,(format nil "Test construction instances of the ~
+                               `~(~A~)' filter class."
                           class))
          construct
 
@@ -67,32 +92,20 @@ tests for filters."))
 
          (ensure-cases (event expected)
              (map 'list #'list events ',matches)
-           (let ((result (matches? simple-filter event)))
-             (ensure-same result expected
-                          :report    "~@<The filter ~S ~:[did not ~
-                                      match~;matched~] the event ~S, ~
-                                      but should~:[ not~;~].~@:>"
-                          :arguments (simple-filter result event expected)))))
+           (call-with-filter-checking-thunk
+            (lambda (do-it)
+              (let ((result (funcall do-it)))
+                (ensure-same result expected
+                             :report    "~@<The filter ~S ~:[did not ~
+                                         match~;matched~] the event ~S, ~
+                                         but should~:[ not~;~].~@:>"
+                             :arguments (simple-filter result event expected))))
+            simple-filter (list* (event-scope event) (event-data event)
+                                 :method (event-method event)
+                                 (meta-data-plist event))))) ; TODO event-spec
 
        (addtest (,suite-name
                  :documentation
-                 ,(format nil "Test calling instances of the `~(~A~)' as functions."
-                          class))
-         funcallability
-
-         (ensure-cases (event expected)
-             (map 'list #'list events ',matches)
-           (let ((result (funcall simple-filter event)))
-             (ensure-same result expected
-                          :report    "~@<When called as a function, the ~
-                                      filter ~S ~:[did not ~
-                                      match~;matched~] the event ~S, ~
-                                      but should~:[ not~;~].~@:>"
-                          :arguments (simple-filter result event expected)))))
-
-       (addtest (,suite-name
-                 :documentation
-
                  ,(format nil "Test method on `print-object' for the ~
                                `~(~A~)' filter class."
                           class))

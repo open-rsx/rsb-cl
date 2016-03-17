@@ -1,6 +1,6 @@
 ;;;; method-filter.lisp --- Event filtering based on method.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,6 +25,11 @@
 
 (service-provider:register-provider/class 'filter :method
   :class 'method-filter)
+
+(defmethod rsb.ep:access? ((transform method-filter)
+                           (part      (eql :method))
+                           (mode      (eql :read)))
+  t)
 
 (defmethod matches? ((filter method-filter) (event event))
   (eq (filter-method filter) (event-method event)))

@@ -1,6 +1,6 @@
 ;;;; scope-filter.lisp --- A filter that discriminates based on scopes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -27,6 +27,11 @@
 
 (service-provider:register-provider/class 'filter :scope
   :class 'scope-filter)
+
+(defmethod rsb.ep:access? ((transform scope-filter)
+                           (part      (eql :scope))
+                           (mode      (eql :read)))
+  t)
 
 (defmethod matches? ((filter scope-filter) (event event))
   ;; EVENT is matched by comparing its scope to the scope of FILTER.

@@ -1,6 +1,6 @@
 ;;;; meta-data-filter.lisp --- Event filtering based on meta-data items.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,6 +36,11 @@
                                      (predicate nil predicate-supplied?))
   (when predicate-supplied?
     (setf (filter-%predicate instance) (coerce predicate 'function))))
+
+(defmethod rsb.ep:access? ((transform meta-data-filter)
+                           (part      (eql :meta-data))
+                           (mode      (eql :read)))
+  t)
 
 (defmethod matches? ((filter meta-data-filter) (event event))
   (let+ (((&structure-r/o filter- key predicate) filter)

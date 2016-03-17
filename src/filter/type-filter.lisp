@@ -52,6 +52,11 @@
              :format-arguments (list new-value)))
     (setf (filter-%predicate filter) (unless failure? function))))
 
+(defmethod rsb.ep:access? ((transform type-filter)
+                           (part      (eql :data))
+                           (mode      (eql :read)))
+  t)
+
 (defmethod payload-matches? ((filter type-filter) (payload t))
   (if-let ((predicate (filter-%predicate filter)))
     (locally (declare (type function predicate))

@@ -1,6 +1,6 @@
 ;;;; composite-filter.lisp --- Composite filters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,6 +19,11 @@
     behavior by combining decisions of a set of subordinate
     filters. On rare occasions is it useful to make instances of this
     class itself rather than subclasses."))
+
+(defmethod rsb.ep:access? ((transform composite-filter)
+                           (part      t)
+                           (mode      t))
+  (rsb.ep:access? (filter-children transform) part mode))
 
 (defmethod print-object ((object composite-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)
