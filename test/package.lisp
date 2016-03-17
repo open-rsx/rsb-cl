@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition cl-rsb unit tests.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,6 +36,16 @@
    #:check-print
 
    #:check-event
+
+   #:call-with-access-checking
+   #:with-access-checking
+   #:without-access-checking
+
+   #:access-checking-event
+   #:event-readable?
+   #:event-writable?
+   #:make-access-checking-event
+   #:make-access-checking-event-for-processor
 
    #:participant-suite
    #:define-basic-participant-test-cases
@@ -100,6 +110,117 @@
   (:timeout 20)
   (:documentation
    "Root unit test suite of the cl-rsb system."))
+
+;;; Tools related to events
+
+(defvar *check-access?* nil)
+
+(defun call-with-access-checking (enabled thunk)
+  (let ((*check-access?* enabled))
+    (funcall thunk)))
+
+(defmacro with-access-checking (() &body forms)
+  "Executing forms with event access checking enabled."
+  `(call-with-access-checking t (lambda () ,@forms)))
+
+(defmacro without-access-checking (() &body forms)
+  "Executing forms without event access checking enabled."
+  `(call-with-access-checking nil (lambda () ,@forms)))
+
+(defclass access-checking-event (event)
+  ((rules :initarg  :rules
+          :accessor event-rules
+          :initform '()
+          :documentation
+          "Stores rules of the form
+
+             (PART MODE ALLOWED?)
+
+           where PART names an event part, MODE is an access mode such
+           as :read or :write and ALLOWED? is a Boolean indicating
+           whether the access should be allowed."))
+  (:documentation
+   "Instances are specialized events that only permit access to their
+    slots as specified by rules.
+
+    The rules work as a whitelist: allow accesses are forbidden unless
+    specifically allowed."))
+
+(defmethod print-object :around ((object access-checking-event)
+                                 stream)
+  ;; Allow all accesses while printing OBJECT.
+  (without-access-checking ()
+    (call-next-method)))
+
+(defmethod rsb.ep:access? ((processor access-checking-event)
+                           (part      t)
+                           (mode      t))
+  (loop :for (rule-part rule-mode allowed?) :in (event-rules processor) :do
+     (when (and (eq rule-part part) (eq rule-mode mode) allowed?)
+       (return-from rsb.ep:access? t))))
+
+(defmethod (setf rsb.ep:access?) ((new-value t)
+                                  (processor access-checking-event)
+                                  (part      t)
+                                  (mode      t))
+  (push (list part mode new-value) (event-rules processor)))
+
+(defgeneric check-access (event part mode)
+  (:method ((event access-checking-event) (part t) (mode t))
+    (when *check-access?*
+      (unless (rsb.ep:access? event part mode)
+        (error "~@<~S access to ~S of ~A should not be performed.~@:>"
+               mode part event)))))
+
+;; Define :before methods on the event accessor generic function that
+;; check whether the attempted access is allowed and signal an error
+;; if it is not.
+(macrolet ((define-checked-method (name lambda-list part modes)
+             `(progn
+                ,@(when (member :read modes)
+                    `((defmethod ,name :before
+                        ((event access-checking-event)
+                         ,@lambda-list)
+                        (check-access event ,part :read))))
+
+                ,@(when (member :write modes)
+                    `((defmethod (setf ,name) :before
+                        ((new-value t)
+                         (event     access-checking-event)
+                         ,@lambda-list)
+                        (check-access event ,part :write))))))
+           (define-checked-methods ()
+             `(progn
+                ,@(mappend
+                   (lambda+ ((part . (&key accessors &allow-other-keys)))
+                     (mapcar
+                      (lambda+ ((name lambda-list modes))
+                        `(define-checked-method ,name ,lambda-list ,part ,modes))
+                      accessors))
+                   rsb.ep:*event-parts*))))
+  (define-checked-methods))
+
+(defun make-access-checking-event (scope data
+                                   &rest args &key
+                                   rules
+                                   &allow-other-keys)
+  "Construction helper for `access-checking-event'."
+  (let ((event (apply #'make-event scope data
+                      (remove-from-plist args :rules))))
+    (change-class event 'access-checking-event :rules rules)))
+
+(defun make-access-checking-event-for-processor
+    (processor scope data &rest args)
+  "Return an event based on SCOPE, DATA and ARGS that only permits
+   read/write access to its parts as declared necessary by PROCESSOR."
+  (let ((rules (loop :named :outer :for (part . plist) :in rsb.ep:*event-parts*
+                  :append
+                  (loop :for mode :in '(:read :write)
+                     :collect
+                     `(,part ,mode ,(rsb.ep:access? processor part mode))))))
+    (apply #'make-access-checking-event scope data :rules rules args)))
+
+;;; Tools related to participants
 
 (deftestsuite participant-suite ()
   ()

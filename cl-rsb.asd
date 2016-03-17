@@ -165,9 +165,19 @@
 
                               (:file       "error-handling")))
 
+                (:module     "event-processing-early"
+                 :pathname   "src/event-processing"
+                 :depends-on ("src-early")
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "util")
+                              (:file       "protocol")
+
+                              (:file       "scope-trie")))
+
                 (:module     "filter"
                  :pathname   "src/filter"
-                 :depends-on ("src-early")
+                 :depends-on ("src-early" "event-processing-early")
                  :serial     t
                  :components ((:file       "package")
                               (:file       "types")
@@ -185,7 +195,7 @@
 
                 (:module     "transform"
                  :pathname   "src/transform"
-                 :depends-on ("src-early")
+                 :depends-on ("src-early" "event-processing-early")
                  :serial     t
                  :components ((:file       "package")
                               (:file       "conditions")
@@ -198,15 +208,10 @@
 
                 (:module     "event-processing"
                  :pathname   "src/event-processing"
-                 :depends-on ("src-early" "filter" "transform") ; for {filter,transform}-mixin
+                 :depends-on ("src-early" "event-processing-early"
+                              "filter" "transform") ; for {filter,transform}-mixin
                  :serial     t
-                 :components ((:file       "package")
-                              (:file       "util")
-                              (:file       "protocol")
-
-                              (:file       "scope-trie")
-
-                              (:file       "broadcast-processor")
+                 :components ((:file       "broadcast-processor")
                               (:file       "pull-processor")
 
                               (:file       "processor-mixins")
