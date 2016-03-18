@@ -65,17 +65,20 @@ mean to call some handlers, for example."))
 ;;; transmitting or (de)serializing these parts.
 
 (defvar *event-parts*
-  '((:scope     . (:accessors ((event-scope         ()    (:read :write)))))
-    (:origin    . (:accessors ((event-origin        ()    (:read :write)))))
-    (:method    . (:accessors ((event-method        ()    (:read :write)))))
-    (:data      . (:accessors ((event-data          ()    (:read :write)))))
-    (:meta-data . (:accessors ((rsb:meta-data-plist ()    (:read       ))
-                               (rsb:meta-data-alist ()    (:read       ))
-                               (rsb:meta-data       (key) (:read :write)))))
-    (:timestamp . (:accessors ((rsb:timestamp-plist ()    (:read       ))
-                               (rsb:timestamp-alist ()    (:read       ))
-                               (rsb:timestamp       (key) (:read :write)))))
-    (:causes    . (:accessors ((event-causes        ()    (:read :write))))))
+  '((:scope           . (:accessors ((event-scope           ()    (:read :write)))))
+    (:origin          . (:accessors ((event-origin          ()    (:read :write))
+                                     (event-id              ()    (:read)))))
+    (:sequence-number . (:accessors ((event-sequence-number ()    (:read :write))
+                                     (event-id              ()    (:read)))))
+    (:method          . (:accessors ((event-method          ()    (:read :write)))))
+    (:data            . (:accessors ((event-data            ()    (:read :write)))))
+    (:meta-data       . (:accessors ((rsb:meta-data-plist   ()    (:read       ))
+                                     (rsb:meta-data-alist   ()    (:read       ))
+                                     (rsb:meta-data         (key) (:read :write)))))
+    (:timestamp       . (:accessors ((rsb:timestamp-plist   ()    (:read       ))
+                                     (rsb:timestamp-alist   ()    (:read       ))
+                                     (rsb:timestamp         (key) (:read :write)))))
+    (:causes          . (:accessors ((event-causes          ()    (:read :write))))))
   "Parts of events with access and mode information. Entries are of
    the form:
 
