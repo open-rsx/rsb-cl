@@ -44,6 +44,9 @@
    #:access-checking-event
    #:event-readable?
    #:event-writable?
+
+   #:access-rules-for-processor
+   #:add-access-checking-to-event
    #:make-access-checking-event
    #:make-access-checking-event-for-processor
 
@@ -200,25 +203,35 @@
                    rsb.ep:*event-parts*))))
   (define-checked-methods))
 
+(defun access-rules-for-processor (processor)
+  (loop :named :outer :for (part . plist) :in rsb.ep:*event-parts*
+     :append
+     (loop :for mode :in '(:read :write)
+        :collect
+        `(,part ,mode ,(rsb.ep:access? processor part mode)))))
+
+(defun add-access-checking-to-event (event rules)
+  (change-class event 'access-checking-event
+                :create-timestamp? nil
+                :rules             rules))
+
 (defun make-access-checking-event (scope data
                                    &rest args &key
                                    rules
                                    &allow-other-keys)
   "Construction helper for `access-checking-event'."
-  (let ((event (apply #'make-event scope data
-                      (remove-from-plist args :rules))))
-    (change-class event 'access-checking-event :rules rules)))
+  (add-access-checking-to-event
+   (apply #'make-event scope data
+          (remove-from-plist args :rules))
+   rules))
 
 (defun make-access-checking-event-for-processor
     (processor scope data &rest args)
   "Return an event based on SCOPE, DATA and ARGS that only permits
    read/write access to its parts as declared necessary by PROCESSOR."
-  (let ((rules (loop :named :outer :for (part . plist) :in rsb.ep:*event-parts*
-                  :append
-                  (loop :for mode :in '(:read :write)
-                     :collect
-                     `(,part ,mode ,(rsb.ep:access? processor part mode))))))
-    (apply #'make-access-checking-event scope data :rules rules args)))
+  (apply #'make-access-checking-event scope data
+         :rules (access-rules-for-processor processor)
+         args))
 
 ;;; Tools related to participants
 
