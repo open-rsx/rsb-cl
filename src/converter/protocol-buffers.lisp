@@ -1,6 +1,6 @@
 ;;;; protocol-buffers.lisp --- Converter for protocol buffer wire schemas.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,9 +9,8 @@
 (defmethod wire->domain? ((converter   (eql :protocol-buffer))
                           (wire-data   simple-array)
                           (wire-schema symbol))
-  (when-let* ((descriptor (pb:find-descriptor wire-schema
-                                              :error? nil))
-              (class      (pb:descriptor-class descriptor)))
+  (when-let* ((descriptor (pb:find-descriptor wire-schema :error? nil))
+              (class      (pb:descriptor-class descriptor :error? nil)))
     (values converter (class-name class))))
 
 (defmethod domain->wire? ((converter     (eql :protocol-buffer))
