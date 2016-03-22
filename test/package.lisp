@@ -116,6 +116,13 @@
 
 ;;; Tools related to events
 
+(defgeneric (setf rsb.event-processing:access?)
+    (new-value processor part mode)
+  (:documentation
+   "Set MODE access to PART for PROCESSOR to NEW-VALUE.
+
+    Only used by test utilities."))
+
 (defvar *check-access?* nil)
 
 (defun call-with-access-checking (enabled thunk)
