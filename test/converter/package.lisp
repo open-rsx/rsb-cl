@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the converter module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 
@@ -9,6 +9,7 @@
    #:cl
    #:alexandria
    #:let-plus
+   #:more-conditions
    #:lift
 
    #:nibbles
@@ -23,6 +24,12 @@
    #:octetify
 
    #:define-basic-converter-test-cases)
+
+  ;; Test utilities
+  (:export
+   #:call-tracking-converter
+   #:converter-next
+   #:converter-calls)
 
   (:documentation
    "This package contains unit tests for the converter module."))
@@ -141,3 +148,55 @@
                   (decoded (wire->domain converter encoded encoded-wire-schema)))
              (ensure-same domain-object decoded
                           :test (function ,domain-test))))))))
+
+;;; `tracking-converter'
+
+(defclass call-tracking-converter ()
+  ((next  :initarg  :next
+          :reader   converter-next
+          :documentation
+          "The subordinate converter to delegate the actual work to.")
+   (calls :type     list
+          :reader   converter-calls
+          :accessor converter-%calls
+          :initform '()
+          :documentation
+          "A list of calls to converter-protocol-related functions."))
+  (:default-initargs
+   :next (missing-required-initarg 'call-tracking-converter :next))
+  (:documentation
+   "A converter that tracks convert-protocol-related calls but
+    otherwise delegates to a subordinate converter."))
+
+(macrolet ((define-call-tracking-method (name lambda-list)
+             (let* ((unspecialized
+                     (mapcar (compose #'first #'ensure-list)
+                             (parse-ordinary-lambda-list
+                              lambda-list :allow-specializers t)))
+                    (converter (first unspecialized)))
+               `(defmethod ,name ,lambda-list
+                  (push `(,',name ,,@unspecialized)
+                        (converter-%calls ,converter))
+                  (,name (converter-next ,converter)
+                         ,@(rest unspecialized))))))
+
+  (define-call-tracking-method wire->domain?
+      ((converter   call-tracking-converter)
+       (wire-data   t)
+       (wire-schema t)))
+
+  (define-call-tracking-method domain->wire?
+      ((converter     call-tracking-converter)
+       (domain-object t)))
+
+  (define-call-tracking-method wire->domain
+      ((converter   call-tracking-converter)
+       (wire-data   t)
+       (wire-schema t)))
+
+  (define-call-tracking-method domain->wire
+      ((converter     call-tracking-converter)
+       (domain-object t))))
+
+(service-provider:register-provider/class
+ 'rsb.converter::converter :call-tracking :class 'call-tracking-converter)
