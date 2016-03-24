@@ -20,10 +20,11 @@
                 are sub-scopes permitted?"))
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
-   "This filter discriminates based on the scopes of events. Depending
-    on whether exact matches are requested, event scopes match the
-    scope of the filter, either if they are identical or if they are
-    identical or sub-scopes."))
+   "Discriminate based on the scopes of events.
+
+    Depending on whether exact matches are requested, event scopes
+    match the scope of the filter, either if they are identical or if
+    they are identical or sub-scopes."))
 
 (service-provider:register-provider/class 'filter :scope
   :class 'scope-filter)
