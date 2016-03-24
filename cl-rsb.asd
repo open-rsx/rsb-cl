@@ -236,6 +236,7 @@
                               (:file       "sequence")
                               (:file       "force-wire-schema")
                               (:file       "annotating")
+                              (:file       "caching")
 
                               (:file       "fundamental")
 
@@ -382,6 +383,8 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "annotating")
+                              (:file       "caching")
+
                               (:file       "fundamental")
                               (:file       "reader")))
 

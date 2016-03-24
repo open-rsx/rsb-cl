@@ -49,6 +49,11 @@
    #:wire->domain-cache-mixin
    #:domain->wire-cache-mixin)
 
+  ;; Caching converter
+  (:export
+   #:caching-converter
+   #:converter-target)
+
   ;; void converter
   (:export
    #:+no-value+ ; marker value

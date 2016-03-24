@@ -49,8 +49,9 @@
       &key
       (suite-name     (symbolicate converter "-ROOT"))
       (make-converter converter)
-      (domain-test    'equalp))
-      cases)
+      (domain-test    'equalp)
+      (simple?        t))
+     cases)
   "Emit basic test cases for CONVERTER in test suite SUITE-NAME."
   `(progn
 
@@ -70,7 +71,9 @@
              ((eq domain-object :not-applicable)
               (ensure-null (do-it)))
              (t
-              (ensure-same (do-it) converter :ignore-multiple-values? t))))))
+              `(if simple?
+                   `(ensure-same (do-it) converter :ignore-multiple-values? t)
+                   `(ensure (do-it))))))))
 
      (addtest (,suite-name
                :documentation
@@ -89,7 +92,9 @@
              (ensure-null (do-it)))
             (t
              (let+ (((&values converter* wire-type* wire-schema*) (do-it)))
-               (ensure-same converter converter*)
+               ,(if simple?
+                    `(ensure-same converter converter*)
+                    `(ensure converter*))
                (unless (eq wire-data :error)
                  (ensure (typep wire-data wire-type*)))
                (ensure-same wire-schema wire-schema*)))))))
