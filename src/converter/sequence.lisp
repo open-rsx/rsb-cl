@@ -17,19 +17,19 @@
                           (wire-schema t))
   ;; Check whether any child can handle the requested conversion.
   (iter (for child in converter)
-        (let+ (((&values use? domain-type)
+        (let+ (((&values usable-child domain-type)
                 (wire->domain? child wire-data wire-schema)))
-          (when use?
-            (return (values use? domain-type))))))
+          (when usable-child
+            (return (values usable-child domain-type))))))
 
 (defmethod domain->wire? ((converter     sequence)
                           (domain-object t))
   ;; Check whether any child can handle the requested conversion.
   (iter (for child in converter)
-        (let+ (((&values use? wire-type wire-schema)
+        (let+ (((&values usable-child wire-type wire-schema)
                 (domain->wire? child domain-object)))
-          (when use?
-            (return (values use? wire-type wire-schema))))))
+          (when usable-child
+            (return (values usable-child wire-type wire-schema))))))
 
 (defmethod wire->domain ((converter   sequence)
                          (wire-data   t)
