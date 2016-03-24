@@ -230,6 +230,7 @@
                  :components ((:file       "package")
                               (:file       "conditions")
                               (:file       "protocol")
+                              (:file       "mixins")
                               (:file       "macros")
 
                               (:file       "sequence")

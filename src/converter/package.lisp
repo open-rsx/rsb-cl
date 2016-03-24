@@ -44,6 +44,11 @@
 
    #:make-converter)
 
+  ;; Converter mixins
+  (:export
+   #:wire->domain-cache-mixin
+   #:domain->wire-cache-mixin)
+
   ;; void converter
   (:export
    #:+no-value+ ; marker value
