@@ -6,28 +6,6 @@
 
 (cl:in-package #:rsb.converter)
 
-;;; Converter protocol
-
-(defgeneric wire->domain (converter wire-data wire-schema)
-  (:documentation
-   "Decode WIRE-DATA into a Lisp object using an interpretation
-    according to WIRE-SCHEMA and CONVERTER. Return the decoded Lisp
-    object.
-
-    Example:
-    RSB.CONVERTER> (wire->domain :fundamental-string #(102 111 111) :string)
-    => \"foo\""))
-
-(defgeneric domain->wire (converter domain-object)
-  (:documentation
-   "Encode the Lisp object DOMAIN-OBJECT into the wire representation
-    associated to CONVERTER. Return two values: the constructed wire
-    representation and the wire-schema.
-
-    Example:
-    RSB.CONVERTER> (domain->wire :fundamental-string \"foo\")
-    => #(102 111 111) :string"))
-
 ;;; Converter query protocol
 
 (defgeneric wire->domain? (converter wire-data wire-schema)
@@ -53,7 +31,7 @@
     RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
     => :fundamental-string 'octet-vector :string"))
 
-;;; Default behavior
+;; Default behavior
 
 (defmethod no-applicable-method ((function (eql (fdefinition 'wire->domain?)))
                                  &rest args)
@@ -69,6 +47,30 @@
   ;; converter and data, the converter cannot handle the data.
   (declare (ignore args))
   nil)
+
+;;; Converter protocol
+
+(defgeneric wire->domain (converter wire-data wire-schema)
+  (:documentation
+   "Decode WIRE-DATA into a Lisp object using an interpretation
+    according to WIRE-SCHEMA and CONVERTER. Return the decoded Lisp
+    object.
+
+    Example:
+    RSB.CONVERTER> (wire->domain :fundamental-string #(102 111 111) :string)
+    => \"foo\""))
+
+(defgeneric domain->wire (converter domain-object)
+  (:documentation
+   "Encode the Lisp object DOMAIN-OBJECT into the wire representation
+    associated to CONVERTER. Return two values: the constructed wire
+    representation and the wire-schema.
+
+    Example:
+    RSB.CONVERTER> (domain->wire :fundamental-string \"foo\")
+    => #(102 111 111) :string"))
+
+;; Default behavior
 
 (defmethod wire->domain :around ((converter   t)
                                  (wire-data   t)
@@ -87,7 +89,8 @@
         :report (lambda (stream)
                   (format stream "~@<Retry converting ~S (in ~S ~
                                   schema) using converter ~A.~@:>"
-                          wire-data wire-schema converter)) nil)
+                          wire-data wire-schema converter))
+        nil)
       (use-value (value)
         :report      (lambda (stream)
                        (format stream "~@<Supply a replacement value ~
