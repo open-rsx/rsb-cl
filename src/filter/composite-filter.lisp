@@ -6,6 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
+;;; Class `composite-filter'
+
 (defclass composite-filter (funcallable-filter-mixin)
   ((children :initarg  :children
              :type     list
@@ -20,10 +22,10 @@
     filters. On rare occasions is it useful to make instances of this
     class itself rather than subclasses."))
 
-(defmethod rsb.ep:access? ((transform composite-filter)
+(defmethod rsb.ep:access? ((processor composite-filter)
                            (part      t)
                            (mode      t))
-  (rsb.ep:access? (filter-children transform) part mode))
+  (rsb.ep:access? (filter-children processor) part mode))
 
 (defmethod print-object ((object composite-filter) stream)
   (print-unreadable-object (object stream :type t :identity t)

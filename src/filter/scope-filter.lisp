@@ -29,7 +29,7 @@
 (service-provider:register-provider/class 'filter :scope
   :class 'scope-filter)
 
-(defmethod rsb.ep:access? ((transform scope-filter)
+(defmethod rsb.ep:access? ((processor scope-filter)
                            (part      (eql :scope))
                            (mode      (eql :read)))
   t)

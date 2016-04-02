@@ -26,7 +26,7 @@
 (service-provider:register-provider/class 'filter :method
   :class 'method-filter)
 
-(defmethod rsb.ep:access? ((transform method-filter)
+(defmethod rsb.ep:access? ((processor method-filter)
                            (part      (eql :method))
                            (mode      (eql :read)))
   t)

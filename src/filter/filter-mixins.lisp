@@ -62,7 +62,7 @@
    "This mixin class is intended to be mixed into filter classes that
     discriminate event based on their payload."))
 
-(defmethod rsb.ep:access? ((transform payload-matching-mixin)
+(defmethod rsb.ep:access? ((processor payload-matching-mixin)
                            (part      (eql :data))
                            (mode      (eql :read)))
   t)

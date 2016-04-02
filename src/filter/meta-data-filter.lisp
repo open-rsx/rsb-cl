@@ -37,7 +37,7 @@
   (when predicate-supplied?
     (setf (filter-%predicate instance) (coerce predicate 'function))))
 
-(defmethod rsb.ep:access? ((transform meta-data-filter)
+(defmethod rsb.ep:access? ((processor meta-data-filter)
                            (part      (eql :meta-data))
                            (mode      (eql :read)))
   t)

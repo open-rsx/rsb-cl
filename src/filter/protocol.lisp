@@ -24,7 +24,7 @@
   (:documentation
    "Return non-nil if PAYLOAD matches the criteria of FILTER."))
 
-;;; Filter class family
+;;; Filter service
 
 (service-provider:define-service filter
   (:documentation

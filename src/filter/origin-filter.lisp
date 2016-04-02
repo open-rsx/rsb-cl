@@ -39,7 +39,7 @@
         (setf (filter-%origin filter) (uuid:byte-array-to-uuid new-value))
         (call-next-method))))
 
-(defmethod rsb.ep:access? ((transform origin-filter)
+(defmethod rsb.ep:access? ((processor origin-filter)
                            (part      (eql :origin))
                            (mode      (eql :read)))
   t)
