@@ -1,29 +1,23 @@
 ;;;; xpath-filter.lisp --- XPath-based filtering.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter)
 
-;;; Protocol
-
-(defgeneric compile-xpath (filter xpath)
-  (:documentation
-   "Produce and return a compiled representation of XPATH that can be
-    used with FILTER."))
-
 ;;; `xpath-filter' class
 
-(defclass xpath-filter (funcallable-filter-mixin
+(defclass xpath-filter (function-caching-mixin
+                        funcallable-filter-mixin
                         payload-matching-mixin
                         fallback-policy-mixin
                         print-items:print-items-mixin)
-  ((xpath          :type     string
-                   :accessor filter-xpath
+  ((xpath          :type     xpath::xpath-expr
+                   :reader   filter-xpath
+                   :writer   (setf filter-%xpath)
                    :documentation
-                   "The XPath used by the filter to discriminate
-                    events.")
+                   "The XPath used by the filter to discriminate events.")
    (compiled-xpath :type     function
                    :reader   filter-compiled-xpath
                    :writer   (setf filter-%compiled-xpath)
@@ -45,21 +39,29 @@
 (defmethod shared-initialize :after ((instance   xpath-filter)
                                      (slot-names t)
                                      &key
-                                     xpath)
-  (check-type xpath xpath::xpath-expr
-              "an XPath string or an XPath sexp expression")
+                                     (xpath nil xpath-supplied?))
+  (when xpath-supplied?
+    (setf (filter-%xpath instance) xpath)))
 
-  (setf (filter-xpath instance) xpath))
-
-(defmethod (setf filter-xpath) :before ((new-value string)
+(defmethod (setf filter-%xpath) :before ((new-value t)
                                         (filter    xpath-filter))
-  ;; Compile the XPath.
-  (setf (filter-%compiled-xpath filter)
-        (compile-xpath filter new-value)))
+  (check-type new-value xpath::xpath-expr
+              "an XPath string or an XPath sexp expression")
+  (setf (filter-%compiled-xpath filter) (xpath:compile-xpath new-value)))
 
-(defmethod compile-xpath ((filter xpath-filter)
-                          (xpath  string))
-  (xpath:compile-xpath xpath))
+(defmethod compute-filter-function ((filter xpath-filter) &key next)
+  (declare (type function next))
+  (if next
+      (locally (declare (type function next))
+        (lambda (payload)
+          (case (payload-matches? filter payload)
+            (:cannot-tell (funcall next payload))
+            ((nil)        nil)
+            (t            t))))
+      (lambda (payload)
+        (case (payload-matches? filter payload)
+          ((:cannot-tell nil) nil)
+          (t                  t)))))
 
 (defmethod print-items:print-items append ((object xpath-filter))
   `((:xpath ,(filter-xpath object) "~S")))

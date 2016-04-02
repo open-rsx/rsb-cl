@@ -9,6 +9,7 @@
 ;;; Class `complement-filter'
 
 (defclass complement-filter (composite-filter-mixin
+                             function-caching-mixin
                              funcallable-filter-mixin
                              print-items:print-items-mixin)
   ()
@@ -34,16 +35,23 @@
     (error "~@<~A can only have a single subordinate filter (not ~D).~@:>"
            (class-of instance) (length children))))
 
-(defmethod matches? ((filter complement-filter) (event t))
-  (not (matches? (first (filter-children filter)) event)))
+(defmethod compute-filter-function ((filter complement-filter) &key next)
+  (declare (ignore next))
+  (let ((function (%maybe-filter-function (first (filter-children filter)))))
+    (declare (type function function))
+    (lambda (event)
+      (not (funcall function event)))))
 
 ;;; Classes `conjoin-filter' and `disjoin-filter'
 
 (macrolet
     ((define-composite-filter ((name &rest designators)
-                               operation operation-name)
+                               operation-name
+                               empty-value
+                               short-circuit-condition short-circuit-value)
        `(progn
           (defclass ,name (composite-filter-mixin
+                           function-caching-mixin
                            funcallable-filter-mixin
                            print-items:print-items-mixin)
             ()
@@ -58,13 +66,38 @@
           ,@(mapcar
              (lambda (designator)
                `(service-provider:register-provider/class 'filter ,designator
-                  :class ',name))
+                                                          :class ',name))
              designators)
 
-          (defmethod matches? ((filter ,name) (event t))
-            (,operation (rcurry #'matches? event) (filter-children filter))))))
+          (defmethod compute-filter-function ((filter ,name) &key next)
+            (declare (ignore next))
+            (let ((children (filter-children filter)))
+              (case (length children)
+                (0
+                 (constantly ,empty-value))
+                (1
+                 (%maybe-filter-function (first children)))
+                (t
+                 (let ((functions (mapcar #'%maybe-filter-function children)))
+                   (named-lambda match (event)
+                     (loop :for function :of-type function :in functions
+                            ,short-circuit-condition (funcall function event)
+                           :do (return-from match ,short-circuit-value))
+                     ,empty-value)))))))))
 
   (define-composite-filter (conjoin-filter :conjoin :and)
-    every "and")
+    "and" t   :unless nil)
   (define-composite-filter (disjoin-filter :disjoin :or)
-    some "or"))
+    "or"  nil :when   t))
+
+;;; Utilities functions
+
+(defun %maybe-filter-function (child)
+  (cond
+    ((compute-applicable-methods
+      #'filter-function (list child))
+     (filter-function child))
+    ((functionp child)
+     child)
+    (t
+     (curry #'matches? child))))

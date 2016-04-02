@@ -34,12 +34,13 @@
   ()
   (:metaclass closer-mop:funcallable-standard-class)
   (:documentation
-   "This mixin makes instances of its subclasses funcallable."))
+   "This mixin makes instances of its subclasses funcallable.
 
-(defmethod initialize-instance :after ((instance funcallable-filter-mixin)
-                                       &key)
-  (closer-mop:set-funcallable-instance-function
-   instance (curry #'matches? instance)))
+    It can be used in conjunction with `function-caching-mixin'."))
+
+(defmethod (setf filter-%function) :after ((new-value function)
+                                           (instance  funcallable-filter-mixin))
+  (closer-mop:set-funcallable-instance-function instance new-value))
 
 ;;; `fallback-policy-mixin'
 
@@ -61,6 +62,19 @@
 
 (service-provider:register-provider/class 'filter :constant
   :class 'fallback-policy-mixin)
+
+(defmethod compute-filter-function :around ((filter fallback-policy-mixin)
+                                            &key next)
+  (declare (ignore next))
+  ;; Decide whether EVENT should match FILTER based on FILTER's
+  ;; fallback policy. This method is only called, if no more specific
+  ;; method on `matches?' made a decision.
+  (let ((fallback-result (case (filter-fallback-policy filter)
+                           (:match        t)
+                           (:do-not-match nil))))
+    (call-next-method filter :next (lambda (event)
+                                     (declare (ignore event))
+                                     fallback-result))))
 
 (defmethod matches? ((filter fallback-policy-mixin)
                      (event  t))
@@ -88,12 +102,19 @@
                            (mode      (eql :read)))
   t)
 
+(defmethod compute-filter-function :around ((filter payload-matching-mixin)
+                                            &key next)
+  (let ((function (call-next-method filter :next next)))
+    (declare (type function function))
+    (lambda (event)
+      (funcall function (event-data event)))))
+
 (defmethod matches? ((filter payload-matching-mixin) (event event))
   ;; Decide whether EVENT matches FILTER by calling `payload-matches?'
   ;; on the payload of EVENT.
   (case (payload-matches? filter (event-data event))
-    ((nil)        nil)
     (:cannot-tell (call-next-method))
+    ((nil)        nil)
     (t            t)))
 
 (defmethod payload-matches? ((filter payload-matching-mixin) (payload t))
@@ -103,8 +124,7 @@
 ;;; Class `composite-filter-mixin'
 
 (defclass composite-filter-mixin ()
-  ((children :initarg  :children
-             :type     list
+  ((children :type     list
              :accessor filter-children
              :initform '()
              :documentation
@@ -116,10 +136,21 @@
     filters. On rare occasions is it useful to make instances of this
     class itself rather than subclasses."))
 
+(defmethod shared-initialize :after ((instance   composite-filter-mixin)
+                                     (slot-names t)
+                                     &key
+                                     (children nil children-supplied?))
+  (when children-supplied?
+    (setf (filter-children instance) children)))
+
 (defmethod rsb.ep:access? ((processor composite-filter-mixin)
                            (part      t)
                            (mode      t))
   (rsb.ep:access? (filter-children processor) part mode))
+
+(defmethod (setf filter-children) :after ((new-value t)
+                                          (filter    composite-filter-mixin))
+  (update-filter-function filter))
 
 (defmethod print-items:print-items append ((object composite-filter-mixin))
   `((:child-count ,(length (filter-children object)) "(~D)")))

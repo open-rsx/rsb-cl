@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass meta-data-filter (funcallable-filter-mixin
+(defclass meta-data-filter (function-caching-mixin
+                            funcallable-filter-mixin
                             print-items:print-items-mixin)
   ((key       :initarg  :key
               :type     keyword
@@ -43,10 +44,12 @@
                            (mode      (eql :read)))
   t)
 
-(defmethod matches? ((filter meta-data-filter) (event event))
-  (let+ (((&structure-r/o filter- key predicate) filter)
-         (value (meta-data event key)))
-    (funcall (the function predicate) value)))
+(defmethod compute-filter-function ((filter meta-data-filter) &key next)
+  (declare (ignore next))
+  (let+ (((&structure-r/o filter- key predicate) filter))
+    (declare (type function predicate))
+    (lambda (event)
+      (funcall predicate (meta-data event key)))))
 
 (defmethod print-items:print-items append ((object meta-data-filter))
   (let+ (((&structure-r/o filter- key predicate) object))

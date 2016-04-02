@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass origin-filter (funcallable-filter-mixin
+(defclass origin-filter (function-caching-mixin
+                         funcallable-filter-mixin
                          print-items:print-items-mixin)
   ((origin :type     uuid:uuid
            :reader   filter-origin
@@ -35,9 +36,12 @@
                            (mode      (eql :read)))
   t)
 
-(defmethod matches? ((filter origin-filter) (event event))
-  (when-let ((event-origin (event-origin event)))
-    (uuid:uuid= (filter-origin filter) (event-origin event))))
+(defmethod compute-filter-function ((filter origin-filter) &key next)
+  (declare (ignore next))
+  (let ((filter-origin (filter-origin filter)))
+    (lambda (event)
+      (when-let ((event-origin (event-origin event)))
+        (uuid:uuid= filter-origin (event-origin event))))))
 
 (defmethod print-items:print-items append ((object origin-filter))
   `((:origin ,(filter-origin object) "~/rsb::print-id/")))

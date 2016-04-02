@@ -6,36 +6,21 @@
 
 (cl:in-package #:rsb.filter)
 
-;;; Protocol
-
-(defgeneric compile-regex (filter regex
-                           &key
-                           case-sensitive?)
-  (:documentation
-   "Compile REGEX and store the resulting compiled scanner in
-    FILTER.
-
-    CASE-SENSITIVE? controls whether the created scanner performs
-    case-sensitive matching."))
-
 ;;; `regex-filter' class
 
-(defclass regex-filter (funcallable-filter-mixin
+(defclass regex-filter (function-caching-mixin
+                        funcallable-filter-mixin
                         payload-matching-mixin
                         fallback-policy-mixin
                         print-items:print-items-mixin)
   ((regex           :type     string
-                    :accessor filter-regex
+                    :reader   filter-regex
+                    :writer   (setf filter-%regex)
                     :documentation
                     "Stores regular expression employed by the
                      filter.")
-   (scanner         :reader   filter-scanner
-                    :writer   (setf filter-%scanner)
-                    :documentation
-                    "Stores the compiled scanner corresponding to the
-                     regular expression of the filter.")
    (case-sensitive? :initarg  :case-sensitive?
-                    :accessor filter-case-sensitive?
+                    :reader   filter-case-sensitive?
                     :initform t
                     :documentation
                     "Stores a boolean which controls whether the
@@ -58,32 +43,30 @@
 (defmethod shared-initialize :after ((instance   regex-filter)
                                      (slot-names t)
                                      &key
-                                     regex)
-  (check-type regex string "a string")
+                                     (regex nil regex-supplied?))
+  (when regex-supplied?
+    (setf (filter-%regex instance) regex)))
 
-  (setf (filter-regex instance) regex))
+(defmethod (setf filter-%regex) :before ((new-value t)
+                                         (filter    regex-filter))
+  (check-type new-value string "a string"))
 
-(defmethod (setf filter-regex) :before ((new-value string)
-                                        (filter    regex-filter))
-  ;; Create a new scanner for FILTER for the regex NEW-VALUE.
-  (compile-regex filter new-value
-                 :case-sensitive? (filter-case-sensitive? filter)))
-
-(defmethod (setf filter-case-sensitive?) :before ((new-value t)
-                                                  (filter    regex-filter))
-  ;; Create a new scanner for FILTER for the regex NEW-VALUE.
-  (compile-regex filter (filter-regex filter)
-                 :case-sensitive? new-value))
-
-(defmethod compile-regex ((filter regex-filter) (regex string)
-                          &key
-                          case-sensitive?)
-  (setf (filter-%scanner filter)
-        (ppcre:create-scanner
-         regex :case-insensitive-mode (not case-sensitive?))))
-
-(defmethod payload-matches? ((filter regex-filter) (payload string))
-  (ppcre:scan (filter-scanner filter) payload))
+(defmethod compute-filter-function ((filter regex-filter) &key next)
+  (let+ (((&structure-r/o filter- regex case-sensitive?) filter)
+         (scanner (ppcre:create-scanner
+                   regex :case-insensitive-mode (not case-sensitive?))))
+    (declare (type function scanner))
+    (if next
+        (locally (declare (type function next))
+          (lambda (payload)
+            (cond
+              ((not (stringp payload))
+               (funcall next payload))
+              ((ppcre:scan scanner payload)
+               t))))
+        (lambda (payload)
+          (when (stringp payload)
+            (when (ppcre:scan scanner payload) t))))))
 
 (defmethod print-items:print-items append ((object regex-filter))
   (let+ (((&structure-r/o filter- regex case-sensitive?) object))

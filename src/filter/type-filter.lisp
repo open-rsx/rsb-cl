@@ -6,19 +6,15 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass type-filter (funcallable-filter-mixin
+(defclass type-filter (function-caching-mixin
+                       funcallable-filter-mixin
                        payload-matching-mixin
                        print-items:print-items-mixin)
-  ((type      :type     (or list symbol)
-              :accessor filter-type
-              :documentation
-              "The type of matching events.")
-   (predicate :type     (or null function)
-              :accessor filter-%predicate
-              :initform nil
-              :documentation
-              "Stores a compiled predicate implementing the filter or
-               nil if none is available."))
+  ((type :initarg  :type
+         :type     (or list symbol)
+         :reader   filter-type
+         :documentation
+         "The type of matching events."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :type (missing-required-initarg 'type-filter :type))
@@ -28,36 +24,25 @@
 (service-provider:register-provider/class 'filter :type
   :class 'type-filter)
 
-(defmethod shared-initialize :after ((instance   type-filter)
-                                     (slot-names t)
-                                     &key
-                                     (type nil type-supplied?))
-  (when type-supplied?
-    (setf (filter-type instance) type)))
-
-(defmethod (setf filter-type) :before ((new-value t)
-                                       (filter    type-filter))
-  (let+ (((&values function &ign failure?)
+(defmethod compute-filter-function ((filter type-filter) &key next)
+  (declare (ignore next))
+  (let+ ((type (filter-type filter))
+         ((&values function &ign failure?)
           (block compile
             (handler-bind (((and warning (not style-warning))
-                            (lambda (condition)
-                              (return-from compile (values nil condition t)))))
+                             (lambda (condition)
+                               (return-from compile (values nil condition t)))))
               (let ((*error-output* (make-broadcast-stream)))
                 (with-compilation-unit (:override t)
-                  (compile nil `(lambda (payload) (typep payload ',new-value)))))))))
+                  (compile nil `(lambda (payload)
+                                  (typep payload ',type)))))))))
     (when failure?
       (error 'simple-type-error
-             :datum            new-value
+             :datum            type
              :type             '(or cons symbol)
              :format-control   "~@<~S is not a valid type specifier.~@:>"
-             :format-arguments (list new-value)))
-    (setf (filter-%predicate filter) (unless failure? function))))
-
-(defmethod payload-matches? ((filter type-filter) (payload t))
-  (if-let ((predicate (filter-%predicate filter)))
-    (locally (declare (type function predicate))
-      (funcall predicate payload))
-    (typep payload (filter-type filter))))
+             :format-arguments (list type)))
+    function))
 
 (defmethod print-items:print-items append ((object type-filter))
   `((:type ,(filter-type object))))

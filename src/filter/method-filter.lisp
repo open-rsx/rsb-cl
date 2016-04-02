@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass method-filter (funcallable-filter-mixin
+(defclass method-filter (function-caching-mixin
+                         funcallable-filter-mixin
                          print-items:print-items-mixin)
   ((method :initarg  :method
            :type     (or null keyword)
@@ -32,8 +33,11 @@
                            (mode      (eql :read)))
   t)
 
-(defmethod matches? ((filter method-filter) (event event))
-  (eq (filter-method filter) (event-method event)))
+(defmethod compute-filter-function ((filter method-filter) &key next)
+  (declare (ignore next))
+  (let ((method (filter-method filter)))
+    (lambda (event)
+      (eq method (event-method event)))))
 
 (defmethod print-items:print-items append ((object method-filter))
   `((:method ,(filter-method object))))

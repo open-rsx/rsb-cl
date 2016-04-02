@@ -6,15 +6,16 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass scope-filter (funcallable-filter-mixin
+(defclass scope-filter (function-caching-mixin
+                        funcallable-filter-mixin
                         scope-mixin
                         print-items:print-items-mixin)
-  ((rsb::scope :accessor filter-scope
+  ((rsb::scope :reader   filter-scope
                :documentation
                "A superscope of the scopes of matching events.")
    (exact?     :initarg  :exact?
                :type     boolean
-               :accessor filter-exact?
+               :reader   filter-exact?
                :initform nil
                :documentation
                "Do events have to have exactly the specified scope or
@@ -35,12 +36,17 @@
                            (mode      (eql :read)))
   t)
 
-(defmethod matches? ((filter scope-filter) (event event))
-  ;; EVENT is matched by comparing its scope to the scope of FILTER.
+(defmethod compute-filter-function ((filter scope-filter) &key next)
+  (declare (ignore next))
+  ;; The event is matched by comparing its scope to the scope of
+  ;; FILTER.
   (let+ (((&structure-r/o filter- scope exact?) filter))
+    (declare (type scope scope))
     (if exact?
-        (scope=/no-coerce (event-scope event) scope)
-        (sub-scope?/no-coerce (event-scope event) scope))))
+        (lambda (event)
+          (scope=/no-coerce (event-scope event) scope))
+        (lambda (event)
+          (sub-scope?/no-coerce (event-scope event) scope)))))
 
 (defmethod print-items:print-items append ((object scope-filter))
   `((:relation ,(if (filter-exact? object) #\= #\<)  "~C")
