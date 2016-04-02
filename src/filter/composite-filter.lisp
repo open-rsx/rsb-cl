@@ -9,7 +9,8 @@
 ;;; Class `complement-filter'
 
 (defclass complement-filter (composite-filter-mixin
-                             funcallable-filter-mixin)
+                             funcallable-filter-mixin
+                             print-items:print-items-mixin)
   ()
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
@@ -43,7 +44,8 @@
                                operation operation-name)
        `(progn
           (defclass ,name (composite-filter-mixin
-                           funcallable-filter-mixin)
+                           funcallable-filter-mixin
+                           print-items:print-items-mixin)
             ()
             (:metaclass closer-mop:funcallable-standard-class)
             (:documentation

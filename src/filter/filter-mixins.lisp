@@ -49,9 +49,8 @@
     (:match        t)
     (:do-not-match nil)))
 
-(defmethod print-object ((object fallback-policy-mixin) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~A" (filter-fallback-policy object))))
+(defmethod print-items:print-items append ((object fallback-policy-mixin))
+  `((:fallback-policy ,(filter-fallback-policy object) " or ~A")))
 
 ;;; `payload-matching-mixin'
 
@@ -100,6 +99,5 @@
                            (mode      t))
   (rsb.ep:access? (filter-children processor) part mode))
 
-(defmethod print-object ((object composite-filter-mixin) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "(~D)" (length (filter-children object)))))
+(defmethod print-items:print-items append ((object composite-filter-mixin))
+  `((:child-count ,(length (filter-children object)) "(~D)")))

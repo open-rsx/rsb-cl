@@ -1,6 +1,6 @@
 ;;;; xpath-filter.lisp --- XPath-based filtering.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,7 +17,8 @@
 
 (defclass xpath-filter (funcallable-filter-mixin
                         payload-matching-mixin
-                        fallback-policy-mixin)
+                        fallback-policy-mixin
+                        print-items:print-items-mixin)
   ((xpath          :type     string
                    :accessor filter-xpath
                    :documentation
@@ -60,9 +61,8 @@
                           (xpath  string))
   (xpath:compile-xpath xpath))
 
-(defmethod print-object ((object xpath-filter) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~S" (filter-xpath object))))
+(defmethod print-items:print-items append ((object xpath-filter))
+  `((:xpath ,(filter-xpath object) "~S")))
 
 ;;; Utility functions
 

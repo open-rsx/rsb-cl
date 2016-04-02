@@ -22,7 +22,8 @@
 
 (defclass regex-filter (funcallable-filter-mixin
                         payload-matching-mixin
-                        fallback-policy-mixin)
+                        fallback-policy-mixin
+                        print-items:print-items-mixin)
   ((regex           :type     string
                     :accessor filter-regex
                     :documentation
@@ -84,9 +85,7 @@
 (defmethod payload-matches? ((filter regex-filter) (payload string))
   (ppcre:scan (filter-scanner filter) payload))
 
-(defmethod print-object ((object regex-filter) stream)
-  (let+ (((&structure-r/o filter- regex case-sensitive? fallback-policy)
-          object))
-   (print-unreadable-object (object stream :type t :identity t)
-     (format stream "~S~:[/i~;~] or ~A"
-             regex case-sensitive? fallback-policy))))
+(defmethod print-items:print-items append ((object regex-filter))
+  (let+ (((&structure-r/o filter- regex case-sensitive?) object))
+    `((:regex (,regex ,case-sensitive?) "~{~S~:[/i~;~]~}"
+              ((:before :fallback-policy))))))

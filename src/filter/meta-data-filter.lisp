@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass meta-data-filter (funcallable-filter-mixin)
+(defclass meta-data-filter (funcallable-filter-mixin
+                            print-items:print-items-mixin)
   ((key       :initarg  :key
               :type     keyword
               :reader   filter-key
@@ -47,7 +48,6 @@
          (value (meta-data event key)))
     (funcall (the function predicate) value)))
 
-(defmethod print-object ((object meta-data-filter) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (let+ (((&structure-r/o filter- key predicate) object))
-      (format stream "(~A ~S)" predicate key))))
+(defmethod print-items:print-items append ((object meta-data-filter))
+  (let+ (((&structure-r/o filter- key predicate) object))
+    `((:predicate-and-key (,predicate ,key) "~{(~A ~S)~}"))))

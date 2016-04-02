@@ -7,7 +7,8 @@
 (cl:in-package #:rsb.filter)
 
 (defclass scope-filter (funcallable-filter-mixin
-                        scope-mixin)
+                        scope-mixin
+                        print-items:print-items-mixin)
   ((rsb::scope :accessor filter-scope
                :documentation
                "A superscope of the scopes of matching events.")
@@ -41,8 +42,7 @@
         (scope=/no-coerce (event-scope event) scope)
         (sub-scope?/no-coerce (event-scope event) scope))))
 
-(defmethod print-object ((object scope-filter) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~C ~A"
-            (if (filter-exact? object) #\= #\<)
-            (scope-string (filter-scope object)))))
+(defmethod print-items:print-items append ((object scope-filter))
+  `((:relation ,(if (filter-exact? object) #\= #\<)  "~C")
+    (:scope    ,(scope-string (filter-scope object)) " ~A"
+               ((:after :relation)))))

@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass method-filter (funcallable-filter-mixin)
+(defclass method-filter (funcallable-filter-mixin
+                         print-items:print-items-mixin)
   ((method :initarg  :method
            :type     (or null keyword)
            :reader   filter-method
@@ -34,6 +35,5 @@
 (defmethod matches? ((filter method-filter) (event event))
   (eq (filter-method filter) (event-method event)))
 
-(defmethod print-object ((object method-filter) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~A" (filter-method object))))
+(defmethod print-items:print-items append ((object method-filter))
+  `((:method ,(filter-method object))))

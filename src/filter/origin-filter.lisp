@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.filter)
 
-(defclass origin-filter (funcallable-filter-mixin)
+(defclass origin-filter (funcallable-filter-mixin
+                         print-items:print-items-mixin)
   ((origin :type     uuid:uuid
            :reader   filter-origin
            :writer   (setf filter-%origin)
@@ -47,6 +48,5 @@
 (defmethod matches? ((filter origin-filter) (event event))
   (uuid:uuid= (filter-origin filter) (event-origin event)))
 
-(defmethod print-object ((object origin-filter) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~/rsb::print-id/" (filter-origin object))))
+(defmethod print-items:print-items append ((object origin-filter))
+  `((:origin ,(filter-origin object) "~/rsb::print-id/")))

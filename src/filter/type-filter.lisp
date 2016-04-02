@@ -7,7 +7,8 @@
 (cl:in-package #:rsb.filter)
 
 (defclass type-filter (funcallable-filter-mixin
-                       payload-matching-mixin)
+                       payload-matching-mixin
+                       print-items:print-items-mixin)
   ((type      :type     (or list symbol)
               :accessor filter-type
               :documentation
@@ -58,6 +59,5 @@
       (funcall predicate payload))
     (typep payload (filter-type filter))))
 
-(defmethod print-object ((object type-filter) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~A" (filter-type object))))
+(defmethod print-items:print-items append ((object type-filter))
+  `((:type ,(filter-type object))))
