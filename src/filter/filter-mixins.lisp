@@ -78,3 +78,28 @@
 (defmethod payload-matches? ((filter payload-matching-mixin) (payload t))
   ;; The default behavior is not to decide based on the payload.
   :cannot-tell)
+
+;;; Class `composite-filter-mixin'
+
+(defclass composite-filter-mixin ()
+  ((children :initarg  :children
+             :type     list
+             :accessor filter-children
+             :initform '()
+             :documentation
+             "A list of subordinate filters."))
+  (:metaclass closer-mop:funcallable-standard-class)
+  (:documentation
+   "Instances of subclasses of this class implement complex filtering
+    behavior by combining decisions of a set of subordinate
+    filters. On rare occasions is it useful to make instances of this
+    class itself rather than subclasses."))
+
+(defmethod rsb.ep:access? ((processor composite-filter-mixin)
+                           (part      t)
+                           (mode      t))
+  (rsb.ep:access? (filter-children processor) part mode))
+
+(defmethod print-object ((object composite-filter-mixin) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "(~D)" (length (filter-children object)))))
