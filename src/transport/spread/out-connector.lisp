@@ -29,8 +29,8 @@
 
 (defmethod notify ((recipient out-connector)
                    (subject   scope)
-                   (action    (eql :detached)))
-  (notify recipient t :detached))
+                   (action    t))
+  (notify recipient t action))
 
 (defmethod handle ((sink out-connector) (data event))
   (let+ (((&structure-r/o connector- (cache %scope->groups-cache)) sink)
