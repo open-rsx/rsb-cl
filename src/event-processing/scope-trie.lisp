@@ -217,7 +217,7 @@
   (define-scope-trie-function scope-trie-map (function)
     "Call FUNCTION for values associated to super-scopes of SCOPE in
      TRIE."
-    (let ((function (coerce function 'function)))
+    (let ((function (ensure-function function)))
       (visit (state nil nil)
         (let ((value (node-state-value state)))
           (unless (eq value +no-value+)

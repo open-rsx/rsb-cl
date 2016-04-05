@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utilities used in the model.inference module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,8 +74,8 @@
                    &key
                    (key           #'values-list)
                    (initial-value '(nil t)))
-  (let ((function (coerce function 'function))
-        (key      (coerce key 'function)))
+  (let ((function (ensure-function function))
+        (key      (ensure-function key)))
     (values-list
      (reduce (lambda (element accum)
                (multiple-value-list

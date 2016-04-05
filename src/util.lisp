@@ -1,6 +1,6 @@
 ;;;; util.lisp ---
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -262,7 +262,7 @@ identity."
 
    * If it is called after one or more elements of ARGS have become
      garbage, FUNCTION is not called and two nil values are returned."
-  (let ((function (coerce function 'function)))
+  (let ((function (ensure-function function)))
     (unless args
       (return-from curry/weak
         (lambda (&rest new-args)
