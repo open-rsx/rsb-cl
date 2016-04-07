@@ -283,25 +283,7 @@
                  :components ((:file       "package")
                               (:file       "conditions")
                               (:file       "protocol")
-                              (:file       "mixins")))
-
-                (:module     "patterns-request-reply"
-                 :pathname   "src/patterns/request-reply"
-                 :depends-on ("src" "patterns")
-                 :serial     t
-                 :components ((:file       "package")
-                              (:file       "types")
-                              (:file       "variables")
-                              (:file       "conditions")
-                              (:file       "protocol")
-
-                              (:file       "future")
-
-                              (:file       "server")
-                              (:file       "local-server")
-                              (:file       "remote-server")
-
-                              (:file       "macros"))))
+                              (:file       "mixins"))))
 
   :in-order-to ((test-op (test-op :cl-rsb-test))))
 
@@ -405,20 +387,7 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "protocol")
-                              (:file       "mixins")))
-
-                (:module     "patterns-request-reply"
-                 :pathname   "test/patterns/request-reply"
-                 :depends-on ("test" "patterns")
-                 :serial     t
-                 :components ((:file       "package")
-                              (:file       "future")
-                              (:file       "server")
-                              (:file       "local-server")
-                              (:file       "remote-server")
-                              (:file       "macros")
-
-                              (:file       "integration")))))
+                              (:file       "mixins")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise

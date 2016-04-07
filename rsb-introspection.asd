@@ -1,6 +1,6 @@
 ;;;; rsb-introspection.asd --- System definition for introspection for RSB.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,10 +18,11 @@
   :description "Introspection support for RSB."
   :defsystem-depends-on (:cl-protobuf)
   :depends-on  (:utilities.print-items
-                (:version :uiop      "3") ; for portable platform information
+                (:version :uiop                       "3") ; for portable platform information
 
-                (:version :cl-rsb    #.(version/string))
-                (:version :rsb-model #.(version/string)))
+                (:version :cl-rsb                     #.(version/string))
+                (:version :rsb-model                  #.(version/string))
+                (:version :rsb-patterns-request-reply #.(version/string)))
   :encoding    :utf-8
   :components  ((:protocol-buffer-descriptor-directory "protocol"
                  :pathname   #.+protocol-directory+

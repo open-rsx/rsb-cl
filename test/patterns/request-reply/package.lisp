@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,6 +22,9 @@
    #:method1
    #:local-method
    #:remote-method)
+
+  (:export
+   #:patterns-request-reply-root)
 
   (:documentation
    "This package contains unit tests for the patterns.request-reply
