@@ -59,19 +59,17 @@
                               (asdf:system-relative-pathname
                                :rsb "examples/"))))
 
-(deftestsuite examples-root (root)
-  ()
-  (:timeout 60)
-  (:documentation
-   "Test suite for compiling and loading example files in the examples
-    directory."))
+(def-suite examples-root
+  :in root
+  :description
+  "Test suite for compiling and loading example files in the examples
+   directory.")
+;; TODO (:timeout 60)
 
-(addtest (examples-root
-          :documentation
-          "Test compiling and loading example files in the examples
-           directory.")
-  compile-and-load
+(test (compile-and-load :fixture with-configuration)
+  "Test compiling and loading example files in the examples
+   directory."
 
-  (ensure-cases (file)
-      (example-files)
-    (test-example file)))
+  (mapc (lambda (file)
+          (finishes (test-example file)))
+        (example-files)))

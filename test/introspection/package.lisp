@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the introspection module.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,7 @@
    #:iterate
    #:more-conditions
 
-   #:lift
+   #:fiveam
 
    #:rsb
    #:rsb.patterns.request-reply
@@ -90,9 +90,10 @@
 
 ;;; Test suite
 
-(deftestsuite introspection-root (root)
-  ()
-  (:dynamic-variables
-   (rsb:*configuration* +introspection-configuration+))
-  (:documentation
-   "Root unit test suite of the introspection module."))
+(def-suite introspection-root
+  :in root
+  :description
+  "Root unit test suite of the introspection module.")
+(in-suite introspection-root)
+#+TODO   (:dynamic-variables
+          (rsb:*configuration* +introspection-configuration+))

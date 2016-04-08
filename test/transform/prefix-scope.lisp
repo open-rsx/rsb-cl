@@ -6,47 +6,41 @@
 
 (cl:in-package #:rsb.transform.test)
 
-(deftestsuite rsb.transform.prefix-scope-root (rsb.transform-root)
-  ()
-  (:documentation
-   "Unit tests for the `prefix-scope' transform."))
+(def-suite rsb.transform.prefix-scope-root
+  :in rsb.transform-root
+  :description
+  "Unit tests for the `prefix-scope' transform.")
+(in-suite rsb.transform.prefix-scope-root)
 
-(addtest (rsb.transform.prefix-scope-root
-          :documentation
-          "Test constructing `prefix-scope' instances.")
-  construct
+(test construct
+  "Test constructing `prefix-scope' instances."
 
-  (ensure-condition transform-creation-error
-    (make-transform :prefix-scope))
-  (ensure-condition transform-creation-error
-    (make-transform :prefix-scope :prefix 1)))
+  (signals transform-creation-error (make-transform :prefix-scope))
+  (signals transform-creation-error (make-transform :prefix-scope :prefix 1)))
 
-(addtest (rsb.transform.prefix-scope-root
-          :documentation
-          "Smoke test for the `prefix-scope' transform.")
-  smoke
+(test smoke
+  "Smoke test for the `prefix-scope' transform."
 
-  (ensure-cases (prefix event-scope expected)
-      '(("/"        "/"        "/")
-        ("/"        "/foo"     "/foo")
-        ("/"        "/foo/bar" "/foo/bar")
-        ("/baz"     "/"        "/baz/")
-        ("/baz"     "/foo"     "/baz/foo")
-        ("/baz"     "/foo/bar" "/baz/foo/bar")
-        ("/baz/fez" "/"        "/baz/fez/")
-        ("/baz/fez" "/foo"     "/baz/fez/foo")
-        ("/baz/fez" "/foo/bar" "/baz/fez/foo/bar"))
+  (mapc
+   (lambda+ ((prefix event-scope expected))
+     (call-with-transform-checking-thunk
+      (lambda (do-it)
+        (is (scope= expected (event-scope (funcall do-it)))))
+      (list :prefix-scope :prefix prefix)
+      (list event-scope "")))
 
-    (call-with-transform-checking-thunk
-     (lambda (do-it)
-       (ensure-same expected (event-scope (funcall do-it)) :test #'scope=))
-     (list :prefix-scope :prefix prefix)
-     (list event-scope ""))))
+   '(("/"        "/"        "/")
+     ("/"        "/foo"     "/foo")
+     ("/"        "/foo/bar" "/foo/bar")
+     ("/baz"     "/"        "/baz/")
+     ("/baz"     "/foo"     "/baz/foo")
+     ("/baz"     "/foo/bar" "/baz/foo/bar")
+     ("/baz/fez" "/"        "/baz/fez/")
+     ("/baz/fez" "/foo"     "/baz/fez/foo")
+     ("/baz/fez" "/foo/bar" "/baz/fez/foo/bar"))))
 
-(addtest (rsb.transform.prefix-scope-root
-          :documentation
-          "Test printing `prefix-scope' instances.")
-  print
+(test print
+  "Test printing `prefix-scope' instances."
 
   (let ((transform (make-transform :prefix-scope :prefix "/foo")))
-    (ensure (search "/foo" (princ-to-string transform)))))
+    (is (search "/foo" (princ-to-string transform)))))

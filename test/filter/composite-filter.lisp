@@ -8,10 +8,10 @@
 
 ;;; `complement-filter'
 
-(deftestsuite complement-filter-root (filter-root)
-  ()
-  (:documentation
-   "Unit tests for the `complement-filter' class."))
+(def-suite complement-filter-root
+  :in filter-root
+  :description
+  "Unit tests for the `complement-filter' class.")
 
 (define-basic-filter-tests (complement-filter :complement)
   `(;; exactly one child is required.
@@ -28,10 +28,10 @@
 
 ;;; `conjoin-filter'
 
-(deftestsuite conjoin-filter-root (filter-root)
-  ()
-  (:documentation
-   "Unit tests for the `conjoin-filter' class."))
+(def-suite conjoin-filter-root
+  :in filter-root
+  :description
+  "Unit tests for the `conjoin-filter' class.")
 
 (define-basic-filter-tests (conjoin-filter :and)
   '(;; these are ok
@@ -51,10 +51,10 @@
 
 ;;; `disjoin-filter'
 
-(deftestsuite disjoin-filter-root (filter-root)
-  ()
-  (:documentation
-   "Unit tests for the `disjoin-filter' class."))
+(def-suite disjoin-filter-root
+  :in filter-root
+  :description
+  "Unit tests for the `disjoin-filter' class.")
 
 (define-basic-filter-tests (disjoin-filter :or)
   '(;; these are ok

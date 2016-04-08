@@ -9,7 +9,8 @@
    #:cl
    #:alexandria
    #:let-plus
-   #:lift
+
+   #:fiveam
 
    #:rsb
    #:rsb.event-processing
@@ -22,10 +23,10 @@
 
 (cl:in-package #:rsb.event-processing.test)
 
-(deftestsuite event-processing-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the event-processing module."))
+(def-suite event-processing-root
+  :in root
+  :description
+  "Root unit test suite for the event-processing module.")
 
 ;;; `mock-processor' mock class
 

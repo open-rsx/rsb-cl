@@ -1,6 +1,6 @@
 ;;;; builder.lisp --- Unit tests for builder support.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
    #:alexandria
    #:let-plus
 
-   #:lift
+   #:fiveam
 
    #:rsb
    #:rsb.builder)
@@ -29,10 +29,12 @@
 
 (cl:in-package #:rsb.builder.test)
 
-(deftestsuite rsb-builder-root (root)
-  ()
-  (:documentation
-   "Unit tests for builder support."))
+(def-suite rsb-builder-root
+  :description
+  "Unit tests for builder support.")
+
+(defun run-tests ()
+  (run! 'rsb-builder-root))
 
 (defun check-un-build-calls (builder atom-type cases &key peek-function)
   (mapc (lambda+ ((object expected-calls))
@@ -40,13 +42,11 @@
                   (record-un-build-calls/peeking
                    #'bp:walk-nodes builder atom-type object
                    :peek-function peek-function)))
-            (ensure-same calls expected-calls :test #'equal)))
+            (is (equal expected-calls calls))))
         cases))
 
-(addtest (rsb-builder-root
-          :documentation
-          "Smoke test for \"unbuilding\" `scope' instances.")
-  scope/smoke
+(test scope/smoke
+  "Smoke test for \"unbuilding\" `scope' instances."
 
   (check-un-build-calls
    t 'string
@@ -60,10 +60,8 @@
                   (:peek  :component () "foo")
                   (:peek  :component () "bar")))))))
 
-(addtest (rsb-builder-root
-          :documentation
-          "Smoke test for the \"unbuilding\" `event' instances.")
-  event/smoke
+(test event/smoke
+  "Smoke test for the \"unbuilding\" `event' instances."
 
   (check-un-build-calls
    t '(or number string
@@ -105,11 +103,9 @@
          :type     vector
          :initform #(1 2))))
 
-(addtest (rsb-builder-root
-          :documentation
-          "Smoke test for \"unbuilding\" `event' instances, switching
-           to universal builder for the data relation.")
-  event/universal-builder-for-event-data
+(test event/universal-builder-for-event-data
+  "Smoke test for \"unbuilding\" `event' instances, switching to
+   universal builder for the data relation."
 
   (check-un-build-calls
    t '(or number string

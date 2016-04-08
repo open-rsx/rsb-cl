@@ -9,7 +9,7 @@
    #:cl
    #:let-plus
 
-   #:lift
+   #:fiveam
 
    #:rsb
    #:rsb.introspection)
@@ -36,11 +36,10 @@
 
 (cl:in-package #:rsb.introspection.builder.test)
 
-(deftestsuite rsb-introspection-builder-root ()
-  ()
-  (:documentation
-   "Unit test suite for the introspection model (un)builder
-    support."))
+(def-suite rsb-introspection-builder-root
+  :description
+  "Unit test suite for the introspection model (un)builder support.")
+(in-suite rsb-introspection-builder-root)
 
 (defvar *stop-type* '(or number string uuid:uuid puri:uri scope))
 
@@ -52,8 +51,7 @@
             (ensure-same calls expected-calls :test #'equal)))
         cases))
 
-(addtest (rsb-introspection-builder-root)
-  remote-introspection-database/smoke
+(test remote-introspection-database/smoke
 
   (check-un-build-calls
    t nil
@@ -61,8 +59,7 @@
         `(,database ((:peek  nil () ,database)
                      (:visit nil () ,database :database ((:children . *)) ())))))))
 
-(addtest (rsb-introspection-builder-root)
-  process-entry/smoke
+(test process-entry/smoke
 
   (check-un-build-calls
    t *stop-type*
@@ -93,8 +90,7 @@
                   ,@(mapcar (lambda (x) `(:peek :commandline-arguments () ,x))
                             commandline-arguments)))))))
 
-(addtest (rsb-introspection-builder-root)
-  host-entry/smoke
+(test host-entry/smoke
 
   (check-un-build-calls
    t *stop-type*

@@ -10,7 +10,8 @@
    #:let-plus
    #:iterate
    #:more-conditions
-   #:lift
+
+   #:fiveam
 
    #:rsb
    #:rsb.patterns.request-reply
@@ -32,7 +33,7 @@
 
 (cl:in-package #:rsb.patterns.request-reply.test)
 
-(deftestsuite patterns-request-reply-root (patterns-root)
-  ()
-  (:documentation
-   "Root unit test suite for the patterns.request-reply module."))
+(def-suite patterns-request-reply-root
+  :in patterns-root
+  :description
+  "Root unit test suite for the patterns.request-reply module.")

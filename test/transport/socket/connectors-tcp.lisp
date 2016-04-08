@@ -1,6 +1,6 @@
 ;;;; connectors-tcp.lisp --- Unit tests for TCP connector classes.
 ;;;;
-;;;; Copyright (C) 2012-2018 Jan Moringen
+;;;; Copyright (C) 2012-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,15 +8,14 @@
 
 ;;; `connector' class
 
-(deftestsuite tcp-connector-root (transport-socket-root)
-  ()
-  (:documentation
-   "Unit tests for the `tcp-connector' class."))
+(def-suite tcp-connector-root
+  :in transport-socket-root
+  :description
+  "Unit tests for the `tcp-connector' class.")
+(in-suite tcp-connector-root)
 
-(addtest (tcp-connector-root
-          :documentation
-          "Test constructing instances of the `tcp-connector' class.")
-  construction/smoke
+(test construction/smoke
+  "Test constructing instances of the `tcp-connector' class."
 
   (flet ((do-it (&rest args)
            (apply #'make-instance 'tcp-connector
@@ -25,22 +24,18 @@
                   :port      1
                   :converter nil
                   args)))
-    (ensure-condition 'incompatible-initargs
-      (do-it :server? nil :portfile "-"))
-    (ensure-condition 'incompatible-initargs
-      (do-it :server? :auto :portfile "-"))
-    (ensure-condition 'error
-      (do-it :if-leftover-connections :foo))
-    (ensure-condition 'error
-      (do-it :if-leftover-connections "foo")))
+    (signals incompatible-initargs (do-it :server? nil :portfile "-"))
+    (signals incompatible-initargs (do-it :server? :auto :portfile "-"))
+    (signals error                 (do-it :if-leftover-connections :foo))
+    (signals error                 (do-it :if-leftover-connections "foo")))
 
-  (let ((instance (make-instance 'tcp-connector
-                                 :schema    :tcp-socket
-                                 :host      "foo"
-                                 :port      1
-                                 :converter nil)))
-    (ensure-same (connector-host instance) "foo" :test #'equal)
-    (ensure-same (connector-port instance) 1     :test #'eql)))
+    (let ((instance (make-instance 'tcp-connector
+                                   :schema    :tcp-socket
+                                   :host      "foo"
+                                   :port      1
+                                   :converter nil)))
+      (is (equal "foo" (connector-host instance)))
+      (is (equal 1 (connector-port instance))))))
 
 ;;; Connector subclasses
 
@@ -49,11 +44,12 @@
        (let ((class-name (format-symbol :rsb.transport.socket "TCP-~A-CONNECTOR" direction))
              (suite-name (format-symbol *package* "TCP-~A-CONNECTOR-ROOT" direction)))
          `(progn
-            (deftestsuite ,suite-name (transport-socket-root)
-              ()
-              (:documentation
-               ,(format nil "Test suite for the `~(~A~)' class."
-                        class-name)))
+            (def-suite ,suite-name
+              :in transport-socket-root
+              :description
+              ,(format nil "Test suite for the `~(~A~)' class."
+                       class-name))
+            (in-suite ,suite-name)
 
             (define-basic-connector-test-cases ,class-name
               :name               :tcp-socket
@@ -69,14 +65,12 @@
 
               :expected-direction ,(make-keyword direction))
 
-            (addtest (,suite-name
-                      :documentation
-                      ,(format nil "Test constructing `~(~A~)' instances."
-                               class-name))
-              construct/invalid
+            (test construct/invalid
+              ,(format nil "Test constructing `~(~A~)' instances."
+                       class-name)
 
               ;; Missing :converter initarg.
-              (ensure-condition 'missing-required-initarg
+              (signals missing-required-initarg
                 (make-instance ',class-name)))))))
 
   (define-connector-suite :out)

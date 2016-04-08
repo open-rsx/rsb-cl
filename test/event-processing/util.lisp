@@ -1,28 +1,25 @@
 ;;;; util.lisp --- Unit tests for utility functions of the event-processing module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.event-processing.test)
 
-(deftestsuite util-root (event-processing-root)
-  ()
-  (:documentation
-   "Unit tests for the utility functions of the event-processing module."))
+(def-suite util-root
+  :in event-processing-root
+  :description
+  "Unit tests for the utility functions of the event-processing module.")
 
-(addtest (util-root
-          :documentation
-          "Smoke test for the `merge-implementation-info' function.")
-  merge-implementation-infos-smoke
+(test merge-implementation-infos-smoke
+  "Smoke test for the `merge-implementation-info' function."
 
-  (ensure-cases (input expected)
-      '((()                              :implemented)
-        ((:not-implemented)              :not-implemented)
-        ((:implemented)                  :implemented)
-        ((:implemented :not-implemented) :not-implemented)
-        ((:implemented :implemented)     :implemented))
+  (mapc (lambda+ ((input expected))
+          (let ((result (reduce #'merge-implementation-infos input)))
+            (is (eq result expected))))
 
-    (let ((result (reduce #'merge-implementation-infos input)))
-      (ensure-same result expected
-                   :test #'eq))))
+        '((()                              :implemented)
+          ((:not-implemented)              :not-implemented)
+          ((:implemented)                  :implemented)
+          ((:implemented :not-implemented) :not-implemented)
+          ((:implemented :implemented)     :implemented))))

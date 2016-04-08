@@ -6,10 +6,10 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite method-filter-root (filter-root)
-  ()
-  (:documentation
-   "Test suite for the `method-filter' class."))
+(def-suite method-filter-root
+  :in filter-root
+  :description
+  "Test suite for the `method-filter' class.")
 
 (define-basic-filter-tests (method-filter :method)
   '(;; missing :method initarg

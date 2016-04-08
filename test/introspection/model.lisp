@@ -1,46 +1,43 @@
 ;;;; model.lisp --- Tests for model classes.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.introspection.test)
 
-(deftestsuite introspection-model-root (introspection-root)
-  ()
-  (:documentation
-   "Unit test suite for the model classes."))
+(def-suite introspection-model-root
+  :in introspection-root
+  :description
+  "Unit test suite for the model classes.")
+(in-suite introspection-model-root)
 
 ;;; Functions related to `process-info' classes
 
-(addtest (introspection-model-root
-          :documentation
-          "Smoke test for the `current-process-info' function.")
-  current-process-info/smoke
+(test current-process-info/smoke
+  "Smoke test for the `current-process-info' function."
 
   (let ((info (current-process-info)))
-    (ensure (typep (process-info-process-id info)            'non-negative-integer))
-    (ensure (typep (process-info-program-name info)          'string))
-    (ensure (typep (process-info-commandline-arguments info) 'list))
-    (ensure (typep (process-info-start-time info)            'local-time:timestamp))
-    (ensure (typep (process-info-executing-user info)        'string))
-    (ensure (typep (process-info-rsb-version info)           '(or null string)))
-    (ensure (typep (process-info-display-name info)          '(or null string)))))
+    (is (typep (process-info-process-id info)            'non-negative-integer))
+    (is (typep (process-info-program-name info)          'string))
+    (is (typep (process-info-commandline-arguments info) 'list))
+    (is (typep (process-info-start-time info)            'local-time:timestamp))
+    (is (typep (process-info-executing-user info)        'string))
+    (is (typep (process-info-rsb-version info)           '(or null string)))
+    (is (typep (process-info-display-name info)          '(or null string)))))
 
 ;;; Functions related to `host-info' classes
 
-(addtest (introspection-model-root
-          :documentation
-          "Smoke test for the `current-host-info' function.")
-  current-host-info/smoke
+(test current-host-info/smoke
+  "Smoke test for the `current-host-info' function."
 
   (let ((info (current-host-info)))
-    (ensure (typep (host-info-id info)               'string))
-    (ensure (typep (host-info-hostname info)         'string))
-    (ensure (typep (host-info-machine-type info)     'string))
-    (ensure (typep (host-info-machine-version info)  'string))
-    (ensure (typep (host-info-software-type info)    'string))
-    (ensure (typep (host-info-software-version info) 'string))))
+    (is (typep (host-info-id info)               'string))
+    (is (typep (host-info-hostname info)         'string))
+    (is (typep (host-info-machine-type info)     'string))
+    (is (typep (host-info-machine-version info)  'string))
+    (is (typep (host-info-software-type info)    'string))
+    (is (typep (host-info-software-version info) 'string))))
 
 ;;; `hello' and `bye' classes
 

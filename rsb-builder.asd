@@ -1,6 +1,6 @@
 ;;;; rsb-builder.asd --- Builder support for RSB objects.
 ;;;;
-;;;; Copyright (C) 2015, 2016, 2018 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -37,7 +37,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"                               "1.7.1")
+  :depends-on  ((:version :fiveam                              "1.4")
 
                 (:version "architecture.builder-protocol/test" "0.3")
 
@@ -49,6 +49,5 @@
                  :components ((:file       "builder"))))
 
   :perform (test-op (operation component)
-             (eval (read-from-string "(lift:run-tests :config
-                                        (asdf:system-relative-pathname
-                                         :rsb-builder/test \"lift-builder.config\"))"))))
+                    (symbol-call '#:log '#:config :warn) ; less noise
+                    (symbol-call '#:rsb.builder.test '#:run-tests)))

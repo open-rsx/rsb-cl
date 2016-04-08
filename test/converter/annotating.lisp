@@ -1,15 +1,16 @@
 ;;;; annotating.lisp --- Unit test for the annotating converter class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter.test)
 
-(deftestsuite annotating-root (converter-root)
-  ()
-  (:documentation
-   "Unit tests for the `annotating' converter class."))
+(def-suite annotating-root
+  :in converter-root
+  :description
+  "Unit tests for the `annotating' converter class.")
+(in-suite annotating-root)
 
 (define-basic-converter-test-cases (:annotating
                                     :make-converter (make-instance 'rsb.converter::annotating))

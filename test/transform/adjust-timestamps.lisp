@@ -6,94 +6,90 @@
 
 (cl:in-package #:rsb.transform.test)
 
-(deftestsuite rsb.transform.adjust-timestamps-root (rsb.transform-root)
-  ()
-  (:documentation
-   "Test suite for the `adjust-timestamps' transform."))
+(def-suite rsb.transform.adjust-timestamps-root
+  :in rsb.transform-root
+  :description
+  "Test suite for the `adjust-timestamps' transform.")
+(in-suite rsb.transform.adjust-timestamps-root)
 
-(addtest (rsb.transform.adjust-timestamps-root
-          :documentation
-          "Test constructing `adjust-timestamps' instances.")
-  construct
+(test construct
+  "Test constructing `adjust-timestamps' instances."
 
-  (ensure-cases (initargs expected)
-      `(;; Some invalid cases.
-        ((:adjustments 1)                                          transform-creation-error)
-        ((:adjustments :foo)                                       transform-creation-error)
-        ((:adjustments (:foo))                                     transform-creation-error)
-        ((:adjustments ((:foo)))                                   transform-creation-error)
-        ((:adjustments ((:create (:copy))))                        transform-creation-error)
-        ((:adjustments ((:create (+))))                            transform-creation-error)
-        ((:adjustments ((:create (+ 1))))                          transform-creation-error)
-
-        ;; These are OK.
-        (()                                                        t)
-        ((:adjustments ())                                         t)
-        ((:adjustments ((:create :now)))                           t)
-        ((:adjustments ((:create ,(local-time:now))))              t)
-        ((:adjustments ((:create ,(local-time:now)) (:send :now))) t)
-        ((:adjustments ((:send   (:copy :create))))                t)
-        ((:adjustments ((:send   (+ :create 5))))                  t)
-        ((:adjustments ((:send   (+ (+ :create -1) 5))))           t)
-        ((:adjustments ((:send   :self)))                          t))
-
-    (flet ((do-it ()
-             (apply #'make-transform :adjust-timestamps initargs)))
-      (case expected
-        (transform-creation-error
-         (ensure-condition 'transform-creation-error (do-it)))
-        (t
-         (do-it))))))
-
-(addtest (rsb.transform.adjust-timestamps-root
-          :documentation
-          "Smoke test for the `adjust-timestamps' transform.")
-  smoke
-
-  (ensure-cases (adjustments expected)
-      `(;; Some invalid cases.
-        (((:copied :no-such-timestamp)) error)
-
-        ;; These are OK.
-        (()
-         (:create))
-
-        (((:fresh ,(local-time:now)))
-         (:create :fresh))
-
-        (((:copied :now))
-         (:create :copied))
-
-        (((:copied (:copy :create)))
-         (:create :copied))
-
-        (((:copied-1 :now) (:copied-2 :copied-1))
-         (:create :copied-1 :copied-2))
-
-        (((:adjusted (+ :create 5)))
-         (:create :adjusted))
-
-        (((:create (+ :self -1)))
-         (:create)))
-
-    (call-with-transform-checking-thunk
-     (lambda (do-it)
+  (mapc
+   (lambda+ ((initargs expected))
+     (flet ((do-it ()
+              (apply #'make-transform :adjust-timestamps initargs)))
        (case expected
-         (error (ensure-condition 'error (funcall do-it)))
-         (t     (let ((result (funcall do-it)))
-                  (dolist (expected expected)
-                    (ensure (typep (timestamp result expected)
-                                   'local-time:timestamp)))))))
-     (list :adjust-timestamps :adjustments adjustments)
-     (list "/" 5))))
+         (transform-creation-error
+          (signals transform-creation-error (do-it)))
+         (t
+          (do-it)))))
 
-(addtest (rsb.transform.adjust-timestamps-root
-          :documentation
-          "Test printing `adjust-timestamps' instances.")
-  print
+   `( ;; Some invalid cases.
+     ((:adjustments 1)                                          transform-creation-error)
+     ((:adjustments :foo)                                       transform-creation-error)
+     ((:adjustments (:foo))                                     transform-creation-error)
+     ((:adjustments ((:foo)))                                   transform-creation-error)
+     ((:adjustments ((:create (:copy))))                        transform-creation-error)
+     ((:adjustments ((:create (+))))                            transform-creation-error)
+     ((:adjustments ((:create (+ 1))))                          transform-creation-error)
+
+     ;; These are OK.
+     (()                                                        t)
+     ((:adjustments ())                                         t)
+     ((:adjustments ((:create :now)))                           t)
+     ((:adjustments ((:create ,(local-time:now))))              t)
+     ((:adjustments ((:create ,(local-time:now)) (:send :now))) t)
+     ((:adjustments ((:send   (:copy :create))))                t)
+     ((:adjustments ((:send   (+ :create 5))))                  t)
+     ((:adjustments ((:send   (+ (+ :create -1) 5))))           t)
+     ((:adjustments ((:send   :self)))                          t))))
+
+(test smoke
+  "Smoke test for the `adjust-timestamps' transform."
+
+  (mapc (lambda+ ((adjustments expected))
+          (call-with-transform-checking-thunk
+           (lambda (do-it)
+             (case expected
+               (error (signals error (funcall do-it)))
+               (t     (let ((result (funcall do-it)))
+                        (dolist (expected expected)
+                          (is (typep (timestamp result expected)
+                                     'local-time:timestamp)))))))
+           (list :adjust-timestamps :adjustments adjustments)
+           (list "/" 5)))
+
+        `( ;; Some invalid cases.
+          (((:copied :no-such-timestamp)) error)
+
+          ;; These are OK.
+          (()
+           (:create))
+
+          (((:fresh ,(local-time:now)))
+           (:create :fresh))
+
+          (((:copied :now))
+           (:create :copied))
+
+          (((:copied (:copy :create)))
+           (:create :copied))
+
+          (((:copied-1 :now) (:copied-2 :copied-1))
+           (:create :copied-1 :copied-2))
+
+          (((:adjusted (+ :create 5)))
+           (:create :adjusted))
+
+          (((:create (+ :self -1)))
+           (:create)))))
+
+(test print
+  "Test printing `adjust-timestamps' instances."
 
   (let ((transform (make-transform :adjust-timestamps
                                    :adjustments '((:create (+ :self 1))
                                                   (:copy-of-send :send)))))
-    (ensure (search "CREATE ← (+ SELF 1)" (princ-to-string transform)))
-    (ensure (search "COPY-OF-SEND ← SEND" (princ-to-string transform)))))
+    (is (search "CREATE ← (+ SELF 1)" (princ-to-string transform)))
+    (is (search "COPY-OF-SEND ← SEND" (princ-to-string transform)))))

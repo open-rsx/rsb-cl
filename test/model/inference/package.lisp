@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the model.inference module.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,7 @@
    #:iterate
    #:more-conditions
 
-   #:lift
+   #:fiveam
 
    #:rsb.model
    #:rsb.model.inference
@@ -42,7 +42,7 @@
 
 ;;; Test suite
 
-(deftestsuite rsb-model-inference-root (rsb-model-root)
-  ()
-  (:documentation
-   "Root unit test suite of the model.inference module."))
+(def-suite rsb-model-inference-root
+  :in rsb-model-root
+  :description
+  "Root unit test suite of the model.inference module.")

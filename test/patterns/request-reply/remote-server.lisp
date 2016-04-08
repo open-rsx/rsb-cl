@@ -8,15 +8,14 @@
 
 ;;; `remote-method' tests
 
-(deftestsuite remote-method-root (patterns-request-reply-root)
-  ()
-  (:documentation
-   "Test suite for `remote-method' class."))
+(def-suite remote-method-root
+  :in patterns-request-reply-root
+  :description
+  "Test suite for `remote-method' class.")
+(in-suite remote-method-root)
 
-(addtest (remote-method-root
-          :documentation
-          "Test constructing `remote-method' instances.")
-  construction
+(test construction
+  "Test constructing `remote-method' instances."
 
   (make-instance 'remote-method
                  :scope  "/remoteserver/foo"
@@ -25,11 +24,11 @@
 
 ;;; `remote-server' tests
 
-(deftestsuite remote-server-root (patterns-request-reply-root
-                                  participant-suite)
-  ()
-  (:documentation
-   "Unit tests for the `remote-server' class."))
+(def-suite remote-server-root
+  :in patterns-request-reply-root
+  :description
+  "Unit tests for the `remote-server' class.")
+(in-suite remote-server-root)
 
 (define-basic-participant-test-cases (:remote-server
                                       :check-transport-urls? nil)
@@ -68,21 +67,19 @@
   ;; No transports => error
   '("/" (:transports ((t :enabled nil))) error))
 
-(addtest (remote-server-root
-          :documentation
-          "Test adding methods to a `remote-server' instance.")
-  set-method
+(test set-method
+  "Test adding methods to a `remote-server' instance."
 
   (with-participant (server :remote-server "/rsbtest/remoteserver/set-method")
-    (ensure-cases (name expected)
-        `(("foo"          t)
-          (nil            t)
+    (mapc (lambda+ ((name expected))
+            (let+ (((&flet do-it ()
+                      (server-method server name))))
+              (case expected
+                (type-error (signals type-error (do-it)))
+                ((t)        (is (not (null (do-it))))))))
 
-          ;; invalid method name => error
-          ("%invalidname" type-error))
+          `(("foo"          t)
+            (nil            t)
 
-      (let+ (((&flet do-it ()
-                (server-method server name))))
-        (case expected
-          (type-error (ensure-condition 'type-error (do-it)))
-          ((t)        (ensure (do-it))))))))
+            ;; invalid method name => error
+            ("%invalidname" type-error)))))

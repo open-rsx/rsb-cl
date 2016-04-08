@@ -1,6 +1,6 @@
 ;;;; threaded-receiver-mixin.lisp --- Unit tests for the threaded-receive-mixin class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,24 +13,23 @@
   ;; not work properly.
   (sleep most-positive-fixnum))
 
-(deftestsuite threaded-receiver-mixin-root (transport-root)
-  ()
-  (:documentation
-   "Unit tests for the `threaded-receiver-mixin' class."))
+(def-suite threaded-receiver-mixin-root
+  :in transport-root
+  :description
+  "Unit tests for the `threaded-receiver-mixin' class.")
+(in-suite threaded-receiver-mixin-root)
 
-(addtest (threaded-receiver-mixin-root
-          :documentation
-          "Smoke test for the `threaded-receiver-mixin' class.")
-  smoke
+(test smoke
+  "Smoke test for the `threaded-receiver-mixin' class."
 
   ;; We try attaching and detaching with different timing behaviors.
   (let ((receiver (make-instance 'mock-receiver)))
     (iter (repeat 4)
           (start-receiver receiver)
           (stop-receiver receiver)
-          (ensure-null (connector-thread receiver))
+          (is (null (connector-thread receiver)))
 
           (start-receiver receiver)
           (sleep .001)
           (stop-receiver receiver)
-          (ensure-null (connector-thread receiver)))))
+          (is (null (connector-thread receiver))))))

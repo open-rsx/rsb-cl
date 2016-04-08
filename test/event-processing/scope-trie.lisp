@@ -32,15 +32,14 @@
 
 ;;; `scope-trie'
 
-(deftestsuite event-processing-scope-trie-root (event-processing-root)
-  ()
-  (:documentation
-   "Test suite for the `scope-trie' data structure."))
+(def-suite event-processing-scope-trie-root
+  :in event-processing-root
+  :description
+  "Test suite for the `scope-trie' data structure.")
+(in-suite event-processing-scope-trie-root)
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Smoke test for the `scope-trie' data structure.")
-  smoke
+(test smoke
+  "Smoke test for the `scope-trie' data structure."
 
   ;; Order of additions and removals must not matter.
   (map-permutations
@@ -53,7 +52,7 @@
                 scope trie)))
             ((&flet check-empty ()
                (dolist (scope scopes)
-                 (ensure-same (nth-value 1 (scope-trie-get scope trie)) nil)))))
+                 (is (eql nil (nth-value 1 (scope-trie-get scope trie))))))))
        ;; We repeat the process to ensure that deleting all values
        ;; restores the initial state and that the restored initial
        ;; state permits add values again. There was a bug regarding
@@ -70,31 +69,29 @@
                                     :test #'scope=))
                    (expected (make-list count
                                         :initial-element (scope-string scope))))
-              (ensure-same (scope-trie-get scope trie) (values expected t)
-                           :test #'equal)))
+              (is (equal (list expected t)
+                         (multiple-value-list (scope-trie-get scope trie))))))
           ;; Remove all entries.
           (mapc (rcurry #'scope-trie-rem trie) scopes))))
    *scope-trie-test-a-few-scopes*))
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Smoke test for the `scope-trie-map' function.")
-  scope-trie-map/smoke
+(test scope-trie-map/smoke
+  "Smoke test for the `scope-trie-map' function."
 
   (let ((trie (make-filled-scope-trie)))
-    (ensure-cases (scope expected)
-        '(("/"      (("/")))
-          ("/b"     (("/")))
-          ("/a"     (("/") ("/a/")))
-          ("/a/b"   (("/") ("/a/") ("/a/b/")))
-          ("/a/b/c" (("/") ("/a/") ("/a/b/") ("/a/b/c/" "/a/b/c/"))))
-      (let ((scope  (make-scope scope))
-            (values '()))
-        (scope-trie-map (lambda (scope value)
-                          (ensure-same scope (first value) :test #'scope=)
-                          (push value values))
-                        scope trie)
-        (ensure-same (reverse values) expected :test #'equal)))))
+    (mapc (lambda+ ((scope expected))
+            (let ((scope  (make-scope scope))
+                  (values '()))
+              (scope-trie-map (lambda (scope value)
+                                (is (scope= scope (first value)))
+                                (push value values))
+                              scope trie)
+              (is (equal expected (reverse values)))))
+          '(("/"      (("/")))
+            ("/b"     (("/")))
+            ("/a"     (("/") ("/a/")))
+            ("/a/b"   (("/") ("/a/") ("/a/b/")))
+            ("/a/b/c" (("/") ("/a/") ("/a/b/") ("/a/b/c/" "/a/b/c/")))))))
 
 (defun cleanup-test (thunk)
   (let* ((count        100)
@@ -106,23 +103,19 @@
        :for remove = (pop queue)
        :for add = (funcall random-scope) :do
        (appendf queue (list add))
-       (ensure-same (length queue) count)
+       (is (= count (length queue)))
        (setf (scope-trie-get add trie) i)
        (funcall thunk trie remove))))
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Make sure that removing entries from the `scope-trie' via
-           `scope-trie-rem' cleans everything up.")
-  scope-trie-rem/cleanup
+(test scope-trie-rem/cleanup
+  "Make sure that removing entries from the `scope-trie' via
+   `scope-trie-rem' cleans everything up."
 
   (cleanup-test (lambda (trie remove) (scope-trie-rem remove trie))))
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Make sure that removing entries from the `scope-trie' via
-           `scope-trie-update' cleans everything up.")
-  scope-trie-update/cleanup
+(test scope-trie-update/cleanup
+  "Make sure that removing entries from the `scope-trie' via
+   `scope-trie-update' cleans everything up."
 
   (cleanup-test (lambda (trie remove)
                   (scope-trie-update
@@ -149,11 +142,9 @@
                               (values new new)))
                           scope trie))))
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Multi-threaded stress test for the `scope-trie' data
-           structure exercising concurrent insertions.")
-  stress.1
+(test stress.1
+  "Multi-threaded stress test for the `scope-trie' data structure
+   exercising concurrent insertions."
 
   (loop :repeat 1000 :do
      (let ((scopes       *scope-trie-test-lots-of-scopes*)
@@ -166,16 +157,14 @@
                                      trie scopes))
                      (iota thread-count)))
        ;; Check expected number of items in each value.
-       (ensure-same (reduce #'+ scopes
-                            :key (lambda (scope)
-                                   (length (scope-trie-get scope trie))))
-                    (* thread-count (length scopes))))))
+       (is (= (* thread-count (length scopes))
+              (reduce #'+ scopes
+                      :key (lambda (scope)
+                             (length (scope-trie-get scope trie)))))))))
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Multi-threaded stress test for the `scope-trie' data
-           structure exercising concurrent insertions and deletions.")
-  stress.2
+(test stress.2
+  "Multi-threaded stress test for the `scope-trie' data structure
+   exercising concurrent insertions and deletions."
 
   (loop :repeat 1000 :do
      (let ((scopes       *scope-trie-test-lots-of-scopes*)
@@ -195,16 +184,13 @@
               (iota thread-count)))
        ;; Check that all entries have empty values after all
        ;; add-then-remove actions are done.
-       (ensure (every (lambda (scope)
-                        (null (scope-trie-get scope trie)))
-                      scopes)))))
+       (is (every (lambda (scope)
+                    (null (scope-trie-get scope trie)))
+                  scopes)))))
 
-(addtest (event-processing-scope-trie-root
-          :documentation
-          "Multi-threaded stress test for the `scope-trie' data
-           structure exercising concurrent insertions, deletions and
-           queries.")
-  stress.3
+(test stress.3
+  "Multi-threaded stress test for the `scope-trie' data structure
+   exercising concurrent insertions, deletions and queries."
 
   (let+ ((count 1000000)
          (scope (make-scope '("a" "b" "c" "d" "e")))
@@ -235,19 +221,17 @@
                             scope trie))
       (mapc #'bt:join-thread threads))
     ;; Check result of concurrent adding and removing.
-    (ensure-same (length (scope-trie-get scope trie)) (* 2 count))))
+    (is (= (* 2 count) (length (scope-trie-get scope trie))))))
 
 ;;; `sink-scope-trie'
 
-(deftestsuite event-processing-sink-scope-trie-root (event-processing-root)
-  ()
-  (:documentation
-   "Test suite for the `sink-scope-trie' class."))
+(def-suite event-processing-sink-scope-trie-root
+  :in event-processing-root
+  :description
+  "Test suite for the `sink-scope-trie' class.")
 
-(addtest (event-processing-sink-scope-trie-root
-          :documentation
-          "Smoke test for the `sink-scope-trie' data structure.")
-  smoke
+(test smoke
+  "Smoke test for the `sink-scope-trie' data structure."
 
   (let+ ((trie (make-sink-scope-trie))
          ((&flet add-sink (scope)

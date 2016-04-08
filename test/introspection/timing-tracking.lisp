@@ -1,25 +1,25 @@
 ;;;; timing-tracking.lisp --- Unit tests for the timing tracking functionality.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.introspection.test)
 
-(deftestsuite timing-tracking-root (introspection-root)
-  ()
-  (:documentation
-   "Unit test suite for the timing tracking functionality."))
+(def-suite timing-tracking-root
+  :in introspection-root
+  :description
+  "Unit test suite for the timing tracking functionality.")
+(in-suite timing-tracking-root)
 
-(deftestsuite timing-tracker-root (timing-tracking-root)
-  ()
-  (:documentation
-   "Unit test suite for the `timing-tracker' class."))
+(def-suite timing-tracker-root
+  :in timing-tracking-root
+  :description
+  "Unit test suite for the `timing-tracker' class.")
+(in-suite timing-tracker-root)
 
-(addtest (timing-tracker-root
-          :documentation
-          "Smoke test for the `timing-tracker' class.")
-  smoke
+(test smoke
+  "Smoke test for the `timing-tracker' class."
 
   (let* ((tracker (make-instance 'rsb.introspection::timing-tracker))
          (event   (rsb:make-event

@@ -7,7 +7,8 @@
 (cl:defpackage #:rsb.transport.inprocess.test
   (:use
    #:cl
-   #:lift
+
+   #:fiveam
 
    #:rsb.transport.inprocess
 
@@ -24,7 +25,7 @@
 
 (cl:in-package #:rsb.transport.inprocess.test)
 
-(deftestsuite transport-inprocess-root (transport-root)
-  ()
-  (:documentation
-   "Root unit test suite for the transport.inprocess module."))
+(def-suite transport-inprocess-root
+  :in transport-root
+  :description
+  "Root unit test suite for the transport.inprocess module.")

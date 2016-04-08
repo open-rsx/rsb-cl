@@ -1,6 +1,6 @@
 ;;;; rsb-transport-spread.asd --- System containing the Spread-based transport.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -67,7 +67,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"                 "1.7.1")
+  :depends-on  ((:version "fiveam"               "1.4")
 
                 (:version "rsb"                  #.(version/string))
                 (:version "rsb-transport-spread" #.(version/string))
@@ -87,8 +87,5 @@
                               (:file       "connectors"))))
 
   :perform     (test-op (operation component)
-                 (eval (read-from-string "(log:config :warn)")) ; less noise
-                 (eval (read-from-string
-                        "(network.spread.daemon:with-daemon (:port rsb-system::*spread-port*)
-                           (lift:run-tests :config (lift::lift-relative-pathname
-                                                    \"lift-transport-spread.config\")))"))))
+                 (symbol-call '#:log '#:config :warn) ; less noise
+                 (symbol-call '#:rsb.transport.spread.test '#:run-tests)))

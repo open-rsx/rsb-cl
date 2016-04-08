@@ -6,16 +6,14 @@
 
 (cl:in-package #:rsb.transport.socket.test)
 
-(deftestsuite transport-socket-tcp-root (transport-socket-root)
-  ()
-  (:documentation
-   "Unit tests for the TCP transport and bus."))
+(def-suite transport-socket-tcp-root
+    :in transport-socket-root
+    :description
+    "Unit tests for the TCP transport and bus.")
+(in-suite transport-socket-tcp-root)
 
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test supplying incompatible options for a single
-           connection.")
-  incompatible-options
+(test incompatible-options
+  "Test supplying incompatible options for a single connection."
 
   ;; Has to signal an error since the incompatible options are
   ;; supplied for a single host-port combination.
@@ -25,15 +23,13 @@
          (nil :reader (make-socket-url :tcp-socket nil '("tcpnodelay" "0")))
          (nil :reader (make-socket-url :tcp-socket nil nil)))))) ; body is not important
 
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test creating `bus-client' instances and attaching and
-           detaching connectors to them.
+(test client/smoke
+  "Test creating `bus-client' instances and attaching and detaching
+   connectors to them.
 
-           Try multiple connectors of different classes which also
-           causes the test case to be repeated without a fresh
-           port. This helps ensuring proper cleanup.")
-  client/smoke
+   Try multiple connectors of different classes which also causes the
+   test case to be repeated without a fresh port. This helps ensuring
+   proper cleanup."
 
   (ensure-cases (connector-class schema address)
       (mappend (lambda+ ((class schema address))
@@ -51,7 +47,7 @@
           (connector-2 (make-socket-connector connector-class schema address)))
 
       ;; There is no server yet, so this has to signal an error.
-      (ensure-condition 'usocket:connection-refused-error ; TODO(jmoringe): keep this condition type?
+      (signals usocket:connection-refused-error ; TODO(jmoringe): keep this condition type?
         (transport-ensure-bus transport :client! connector-1 address))
 
       ;; Create a bus server.
@@ -69,14 +65,13 @@
           (check-buses-and-connectors
            (list bus-1 bus-2) (list connector-1 connector-2) t))))))
 
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test creating `bus-server' instances and attaching and
-           detaching connectors to them.
+(test server/smoke
+  "Test creating `bus-server' instances and attaching and detaching
+   connectors to them.
 
-           Try multiple connectors of different classes which also
-           causes the test case to be repeated without a fresh
-           port. This helps ensuring proper cleanup.")  server/smoke
+   Try multiple connectors of different classes which also causes the
+   test case to be repeated without a fresh port. This helps ensuring
+   proper cleanup."
 
   (ensure-cases (connector-class schema address)
       (mappend (lambda+ ((class schema address))
@@ -107,11 +102,9 @@
         (check-buses-and-connectors
          (list bus-1 bus-2) (list connector-1 connector-2))))))
 
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test automatically assigned ports and the portfile option
-           using the -[2] syntax.")
-  server/automatic-port.1
+(test server/automatic-port.1
+  "Test automatically assigned ports and the portfile option using the
+   -[2] syntax."
 
   (let* ((host        "localhost")
          (port        0)
@@ -149,11 +142,9 @@
       (check-buses-and-connectors
        (list bus-1 bus-2) (list connector-1 connector-2)))))
 
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test automatically assigned ports and the portfile option
-           with multiple/mixed portfile options.")
-  server/automatic-port.2
+(test server/automatic-port.2
+  "Test automatically assigned ports and the portfile option with
+   multiple/mixed portfile options."
 
   (let* ((host        "localhost")
          (port        0)
@@ -195,11 +186,9 @@
        (list bus-1 bus-2 bus-3) (list connector-1 connector-2 connector-3)))))
 
 #+(and sbcl (not win32))
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test automatically assigned ports and the portfile option
-           with custom file descriptors.")
-  server/automatic-port.portfile-fd
+(test server/automatic-port.portfile-fd
+  "Test automatically assigned ports and the portfile option with
+   custom file descriptors."
 
   (let+ (((&values read-fd write-fd) (sb-posix:pipe))
          (portfile  (format nil "-~D" write-fd))
@@ -223,11 +212,9 @@
 (defun note-port (port)
   (lparallel:fulfill *port-promise* port))
 
-(addtest (transport-socket-tcp-root
-          :documentation
-          "Test automatically assigned ports and the portfile
-           option using the call:NAME syntax.")
-  server/automatic-port.call
+(test server/automatic-port.call
+  "Test automatically assigned ports and the portfile option using the
+   call:NAME syntax."
 
   (let* ((host        "localhost")
          (port        0)

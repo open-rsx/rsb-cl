@@ -6,271 +6,252 @@
 
 (cl:in-package #:rsb.test)
 
-(deftestsuite scope-root (root)
-  ()
-  (:setup
-   (clrhash rsb::*scopes*))
-  (:documentation
-   "Unit tests for the `scope' class."))
+(def-suite scope-root
+  :in root
+  :description
+  "Unit tests for the `scope' class.")
+;; TODO (:setup
+;;  (clrhash rsb::*scopes*))
+(in-suite scope-root)
 
-(addtest (scope-root
-          :documentation
-          "Test function `derive-scope-component'.")
-  derive-scope-component
+(test derive-scope-component
+  "Test function `derive-scope-component'."
 
-  (ensure-cases (input expected)
-      '(("foo"  "foo")
-        ("Foo"  "Foo")
-        ("FOO"  "FOO")
-        ("foO"  "foO")
-        ("/foo" "_foo")
-        ("foo/" "foo_")
-        ("!@"   "__")
-        ("_foo" "_foo")
-        ("foo_" "foo_"))
-    (ensure-same (derive-scope-component input) expected :test #'string=)))
+  (mapcar (lambda+ ((input expected))
+            (is (string= expected (derive-scope-component input))))
+          '(("foo"  "foo")
+            ("Foo"  "Foo")
+            ("FOO"  "FOO")
+            ("foO"  "foO")
+            ("/foo" "_foo")
+            ("foo/" "foo_")
+            ("!@"   "__")
+            ("_foo" "_foo")
+            ("foo_" "foo_"))))
 
-(addtest (scope-root
-          :documentation
-          "Test constructing `scope' instances from lists of component
-           strings.")
-  construction/from-components
+(test construction/from-components
+  "Test constructing `scope' instances from lists of component
+   strings."
 
-  (ensure-cases (input expected-components)
-      `(;; Some invalid cases
-        (("foo ")             type-error) ; invalid character: space
-        (("!@#+1")            type-error) ; invalid characters: !@#+
-        (("foo" "+1")         type-error) ; in second component
-        (#("!@#" "foo")       type-error) ; likewise for vector
-        (#("/")               type-error)
-        (#("foo" "+1")        type-error)
-        (("")                 type-error) ; empty component
+  (mapc (lambda+ ((input expected-components))
+          (case expected-components
+            (type-error (signals type-error (make-scope input)))
+            (t          (is (equalp expected-components
+                                    (scope-components (make-scope input)))))))
+        `(;; Some invalid cases
+          (("foo ")             type-error) ; invalid character: space
+          (("!@#+1")            type-error) ; invalid characters: !@#+
+          (("foo" "+1")         type-error) ; in second component
+          (#("!@#" "foo")       type-error) ; likewise for vector
+          (#("/")               type-error)
+          (#("foo" "+1")        type-error)
+          (("")                 type-error) ; empty component
 
-        ;; These are valid
-        (,(make-scope "/foo") ("foo"))
-        (()                   ())
-        (("bar" "foo")        ("bar" "foo"))
-        (#("baz" "bar")       ("baz" "bar"))
-        (("foo" "_")          ("foo" "_"))
-        (("foo" "-")          ("foo" "-"))
-        (("Bar" "Foo")        ("Bar" "Foo"))
-        (("BAR" "FOO")        ("BAR" "FOO")))
-    (case expected-components
-      (type-error (ensure-condition 'type-error (make-scope input)))
-      (t          (ensure-same (scope-components (make-scope input))
-                               expected-components
-                               :test #'equalp)))))
+          ;; These are valid
+          (,(make-scope "/foo") ("foo"))
+          (()                   ())
+          (("bar" "foo")        ("bar" "foo"))
+          (#("baz" "bar")       ("baz" "bar"))
+          (("foo" "_")          ("foo" "_"))
+          (("foo" "-")          ("foo" "-"))
+          (("Bar" "Foo")        ("Bar" "Foo"))
+          (("BAR" "FOO")        ("BAR" "FOO")))))
 
-(addtest (scope-root
-          :documentation
-          "Test constructing `scope' instances from strings.")
-  construction/from-string
+(test construction/from-string
+  "Test constructing `scope' instances from strings."
 
-  (ensure-cases (string expected-components)
-      '(;; Some invalid cases.
-        ("foo"         scope-parse-error) ; missing leading "/"
-        ("foo/bar"     scope-parse-error) ; likewise
-        ("/foo "       scope-parse-error) ; invalid character: space
-        ("/!@#/+1"     scope-parse-error) ; invalid characters: !@#+
-        ("/foo/+1"     scope-parse-error) ; in second component
-        (""            scope-parse-error) ; empty string
+  (mapc (lambda+ ((string expected-components))
+          (case expected-components
+            (scope-parse-error
+             (signals scope-parse-error (make-scope string)))
+            (t
+             (is (equal expected-components
+                        (scope-components (make-scope string)))))))
+        '(;; Some invalid cases.
+          ("foo"         scope-parse-error) ; missing leading "/"
+          ("foo/bar"     scope-parse-error) ; likewise
+          ("/foo "       scope-parse-error) ; invalid character: space
+          ("/!@#/+1"     scope-parse-error) ; invalid characters: !@#+
+          ("/foo/+1"     scope-parse-error) ; in second component
+          (""            scope-parse-error) ; empty string
 
-        ;; These are valid.
-        ("///Foo//BAR" ("Foo" "BAR"))
-        ("//foo/bar"   ("foo" "bar"))
-        ("//foo/bar"   ("foo" "bar"))
-        ("/foo/bar/"   ("foo" "bar"))
-        ("/foo/5/"     ("foo" "5"))
-        ("/foo/-/"     ("foo" "-"))
-        ("/foo/_/"     ("foo" "_"))
-        ("/-/foo/"     ("-" "foo"))
-        ("/_/foo/"     ("_" "foo"))
-        ("/"           ()))
-    (case expected-components
-      (scope-parse-error
-       (ensure-condition 'scope-parse-error (make-scope string)))
-      (t
-       (ensure-same (scope-components (make-scope string)) expected-components
-                    :test #'equal)))))
+          ;; These are valid.
+          ("///Foo//BAR" ("Foo" "BAR"))
+          ("//foo/bar"   ("foo" "bar"))
+          ("//foo/bar"   ("foo" "bar"))
+          ("/foo/bar/"   ("foo" "bar"))
+          ("/foo/5/"     ("foo" "5"))
+          ("/foo/-/"     ("foo" "-"))
+          ("/foo/_/"     ("foo" "_"))
+          ("/-/foo/"     ("-" "foo"))
+          ("/_/foo/"     ("_" "foo"))
+          ("/"           ()))))
 
-(addtest (scope-root
-          :documentation
-          "Test attempting to construct `scope' instance from
-           unsuitable objects.")
-  construction/invalid
+(test construction/invalid
+  "Test attempting to construct `scope' instance from unsuitable
+   objects."
 
-  (ensure-cases (input)
-      '(5 t :foo #\a)
-    (ensure-condition 'type-error (make-scope input))))
+  (mapc (lambda (input) (signals type-error (make-scope input)))
+        '(5 t :foo #\a)))
 
-(addtest (scope-root
-          :documentation
-          "Test relations between `scope' instances.")
-  relations
+(test relations
+  "Test relations between `scope' instances."
 
-  (ensure-cases (left right relations equality)
-      '(("/foo"     "/foo"     (:sub :super) =)
-        ("/foo/"    "/foo"     (:sub :super) =)
-        ("/foo/bar" "/foo"     :sub          /=)
-        ("/foo/bar" "/foo/baz" :none         /=)
-        ("/"        "/foo"     :super        /=)
-        ("/bar"     "/baz"     :none         /=)
-        ("/bar"     "/Bar"     :none         /=)
-        ("/bar"     "/BAR"     :none         /=))
+  (mapc (lambda+ ((left right relations equality))
+          (let ((left      (make-scope left))
+                (right     (make-scope right))
+                (relations (ensure-list relations)))
+            ;; Test sub/super relation.
+            (when (member :sub relations)
+              (is (sub-scope?   left right))
+              (is (super-scope? right left)))
+            (when (member :super relations)
+              (is (super-scope? left right))
+              (is (sub-scope?   right left)))
+            (when (member :none relations)
+              (is (not (sub-scope?   left right)))
+              (is (not (super-scope? left right))))
 
-    (let ((left      (make-scope left))
-          (right     (make-scope right))
-          (relations (ensure-list relations)))
-      ;; Test sub/super relation.
-      (when (member :sub relations)
-        (ensure (sub-scope?   left right))
-        (ensure (super-scope? right left)))
-      (when (member :super relations)
-        (ensure (super-scope? left right))
-        (ensure (sub-scope?   right left)))
-      (when (member :none relations)
-        (ensure (not (sub-scope?   left right)))
-        (ensure (not (super-scope? left right))))
+            ;; Test equality relation.
+            (ecase equality
+              (=  (is (scope= left right)))
+              (/= (is (not (scope= left right)))))))
 
-      ;; Test equality relation.
-      (ecase equality
-        (=  (ensure (scope= left right)))
-        (/= (ensure (not (scope= left right))))))))
+        '(("/foo"     "/foo"     (:sub :super) =)
+          ("/foo/"    "/foo"     (:sub :super) =)
+          ("/foo/bar" "/foo"     :sub          /=)
+          ("/foo/bar" "/foo/baz" :none         /=)
+          ("/"        "/foo"     :super        /=)
+          ("/bar"     "/baz"     :none         /=)
+          ("/bar"     "/Bar"     :none         /=)
+          ("/bar"     "/BAR"     :none         /=))))
 
-(addtest (scope-root
-          :documentation
-          "Test `merge-scopes' function.")
-  merge-scopes
+(test merge-scopes
+  "Test `merge-scopes' function."
 
-  (ensure-cases (left right expected)
-      `((,+root-scope+      ,+root-scope+      ,+root-scope+)
-        ("/"                ,+root-scope+      "/")
-        (()                 ,+root-scope+      "/")
-        (,+root-scope+      "/"                "/")
-        (,+root-scope+      ()                 "/")
+  (mapc (lambda+ ((left right expected))
+          (let ((result (merge-scopes left right)))
+            (is (typep result 'scope))
+            (if (eq expected +root-scope+)
+                (is (eq     expected result))
+                (is (scope= expected result)))))
 
-        (,(make-scope "/a") ,+root-scope+      "/a")
-        ("/a"               ,+root-scope+      "/a")
-        (("a")              ,+root-scope+      "/a")
-        (,(make-scope "/a") "/"                "/a")
-        ("/a"               "/"                "/a")
-        (("a")              "/"                "/a")
-        (,(make-scope "/a") ()                 "/a")
-        ("/a"               ()                 "/a")
-        (("a")              ()                 "/a")
+        `((,+root-scope+      ,+root-scope+      ,+root-scope+)
+          ("/"                ,+root-scope+      "/")
+          (()                 ,+root-scope+      "/")
+          (,+root-scope+      "/"                "/")
+          (,+root-scope+      ()                 "/")
 
-        (,+root-scope+      ,(make-scope "/a") "/a")
-        (,+root-scope+      "/a"               "/a")
-        (,+root-scope+      ("a")              "/a")
-        ("/"                ,(make-scope "/a") "/a")
-        ("/"                "/a"               "/a")
-        ("/"                ("a")              "/a")
-        (()                 ,(make-scope "/a") "/a")
-        (()                 "/a"               "/a")
-        (()                 ("a")              "/a")
+          (,(make-scope "/a") ,+root-scope+      "/a")
+          ("/a"               ,+root-scope+      "/a")
+          (("a")              ,+root-scope+      "/a")
+          (,(make-scope "/a") "/"                "/a")
+          ("/a"               "/"                "/a")
+          (("a")              "/"                "/a")
+          (,(make-scope "/a") ()                 "/a")
+          ("/a"               ()                 "/a")
+          (("a")              ()                 "/a")
 
-        (,(make-scope "/a") ,(make-scope "/b") "/b/a")
-        ("/a"               ,(make-scope "/b") "/b/a")
-        (("a")              ,(make-scope "/b") "/b/a")
-        (,(make-scope "/a") "/b"               "/b/a")
-        ("/a"               "/b"               "/b/a")
-        (("a")              "/b"               "/b/a")
-        (,(make-scope "/a") ("b")              "/b/a")
-        ("/a"               ("b")              "/b/a")
-        (("a")              ("b")              "/b/a"))
+          (,+root-scope+      ,(make-scope "/a") "/a")
+          (,+root-scope+      "/a"               "/a")
+          (,+root-scope+      ("a")              "/a")
+          ("/"                ,(make-scope "/a") "/a")
+          ("/"                "/a"               "/a")
+          ("/"                ("a")              "/a")
+          (()                 ,(make-scope "/a") "/a")
+          (()                 "/a"               "/a")
+          (()                 ("a")              "/a")
 
-    (let ((result (merge-scopes left right)))
-      (ensure (typep result 'scope))
-      (ensure-same result expected
-                   :test (if (eq expected +root-scope+) #'eq #'scope=)))))
+          (,(make-scope "/a") ,(make-scope "/b") "/b/a")
+          ("/a"               ,(make-scope "/b") "/b/a")
+          (("a")              ,(make-scope "/b") "/b/a")
+          (,(make-scope "/a") "/b"               "/b/a")
+          ("/a"               "/b"               "/b/a")
+          (("a")              "/b"               "/b/a")
+          (,(make-scope "/a") ("b")              "/b/a")
+          ("/a"               ("b")              "/b/a")
+          (("a")              ("b")              "/b/a"))))
 
-(addtest (scope-root
-          :documentation
-          "Test `enough-scope' function.")
-  enough-scope
+(test enough-scope
+  "Test `enough-scope' function."
 
-  (ensure-cases (thing defaults expected)
-      `(;; Test coercion.
-        (,+root-scope+      ,+root-scope+ ,+root-scope+)
-        ("/"                ,+root-scope+ "/")
-        (()                 ,+root-scope+ "/")
-        (,+root-scope+      "/"           "/")
-        (,+root-scope+      ()            "/")
+  (mapc (lambda+ ((thing defaults expected))
+          (case expected
+            (error
+             (signals error (enough-scope thing defaults)))
+            (t
+             (let ((result (enough-scope thing defaults)))
+               (is (typep result 'scope))
+               (if (eq expected +root-scope+)
+                   (is (eq     expected result))
+                   (is (scope= expected result)))))))
 
-        (,(make-scope "/a") ,+root-scope+ "/a")
-        ("/a"               ,+root-scope+ "/a")
-        (("a")              ,+root-scope+ "/a")
-        (,(make-scope "/a") "/"           "/a")
-        ("/a"               "/"           "/a")
-        (("a")              "/"           "/a")
-        (,(make-scope "/a") ()            "/a")
-        ("/a"               ()            "/a")
-        (("a")              ()            "/a")
+        `(;; Test coercion.
+          (,+root-scope+      ,+root-scope+ ,+root-scope+)
+          ("/"                ,+root-scope+ "/")
+          (()                 ,+root-scope+ "/")
+          (,+root-scope+      "/"           "/")
+          (,+root-scope+      ()            "/")
 
-        ;; Test semantics.
-        ("/"                "/"           ,+root-scope+)
-        ("/a"               "/"           "/a")
-        ("/a/b"             "/"           "/a/b")
+          (,(make-scope "/a") ,+root-scope+ "/a")
+          ("/a"               ,+root-scope+ "/a")
+          (("a")              ,+root-scope+ "/a")
+          (,(make-scope "/a") "/"           "/a")
+          ("/a"               "/"           "/a")
+          (("a")              "/"           "/a")
+          (,(make-scope "/a") ()            "/a")
+          ("/a"               ()            "/a")
+          (("a")              ()            "/a")
 
-        ("/"                "/a"          error)
-        ("/a"               "/a"          ,+root-scope+)
-        ("/a/b"             "/a"          "/b")
+          ;; Test semantics.
+          ("/"                "/"           ,+root-scope+)
+          ("/a"               "/"           "/a")
+          ("/a/b"             "/"           "/a/b")
 
-        ("/"                "/a/b"        error)
-        ("/a"               "/a/b"        error)
-        ("/a/b"             "/a/b"        "/"))
+          ("/"                "/a"          error)
+          ("/a"               "/a"          ,+root-scope+)
+          ("/a/b"             "/a"          "/b")
 
-    (case expected
-      (error
-       (ensure-condition error (enough-scope thing defaults)))
-      (t
-       (let ((result (enough-scope thing defaults)))
-         (ensure (typep result 'scope))
-         (ensure-same result expected
-                      :test (if (eq expected +root-scope+) #'eq #'scope=)))))))
+          ("/"                "/a/b"        error)
+          ("/a"               "/a/b"        error)
+          ("/a/b"             "/a/b"        "/"))))
 
-(addtest (scope-root
-          :documentation
-          "Test interning of `scope' instances.")
-  intern
+(test intern
+  "Test interning of `scope' instances."
 
-  (ensure-cases (scope)
-      `("/"
-        "/foo"
-        ,(make-scope "/")
-        ,(make-scope "/foo")
-        ,(make-scope "/" :intern? t)
-        ,(make-scope "/foo" :intern? t))
-    (let ((result-1 (make-scope scope :intern? t))
-          (result-2 (make-scope scope :intern? t))
-          (result-3 (make-scope scope)))
-      (ensure (scope-interned? result-1))
-      (ensure (scope-interned? result-2))
-      ;; RESULT-3 can only be interned if SCOPE was of type `scope'
-      ;; and was already interned.
-      (ensure (eq (scope-interned? result-3)
-                  (when (typep scope 'scope)
-                    (scope-interned? scope))))
+  (mapc (lambda (scope)
+          (let ((result-1 (make-scope scope :intern? t))
+                (result-2 (make-scope scope :intern? t))
+                (result-3 (make-scope scope)))
+            (is (scope-interned? result-1))
+            (is (scope-interned? result-2))
+            ;; RESULT-3 can only be interned if SCOPE was of type `scope'
+            ;; and was already interned.
+            (is (eq (when (typep scope 'scope)
+                      (scope-interned? scope))
+                    (scope-interned? result-3)))
 
-      (ensure-same result-1 result-2 :test #'eq)
-      (ensure-same result-1 result-3 :test #'scope=))))
+            (is (eq     result-1 result-2))
+            (is (scope= result-1 result-3))))
+        `("/"
+          "/foo"
+          ,(make-scope "/")
+          ,(make-scope "/foo")
+          ,(make-scope "/" :intern? t)
+          ,(make-scope "/foo" :intern? t))))
 
-(addtest (scope-root
-          :documentation
-          "Test method on `print-object' for `scope' class.")
-  print
+(test print
+  "Test method on `print-object' for `scope' class."
 
-  (ensure-cases (scope intern?)
-      '(("/"         nil) ("/"         t)
-        ("/foo"      nil) ("/foo"      t)
-        ("/foo/bar/" nil) ("/foo/bar/" t)
-        ("/Foo/BAR/" nil) ("/Foo/BAR/" t))
-   (check-print (make-scope scope :intern? intern?))))
+  (mapc  (lambda+ ((scope intern?))
+           (check-print (make-scope scope :intern? intern?)))
+         '(("/"         nil) ("/"         t)
+           ("/foo"      nil) ("/foo"      t)
+           ("/foo/bar/" nil) ("/foo/bar/" t)
+           ("/Foo/BAR/" nil) ("/Foo/BAR/" t))))
 
-(addtest (scope-root
-          :documentation
-          "Stress test for the `intern-scope' function.")
-  intern-scope/stress
+(test intern-scope/stress
+  "Stress test for the `intern-scope' function."
 
   (loop :repeat 1000 :do
      (let+ ((table      (make-hash-table :test #'equal))
@@ -283,9 +264,9 @@
             (interned (mapcar #'bt:join-thread
                               (map-into (make-list 10)
                                         (curry #'bt:make-thread #'intern-one)))))
-       (ensure-same (hash-table-count table) 1)
-       (ensure (every (compose (curry #'string= string) #'scope-string)
-                      interned))
-       (ensure (every (compose (curry #'equal components) #'scope-components)
-                      interned))
-       (ensure-same (length (remove-duplicates interned :test #'eq)) 1))))
+       (is (= 1 (hash-table-count table)))
+       (is-true (every (compose (curry #'string= string) #'scope-string)
+                       interned))
+       (is-true (every (compose (curry #'equal components) #'scope-components)
+                       interned))
+       (is (= 1 (length (remove-duplicates interned :test #'eq)))))))

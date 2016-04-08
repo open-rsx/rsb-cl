@@ -6,6 +6,8 @@
 
 (cl:in-package #:rsb.event-processing.test)
 
+(in-suite event-processing-root)
+
 (defclass mock-access-processor ()
   ((access :initarg :access
            :reader  processor-access)))
@@ -15,25 +17,23 @@
                     (mode      symbol))
   (assoc-value (processor-access processor) (cons part mode) :test #'equal))
 
-(addtest (event-processing-root
-          :documentation
-          "Smoke test for the `access?' generic function.")
-  access?/smoke
+(test access?/smoke
+  "Smoke test for the `access?' generic function."
 
   (let* ((processor1 (make-instance 'mock-access-processor
                                     :access '(((:data . :read) . t))))
          (processor2 (make-instance 'mock-access-processor
                                     :access '(((:scope . :read) . t))))
          (processors (list processor1 processor2)))
-    (ensure-same (access? processor1 :data           :read)  t)
-    (ensure-same (access? processor1 :data           :write) nil)
-    (ensure-same (access? processor1 :scope          :read)  nil)
-    (ensure-same (access? processor1 :meta-data      :read)  nil)
+    (is (eq t   (access? processor1 :data           :read)))
+    (is (eq nil (access? processor1 :data           :write)))
+    (is (eq nil (access? processor1 :scope          :read)))
+    (is (eq nil (access? processor1 :meta-data      :read)))
 
-    (ensure-same (access? processor1 '(:data)        :read)  t)
-    (ensure-same (access? processor1 '(:scope)       :read)  nil)
-    (ensure-same (access? processor1 '(:data :scope) :read)  t)
+    (is (eq t   (access? processor1 '(:data)        :read)))
+    (is (eq nil (access? processor1 '(:scope)       :read)))
+    (is (eq t   (access? processor1 '(:data :scope) :read)))
 
-    (ensure-same (access? processors :data           :read)  t)
-    (ensure-same (access? processors :scope          :read)  t)
-    (ensure-same (access? processors :meta-data      :read)  nil)))
+    (is (eq t   (access? processors :data           :read)))
+    (is (eq t   (access? processors :scope          :read)))
+    (is (eq nil (access? processors :meta-data      :read)))))

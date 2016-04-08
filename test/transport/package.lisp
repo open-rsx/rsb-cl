@@ -10,7 +10,8 @@
    #:alexandria
    #:iterate
    #:let-plus
-   #:lift
+
+   #:fiveam
 
    #:rsb
    #:rsb.event-processing
@@ -32,10 +33,10 @@
 
 (cl:in-package #:rsb.transport.test)
 
-(deftestsuite transport-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the transport module."))
+(def-suite transport-root
+  :in root
+  :description
+  "Root unit test suite for the transport module.")
 
 ;;; Test utilities
 
@@ -51,20 +52,19 @@
         (options   (connector-options class)))
     ;; Check schemas.
     (iter (for schema in schemas)
-          (ensure (typep schema 'keyword)))
-    (ensure-same schemas expected-schemas :test #'set-equal)
+          (is (typep schema 'keyword)))
+    (is (set-equal expected-schemas schemas))
     ;; Check wire-type.
-    (ensure (typep wire-type 'wire-type))
-    (ensure-same wire-type expected-wire-type :test #'type=)
+    (is (typep wire-type 'wire-type))
+    (is (type= expected-wire-type wire-type))
     ;; Check remote.
-    (ensure-same remote? expected-remote? :test #'eq)
+    (is (eq expected-remote? remote?))
     ;; Check direction.
-    (ensure (typep direction 'direction))
-    (ensure-same direction expected-direction
-                 :test #'eq)
+    (is (typep direction 'direction))
+    (is (eq expected-direction direction))
     ;; Check options.
     (iter (for option in options)
-          (ensure (typep option 'list)))))
+          (is (typep option 'list)))))
 
 (defun check-connector (connector
                         expected-schemas
@@ -79,28 +79,27 @@
         (rel-url   (connector-relative-url connector "/foo")))
     ;; Check schemas.
     (iter (for schema in schemas)
-          (ensure (typep schema 'keyword)))
-    (ensure-same schemas expected-schemas :test #'set-equal)
+          (is (typep schema 'keyword)))
+    (is (set-equal expected-schemas schemas))
     ;; Check wire-type.
-    (ensure (typep wire-type 'wire-type))
-    (ensure-same wire-type expected-wire-type :test #'type=)
+    (is (typep wire-type 'wire-type))
+    (is (type= expected-wire-type wire-type))
     ;; Check remote.
-    (ensure-same remote? expected-remote? :test #'eq)
+    (is (eq expected-remote? remote?))
     ;; Check direction.
-    (ensure (typep direction 'direction))
-    (ensure-same direction expected-direction :test #'eq)
+    (is (typep direction 'direction))
+    (is (eq expected-direction direction))
     ;; Check URLs.
-    (ensure (typep url 'puri:uri))
-    (ensure (typep rel-url 'puri:uri))
-    (ensure (eq (puri:uri-scheme url) (first expected-schemas)))
-    (ensure-same (puri:uri-path rel-url) "/foo/"
-                 :test #'string=)))
+    (is (typep url 'puri:uri))
+    (is (typep rel-url 'puri:uri))
+    (is (eq (first expected-schemas) (puri:uri-scheme url)))
+    (is (string= "/foo/" (puri:uri-path rel-url)))))
 
 (defmacro define-basic-connector-test-cases
     (class
      &key
      (name              (%guess-connector-name class))
-     (suite-name        (symbolicate class "-ROOT"))
+     suite
      initargs
      expected-schemas
      expected-wire-type
@@ -111,8 +110,8 @@
    NAME is a keyword designating TRANSPORT e.g. in calls to
    `rsb.transport:make-connector'.
 
-   SUITE-NAME is a symbol naming the test suite part of which the
-   generated test cases should be.
+   SUITE is a symbol naming the test suite part of which the generated
+   test cases should be.
 
    INITARGS are initargs which should be used when making connector
    instances.
@@ -129,26 +128,22 @@
    EXPECTED-DIRECTION specifies the expected direction of the
    connector class. "
   `(progn
-     (addtest (,suite-name
-          :documentation
-          ,(format nil "Test whether `find-connector-class' can find ~
-                        the ~A connector class."
-                   class))
-       find-connector-class
+     (test (find-connector-class ,@(when suite `(:suite ,suite)))
+       ,(format nil "Test whether `find-connector-class' can find ~
+                     the ~A connector class."
+                    class)
 
        (let* ((transport (service-provider:find-provider
                           'rsb.transport::transport ',name))
               (provider  (service-provider:find-provider
                           transport ,expected-direction))
               (class     (service-provider:provider-class provider)))
-         (ensure-same (find-class ',class) class :test #'eq)))
+         (is (eq class (find-class ',class)))))
 
-     (addtest (,suite-name
-               :documentation
-               ,(format nil "Test basic properties of the ~A connector ~
-                             class."
-                        class))
-       class
+     (test (class ,@(when suite `(:suite ,suite)))
+       ,(format nil "Test basic properties of the ~A connector ~
+                     class."
+                class)
 
        (check-connector-class (find-class ',class)
                               ,expected-schemas
@@ -156,12 +151,10 @@
                               ,expected-remote?
                               ,expected-direction))
 
-     (addtest (,suite-name
-               :documentation
-               ,(format nil "Test basic properties of a ~A connector ~
-                             instance."
-                        class))
-       construct
+     (test (construct ,@(when suite `(:suite ,suite)))
+       ,(format nil "Test basic properties of a ~A connector ~
+                     instance."
+                class)
 
        (let ((instance (apply #'make-instance ',class ,initargs)))
          (check-connector instance
@@ -170,15 +163,13 @@
                           ,expected-remote?
                           ,expected-direction)))
 
-     (addtest (,suite-name
-               :documentation
-               ,(format nil "Test printing a ~A connector instance."
-                        class))
-       print
+     (test (print ,@(when suite `(:suite ,suite)))
+       ,(format nil "Test printing a ~A connector instance."
+                    class)
 
        (let ((instance (apply #'make-instance ',class ,initargs)))
-         (with-output-to-string (stream)
-           (print-object instance stream))))))
+         (is (not (emptyp (with-output-to-string (stream)
+                            (print-object instance stream)))))))))
 
 ;;; Utility functions
 

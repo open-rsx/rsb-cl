@@ -1,6 +1,6 @@
 ;;;; rsb-transport-inprocess.asd --- System containing the inprocess transport.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -35,7 +35,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"                    "1.7.1")
+  :depends-on  ((:version "fiveam"                  "1.4")
 
                 (:version "rsb-transport-inprocess" #.(version/string))
 
@@ -48,7 +48,5 @@
                               (:file       "connectors"))))
 
   :perform     (test-op (operation component)
-                 (eval (read-from-string "(log:config :warn)")) ; less noise
-                 (eval (read-from-string
-                        "(lift:run-tests :config (lift::lift-relative-pathname
-                                                  \"lift-transport-inprocess.config\"))"))))
+                 (symbol-call '#:log '#:config :warn) ; less noise
+                 (symbol-call '#:rsb.transport.inprocess.test '#:run-tests)))

@@ -6,16 +6,15 @@
 
 (cl:in-package #:rsb.test)
 
-(deftestsuite listener-root (root
-                             participant-suite)
-  ()
-  (:function
-   (send-some (informer)
-     (iter (repeat 100)
-           (send informer "foo")
-           (send informer "bar"))))
-  (:documentation
-   "Unit tests for the `listener' class."))
+(def-suite listener-root
+  :in root
+  :description
+  "Unit tests for the `listener' class.")
+
+(defun send-some (informer)
+  (iter (repeat 100)
+        (send informer "foo")
+        (send informer "bar")))
 
 (define-basic-participant-test-cases listener
   '("/rsbtest/listener/construction"
@@ -77,32 +76,27 @@
     (:transports ((t :enabled nil)))
     error))
 
-(addtest (listener-root
-          :documentation
-          "Test adding and removing handlers to/from a `listener'
-instance.")
-  handlers
+(test (handlers :fixture with-configuration)
+  "Test adding and removing handlers to/from a `listener' instance."
 
   (with-participant (listener :listener "/foo")
     ;; Initially, there should not be any handlers.
-    (ensure-null (rsb.ep:handlers listener))
+    (is (null (rsb.ep:handlers listener)))
 
     ;; Test adding and removing a handler.
     (let ((handler (lambda (event) (declare (ignore event)))))
       (push handler (rsb.ep:handlers listener))
-      (ensure-same (rsb.ep:handlers listener) (list handler)
-                   :test #'equal)
+      (is (equal (list handler) (rsb.ep:handlers listener)))
 
       (removef (rsb.ep:handlers listener) handler)
-      (ensure-null (rsb.ep:handlers listener)))))
+      (is (null (rsb.ep:handlers listener))))))
 
-(addtest (listener-root
-          :documentation
-          "Test receiving data sent by an informer.")
-  receive
+(test (receive.smoke :fixture with-configuration)
+  "Test receiving data sent by an informer."
 
-  (with-participant (informer :informer "/rsbtest/listener/receive")
-    (with-participant (listener :listener "/rsbtest/listener/receive")
+  (with-participants ((informer :informer "/rsbtest/listener/receive")
+                      (listener :listener "/rsbtest/listener/receive"))
+    (finishes
       ;; Test receive
       (send-some informer)
 

@@ -6,10 +6,11 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite cause-filter-root (filter-root)
-  ()
-  (:documentation
-   "Test suite for the `cause-filter' class."))
+(def-suite cause-filter-root
+  :in filter-root
+  :description
+  "Test suite for the `cause-filter' class.")
+(in-suite cause-filter-root)
 
 (define-basic-filter-tests (cause-filter :cause)
   `(;; Some invalid cases.

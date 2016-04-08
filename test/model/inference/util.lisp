@@ -1,15 +1,13 @@
 ;;;; util.lisp --- Tests for the utilities used in the model.inference module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.model.inference.test)
 
-(addtest (rsb-model-inference-root
-          :documentation
-          "Smoke test for the `tri-and' macro.")
-  tri-and/smoke
+(test tri-and/smoke
+  "Smoke test for the `tri-and' macro."
 
   (%call-with-tri-test-cases
    (lambda (left left-definitive? right right-definitive?)
@@ -33,10 +31,8 @@
      ((t   t  ) (t   nil) incompatible-arguments)
      ((t   t  ) (t   t  ) (t   t  )))))
 
-(addtest (rsb-model-inference-root
-          :documentation
-          "Smoke test for the `tri-or' macro.")
-  tri-or/smoke
+(test tri-or/smoke
+  "Smoke test for the `tri-or' macro."
 
   (%call-with-tri-test-cases
    (lambda (left left-definitive? right right-definitive?)

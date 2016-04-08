@@ -1,15 +1,16 @@
 ;;;; classes.lisp --- Tests for model classes.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.model.test)
 
-(deftestsuite rsb-model-classes-root (rsb-model-root)
-  ()
-  (:documentation
-   "Unit test suite for the model classes."))
+(def-suite rsb-model-classes-root
+  :in rsb-model-root
+  :description
+  "Unit test suite for the model classes.")
+(in-suite rsb-model-classes-root)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro define-simple-model-class-tests (class-and-options &body cases)
@@ -18,44 +19,38 @@
            (parent-suite-name (symbolicate suite-prefix '#:root))
            (suite-name        (symbolicate suite-prefix class '#:-root)))
       `(progn
-         (deftestsuite ,suite-name (,parent-suite-name)
-           ()
-           (:documentation
-            ,(format nil "Unit test suite for the `~(~A~)' model class."
-                     class)))
+         (def-suite ,suite-name
+           :in ,parent-suite-name
+           :description
+           ,(format nil "Unit test suite for the `~(~A~)' model class."
+                    class))
 
-         (addtest (,suite-name
-                   :documentation
-                   ,(format nil "Test constructing `~(~A~)' instances."
-                            class))
-           construct
+         (test construct
+           ,(format nil "Test constructing `~(~A~)' instances." class)
 
-           (ensure-cases (initargs &optional expected-result expected-printed)
-               (list ,@cases)
-             (let+ (((&flet do-it ()
-                       (apply #'make-instance ',class initargs))))
-               (case expected-result
-                 (missing-required-initarg
-                  (ensure-condition missing-required-initarg (do-it)))
-                 (t
-                  (do-it))))))
+           (mapc (lambda+ ((initargs &optional expected-result &ign))
+                   (let+ (((&flet do-it ()
+                             (apply #'make-instance ',class initargs))))
+                     (case expected-result
+                       (missing-required-initarg
+                        (signals missing-required-initarg (do-it)))
+                       (t
+                        (do-it)))))
+               (list ,@cases)))
 
-         (addtest (,suite-name
-                   :documentation
-                   ,(format nil "Test printing `~(~A~)' instances." class))
-           print
+         (test print
+           ,(format nil "Test printing `~(~A~)' instances." class)
 
-           (ensure-cases (initargs &optional expected-result (expected-printed t))
-               (list ,@cases)
-             (let+ (((&flet do-it ()
-                       (princ-to-string (apply #'make-instance ',class initargs)))))
-               (cond
-                 ((eq expected-result 'missing-required-initarg))
-                 ((eq expected-printed t)
-                  (do-it))
-                 (t
-                  (ensure-same (do-it) expected-printed
-                               :test (lambda (x y) (search y x))))))))))))
+           (mapc (lambda+ ((initargs &optional expected-result (expected-printed t)))
+                   (let+ (((&flet do-it ()
+                             (princ-to-string (apply #'make-instance ',class initargs)))))
+                     (case expected-result
+                       (missing-required-initarg)
+                       ((t)
+                        (finishes (do-it)))
+                       (t
+                        (is (search expected-printed (do-it)))))))
+                 (list ,@cases)))))))
 
 ;;; `participant-info' classes
 

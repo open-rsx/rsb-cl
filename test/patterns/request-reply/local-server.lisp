@@ -8,27 +8,26 @@
 
 ;;; `local-method' tests
 
-(deftestsuite local-method-root (patterns-request-reply-root)
-  ()
-  (:documentation
-   "Test suite for `local-method' class."))
+(def-suite local-method-root
+  :in patterns-request-reply-root
+  :description
+  "Test suite for `local-method' class.")
+(in-suite local-method-root)
 
-(addtest (local-method-root
-          :documentation
-          "Test constructing `local-method' instances.")
-  construction
+(test construction
+  "Test constructing `local-method' instances."
 
   ;; Missing :callback initarg
-  (ensure-condition 'missing-required-initarg
+  (signals missing-required-initarg
     (make-instance 'local-method :scope (make-scope "/foo") :name "foo")))
 
 ;;; `local-server' tests
 
-(deftestsuite local-server-root (patterns-request-reply-root
-                                 participant-suite)
-  ()
-  (:documentation
-   "Test suite for the `local-server' class."))
+(def-suite local-server-root
+  :in patterns-request-reply-root
+  :description
+  "Test suite for the `local-server' class.")
+(in-suite local-server-root)
 
 (define-basic-participant-test-cases (:local-server
                                       :check-transport-urls? nil)
@@ -67,41 +66,39 @@
   ;; No transports => error
   '("/" (:transports ((t :enabled nil))) error))
 
-(addtest (local-server-root
-          :documentation
-          "Test adding methods to a `local-server' instance.")
-  set-method
+(test set-method
+  "Test adding methods to a `local-server' instance."
 
   (with-participant (server :local-server "/rsbtest/localserver/set-method")
-    (ensure-cases (name method args expected)
-        `(("foo"          ,(lambda ()) ()                   t)
-          ("foo"          ,(lambda ()) ()                   t)
-          ("foo"          nil          ()                   nil)
+    (mapc
+     (lambda+ ((name method args expected))
+       (let+ (((&flet do-it ()
+                 (values
+                  (setf (apply #'server-method server name args) method)
+                  (server-method server name :error? nil)))))
+         (case expected
+           (type-error (signals type-error (do-it)))
+           ((t)        (is (notany #'null (multiple-value-list (do-it)))))
+           (t          (is (equal (list expected expected)
+                                  (multiple-value-list (do-it))))))))
 
-          (nil            ,(lambda ()) ()                   t)
-          (nil            nil          ()                   nil)
+     `(("foo"          ,(lambda ()) ()                   t)
+       ("foo"          ,(lambda ()) ()                   t)
+       ("foo"          nil          ()                   nil)
 
-          ("bar"          ,(lambda ()) (:argument :event)   t)
-          ("bar"          ,(lambda ()) (:argument :payload) t)
+       (nil            ,(lambda ()) ()                   t)
+       (nil            nil          ()                   nil)
 
-          ;; invalid method name => type-error
-          ("%invalidname" ,(lambda ()) ()                   type-error)
-          ;; invalid argument style => type-error
-          ("bar"          ,(lambda ()) (:argument :foo)     type-error))
+       ("bar"          ,(lambda ()) (:argument :event)   t)
+       ("bar"          ,(lambda ()) (:argument :payload) t)
 
-      (let+ (((&flet do-it ()
-                (values
-                 (setf (apply #'server-method server name args) method)
-                 (server-method server name :error? nil)))))
-        (case expected
-          (type-error (ensure-condition 'type-error (do-it)))
-          ((t)        (ensure (notany #'null (multiple-value-list (do-it)))))
-          (t          (ensure-same (do-it) (values expected expected))))))))
+       ;; invalid method name => type-error
+       ("%invalidname" ,(lambda ()) ()                   type-error)
+       ;; invalid argument style => type-error
+       ("bar"          ,(lambda ()) (:argument :foo)     type-error)))))
 
-(addtest (local-server-root
-          :documentation
-          "Test methods on `call' for the `local-server' class.")
-  call
+(test (call :fixture with-configuration)
+  "Test methods on `call' for the `local-server' class."
 
   (with-participant (server :local-server "/rsbtest/localserver/call")
     (let ((argument))
@@ -112,29 +109,28 @@
             (server-method server "error")
             (lambda (x) (declare (ignore x)) (error "intentional error")))
 
-      (ensure-cases (method arg expected-argument expected-result)
-          '(("echopayload" "foo" "foo"  "foo")
-            ("echoevent"   "foo" event  "foo")
-            ("error"       "foo" :none  string))
+      (mapc
+       (lambda+ ((method arg expected-argument expected-result))
+         (setf argument :none)
+         (let* ((scope       (merge-scopes
+                              (list method) "/rsbtest/localserver/call"))
+                (event       (let ((event (make-event scope arg)))
+                               (setf (event-sequence-number event)
+                                     0
+                                     (event-origin event)
+                                     (uuid:make-v4-uuid))
+                               event))
+                (result      (call server (server-method server method) event))
+                (result-data (event-data result)))
+           (if (typep expected-argument '(and symbol (not keyword)))
+               (is (typep argument expected-argument))
+               (is (equal expected-argument argument)))
 
-        (setf argument :none)
-        (let* ((scope       (merge-scopes
-                             (list method) "/rsbtest/localserver/call"))
-               (event       (let ((event (make-event scope arg)))
-                              (setf (event-sequence-number event)
-                                    0
-                                    (event-origin event)
-                                    (uuid:make-v4-uuid))
-                              event))
-               (result      (call server (server-method server method) event))
-               (result-data (event-data result)))
-          (if (typep expected-argument '(and symbol (not keyword)))
-              (ensure (typep argument expected-argument))
-              (ensure-same argument expected-argument
-                           :test #'equal))
+           (is (typep result 'event))
+           (if (symbolp expected-result)
+               (is (typep result-data expected-result))
+               (is (equal expected-result result-data)))))
 
-          (ensure (typep result 'event))
-          (if (symbolp expected-result)
-              (ensure (typep result-data expected-result))
-              (ensure-same result-data expected-result
-                           :test #'equal)))))))
+       '(("echopayload" "foo" "foo"  "foo")
+         ("echoevent"   "foo" event  "foo")
+         ("error"       "foo" :none  string))))))

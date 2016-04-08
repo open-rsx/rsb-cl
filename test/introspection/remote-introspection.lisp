@@ -8,10 +8,11 @@
 
 ;;; Class `introspection-receiver'
 
-(deftestsuite introspection-receiver-root (introspection-root)
-  ()
-  (:documentation
-   "Unit test suite for the `introspection-receiver' class."))
+(def-suite introspection-receiver-root
+  :in introspection-root
+  :description
+  "Unit test suite for the `introspection-receiver' class.")
+(in-suite introspection-receiver-root)
 
 (define-basic-participant-test-cases (rsb.introspection::introspection-receiver
                                       :check-transport-urls? nil)
@@ -50,25 +51,25 @@
 
 ;;; Class `remote-introspection-database'
 
-(deftestsuite remote-introspection-database-root (introspection-root)
-  ()
-  (:documentation
-   "Unit test suite for the `remote-introspection-database' class."))
+(def-suite remote-introspection-database-root
+  :in introspection-root
+  :description
+  "Unit test suite for the `remote-introspection-database' class.")
+(in-suite remote-introspection-database-root)
 
-(addtest (remote-introspection-database-root
-          :documentation
-          "Test printing `remote-introspection-database' instances.")
-  print
+(test print
+  "Test printing `remote-introspection-database' instances."
 
   (let ((introspection (make-instance 'remote-introspection-database)))
     (ensure (not (emptyp (princ-to-string introspection))))))
 
 ;;; Class `remote-introspection'
 
-(deftestsuite remote-introspection-root (introspection-root)
-  ()
-  (:documentation
-   "Unit test suite for the `remote-introspection' class."))
+(def-suite remote-introspection-root
+  :in introspection-root
+  :description
+  "Unit test suite for the `remote-introspection' class.")
+(in-suite remote-introspection-root)
 
 (define-basic-participant-test-cases (rsb.introspection::remote-introspection)
   '("/rsbtest/remote-introspection/construction"
@@ -112,21 +113,16 @@
     (:transports ((t :enabled nil)))
     error))
 
-(addtest (remote-introspection-root
-          :documentation
-          "Smoke test for timer-based updating of
-           `remote-introspection'.")
-  update/smoke
+(test update/smoke
+  "Smoke test for timer-based updating of `remote-introspection'."
 
   (with-participant (introspection :remote-introspection +introspection-scope+
                                    :update-interval .2)
     (sleep 1.0)))
 
-(addtest (remote-introspection-root
-          :documentation
-          "Test application of the configured error policy in
-           `remote-introspection' instances.")
-  error-policy
+(test error-policy
+  "Test application of the configured error policy in
+   `remote-introspection' instances."
 
   (with-condition-tracking (record-and-continue check-conditions)
     (with-participant (introspection :remote-introspection +introspection-scope+
@@ -169,10 +165,8 @@
           "Payload is" "1"
           "(not RSB.PROTOCOL.INTROSPECTION:HELLO or RSB.PROTOCOL.INTROSPECTION:BYE or \"pong\")"))))))
 
-(addtest (remote-introspection-root
-          :documentation
-          "Test change-hook of the `remote-introspection' class.")
-  change-hook
+(test change-hook
+  "Test change-hook of the `remote-introspection' class."
 
   (let+ ((calls '())
          ((&flet record (&rest event)
@@ -237,12 +231,9 @@
            (host-entry    real (eql :clock-offset-changed))
            (host-entry    real (eql :latency-changed))))))))
 
-(addtest (remote-introspection-root
-          :documentation
-          "Stress test which sends introspection events to a
-           `remote-introspection' instance from multiple threads in
-           parallel.")
-  stress
+(test stress
+  "Stress test which sends introspection events to a
+   `remote-introspection' instance from multiple threads in parallel."
 
   (with-participants ((nil           :remote-introspection +introspection-scope+
                                      :update-interval .01)

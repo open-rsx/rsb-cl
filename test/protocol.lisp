@@ -8,10 +8,11 @@
 
 ;;; Tests for the `make-participant' generic function
 
-(deftestsuite make-participant-root (root)
-  ()
-  (:documentation
-   "Unit tests for the `participant-hook' generic function."))
+(def-suite make-participant-root
+  :in root
+  :description
+  "Unit tests for the `participant-hook' generic function.")
+(in-suite make-participant-root)
 
 (defclass nested-mock-participant.inner (participant) ())
 (rsb::register-participant-class 'nested-mock-participant.inner)
@@ -59,11 +60,9 @@
 (deftype caused-by-same ()
   '(satisfies caused-by-same?))
 
-(addtest (make-participant-root
-          :documentation
-          "Test chaining of `participant-creation-error' conditions in
-           case of recursive `make-participant' calls.")
-  error-from-nested-call
+(test error-from-nested-call
+  "Test chaining of `participant-creation-error' conditions in case of
+   recursive `make-participant' calls."
 
   (let+ (((&flet do-it (scope &rest initargs)
             (apply #'make-participant :nested-mock-participant.outer scope
@@ -71,11 +70,9 @@
          ((&flet test-case (expected &rest args)
             (ecase expected
               (caused-by-intentional-error
-               (ensure-condition 'caused-by-intentional-error
-                 (apply #'do-it args)))
+               (signals caused-by-intentional-error (apply #'do-it args)))
               (caused-by-same
-               (ensure-condition 'caused-by-same
-                 (apply #'do-it args)))))))
+               (signals caused-by-same (apply #'do-it args)))))))
     (test-case 'caused-by-intentional-error "/")
     (test-case 'caused-by-intentional-error (puri:uri "/"))
     (test-case 'caused-by-intentional-error (make-scope "/"))
@@ -89,15 +86,14 @@
 
 ;;; Hook tests
 
-(deftestsuite hooks-root (root)
-  ()
-  (:documentation
-   "Unit tests for `*make-participant-hook*' and
-    `*participant-state-change-hook*'."))
+(def-suite hooks-root
+  :in root
+  :description
+  "Unit tests for `*make-participant-hook*' and
+   `*participant-state-change-hook*'.")
+(in-suite hooks-root)
 
-(defun call-with-hook-call-tracking (hook thunk
-                                     &key
-                                     handler)
+(defun call-with-hook-call-tracking (hook thunk &key handler)
   (let ((hook-calls '()))
     (hooks:with-handlers
         ((hook (lambda (&rest args)
@@ -116,106 +112,97 @@
         `(setf ,calls-place ,(make-call))
         (make-call))))
 
-(addtest (hooks-root
-          :documentation
-          "Smoke test for `*make-participant-hook*'.")
-  make-participant-hook/smoke
+(test (make-participant-hook/smoke :fixture with-configuration)
+  "Smoke test for `*make-participant-hook*'."
 
-  (ensure-cases ((kind scope &rest args) &rest expected)
-      `(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:converters :transports :introspection?)
-         (:introspection? :parent :handlers :error-policy
-          :transports :converters :transform))
-        ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :parent ,*simple-parent*)
-         (:converters :transports :introspection? :parent)
-         (:introspection? :parent :handlers :error-policy
-          :transports :converters :transform))
-        ;; Hook calls caused by introspection stuff interfere too
-        ;; much.
-        ;; ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
-        ;;                  :introspection? t)
-        ;;  (:converters :transports :introspection?)
-        ;;  (:introspection? :parent :handlers :error-policy
-        ;;   :transports :converters :transform))
-        ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
-          :transform nil)
-         (:converters :transports :introspection? :transform)
-         (:introspection? :parent :handlers :error-policy
-          :transports :converters :transform))
-
-        ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:converters :transports :introspection?))
-        ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :parent ,*simple-parent*)
-         (:converters :transports :introspection? :parent))
-        ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :introspection? t)
-         (:converters :transports :introspection?))
-        ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :transform nil)
-         (:converters :transports :introspection? :transform))
-
-        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :type t)
-         (:converters :transports :type :introspection?))
-        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :type t :parent ,*simple-parent*)
-         (:converters :transports :type :introspection? :parent))
-        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :type t :introspection? t)
-         (:converters :transports :type :introspection?))
-        ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :type t :transform nil)
-         (:converters :transports :type :introspection? :transform))
-
-        ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:converters :transports :introspection?))
-        ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :parent ,*simple-parent*)
-         (:converters :transports :introspection? :parent))
-        ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :introspection? t)
-         (:converters :transports :introspection?))
-        ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :transform nil)
-         (:converters :transports :introspection? :transform))
-
-        ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:converters :transports :introspection?))
-        ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :parent ,*simple-parent*)
-         (:converters :transports :introspection? :parent))
-        ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :introspection? t)
-         (:converters :transports :introspection?))
-        ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :transform nil)
-         (:converters :transports :introspection? :transform)))
-
-    (let ((participant)
-          (child))
-      (ensure-same
-       (with-hook-call-tracking (*make-participant-hook*)
-         (with-active-participant (participant1 (apply #'make-participant
-                                                       kind scope args))
-           (setf participant participant1)
-           (when (typep participant1 'rsb.patterns.reader:reader)
-             (setf child (rsb.patterns:participant-child
-                          participant1 nil :listener)))))
-       (append (when child
-                 (list (list child (second expected))))
-               (list (list participant (first expected))))
-       :test (lambda (calls expected)
-               (every
-                (lambda+ ((call-participant     call-initargs)
-                          (expected-participant expected-initargs))
-                  (ensure-same call-participant expected-participant)
-                  (ensure-same
-                   (iter (for (key _) :on call-initargs :by #'cddr) (collect key))
+  (mapc
+   (lambda+ (((kind scope &rest args) expected))
+     (let* ((participant)
+            (child)
+            (calls
+              (with-hook-call-tracking (*make-participant-hook*)
+                (with-active-participant
+                    (participant1 (apply #'make-participant kind scope args))
+                  (setf participant participant1)
+                  (when (typep participant1 'rsb.patterns.reader:reader)
+                    (setf child (rsb.patterns:participant-child
+                                 participant1 nil :listener)))))))
+       (is
+        ((lambda (expected calls)
+           (every
+            (lambda+ ((call-participant     call-initargs)
+                      (expected-participant expected-initargs))
+              (is (eql expected-participant call-participant))
+              (is (set-equal
                    expected-initargs
-                   :test #'set-equal))
-                calls expected))))))
+                   (iter (for (key _) :on call-initargs :by #'cddr)
+                         (collect key)))))
+            calls expected))
+
+         (append (when child
+                   (list (list child (second expected))))
+                 (list (list participant expected))) calls))))
+
+   `(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
+      (:converters :transports :introspection?))
+     ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :parent ,*simple-parent*)
+      (:converters :transports :introspection? :parent))
+     ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :introspection? t)
+      (:converters :transports :introspection?))
+     ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :transform nil)
+      (:converters :transports :introspection? :transform))
+
+     ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke")
+      (:converters :transports :introspection?))
+     ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :parent ,*simple-parent*)
+      (:converters :transports :introspection? :parent))
+     ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :introspection? t)
+      (:converters :transports :introspection?))
+     ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :transform nil)
+      (:converters :transports :introspection? :transform))
+
+     ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :type t)
+      (:converters :transports :type :introspection?))
+     ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :type t :parent ,*simple-parent*)
+      (:converters :transports :type :introspection? :parent))
+     ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :type t :introspection? t)
+      (:converters :transports :type :introspection?))
+     ((:informer      "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :type t :transform nil)
+      (:converters :transports :type :introspection? :transform))
+
+     ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke")
+      (:converters :transports :introspection?))
+     ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :parent ,*simple-parent*)
+      (:converters :transports :introspection? :parent))
+     ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :introspection? t)
+      (:converters :transports :introspection?))
+     ((:local-server  "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :transform nil)
+      (:converters :transports :introspection? :transform))
+
+     ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke")
+      (:converters :transports :introspection?))
+     ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :parent ,*simple-parent*)
+      (:converters :transports :introspection? :parent))
+     ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :introspection? t)
+      (:converters :transports :introspection?))
+     ((:remote-server "inprocess:/rsbtest/make-participant-hook/smoke"
+                      :transform nil)
+      (:converters :transports :introspection? :transform)))))
 
 (define-condition buggy-handler-error (error) ())
 
@@ -226,11 +213,9 @@
 (deftype participant-creation-error-caused-by-buggy-handler-error ()
   '(satisfies participant-creation-error-caused-by-buggy-handler-error?))
 
-(addtest (hooks-root
-          :documentation
-          "Test signaled error in case of a buggy handler in
-           `*make-participant-hook*'.")
-  make-participant-hook/buggy-handler
+(test make-participant-hook/buggy-handler
+  "Test signaled error in case of a buggy handler in
+   `*make-participant-hook*'."
 
   (let+ ((scope "/rsbtest/make-participant-hook/buggy-handler")
          (uri   (concatenate 'string "inprocess:" scope))
@@ -244,8 +229,7 @@
 
     ;; Without invoking restarts, the condition should be wrapped in a
     ;; `participant-creation-error'.
-    (ensure-condition
-        'participant-creation-error-caused-by-buggy-handler-error
+    (signals participant-creation-error-caused-by-buggy-handler-error
       (do-it))
 
     ;; Skip the buggy handler by using the `continue' restart. Make
@@ -253,31 +237,30 @@
     (handler-bind ((error #'continue))
       (do-it (rcurry #'check-participant :listener scope)))))
 
-(addtest (hooks-root
-          :documentation
-          "Smoke test for `*participant-state-change-hook*'")
-  participant-state-change-hook/smoke
+(test participant-state-change-hook/smoke
+  "Smoke test for `*participant-state-change-hook*'"
 
-  (ensure-cases (kind scope &rest args)
-      '((:reader        "inprocess:/rsbtest/participant-state-change-hook/smoke")
-        (:listener      "inprocess:/rsbtest/participant-state-change-hook/smoke")
-        (:informer      "inprocess:/rsbtest/participant-state-change-hook/smoke"
-                        :type t)
+  (mapc
+   (lambda+ ((kind scope &rest args))
+     (let* ((participant)
+            (child)
+            (calls
+              (with-hook-call-tracking (*participant-state-change-hook*)
+                (with-active-participant
+                    (participant1 (apply #'make-participant kind scope args))
+                  (setf participant participant1)
+                  (when (typep participant1 'rsb.patterns.reader:reader)
+                    (setf child (rsb.patterns:participant-child
+                                 participant1 nil :listener)))))))
+       (is (equal (append (when child
+                            (list (list child :detached)))
+                          (list (list participant :detached)))
+                  calls))))
 
-        (:local-server  "inprocess:/rsbtest/participant-state-change-hook/smoke")
-        (:remote-server "inprocess:/rsbtest/participant-state-change-hook/smoke"))
+   '((:reader        "inprocess:/rsbtest/participant-state-change-hook/smoke")
+     (:listener      "inprocess:/rsbtest/participant-state-change-hook/smoke")
+     (:informer      "inprocess:/rsbtest/participant-state-change-hook/smoke"
+      :type t)
 
-    (let ((participant)
-          (child))
-      (ensure-same
-       (with-hook-call-tracking (*participant-state-change-hook*)
-         (with-active-participant
-             (participant1 (apply #'make-participant kind scope args))
-           (setf participant participant1)
-           (when (typep participant1 'rsb.patterns.reader:reader)
-             (setf child (rsb.patterns:participant-child
-                          participant1 nil :listener)))))
-       (append (when child
-                 (list (list child :detached)))
-               (list (list participant :detached)))
-       :test #'equal))))
+     (:local-server  "inprocess:/rsbtest/participant-state-change-hook/smoke")
+     (:remote-server "inprocess:/rsbtest/participant-state-change-hook/smoke"))))

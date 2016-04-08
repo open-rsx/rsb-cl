@@ -6,10 +6,11 @@
 
 (cl:in-package #:rsb.converter.test)
 
-(deftestsuite caching-root (converter-root)
-  ()
-  (:documentation
-   "Unit tests for the `caching-converter' class."))
+(def-suite caching-root
+  :in converter-root
+  :description
+  "Unit tests for the `caching-converter' class.")
+(in-suite caching-root)
 
 (define-basic-converter-test-cases
     (:caching

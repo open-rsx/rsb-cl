@@ -1,6 +1,6 @@
 ;;;; rsb-introspection.asd --- System definition for introspection for RSB.
 ;;;;
-;;;; Copyright (C) 2013-2018 Jan Moringen
+;;;; Copyright (C) 2013-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -75,7 +75,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"              "1.7.1")
+  :depends-on  ((:version "fiveam"            "1.4")
 
                 (:version "rsb-introspection" #.(version/string))
 
@@ -99,7 +99,5 @@
                                :if-feature :sbcl))))
 
   :perform     (test-op (operation component)
-                 (eval (read-from-string "(log:config :warn)")) ; less noise
-                 (eval (read-from-string "(lift:run-tests :config
-                                            (asdf:system-relative-pathname
-                                             :rsb-introspection/test \"lift-introspection.config\"))"))))
+                 (symbol-call '#:log '#:config :warn) ; less noise
+                 (symbol-call '#:rsb.introspection.test '#:run-tests)))

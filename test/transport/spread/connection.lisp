@@ -9,78 +9,72 @@
 ;;; Utilities
 
 (defun check-connection (connection expected-groups)
-  (ensure-same (connection-groups connection) expected-groups
-               :test (rcurry #'set-equal :test #'string=)))
+  (flet ((set-equal/string (left right)
+           (set-equal left right :test #'string=)))
+    (is (set-equal/string expected-groups (connection-groups connection)))))
 
 ;;; Tests
 
-(deftestsuite spread-connection-root (transport-spread-root)
-  ()
-  (:documentation
-   "Unit tests for the `connection' class."))
+(def-suite spread-connection-root
+  :in transport-spread-root
+  :description
+  "Unit tests for the `connection' class.")
+(in-suite spread-connection-root)
 
-(addtest (spread-connection-root
-          :documentation
-          "Test construction of `connection' instances.")
-  construct
+(test construct
+  "Test construction of `connection' instances."
 
   (let+ ((name (format nil "~D" spread-port))
          ((&flet connect ()
             (network.spread:connect name))))
-    (ensure-cases (initargs expected)
-        `(;; Some invalid cases.
-          (()                            missing-required-initarg) ; Neither :connection nor :name
-          ((:name       "3333@localhost"
-            :connection ,(connect))      incompatible-initargs)    ; Both :connection and :name
+    (mapc (lambda+ ((initargs expected))
+            (let+ (((&flet+ do-it ()
+                      (apply #'make-instance 'connection initargs))))
+              (case expected
+                (missing-required-initarg
+                 (signals missing-required-initarg (do-it)))
+                (incompatible-initargs
+                 (signals incompatible-initargs (do-it)))
+                (t
+                 (detach (do-it))))))
 
-          ;; These are OK.
-          ((:connection ,(connect))      t)
-          ((:name ,name)                 t))
-      (let+ (((&flet+ do-it ()
-                (apply #'make-instance 'connection initargs))))
-       (case expected
-         (missing-required-initarg
-          (ensure-condition 'missing-required-initarg (do-it)))
-         (incompatible-initargs
-          (ensure-condition 'incompatible-initargs (do-it)))
-         (t
-          (detach (do-it))))))))
+          `( ;; Some invalid cases.
+            (()                            missing-required-initarg) ; Neither :connection nor :name
+            ((:name       "3333@localhost"
+              :connection ,(connect))      incompatible-initargs) ; Both :connection and :name
 
-(addtest (spread-connection-root
-          :documentation
-          "Test printing `connection' instances.")
-  print
+            ;; These are OK.
+            ((:connection ,(connect))      t)
+            ((:name ,name)                 t)))))
+
+(test print
+  "Test printing `connection' instances."
 
   (with-connection (connection :port spread-port)
-    (ensure (not (emptyp (princ-to-string connection))))))
+    (is-false (emptyp (princ-to-string connection)))))
 
-(addtest (spread-connection-root
-          :documentation
-          "Smoke test for `ref-group' and `unref-group' methods.")
-  ref/unref-group.smoke
+(test ref/unref-group.smoke
+  "Smoke test for `ref-group' and `unref-group' methods."
 
   (with-connection (connection :port spread-port)
     (let ((group *simple-group-name*))
-      (ensure-same (ref-group connection group) (values 1 1 t))
+      (is (eql (values 1 1 t) (ref-group connection group)) )
       (check-connection connection (list group))
 
-      (ensure-same (ref-group connection group) (values 2 1 nil))
+      (is (eql (values 2 1 nil) (ref-group connection group)))
       (check-connection connection (list group))
 
-      (ensure-same (unref-group connection group) (values 1 1 nil))
+      (is (eql (values 1 1 nil) (unref-group connection group)))
       (check-connection connection (list group))
 
-      (ensure-same (unref-group connection group) (values 0 0 t))
+      (is (eql (values 0 0 t) (unref-group connection group)))
       (check-connection connection '())
 
       ;; Invalid unreference should signal an error.
       (ensure-condition error (unref-group connection group)))))
 
-(addtest (spread-connection-root
-          :documentation
-          "Test for `ref-group' and `unref-group' methods in waitable
-           mode.")
-  ref/unref-group.waitatble
+(test ref/unref-group.waitatble
+  "Test for `ref-group' and `unref-group' methods in waitable mode."
 
   (with-connection (connection :port spread-port)
     (let+ ((group *simple-group-name*)
@@ -90,15 +84,15 @@
               (unref-group connection group :waitable? t))))
 
       (let+ (((&values member-count group-count promise) (ref)))
-        (ensure-same (values member-count group-count) (values 1 1))
+        (is (eql (values 1 1) (values member-count group-count)))
         (loop :until (lparallel:fulfilledp promise)
               :do (receive-message connection nil)))
       (check-connection connection (list group))
 
-      (ensure-same (ref) (values 2 1 nil))
+      (is (eql (values 2 1 nil) (ref)))
       (check-connection connection (list group))
 
-      (ensure-same (unref) (values 1 1 nil))
+      (is (eql (values 1 1 nil) (unref)))
       (check-connection connection (list group))
 
       ;; Make sure the join/leave notification skips unrelated
@@ -108,7 +102,7 @@
         (send-message connection (list group) notification))
 
       (let+ (((&values member-count group-count promise) (unref)))
-        (ensure-same (values member-count group-count) (values 0 0 t))
+        (is (eql (values 0 0 t) (values member-count group-count)))
         (loop :until (lparallel:fulfilledp promise)
               :do (receive-message connection nil)))
       (check-connection connection '()))))

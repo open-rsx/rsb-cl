@@ -6,10 +6,11 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite type-filter-root (filter-root)
-  ()
-  (:documentation
-   "Unit tests for the `type-filter' class."))
+(def-suite type-filter-root
+  :in filter-root
+  :description
+  "Unit tests for the `type-filter' class.")
+(in-suite type-filter-root)
 
 (define-basic-filter-tests (type-filter :type)
   '(;; Some invalid cases.

@@ -6,11 +6,11 @@
 
 (cl:in-package #:rsb.patterns.reader.test)
 
-(deftestsuite reader-root (root
-                           participant-suite)
-  ()
-  (:documentation
-   "Unit tests for the `reader' class."))
+(def-suite reader-root
+  :in root
+  :description
+  "Unit tests for the `reader' class.")
+(in-suite reader-root)
 
 (define-basic-participant-test-cases reader
   '("/rsbtest/reader/construction"
@@ -67,34 +67,28 @@
     (:transports ((t :enabled nil)))
     error))
 
-(addtest (reader-root
-          :documentation
-          "Test receiving data sent by an informer in a blocking
-mode.")
-  receive/blocking
+(test (receive/blocking :fixture with-configuration)
+  "Test receiving data sent by an informer in a blocking mode."
 
-  (with-participant (informer :informer "/rsbtest/reader/receive/blocking")
-    (with-participant (reader :reader "/rsbtest/reader/receive/blocking")
-      (ensure-random-cases 32 ((data a-string))
-        (send informer data)
-        (check-event (receive reader :block? t)
-                     "/rsbtest/reader/receive/blocking" data)))))
+  (with-participants ((informer :informer "/rsbtest/reader/receive/blocking")
+                      (reader   :reader   "/rsbtest/reader/receive/blocking"))
+    (for-all ((data (gen-string)))
+      (send informer data)
+      (check-event (receive reader :block? t)
+                   "/rsbtest/reader/receive/blocking" data))))
 
-(addtest (reader-root
-          :documentation
-          "Test receiving data sent by an informer in a non-blocking
-mode.")
-  receive/non-blocking
+(test (receive/non-blocking :fixture with-configuration)
+  "Test receiving data sent by an informer in a non-blocking mode."
 
-  (with-participant (informer :informer "/rsbtest/reader/receive/non-blocking")
-    (with-participant (reader :reader "/rsbtest/reader/receive/non-blocking")
-      (ensure-random-cases 32 ((data a-string))
-        (send informer data)
-        (let ((received
-                (loop :for received = (receive reader :block? nil)
-                      :when received :do (return received))))
-          (check-event received
-                       "/rsbtest/reader/receive/non-blocking" data))))))
+  (with-participants ((informer :informer "/rsbtest/reader/receive/non-blocking")
+                      (reader   :reader   "/rsbtest/reader/receive/non-blocking"))
+    (for-all ((data (gen-string)))
+      (send informer data)
+      (let ((received
+             (loop :for received = (receive reader :block? nil)
+                   :when received :do (return received))))
+        (check-event received
+                     "/rsbtest/reader/receive/non-blocking" data)))))
 
 (rsb.test::define-error-hook-test-case (reader)
   ;; Force an error during dispatch by injecting a signaling

@@ -6,17 +6,16 @@
 
 (cl:in-package #:rsb.transform.test)
 
-(deftestsuite rsb.transform.drop-payload-root (rsb.transform-root)
-  ()
-  (:documentation
-   "Unit tests for the `drop-payload' transform."))
+(def-suite rsb.transform.drop-payload-root
+  :in rsb.transform-root
+  :description
+  "Unit tests for the `drop-payload' transform.")
+(in-suite rsb.transform.drop-payload-root)
 
-(addtest (rsb.transform.drop-payload-root
-          :documentation
-          "Smoke test for the `drop-payload' transform.")
-  smoke
+(test smoke
+  "Smoke test for the `drop-payload' transform."
 
   (call-with-transform-checking-thunk
    (lambda (do-it)
-     (ensure-same (event-data (funcall do-it)) +dropped-payload+))
+     (is (eq +dropped-payload+ (event-data (funcall do-it)))))
    :drop-payload (list "/" 5)))

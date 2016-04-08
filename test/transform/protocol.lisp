@@ -1,79 +1,76 @@
 ;;;; protocol.lisp --- Unit tests for the protocol provided by the transform module.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transform.test)
 
-(deftestsuite rsb.transform.transform!-root (rsb.transform-root)
-  ()
-  (:documentation
-   "Unit tests for the `transform!' generic function."))
+(def-suite rsb.transform.transform!-root
+  :in rsb.transform-root
+  :description
+  "Unit tests for the `transform!' generic function.")
+(in-suite rsb.transform.transform!-root)
 
-(addtest (rsb.transform.transform!-root
-          :documentation
-          "Test default behavior of the `transform!' generic
-           function.")
-  default-behavior
+(test default-behavior
+  "Test default behavior of the `transform!' generic function."
 
-  (ensure-cases (transform object expected)
-      `(;; Some invalid transforms.
-        (:no-such-transform     :does-not-matter transform-error)
-        ((:no-such-transform)   :does-not-matter transform-error)
-        (,#'1+                  :wrong-type      transform-error)
+  (mapc
+   (lambda+ ((transform object expected))
+     (let+ (((&flet do-it ()
+               (transform! transform object))))
+       (case expected
+         (transform-error (signals transform-error (do-it)))
+         (t               (is (eql expected (do-it)))))))
 
-        ;; These are valid.
-        (,#'1+                  1                2)
-        ((,#'1+ ,(curry #'* 2)) 1                3)
-        ((,(curry #'* 2) ,#'1+) 1                4))
+   `(;; Some invalid transforms.
+     (:no-such-transform     :does-not-matter transform-error)
+     ((:no-such-transform)   :does-not-matter transform-error)
+     (,#'1+                  :wrong-type      transform-error)
 
-    (let+ (((&flet do-it ()
-              (transform! transform object))))
-      (case expected
-        (transform-error (ensure-condition 'transform-error (do-it)))
-        (t               (ensure-same (do-it) expected))))))
+     ;; These are valid.
+     (,#'1+                  1                2)
+     ((,#'1+ ,(curry #'* 2)) 1                3)
+     ((,(curry #'* 2) ,#'1+) 1                4))))
 
-(addtest (rsb.transform.transform!-root
-          :documentation
-          "Test restarts established by default methods on the
-           `transform!' generic function.")
-  restarts
+(test restarts
+  "Test restarts established by default methods on the `transform!'
+   generic function."
 
-  (ensure-cases (restart expected)
-      '((continue      1)
-        ((use-value 2) 2))
+  (mapc
+   (lambda+ ((restart expected))
+     (handler-bind
+         ((error (lambda (condition)
+                   (declare (ignore condition))
+                   (let+ (((name &rest args) (ensure-list restart))
+                          (restart (find-restart name)))
+                     ;; Ensure it is there.
+                     (is-true restart)
+                     ;; Ensure it prints.
+                     (is (typep (princ-to-string restart) 'string))
+                     ;; Ensure it works.
+                     (apply #'invoke-restart restart args)))))
+       (is (eql expected (transform! (curry #'error "~@<I hate ~A~@:>") 1)))))
 
-    (handler-bind
-        ((error (lambda (condition)
-                  (let+ (((name &rest args) (ensure-list restart))
-                         (restart (find-restart name)))
-                    ;; Ensure it is there.
-                    (ensure restart)
-                    ;; Ensure it prints.
-                    (ensure (typep (princ-to-string restart) 'string))
-                    ;; Ensure it works.
-                    (apply #'invoke-restart restart args)))))
-      (ensure-same (transform! (curry #'error "~@<I hate ~A~@:>") 1)
-                   expected))))
+   '((continue      1)
+     ((use-value 2) 2))))
 
-(deftestsuite rsb.transform.make-transform-root (rsb.transform-root)
-  ()
-  (:documentation
-   "Unit tests for the `make-transform' generic function."))
+(def-suite rsb.transform.make-transform-root
+  :in rsb.transform-root
+  :description
+  "Unit tests for the `make-transform' generic function.")
+(in-suite rsb.transform.make-transform-root)
 
-(addtest (rsb.transform.make-transform-root
-          :documentation
-          "Smoke test for the `make-transform' generic function.")
-  smoke
+(test smoke
+  "Smoke test for the `make-transform' generic function."
 
-  (ensure-cases (spec expected)
-      '((:no-such-transform transform-creation-error))
+  (mapc (lambda+ ((spec expected))
+          (let+ (((&flet do-it ()
+                    (apply #'make-transform (ensure-list spec)))))
+            (case expected
+              (transform-creation-error
+               (signals transform-creation-error (do-it)))
+              (t
+               (do-it)))))
 
-    (let+ (((&flet do-it ()
-              (apply #'make-transform (ensure-list spec)))))
-      (case expected
-        (transform-creation-error
-         (ensure-condition transform-creation-error (do-it)))
-        (t
-         (do-it))))))
+        '((:no-such-transform transform-creation-error))))

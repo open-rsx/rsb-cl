@@ -1,6 +1,6 @@
 ;;;; error-handling-mixins.lisp --- Unit tests for the transport-related error handling mixins.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,56 +15,55 @@
             (defmethod ,method-name ((connector ,class) ,@method-args)
               ,@method-body)
 
-            (deftestsuite ,suite-name (transport-root)
-              ((simple-handler (make-instance ',class)))
-              (:documentation
-               ,(format nil "Unit tests for the `~(~A~)' class."
-                        class)))
+            (def-suite ,suite-name
+              :in transport-root
+              :description
+              ,(format nil "Unit tests for the `~(~A~)' class." class))
+            (in-suite ,suite-name)
 
-            (addtest (,suite-name
-                      :documentation
-                      `(format nil "Smoke test for the error handling ~
-                                    performed by the `~(~A~)' class."
-                               class))
-              smoke
+            (test smoke
+              `(format nil "Smoke test for the error handling ~
+                            performed by the `~(~A~)' class."
+                       class)
 
-              ;; See rsb.event-processing.test:error-policy-mixin-root
-              ;; for an explanation of the test logic.
-              (ensure-condition 'simple-error
-                ,@invoke)
+              (let ((handler (make-instance ',class)))
+                ;; See
+                ;; rsb.event-processing.test:error-policy-mixin-root
+                ;; for an explanation of the test logic.
+                (signals simple-error ,@invoke)
 
-              (setf (processor-error-policy simple-handler) #'continue)
-              ,@invoke)))))
+                (setf (processor-error-policy handler) #'continue)
+                ,@invoke))))))
 
   (define-error-handling-mixin-tests
       error-handling-pull-receiver-mixin
       (emit ((block? t))
-            (restart-case
-                (error "~@<emit signaled an error.~@:>")
-              (continue (&optional condition)
-                (declare (ignore condition))
-                nil)))
+        (restart-case
+            (error "~@<emit signaled an error.~@:>")
+          (continue (&optional condition)
+            (declare (ignore condition))
+            nil)))
 
-    (emit simple-handler t))
+    (emit handler t))
 
   (define-error-handling-mixin-tests
       error-handling-push-receiver-mixin
       (receive-messages ()
-            (restart-case
-                (error "~@<receive-messages signaled an error.~@:>")
-              (continue (&optional condition)
-                (declare (ignore condition))
-                nil)))
+        (restart-case
+            (error "~@<receive-messages signaled an error.~@:>")
+          (continue (&optional condition)
+            (declare (ignore condition))
+            nil)))
 
-    (receive-messages simple-handler))
+    (receive-messages handler))
 
   (define-error-handling-mixin-tests
       error-handling-sender-mixin
       (handle ((event event))
-            (restart-case
-                (error "~@<handle signaled an error.~@:>")
-              (continue (&optional condition)
-                (declare (ignore condition))
-                nil)))
+        (restart-case
+            (error "~@<handle signaled an error.~@:>")
+          (continue (&optional condition)
+            (declare (ignore condition))
+            nil)))
 
-    (handle simple-handler (make-event "/" "bla"))))
+    (handle handler (make-event "/" "bla"))))

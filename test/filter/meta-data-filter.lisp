@@ -6,13 +6,12 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite meta-data-filter-root (filter-root)
-  ()
-  (:documentation
-   "Test suite for the `meta-data-filter' class."))
+(def-suite meta-data-filter-root
+  :in filter-root
+  :description
+  "Test suite for the `meta-data-filter' class.")
 
 (define-basic-filter-tests (meta-data-filter :meta-data)
-  ;; Construct cases
   `((()                               error) ; missing initargs
     ((:key :foo)                      error) ; missing :predicate initarg
     ((:predicate 'emptyp)             error) ; missing :key initarg

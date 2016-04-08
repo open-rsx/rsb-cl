@@ -6,61 +6,57 @@
 
 (cl:in-package #:rsb.test)
 
-(deftestsuite curry/weak-root (root)
-  ()
-  (:documentation
-   "Test suite for the `curry/weak' function."))
+(def-suite curry/weak-root
+  :in root
+  :description "Test suite for the `curry/weak' function.")
+(in-suite curry/weak-root)
 
-(addtest (curry/weak-root
-          :documentation
-          "Smoke test for the `curry/weak' function.")
-  smoke
+(test smoke
+  "Smoke test for the `curry/weak' function."
 
   (let+ ((f (rsb::curry/weak #'1+ 1))
          ((&values result result?) (funcall f)))
-    (when result? (ensure-same result 2)))
+    (when result? (is (eql 2 result))))
 
   (let+ ((f (rsb::curry/weak #'+ 1))
          ((&values result result?) (funcall f 2)))
-    (when result? (ensure-same result 3))))
+    (when result? (is (eql 3 result)))))
 
 (macrolet
     ((define-construction-cases (class)
-       `(ensure-cases (initargs expected)
-            `((()                                                                  missing-required-initarg)
-              ((:interval 1)                                                       missing-required-initarg)
-              ((:interval 1 :function ,,'#'+)                                      t)
-              ((:interval 1 :function ,,'#'print :args (list 1 *standard-output*)) t))
+       `(mapc
+         (lambda+ ((initargs expected))
+           (let+ (((&flet do-it ()
+                     (detach (apply #'make-instance ',class initargs)))))
+             (case expected
+               (missing-required-initarg
+                (signals missing-required-initarg (do-it)))
+               (t
+                (do-it)))))
 
-          (let+ (((&flet do-it ()
-                    (detach (apply #'make-instance ',class initargs)))))
-            (case expected
-              (missing-required-initarg
-               (ensure-condition missing-required-initarg
-                 (do-it)))
-              (t
-               (do-it)))))))
+         `((()                                                                  missing-required-initarg)
+           ((:interval 1)                                                       missing-required-initarg)
+           ((:interval 1 :function ,,'#'+)                                      t)
+           ((:interval 1 :function ,,'#'print :args (list 1 *standard-output*)) t)))))
 
-  (deftestsuite timed-executor-root (root)
-    ()
-    (:documentation
-     "Test suite for the `timed-executor' class."))
+  (def-suite timed-executor-root
+    :in root
+    :description
+    "Test suite for the `timed-executor' class.")
+  (in-suite timed-executor-root)
 
-  (addtest (timed-executor-root
-            :documentation
-            "Test constructing `timed-executor' instances.")
-    construction
+  (test construction
+    "Test constructing `timed-executor' instances."
 
     (define-construction-cases timed-executor))
 
-  (deftestsuite timed-executor/weak-root (root)
-    ()
-    (:documentation
-     "Test suite for the `timed-executor/weak' class."))
+  (def-suite timed-executor/weak-root
+    :in root
+    :description
+    "Test suite for the `timed-executor/weak' class.")
+  (in-suite timed-executor/weak-root)
 
-  (addtest (timed-executor/weak-root
-            :documentation
-            "Test constructing `timed-executor/weak' instances.")
-    construction
+  (test construction
+    "Test constructing `timed-executor/weak' instances."
 
     (define-construction-cases timed-executor/weak)))

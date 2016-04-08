@@ -8,15 +8,14 @@
 
 ;;; `connector' class
 
-(deftestsuite unix-connector-root (transport-socket-root)
-  ()
-  (:documentation
-   "Unit tests for the `unix-connector' class."))
+(def-suite unix-connector-root
+  :in transport-socket-root
+  :describe
+  "Unit tests for the `unix-connector' class.")
+(in-suite unix-connector-root)
 
-(addtest (unix-connector-root
-          :documentation
-          "Test constructing instances of the `unix-connector' class.")
-  construction/smoke
+(test construction/smoke
+  "Test constructing instances of the `unix-connector' class."
 
   (flet ((do-it (&rest args)
            (apply #'make-instance 'unix-connector
@@ -35,8 +34,8 @@
                           :name      "foo"
                           :converter nil
                           :server?   server?)))
-    (do-it nil)
-    (do-it :auto)))
+    (finishes (do-it nil))
+    (finishes (do-it :auto))))
 
 ;;; Connector subclasses
 
@@ -45,11 +44,12 @@
        (let ((class-name (format-symbol :rsb.transport.socket "UNIX-~A-CONNECTOR" direction))
              (suite-name (format-symbol *package* "UNIX-~A-CONNECTOR-ROOT" direction)))
          `(progn
-            (deftestsuite ,suite-name (transport-socket-root)
+            (def-suite ,suite-name (transport-socket-root)
               ()
               (:documentation
                ,(format nil "Test suite for the `~(~A~)' class."
                         class-name)))
+            (in-suite ,suite-name)
 
             (define-basic-connector-test-cases ,class-name
               :name               :unix-socket
@@ -64,14 +64,12 @@
 
               :expected-direction ,(make-keyword direction))
 
-            (addtest (,suite-name
-                      :documentation
-                      ,(format nil "Test constructing `~(~A~)' instances."
-                               class-name))
-              construct/invalid
+            (test construct/invalid
+              ,(format nil "Test constructing `~(~A~)' instances."
+                           class-name)
 
               ;; Missing :converter initarg.
-              (ensure-condition 'missing-required-initarg
+              (signals missing-required-initarg
                 (make-instance ',class-name)))))))
 
   (define-connector-suite :out)

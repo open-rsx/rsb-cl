@@ -8,10 +8,11 @@
 
 ;;; `in-pull-connector'
 
-(deftestsuite in-pull-connector-root (transport-inprocess-root)
-  ()
-  (:documentation
-   "Root unit tests suite for the `in-pull-connector' class."))
+(def-suite in-pull-connector-root
+  :in transport-inprocess-root
+  :description
+  "Root unit tests suite for the `in-pull-connector' class.")
+(in-suite in-pull-connector-root)
 
 (define-basic-connector-test-cases in-pull-connector
   :initargs           '(:schema :inprocess)
@@ -24,10 +25,11 @@
 
 ;;; `in-push-connector'
 
-(deftestsuite in-push-connector-root (transport-inprocess-root)
-  ()
-  (:documentation
-   "Root unit tests suite for the `in-push-connector' class."))
+(def-suite in-push-connector-root
+  :in transport-inprocess-root
+  :description
+  "Root unit tests suite for the `in-push-connector' class.")
+(in-suite in-push-connector-root)
 
 (define-basic-connector-test-cases in-push-connector
   :initargs           '(:schema :inprocess)
@@ -40,10 +42,11 @@
 
 ;;; `out-connector'
 
-(deftestsuite out-connector-root (transport-inprocess-root)
-  ()
-  (:documentation
-   "Root unit tests suite for the `out-connector' class."))
+(def-suite out-connector-root
+  :in transport-inprocess-root
+  :description
+  "Root unit tests suite for the `out-connector' class.")
+(in-suite out-connector-root)
 
 (define-basic-connector-test-cases out-connector
   :initargs           '(:schema :inprocess)

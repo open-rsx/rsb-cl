@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition rsb unit tests.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,7 @@
    #:iterate
    #:more-conditions
 
-   #:lift
+   #:fiveam
 
    #:rsb
    #:rsb.filter)
@@ -25,10 +25,14 @@
 
   ;; Root test suite
   (:export
-   #:root)
+   #:root
+
+   #:run-tests)
 
   ;; Test utilities
   (:export
+   #:with-configuration
+
    #:check-print
 
    #:check-event
@@ -82,28 +86,35 @@
   '(((:transport :inprocess :enabled) . t)
     ((:introspection :enabled)        . nil)))
 
-(deftestsuite root ()
-  ()
-  (:dynamic-variables
-   (*configuration* +test-configuration+))
-  (:function
-   (make-id (source)
-     (uuid:make-uuid-from-string source)))
-  (:timeout 60)
-  (:documentation
-   "Root unit test suite of the rsb system."))
+(def-suite root
+  :description
+  "Root unit test suite of the rsb system.")
 
-;;; Tests Utilities
+(def-fixture with-configuration
+    (&optional (configuration +test-configuration+))
+  (let ((*configuration* configuration))
+    (&body)))
+;; TODO
+;; (:timeout 60)
+
+(defun run-tests ()
+  (run! 'root))
+
+;;; Utilities
+
+(defun make-id (source)
+  (uuid:make-uuid-from-string source))
 
 (defun check-print (thing)
-  (ensure (funcall (conjoin #'stringp (complement #'emptyp))
-                   (with-output-to-string (stream)
-                     (print-object thing stream)))))
+  (is-true (funcall
+            (conjoin #'stringp (complement #'emptyp))
+            (with-output-to-string (stream)
+              (print-object thing stream)))))
 
 (defun check-event (event scope data)
-  (ensure (typep (event-id event) '(or null uuid:uuid)))
-  (ensure-same (event-scope event) (make-scope scope) :test #'scope=)
-  (ensure-same (event-data event) data :test #'equalp))
+  (is (typep (event-id event) '(or null uuid:uuid)))
+  (is (scope= (make-scope scope) (event-scope event)))
+  (is (equalp data (event-data event))))
 
 ;;; Tools related to events
 
@@ -237,106 +248,100 @@
 
 ;;; Tools related to participants
 
-(deftestsuite participant-suite ()
-  ()
-  (:documentation
-   "This test suite class can be used as a superclass for test suites
-    that test participant classes."))
-
 (defun check-participant (participant expected-kind scope
                           &key
                           (check-transport-urls? t))
-  (ensure-same (participant-kind participant) expected-kind)
-  (ensure-same (participant-scope participant) (make-scope scope)
-               :test #'scope=)
-  (ensure (typep (participant-id participant) 'uuid:uuid))
+  (is (eq expected-kind (participant-kind participant)))
+  (is (scope= (make-scope scope) (participant-scope participant)))
+  (is (typep (participant-id participant) 'uuid:uuid))
   ;; URI stuff
   (relative-url participant)
   (abstract-uri participant)
   (when check-transport-urls?
     (let ((urls (transport-specific-urls participant)))
-      (ensure (length= 1 urls)
-              :report    "~@<The participant has ~D transport-specific ~
-                          URLs (~{~A~^, ~}), not ~D.~@:>"
-              :arguments ((length urls) urls 1)))))
+      (is (length= 1 urls)
+          "~@<The participant has ~D transport-specific URLs (~{~A~^, ~
+           ~}), not ~D.~@:>"
+          (length urls) urls 1))))
 
 (defmacro define-basic-participant-test-cases (class-and-options &body cases)
   "Define basic test cases for the participant subclass designated by
    CLASS."
-  (let+ (((class &key (check-transport-urls? t))
+  (let+ (((class &key suite (check-transport-urls? t))
           (ensure-list class-and-options))
-         (suite-name (symbolicate class "-ROOT"))
-         (kind       (make-keyword class)))
+         (kind (make-keyword class)))
     `(progn
-       (addtest (,suite-name
-                 :documentation
-                 ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
-                          class 'make-participant))
-         construction/make-participant
+       (test (construction/make-participant
+              ,@(when suite `(:suite ,suite))
+              :fixture with-configuration)
+         ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
+                  class 'make-participant)
 
-         (ensure-cases (uri initargs expected-scope)
-             (list ,@cases)
-
-           (let+ (((&flet do-it () (apply #'make-participant ,kind uri
-                                          initargs))))
-             (case expected-scope
-               (error (ensure-condition error
-                        (detach/ignore-errors (do-it))))
-               (t     (with-active-participant (participant (do-it))
-                        (check-participant
-                         participant ,kind expected-scope
-                         :check-transport-urls? ,check-transport-urls?)))))))
+         (mapc
+          (lambda+ ((uri initargs expected-scope))
+                   (let+ (((&flet do-it () (apply #'make-participant ,kind uri
+                                                  initargs))))
+              (case expected-scope
+                (error (signals error (detach/ignore-errors (do-it))))
+                (t     (with-active-participant (participant (do-it))
+                         (check-participant
+                          participant ,kind expected-scope
+                          :check-transport-urls? ,check-transport-urls?))))))
+          (list ,@cases)))
 
        (define-restart-test-case
            (make-participant-restart/scope
-            :suite-name ,suite-name
             :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
-            :condition  participant-creation-error-caused-by-restart-test-error)
+            :condition  participant-creation-error-caused-by-restart-test-error
+            ,@(when suite `(:suite ,suite))
+            :fixture    with-configuration)
          (detach/ignore-errors
           (make-participant ,kind +restart-test-scope+)))
 
        (define-restart-test-case
            (make-participant-restart/uri
-            :suite-name ,suite-name
             :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
-            :condition  participant-creation-error-caused-by-restart-test-error)
+            :condition  participant-creation-error-caused-by-restart-test-error
+            ,@(when suite `(:suite ,suite))
+            :fixture    with-configuration)
          (detach/ignore-errors
           (make-participant ,kind +restart-test-uri+)))
 
-       (addtest (,suite-name
-                 :documentation
-                 ,(format nil "Test `print-object' method on `~(~A~)' class."
-                          class))
-         print
+       (test (print
+              ,@(when suite `(:suite ,suite))
+              :fixture with-configuration)
+         ,(format nil "Test `print-object' method on `~(~A~)' class."
+                  class)
 
          (with-participant (participant
                             ,kind ,(format nil "/~(~A~)/print" class))
-           (ensure
-            (not (emptyp
-                  (with-output-to-string (stream)
-                    (format stream "~A" participant))))))))))
+           (is-false (emptyp
+                      (with-output-to-string (stream)
+                        (format stream "~A" participant)))))))))
 
 (defmacro define-error-hook-test-case ((class
                                         &key
+                                        suite
                                         (participant? t))
                                        &body body)
   "Generate a test case around BODY for the error-hook mechanism of
-CLASS.
+   CLASS.
 
-PARTICIPANT? controls whether a participant of class CLASS is created
-and bound to a variable named like the value of CLASS."
-  (let+ ((suite-name (format-symbol *package* "~A-ROOT" class))
-         (kind       (make-keyword class))
-         (scope      (format nil "/rsbtest/~(~A~)/errorhook" class))
+   SUITE TODO
+
+   PARTICIPANT? controls whether a participant of class CLASS is created
+   and bound to a variable named like the value of CLASS."
+  (let+ ((kind  (make-keyword class))
+         (scope (format nil "/rsbtest/~(~A~)/errorhook" class))
          ((&flet maybe-wrap (body)
             (if participant?
                 `((with-participant (,class ,kind ,scope) ,@body))
                 body))))
-    `(addtest (,suite-name
-              :documentation
-              ,(format nil "Test the error-hook mechanism for the `~(~A~)' class."
-                       class))
-       error-hook
+    `(test (error-hook
+            ,@(when suite `(:suite ,suite))
+            :fixture with-configuration)
+       ,(format nil "Test the error-hook mechanism for the `~(~A~)' class."
+                class)
 
        (let ((expected-errors)
              (seen-errors))
@@ -348,7 +353,7 @@ and bound to a variable named like the value of CLASS."
                 ,@body))
            ;; Make sure the expected errors match the actually seen
            ;; errors.
-           (ensure-same seen-errors expected-errors :test #'equal))))))
+           (is (equal expected-errors seen-errors)))))))
 
 ;;; Test utilities for restarts
 
@@ -387,22 +392,22 @@ and bound to a variable named like the value of CLASS."
 (defmacro define-restart-test-case
     ((name
       &key
-      (suite-name (missing-required-argument :suite-name))
+      suite
+      fixture
       (restarts   '(continue))
       (var-name   '*signal-error-for-restart-test?*)
       (condition  'restart-test-error))
      &body body)
-  "Define the test case NAME in suite SUITE-NAME that executes BODY
-   and fails if the condition of type CONDITION is not handled by the
+  "Define the test case NAME in suite SUITE that executes BODY and
+   fails if the condition of type CONDITION is not handled by the
    restarts listed in RESTARTS."
-  `(addtest (,suite-name
-             :documentation
-
-             ,(format nil "Smoke test for establishing ~{~S~^, ~} ~
+  `(test (,name
+          ,@(when suite `(:suite ,suite))
+          ,@(when fixture `(:fixture ,fixture)))
+     ,(format nil "Smoke test for establishing ~{~S~^, ~} ~
                            restart~P."
-                      (mapcar (compose #'first #'ensure-list) restarts)
-                      (length restarts)))
-     ,name
+              (mapcar (compose #'first #'ensure-list) restarts)
+              (length restarts))
 
      (let+ (((&flet do-it ()
                ,@body))
@@ -422,7 +427,7 @@ and bound to a variable named like the value of CLASS."
        ;; Make sure CONDITION is signaled when no restarts are
        ;; invoked.
        (let ((,var-name t))
-         (ensure-condition ',condition (do-it)))
+         (signals ,condition (do-it)))
 
        ;; For each restart in RESTARTS, make sure that invoking it
        ;; works properly.

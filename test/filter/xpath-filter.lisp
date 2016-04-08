@@ -6,10 +6,11 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite xpath-filter-root (filter-root)
-  ()
-  (:documentation
-   "Unit tests for the `xpath-filter' class."))
+(def-suite xpath-filter-root
+  :in filter-root
+  :description
+  "Unit tests for the `xpath-filter' class.")
+(in-suite xpath-filter-root)
 
 (define-basic-filter-tests (xpath-filter :xpath)
   '(;; Some invalid cases.

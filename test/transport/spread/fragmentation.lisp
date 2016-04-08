@@ -1,22 +1,21 @@
 ;;;; fragmentation.lisp --- Unit test for fragmentation/assembly.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.spread.test)
 
-(deftestsuite fragmentation-root (transport-spread-root)
-  ()
-  (:documentation
-   "Unit tests for the fragmentation and assembly of
-    data/notifications."))
+(def-suite fragmentation-root
+  :in transport-spread-root
+  :description
+  "Unit tests for the fragmentation and assembly of
+   data/notifications.")
+(in-suite fragmentation-root)
 
-(addtest (fragmentation-root
-          :documentation
-          "Smoke test for the `merge-fragment' with an `assembly-pool'
-instance.")
-  assemble-smoke
+(test assemble-smoke
+  "Smoke test for the `merge-fragment' with an `assembly-pool'
+   instance."
 
   (ensure-cases (sequence-number num-parts parts part-ids expected)
       `((0
@@ -46,10 +45,8 @@ instance.")
                         :test #'equalp)))
        fragments))))
 
-(addtest (fragmentation-root
-          :documentation
-          "Smoke test for the `split-notification' function.")
-  fragment-smoke
+(test fragment-smoke
+  "Smoke test for the `split-notification' function."
 
   (ensure-cases (data fragment-size-limit &optional expected)
       `((""                   90)
@@ -76,12 +73,9 @@ instance.")
                                  #'pb:packed-size)
                         (do-it))))))))
 
-(addtest (fragmentation-root
-          :documentation
-          "Do full roundtrips of fragmenting data using
-           `split-notification' and then re-assemble the fragments
-           using `merge-fragments'.")
-  roundtrip
+(test roundtrip
+  "Do full roundtrips of fragmenting data using `split-notification'
+   and then re-assemble the fragments using `merge-fragments'."
 
   (ensure-cases (data fragment-size-limit)
       `((""                   90)
@@ -104,11 +98,9 @@ instance.")
       (ensure-same (octetify data) result
                    :test #'equalp))))
 
-(addtest (fragmentation-root
-          :documentation
-          "Ensure that warnings are signaled when invalid fragments
-are added to an assembly.")
-  warnings
+(test warnings
+  "Ensure that warnings are signaled when invalid fragments are added
+   to an assembly."
 
   (let ((sequence-number 0)
         (pool            (make-instance 'assembly-pool)))
@@ -123,45 +115,41 @@ are added to an assembly.")
       (merge-fragment pool (a-fragment
                             sequence-number 3 0 (octetify "foo"))))))
 
-(deftestsuite assembly-root (fragmentation-root)
-  ()
-  (:documentation
-   "Unit tests for the `assembly' class."))
+(def-suite assembly-root
+  :in fragmentation-root
+  :description
+  "Unit tests for the `assembly' class.")
+(in-suite assembly-root)
 
-(addtest (assembly-root
-          :documentation
-          "Test `print-object' method on `assembly'.")
-  print-smoke
+(test print-smoke
+  "Test `print-object' method on `assembly'."
 
-  (ensure (not (emptyp
-                (princ-to-string
-                 (make-instance 'assembly
-                                :id            (cons 0 (uuid:uuid-to-byte-array
-                                                        (uuid:make-null-uuid)))
-                                :num-fragments 1))))))
+  (is-false (emptyp
+             (princ-to-string
+              (make-instance 'assembly
+                             :id            (cons 0 (uuid:uuid-to-byte-array
+                                                     (uuid:make-null-uuid)))
+                             :num-fragments 1)))))
 
-(deftestsuite assembly-pool-root (fragmentation-root)
-  ()
-  (:documentation
-   "Unit tests for the `assembly-pool' class."))
+(def-suite assembly-pool-root
+  :in fragmentation-root
+  :description
+  "Unit tests for the `assembly-pool' class.")
+(in-suite assembly-pool-root)
 
-(addtest (assembly-pool-root
-          :documentation
-          "Test `print-object' method on `assembly-pool'.")
-  print-smoke
+(test print-smoke
+  "Test `print-object' method on `assembly-pool'."
 
-  (ensure (not (emptyp (princ-to-string
-                        (make-instance 'assembly-pool))))))
+  (is-false (emptyp (princ-to-string (make-instance 'assembly-pool)))))
 
-(deftestsuite pruning-assembly-pool-root (fragmentation-root)
-  ()
-  (:documentation
-   "Unit tests for the `pruning-assembly-pool' class."))
+(def-suite pruning-assembly-pool-root
+  :in fragmentation-root
+  :description
+  "Unit tests for the `pruning-assembly-pool' class.")
+(in-suite pruning-assembly-pool-root)
 
-(addtest (pruning-assembly-pool-root
-          :documentation
-          "Check that old incomplete assemblies actually get pruned.")
-  prune
+(test prune
+  "Check that old incomplete assemblies actually get pruned."
 
   (let ((pool (make-instance 'pruning-assembly-pool
                              :age-limit 1)))
@@ -182,10 +170,8 @@ are added to an assembly.")
                    get pruned, the count of the pool was ~D, not ~D.~@:>"
        :arguments (count 0)))))
 
-(addtest (pruning-assembly-pool-root
-          :documentation
-          "Test `print-object' method on `pruning-assembly-pool'.")
-  print-smoke
+(test print-smoke
+  "Test `print-object' method on `pruning-assembly-pool'."
 
   (ensure (not (emptyp (princ-to-string
                         (make-instance 'pruning-assembly-pool))))))

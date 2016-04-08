@@ -1,45 +1,41 @@
 ;;;; macros.lisp --- Unit tests for macros.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(deftestsuite macros-root (root
-                           participant-suite)
-  ()
-  (:documentation
-   "Unit tests for macros provided by the rsb system."))
+(def-suite macros-root
+  :in root
+  :description
+  "Unit tests for macros provided by the rsb system.")
+(in-suite macros-root)
 
-(addtest (macros-root
-          :documentation
-          "Test creating an anonymous participant using the
-           `with-participant' macro.")
-  with-participant/anonymous
+(test (with-participant/anonymous :fixture with-configuration)
+  "Test creating an anonymous participant using the `with-participant'
+   macro."
 
-  (with-participant (nil :listener "/rsbtest/macros-root/with-participant/anonymous")))
+  (finishes
+   (with-participant (nil :listener "/rsbtest/macros-root/with-participant/anonymous"))))
 
 ;;; Test `with-participant' macro with `listener' and test
 ;;; `listener'-related macros
 
-(addtest (macros-root
-          :documentation
-          "Smoke test for the `with-participant' macro with
-           a :listener participant.")
-  with-participant/listener/smoke
+(test (with-participant/listener/smoke :fixture with-configuration)
+  "Smoke test for the `with-participant' macro with a :listener
+   participant."
 
   (with-participant (listener :listener "/rsbtest/macros-root/with-participant/listener/smoke")
-    (ensure (typep listener 'listener))
+    (is (typep listener 'listener))
     (check-participant listener :listener "/rsbtest/macros-root/with-participant/listener/smoke")))
 
-(addtest (macros-root
-          :documentation
-          "Test handling of error-policy keyword parameter in
-           `with-participant' macro with a :listener participant.")
-  with-participant/listener/error-policy
+(test (with-participant/listener/error-policy :fixture with-configuration)
+  "Test handling of error-policy keyword parameter in
+   `with-participant' macro with a :listener participant."
 
-  (let ((calls    '())
+  (let ((payload  1)
+        (calls    '())
         (received '()))
     (macrolet
         ((test-case (&optional policy)
@@ -48,96 +44,87 @@
                                         ,@(when policy `(:error-policy ,policy)))
               (with-handler listener ((event) (push event received))
                 (with-participant (informer :informer "/rsbtest/macros-root/with-listener/error-policy")
-                  (send informer 1))))))
+                  (send informer payload))))))
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
-      (ensure-condition rsb.transform:transform-error
-        (test-case))
+      (signals rsb.transform:transform-error (test-case))
 
       ;; With `continue' error policy, receiving and dispatching of
       ;; the event should proceed without the failing transformation.
       (let ((result (test-case (lambda (condition)
                                  (push condition calls)
                                  (continue condition)))))
-        (ensure (typep result 'event))
-        (ensure-same (length calls) 1)
-        (ensure (typep (first calls) 'rsb.transform:transform-error))
-        (ensure-same (length received) 1)))))
+        (is (typep result 'event))
+        (is (= 1 (length calls)))
+        (is (typep (first calls) 'rsb.transform:transform-error))
+        (is (= 1 (length received)))
+        (is (eql payload (event-data (first received))))))))
 
-(addtest (macros-root
-          :documentation
-          "Smoke test for the `with-handler' macro.")
-  with-handler/smoke
+(test (with-handler/smoke :fixture with-configuration)
+  "Smoke test for the `with-handler' macro."
 
   (let ((received '()))
     (with-participant (listener :listener "/rsbtest/macros-root/with-handler/smoke")
       (with-handler listener ((event) (push event received))
-        (ensure (typep listener 'listener))
+        (is (typep listener 'listener))
         (check-participant listener :listener "/rsbtest/macros-root/with-handler/smoke")
         (with-participant (informer :informer "/rsbtest/macros-root/with-handler/smoke")
           (send informer 1))))
-    (ensure-same (length received) 1)))
+    (is (= 1 (length received)))))
 
 ;;; Reader-related macros
 
-(addtest (macros-root
-          :documentation
-          "Smoke test for the `with-participant' macro with a :reader
-           participant.")
-  with-participant/reader/smoke
+(test (with-participant/reader/smoke :fixture with-configuration)
+  "Smoke test for the `with-participant' macro with a :reader
+   participant."
 
   (with-participant (reader :reader "/rsbtest/macros-root/with-participant/reader/smoke")
-    (ensure (typep reader 'reader))
+    (is (typep reader 'reader))
     (check-participant reader :reader "/rsbtest/macros-root/with-participant/reader/smoke")))
 
-(addtest (macros-root
-          :documentation
-          "Test handling of error-policy keyword parameter in
-           `with-participant' macro with a :reader participant.")
-  with-participant/reader/error-policy
+(test (with-participant/reader/error-policy :fixture with-configuration)
+  "Test handling of error-policy keyword parameter in
+   `with-participant' macro with a :reader participant."
 
-  (let ((calls '()))
+  (let ((payload 1)
+        (calls   '()))
     (macrolet
         ((test-case (&optional policy)
            `(with-participant (reader :reader "/rsbtest/macros-root/with-participant/reader/error-policy"
                                       :transform #'mock-transform/error
                                       ,@(when policy `(:error-policy ,policy)))
               (with-participant (informer :informer "/rsbtest/macros-root/with-participant/reader/error-policy")
-                (send informer 1))
+                (send informer payload))
               (receive reader))))
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
-      (ensure-condition rsb.transform:transform-error
-        (test-case))
+      (signals rsb.transform:transform-error (test-case))
 
       ;; With `continue' error policy, sending the event should proceed
       ;; without the failing transformation.
       (let ((result (test-case (lambda (condition)
                                  (push condition calls)
                                  (continue condition)))))
-        (ensure (typep result 'event))
-        (ensure-same (length calls) 1)
-        (ensure (typep (first calls) 'rsb.transform:transform-error))))))
+        (is (typep result 'event))
+        (is (= 1 (length calls)))
+        (is (typep (first calls) 'rsb.transform:transform-error))
+        (is (eql payload (event-data result)))))))
 
 ;;; Informer-related macros
 
-(addtest (macros-root
-          :documentation
-          "Smoke test for the `with-participant' macro with
-           a :informer participant.")
-  with-participant/informer/smoke
+(test (with-participant/informer/smoke :fixture with-configuration)
+  "Smoke test for the `with-participant' macro with a :informer
+   participant."
 
   (with-participant (informer :informer "/rsbtest/macros-root/with-participant/informer/smoke")
-    (ensure (typep informer 'informer))
+    (is (typep informer 'informer))
     (check-participant informer :informer "/rsbtest/macros-root/with-participant/informer/smoke")))
 
-(addtest (macros-root
-          :documentation
-          "Test handling of error-policy keyword parameter in
-           `with-participant' macro with a :informer participant.")
-  with-participant/informer/error-policy
+(test (with-participant/informer/error-policy :fixture with-configuration)
+  "Test handling of error-policy keyword parameter in
+   `with-participant' macro with a :informer participant."
 
   (let ((calls '()))
     (macrolet
@@ -149,14 +136,13 @@
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
-      (ensure-condition rsb.transform:transform-error
-        (test-case))
+      (signals rsb.transform:transform-error (test-case))
 
       ;; With `continue' error policy, sending the event should proceed
       ;; without the failing transformation.
       (let ((result (test-case (lambda (condition)
                                  (push condition calls)
                                  (continue condition)))))
-        (ensure (typep result 'event))
-        (ensure-same (length calls) 1)
-        (ensure (typep (first calls) 'rsb.transform:transform-error))))))
+        (is (typep result 'event))
+        (is (= 1 (length calls)))
+        (is (typep (first calls) 'rsb.transform:transform-error))))))

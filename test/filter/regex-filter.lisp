@@ -6,17 +6,17 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite regex-filter-root (filter-root)
-  ()
-  (:documentation
-   "Unit tests for the `regex-filter' class."))
+(def-suite regex-filter-root
+  :in filter-root
+  :description
+  "Unit tests for the `regex-filter' class.")
+(in-suite regex-filter-root)
 
 (define-basic-filter-tests (regex-filter :regex)
   '(;; Some invalid cases.
     (()                               error) ; missing initarg
     ((:regex 5)                       error) ; wrong type for regex
     ((:regex "*")                     error) ; invalid regex
-
 
     ;; These are ok.
     ((:regex ".*")                    t)

@@ -1,6 +1,6 @@
 ;;;; inference.lisp --- Tests for the inference functions provided by the model.inference module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -41,17 +41,14 @@
 
 ;;; `communication?'
 
-(deftestsuite rsb-model-inference-communication?-root
-    (rsb-model-inference-root)
-  ()
-  (:documentation
-   "Root unit test suite for the `communication?' generic function."))
+(def-suite rsb-model-inference-communication?-root
+  :in rsb-model-inference-root
+  :description
+  "Root unit test suite for the `communication?' generic function.")
 
-(addtest (rsb-model-inference-communication?-root
-          :documentation
-          "Smoke test for the `communication?' generic function
-           focusing on scope and URI inputs.")
-  smoke/scope+uri
+(test smoke/scope+uri
+  "Smoke test for the `communication?' generic function focusing on
+   scope and URI inputs."
 
   (ensure-cases (from to expected)
       `(;; Scopes
@@ -82,11 +79,9 @@
 
     (check-communication?-cases from to expected)))
 
-(addtest (rsb-model-inference-communication?-root
-          :documentation
-          "Smoke test for the `communication?' generic function
-           focusing on `participant-info' inputs.")
-  smoke/participant-info
+(test smoke/participant-info
+  "Smoke test for the `communication?' generic function focusing on
+   `participant-info' inputs."
 
   (ensure-cases (from to expected)
       `(;; Kinds that do not communicate.
@@ -134,11 +129,9 @@
           (to   (apply #'make-participant-info to)))
       (check-communication?-cases from to expected))))
 
-(addtest (rsb-model-inference-communication?-root
-          :documentation
-          "Smoke test for the `communication?' generic function
-           focusing on node inputs.")
-  smoke/nodes
+(test smoke/nodes
+  "Smoke test for the `communication?' generic function focusing on
+   node inputs."
 
   (ensure-cases (from to expected)
       '(;; Unknown participant kind.

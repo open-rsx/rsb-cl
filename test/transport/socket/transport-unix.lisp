@@ -6,20 +6,19 @@
 
 (cl:in-package #:rsb.transport.socket.test)
 
-(deftestsuite transport-socket-unix-root (transport-socket-root)
-  ()
-  (:documentation
-   "Unit tests for the UNIX transport and bus."))
+(def-suite transport-socket-unix-root
+    :in transport-socket-root
+    :description
+    "Unit tests for the UNIX transport and bus.")
+(in-suite transport-socket-unix-root)
 
-(addtest (transport-socket-unix-root
-          :documentation
-          "Test creating `bus-client' instances and attaching and
-           detaching connectors to them.
+(test client/smoke
+  "Test creating `bus-client' instances and attaching and detaching
+   connectors to them.
 
-           Try multiple connectors of different classes which also
-           causes the test case to be repeated without a fresh
-           port. This helps ensuring proper cleanup.")
-  client/smoke
+   Try multiple connectors of different classes which also causes the
+   test case to be repeated without a fresh port. This helps ensuring
+   proper cleanup."
 
   (ensure-cases (connector-class schema address)
       (mappend (lambda+ ((class schema address))
@@ -35,7 +34,7 @@
           (connector-2 (make-socket-connector connector-class schema address)))
 
       ;; There is no server yet, so this has to signal an error.
-      (ensure-condition 'usocket:connection-refused-error ; TODO(jmoringe): keep this condition type?
+      (signals usocket:connection-refused-error ; TODO(jmoringe): keep this condition type?
         (transport-ensure-bus transport :client! connector-1 address))
 
       ;; Create a bus server.
@@ -53,14 +52,13 @@
           (check-buses-and-connectors
            (list bus-1 bus-2) (list connector-1 connector-2) t))))))
 
-(addtest (transport-socket-unix-root
-          :documentation
-          "Test creating `bus-server' instances and attaching and
-           detaching connectors to them.
+(test server/smoke
+  "Test creating `bus-server' instances and attaching and detaching
+   connectors to them.
 
-           Try multiple connectors of different classes which also
-           causes the test case to be repeated without a fresh
-           port. This helps ensuring proper cleanup.")  server/smoke
+   Try multiple connectors of different classes which also causes the
+   test case to be repeated without a fresh port. This helps ensuring
+   proper cleanup."
 
   (ensure-cases (connector-class schema address)
       (mappend (lambda+ ((class schema address))

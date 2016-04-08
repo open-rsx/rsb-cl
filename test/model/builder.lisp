@@ -9,7 +9,7 @@
    #:cl
    #:let-plus
 
-   #:lift
+   #:fiveam
 
    #:rsb
    #:rsb.model)
@@ -33,10 +33,9 @@
 
 (cl:in-package #:rsb.model.builder.test)
 
-(deftestsuite rsb-model-builder-root ()
-  ()
-  (:documentation
-   "Unit test suite for the model (un)builder support."))
+(def-suite rsb-model-builder-root
+  :description
+  "Unit test suite for the model (un)builder support.")
 
 (defvar *stop-type* '(or number string uuid:uuid puri:uri scope))
 
@@ -56,8 +55,7 @@
                                     :scope      ,scope
                                     :type       t)))
 
-  (addtest (rsb-model-builder-root)
-    participant-info/smoke
+  (test participant-info/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -68,8 +66,7 @@
                    (:visit nil         () ,info :participant ((:transports . *)) ,initargs)
                    (:peek  :transports () ,transport-uri)))))))
 
-  (addtest (rsb-model-builder-root)
-    participant-node/smoke
+  (test participant-node/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -93,8 +90,7 @@
                                 :rsb-version    "1.2.3"
                                 :display-name   "Foo")))
 
-  (addtest (rsb-model-builder-root)
-    process-info/smoke
+  (test process-info/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -107,8 +103,7 @@
                    ,@(mapcar (lambda (x) `(:peek :commandline-arguments () ,x))
                              commandline-arguments)))))))
 
-  (addtest (rsb-model-builder-root)
-    remote-process-info/smoke
+  (test remote-process-info/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -125,8 +120,7 @@
                    ,@(mapcar (lambda (x) `(:peek :commandline-arguments () ,x))
                              commandline-arguments)))))))
 
-  (addtest (rsb-model-builder-root)
-    process-node/smoke
+  (test process-node/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -148,8 +142,7 @@
                   :software-type    "st"
                   :software-version "sv")))
 
-  (addtest (rsb-model-builder-root)
-    host-info/smoke
+  (test host-info/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -157,8 +150,7 @@
           `(,info ((:peek  nil () ,info)
                    (:visit nil () ,info :host () ,initargs)))))))
 
-  (addtest (rsb-model-builder-root)
-    remote-host-info/smoke
+  (test remote-host-info/smoke
 
     (check-un-build-calls
      t *stop-type*
@@ -167,8 +159,7 @@
           `(,info ((:peek  nil () ,info)
                    (:visit nil () ,info :host () (:state :up ,@initargs))))))))
 
-  (addtest (rsb-model-builder-root)
-    host-node/smoke
+  (test host-node/smoke
 
     (check-un-build-calls
      t *stop-type*

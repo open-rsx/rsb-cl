@@ -10,7 +10,8 @@
    #:alexandria
    #:let-plus
    #:more-conditions
-   #:lift
+
+   #:fiveam
 
    #:rsb
    #:rsb.transform
@@ -22,10 +23,10 @@
 
 (cl:in-package #:rsb.transform.test)
 
-(deftestsuite rsb.transform-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the transform module."))
+(def-suite rsb.transform-root
+  :in root
+  :description
+  "Root unit test suite for the transform module.")
 
 (defun call-with-transform-checking-thunk
     (thunk transform-spec event-spec)

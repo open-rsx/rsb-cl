@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the patterns module.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
    #:alexandria
    #:let-plus
 
-   #:lift
+   #:fiveam
 
    #:rsb
    #:rsb.patterns
@@ -25,7 +25,7 @@
 
 (cl:in-package #:rsb.patterns.test)
 
-(deftestsuite patterns-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the patterns module."))
+(def-suite patterns-root
+  :in root
+  :description
+  "Root unit test suite for the patterns module.")

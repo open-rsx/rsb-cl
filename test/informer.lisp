@@ -6,11 +6,11 @@
 
 (cl:in-package #:rsb.test)
 
-(deftestsuite informer-root (root
-                             participant-suite)
-  ()
-  (:documentation
-   "Unit tests for the `informer' class."))
+(def-suite informer-root
+  :in root
+  :description
+  "Unit tests for the `informer' class.")
+(in-suite informer-root)
 
 (define-basic-participant-test-cases informer
   '("/rsbtest/informer/construction"
@@ -62,26 +62,47 @@
     (:type t :transports ((t :enabled nil)))
     error))
 
-(addtest (informer-root
-          :documentation
-          "Test sending data.")
-  send/data
+(test (send/data :fixture with-configuration)
+  "Test sending data."
 
-  (with-participant (informer :informer "/rsbtest/informer/send")
-    (iter (repeat 100)
-          (send informer "<foo/>")
-          (send informer "<bar/>"))))
+  (finishes
+    (with-participant (informer :informer "/rsbtest/informer/send")
+      (iter (repeat 100)
+            (send informer "<foo/>")
+            (send informer "<bar/>")))))
 
-(addtest (informer-root
-          :documentation
-          "Test sending data.")
-  send/event
+(test (send/event :fixture with-configuration)
+  "Test sending pre-constructed events."
 
   (with-participant (informer :informer "/rsbtest/informer/send/event")
-    (ensure-cases (scope data args
-                   expected-meta-data expected-method expected-timestamps
-                   expected-causes)
-        `(;; Some invalid cases.
+    (mapc
+     (lambda+ ((scope data args
+                      expected-meta-data expected-method expected-timestamps
+                      expected-causes))
+       (let+ (((&flet do-it ()
+                 (apply #'send informer (make-event scope data) args)))
+              ((&flet+ timestamp-entries-equal ((left-key  . left-timestamp)
+                                                (right-key . right-timestamp))
+                 (and (eq left-key right-key)
+                      (local-time:timestamp= left-timestamp right-timestamp)))))
+         (case expected-meta-data
+           (type-error
+            (signals type-error (do-it)))
+           (t
+            (let ((result (do-it)))
+              (is (set-equal expected-meta-data (meta-data-alist result)
+                             :test #'equal))
+              (is (eq expected-method (event-method result)))
+              (is (set-equal expected-timestamps
+                             (remove-if
+                              (lambda (name)
+                                (member name *framework-timestamps* :test #'eq))
+                              (timestamp-alist result) :key #'car)
+                             :test #'timestamp-entries-equal))
+              (is (set-equal expected-causes (event-causes result)
+                             :test #'event-id=)))))))
+
+      `(;; Some invalid cases.
           ("/rsbtest/informer/send/event" "foo" (:foo foo) ; invalid meta-data item
            type-error nil nil nil)
           ("/rsbtest/informer/send/event" "foo" (:timestamps (:foo 1)) ; invalid timestamp
@@ -108,103 +129,74 @@
                              "2013-03-27T14:12:32.062533+01:00"))) ())
 
           ("/rsbtest/informer/send/event" "foo" (:causes ((,(uuid:make-null-uuid) . 1)))
-           () nil () ((,(uuid:make-null-uuid) . 1))))
+           () nil () ((,(uuid:make-null-uuid) . 1)))))))
 
-      (let+ (((&flet do-it ()
-                (apply #'send informer (make-event scope data) args)))
-             ((&flet+ timestamp-entries-equal ((left-key  . left-timestamp)
-                                               (right-key . right-timestamp))
-                (and (eq left-key right-key)
-                     (local-time:timestamp= left-timestamp right-timestamp)))))
-        (case expected-meta-data
-          (type-error
-           (ensure-condition 'type-error (do-it)))
-          (t
-           (let ((result (do-it)))
-             (ensure-same (meta-data-alist result) expected-meta-data
-                          :test (rcurry #'set-equal :test #'equal))
-             (ensure-same (event-method result) expected-method
-                          :test #'eq)
-             (ensure-same (remove-if
-                           (lambda (name)
-                             (member name *framework-timestamps* :test #'eq))
-                           (timestamp-alist result) :key #'car)
-                          expected-timestamps
-                          :test (rcurry #'set-equal :test #'timestamp-entries-equal))
-             (ensure-same (event-causes result) expected-causes
-                          :test (rcurry #'set-equal :test #'event-id=)))))))))
-
-(addtest (informer-root
-          :documentation
-          "Test the type check employed by the `send' method.")
-  send/check-type
+(test (send/check-type :fixture with-configuration)
+  "Test the type check employed by the `send' method."
 
   (with-participant (informer :informer "/rsbtest/informer/send/check-type"
                               :type 'sequence)
     ;; In this case, the event cannot be constructed from the payload.
-    (ensure-condition 'type-error
-      (send informer 5))
+    (signals type-error (send informer 5))
     ;; In this case, the event is not compatible with the informer's
     ;; type.
-    (ensure-condition 'event-type-error
+    (signals event-type-error
       (send informer (make-event "/rsbtest/informer/send/check-type" 5)))
 
     ;; The following are compatible.
-    (send informer '(1 2))
-    (send informer (make-event "/rsbtest/informer/send/check-type" "bla"))))
+    (finishes (send informer '(1 2)))
+    (finishes (send informer (make-event "/rsbtest/informer/send/check-type" "bla")))))
 
-(addtest (informer-root
-          :documentation
-          "Test the scope check employed by the `send' method.")
-  send/check-scope
+(test (send/check-scope :fixture with-configuration)
+  "Test the scope check employed by the `send' method."
 
   (with-participant (informer :informer "/rsbtest/informer/send/check-scope")
     ;; Identical scope and subscopes are allowed
-    (send informer (make-event "/rsbtest/informer/send/check-scope" "foo"))
-    (send informer (make-event "/rsbtest/informer/send/check-scope/subscope" "foo"))
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/check-scope" "foo")))
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/check-scope/subscope" "foo")))
 
     ;; Scope is not identical to or a subscope of the informer's
     ;; scope.
-    (ensure-condition 'event-scope-error
+    (signals event-scope-error
       (send informer (make-event "/rsbtest/informer/send/wrong-scope" "foo")))))
 
-(addtest (informer-root
-          :documentation
-          "Test the \"unchecked\" mode of operation of the `send'
-           method.")
-  send/unchecked
+(test (send/unchecked :fixture with-configuration)
+  "Test the \"unchecked\" mode of operation of the `send' method."
 
   (with-participant (informer :informer "/rsbtest/informer/send/unchecked"
                               :type 'string)
     ;; Arbitrary scopes should be accepted.
-    (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
-          :unchecked? t)
-    (send informer (make-event "/rsbtest/informer/send/unchecked/subscope" "foo")
-          :unchecked? t)
-    (send informer (make-event "/rsbtest/informer/send/wrong-scope" "foo")
-          :unchecked? t)
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
+            :unchecked? t))
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/unchecked/subscope" "foo")
+            :unchecked? t))
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/wrong-scope" "foo")
+            :unchecked? t))
 
     ;; Arbitrary data types should accepted.
-    (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
-          :unchecked? t)
-    (send informer (make-event "/rsbtest/informer/send/unchecked" 1)
-          :unchecked? t)))
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/unchecked" "foo")
+            :unchecked? t))
+    (finishes
+      (send informer (make-event "/rsbtest/informer/send/unchecked" 1)
+            :unchecked? t))))
 
-(addtest (informer-root
-          :documentation
-          "Test the \"unchecked\" mode of operation of the `send'
-           method.")
-  send/no-fill
+(test (send/no-fill :fixture with-configuration)
+  "Test the \"unchecked\" mode of operation of the `send' method."
 
   (with-participant (informer :informer "/rsbtest/informer/send/no-fill")
     (let* ((event  (make-event "/rsbtest/informer/send/no-fill" "foo"))
            (event* (send informer event :no-fill? t)))
       (setf (event-origin event)          (uuid:make-null-uuid)
             (event-sequence-number event) 1234)
-      (ensure-same (event-origin event*) (event-origin event)
-                   :test #'uuid:uuid=)
-      (ensure-same (event-sequence-number event*)
-                   (event-sequence-number event)))))
+      (is (uuid:uuid= (event-origin event) (event-origin event*)))
+      (is (eql (event-sequence-number event*)
+               (event-sequence-number event))))))
 
 (define-error-hook-test-case (informer :participant? nil)
   ;; We cannot currently cause the informer case to fail when using
@@ -212,18 +204,15 @@
   ;; exercising it.
   (send informer "foo"))
 
-(addtest (informer-root
-          :documentation
-          "Test sequence number generator, especially modular
-           arithmetic behavior around 2^32.")
-  sequence-number-generator
+(test sequence-number-generator
+  "Test sequence number generator, especially modular arithmetic
+   behavior around 2^32."
 
-  (ensure-cases (start expected)
-      `((0                 (0 1 2))
-        (,(- (ash 1 32) 2) (,(- (ash 1 32) 2) ,(- (ash 1 32) 1) 0 1 2)))
+  (mapc (lambda+ ((start expected))
+          (let ((generator (rsb::make-sequence-number-generator start)))
+            (iter (for value/generated next (funcall generator))
+                  (for value/expected  in   expected)
+                  (is (= value/expected value/generated)))))
 
-    (let ((generator (rsb::make-sequence-number-generator start)))
-      (iter (for value/generated next (funcall generator))
-            (for value/expected  in   expected)
-            (ensure-same value/generated value/expected
-                         :test #'=)))))
+        `((0                 (0 1 2))
+          (,(- (ash 1 32) 2) (,(- (ash 1 32) 2) ,(- (ash 1 32) 1) 0 1 2)))))

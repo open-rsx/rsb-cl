@@ -9,7 +9,8 @@
    #:cl
    #:alexandria
    #:let-plus
-   #:lift
+
+   #:fiveam
 
    #:rsb
    #:rsb.filter
@@ -25,10 +26,10 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite filter-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the filter module."))
+(def-suite filter-root
+  :in root
+  :description
+  "Root unit test suite for the filter module.")
 
 ;;; Utilities
 
@@ -50,68 +51,51 @@
     (check nil)
     (check t)))
 
-(defmacro define-basic-filter-tests
-    ((class spec
-      &key
-      (suite-name (symbolicate class "-ROOT")))
-     construct-cases)
+(defmacro define-basic-filter-tests ((class spec) construct-cases)
   "Define basic test cases for the filter class CLASS."
   `(progn
-     (addtest (,suite-name
-               :documentation
-               ,(format nil "Test construction instances of the ~
-                             `~(~A~)' filter class."
-                        class))
-       construct
+     (test construct
+       ,(format nil "Test construction instances of the `~(~A~)' ~
+                     filter class."
+                class)
 
-       (ensure-cases (args expected)
-           ,construct-cases
+       (mapc (lambda+ ((args expected))
+               (case expected
+                 (error
+                  (signals error (apply #'make-instance ',class args)))
+                 (t
+                  (apply #'make-instance ',class args)
+                  (apply #'make-filter ,spec args)
+                  (apply #'filter ,spec args))))
+             ,construct-cases))
 
-         (case expected
-           (error
-            (ensure-condition error
-              (apply #'make-instance ',class args)))
-           (t
-            (apply #'make-instance ',class args)
-            (apply #'make-filter ,spec args)
-            (apply #'filter ,spec args)))))
-
-     (addtest (,suite-name
-               :documentation
-               ,(format nil "Test method on `print-object' for the ~
-                             `~(~A~)' filter class."
-                        class))
-       print
+     (test print
+       ,(format nil "Test method on `print-object' for the `~(~A~)' ~
+                     filter class."
+                class)
 
        (mapc (lambda+ ((initargs &ign))
                (check-print (apply #'make-filter ,spec initargs)))
              (remove t ,construct-cases :key #'second :test-not #'eq)))))
 
-(defmacro define-filter-match-test
-    ((class spec
-     &key
-     (suite-name (symbolicate class "-ROOT")))
-     cases)
+(defmacro define-filter-match-test ((class spec) cases)
   "Define a test case for the `matches?' method of filter class
    CLASS."
-  `(addtest (,suite-name
-             :documentation
-             ,(format nil "Smoke test for the `~(~A~)' filter class."
-                      class))
-     smoke
+  `(test smoke
+     ,(format nil "Smoke test for the `~(~A~)' filter class." class)
 
-     (ensure-cases (filter-initargs event-spec expected)
-         ,cases
-       (let ((filter (apply #'filter (if (listp (first filter-initargs))
-                                         (list (list* ,spec filter-initargs))
-                                         (list* ,spec filter-initargs)))))
-         (call-with-filter-checking-thunk
-          (lambda (do-it)
-            (let ((result (funcall do-it)))
-              (ensure-same result expected
-                           :report    "~@<The filter ~S ~:[did not ~
-                                       match~;matched~] the event ~S, ~
-                                       but should~:[ not~;~].~@:>"
-                           :arguments (filter result event-spec expected))))
-          filter
-          event-spec)))))
+     (mapc
+      (lambda+ ((filter-initargs event-spec expected))
+        (let ((filter (apply #'filter (if (listp (first filter-initargs))
+                                          (list (list* ,spec filter-initargs))
+                                          (list* ,spec filter-initargs)))))
+          (call-with-filter-checking-thunk
+           (lambda (do-it)
+             (let ((result (funcall do-it)))
+               (is (eql expected result)
+                   "~@<The filter ~S ~:[did not match~;matched~] the ~
+                    event ~S, but should~:[ not~;~].~@:>"
+                   filter result event-spec expected)))
+           filter
+           event-spec)))
+      ,cases)))

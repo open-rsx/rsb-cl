@@ -1,22 +1,24 @@
 ;;;; fundamental.lisp --- Unit tests for "fundamental" converters.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter.test)
 
-(deftestsuite fundamental-root (converter-root)
-  ()
-  (:documentation
-   "Root unit test suite for fundamental converters."))
+(def-suite fundamental-root
+  :in converter-root
+  :description
+  "Root unit test suite for fundamental converters.")
+(in-suite fundamental-root)
 
 ;;; Converter fundamental-void
 
-(deftestsuite fundamental-void-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-void' converter."))
+(def-suite fundamental-void-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-void' converter.")
+(in-suite fundamental-void-root)
 
 (define-basic-converter-test-cases (:fundamental-void)
     `((,(octetify #())  :void ,+no-value+)
@@ -27,10 +29,11 @@
 
 ;;; Converter fundamental-null
 
-(deftestsuite fundamental-null-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-null' converter."))
+(def-suite fundamental-null-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-null' converter.")
+(in-suite fundamental-null-root)
 
 (define-basic-converter-test-cases (:fundamental-null)
     `((nil                     t nil)
@@ -41,10 +44,11 @@
 
 ;;; Converter fundamental-bool
 
-(deftestsuite fundamental-bool-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-bool' converter."))
+(def-suite fundamental-bool-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-bool' converter.")
+(in-suite fundamental-bool-root)
 
 (define-basic-converter-test-cases (:fundamental-bool)
     `((,(octetify #(0)) :bool nil)
@@ -54,10 +58,11 @@
 
 ;;; Converter fundamental-int32
 
-(deftestsuite fundamental-int32-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-int32' converter."))
+(def-suite fundamental-int32-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-int32' converter.")
+(in-suite fundamental-int32-root)
 
 (define-basic-converter-test-cases (:fundamental-int32)
     `((,(octetify #(0 0 0 0))         :int32 0)
@@ -68,10 +73,11 @@
 
 ;;; Converter fundamental-ascii-string
 
-(deftestsuite fundamental-ascii-string-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-ascii-string' converter."))
+(def-suite fundamental-ascii-string-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-ascii-string' converter.")
+(in-suite fundamental-ascii-string-root)
 
 (define-basic-converter-test-cases (:fundamental-ascii-string)
     `((,(octetify #())         :ascii-string "")
@@ -82,10 +88,11 @@
 
 ;;; Converter fundamental-utf-8-string
 
-(deftestsuite fundamental-utf-8-string-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-utf-8-string' converter."))
+(def-suite fundamental-utf-8-string-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-utf-8-string' converter.")
+(in-suite fundamental-utf-8-string-root)
 
 (define-basic-converter-test-cases (:fundamental-utf-8-string)
     `((,(octetify #())           :utf-8-string "")
@@ -96,10 +103,11 @@
 
 ;;; Converter fundamental-bytes
 
-(deftestsuite fundamental-bytes-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-bytes' converter."))
+(def-suite fundamental-bytes-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-bytes' converter.")
+(in-suite fundamental-bytes-root)
 
 (define-basic-converter-test-cases (:fundamental-bytes)
     `((,(octetify #())         :bytes ,(octetify #()))
@@ -108,13 +116,14 @@
 
 ;;; Converter fundamental-scope
 
-(deftestsuite fundamental-scope-root (fundamental-root)
-  ()
-  (:documentation
-   "Unit tests for the `fundamental-scope' converter."))
+(def-suite fundamental-scope-root
+  :in fundamental-root
+  :description
+  "Unit tests for the `fundamental-scope' converter.")
+(in-suite fundamental-scope-root)
 
 (define-basic-converter-test-cases (:fundamental-scope
-                                    :domain-test #'scope=)
+                                    :domain-test scope=)
     `((,(octetify #())                  :scope :error)
       (,(octetify #(102 111 111))       :scope :error)
       (:not-applicable                  :scope :not-a-scope)

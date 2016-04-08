@@ -11,7 +11,8 @@
    #:iterate
    #:let-plus
    #:more-conditions
-   #:lift
+
+   #:fiveam
 
    #:nibbles
 
@@ -64,36 +65,37 @@ socket. Should be incremented after each use.")
     (usocket:with-socket-listener (socket host port)
       t)))
 
-(deftestsuite transport-socket-root (transport-root)
-  ()
-  (:function
-   (next-port ()
-     (let ((old *next-port*))
-       (iter (until (port-usable? *next-port*))
-             (incf *next-port*))
-       (unless (= old *next-port*)
-         (format *lift-debug-output* "~&;; Port in use; Incrementing ~D -> ~D~&"
-               old *next-port*)))
-     *next-port*))
-  (:function
-   (make-socket-url (schema server? options)
-     (format nil "~(~A~):~{~@?~}/rsbtest/transport/socket~@[?~{~A=~A~^&~}~]"
-             schema
-             (ecase schema
-               ((:socket :tcp-socket)
-                (list "//localhost:~D" *next-port*))
-               ((:unix :unix-socket)
-                (list "")))
-             (append (when server? (list "server" "1")) options))))
-  ;; Prior to running each individual test case, clear bus clients and
-  ;; servers and choose a new port.
-  (:setup
-   (dolist (transport '(:tcp-socket :unix-socket))
-     (let ((transport (service-provider:find-provider
-                       'rsb.transport:transport transport)))
-       (clrhash (rsb.transport.socket::transport-clients transport))
-       (clrhash (rsb.transport.socket::transport-servers transport))))
-   (next-port))
-  (:run-setup :once-per-test-case)
-  (:documentation
-   "Root unit test suite for the transport.socket module."))
+(defun next-port ()
+  (let ((old *next-port*))
+    (iter (until (port-usable? *next-port*))
+          (incf *next-port*))
+    (unless (= old *next-port*)
+      (format *lift-debug-output* "~&;; Port in use; Incrementing ~D -> ~D~&"
+              old *next-port*)))
+  *next-port*)
+
+(defun make-socket-url (schema server? options)
+  (format nil "~(~A~):~{~@?~}/rsbtest/transport/socket~@[?~{~A=~A~^&~}~]"
+          schema
+          (ecase schema
+            ((:socket :tcp-socket)
+             (list "//localhost:~D" *next-port*))
+            ((:unix :unix-socket)
+             (list "")))
+          (append (when server? (list "server" "1")) options)))
+
+;; Prior to running each individual test case, clear bus clients and
+;; servers and choose a new port.
+#+TODO(:setup
+       (dolist (transport '(:tcp-socket :unix-socket))
+         (let ((transport (service-provider:find-provider
+                           'rsb.transport:transport transport)))
+           (clrhash (rsb.transport.socket::transport-clients transport))
+           (clrhash (rsb.transport.socket::transport-servers transport))))
+ (next-port))
+#+TODO (:run-setup :once-per-test-case)
+
+(def-suite transport-socket-root
+  :in transport-root
+  :description
+  "Root unit test suite for the transport.socket module.")

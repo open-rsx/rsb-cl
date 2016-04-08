@@ -1,6 +1,6 @@
 ;;;; rsb-model.asd --- System definition for model for RSB.
 ;;;;
-;;;; Copyright (C) 2015, 2016, 2018 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -51,7 +51,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"      "1.7.1")
+  :depends-on  ((:version "fiveam"    "1.4")
 
                 (:version "rsb-model" #.(version/string))
 
@@ -71,6 +71,4 @@
                               (:file       "inference"))))
 
   :perform     (test-op (component operation)
-                 (eval (read-from-string "(lift:run-tests :config
-                                           (asdf:system-relative-pathname
-                                            :rsb-model/test \"lift-model.config\"))"))))
+                 (symbol-call '#:rsb.model.test '#:run-tests)))

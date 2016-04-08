@@ -6,10 +6,11 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite origin-filter-root (filter-root)
-  ()
-  (:documentation
-   "Test suite for the `origin-filter' class."))
+(def-suite origin-filter-root
+  :in filter-root
+  :description
+  "Test suite for the `origin-filter' class.")
+(in-suite origin-filter-root)
 
 (define-basic-filter-tests (origin-filter :origin)
   `(;; Some invalid cases.

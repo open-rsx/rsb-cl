@@ -6,36 +6,34 @@
 
 (cl:in-package #:rsb.transport.spread.test)
 
-(deftestsuite util-root (transport-spread-root)
-  ()
-  (:documentation
-   "Test suite for the utility functions used in the spread
-backend."))
+(def-suite util-root
+  :in transport-spread-root
+  :description
+  "Test suite for the utility functions used in the spread backend.")
+(in-suite util-root)
+#+TODO   (:setup
+          (clrhash *scope->groups-cache*))
 
-(addtest (util-root
-          :documentation
-          "Smoke test for the `normalize-daemon-endpoint' function.")
-  normalize-daemon-endpoint/smoke
+(test normalize-daemon-endpoint/smoke
+  "Smoke test for the `normalize-daemon-endpoint' function."
 
-  (ensure-cases (name host port
-                 expected-name &optional expected-host expected-port)
-      '((nil         nil    nil  missing-required-argument)
-        ("4803@host" nil    nil  "4803@host" "host" 4803)
-        (nil         "host" 4803 "4803@host" "host" 4803)
-        (nil         nil    4803 "4803"      nil    4803))
-    (case expected-name
-      (missing-required-argument
-       (ensure-condition missing-required-argument
-         (normalize-daemon-endpoint name host port)))
-      (t
-       (ensure-same (normalize-daemon-endpoint name host port)
-                    (values expected-name expected-host expected-port)
-                    :test #'equal)))))
+  (mapc (lambda+ ((name host port
+                   expected-name &optional expected-host expected-port))
+         (case expected-name
+           (missing-required-argument
+            (signals missing-required-argument
+              (normalize-daemon-endpoint name host port)))
+           (t
+            (ensure-same (normalize-daemon-endpoint name host port)
+                         (values expected-name expected-host expected-port)
+                         :test #'equal))))
+                '((nil         nil    nil  missing-required-argument)
+                  ("4803@host" nil    nil  "4803@host" "host" 4803)
+                  (nil         "host" 4803 "4803@host" "host" 4803)
+                  (nil         nil    4803 "4803"      nil    4803))))
 
-(addtest (util-root
-          :documentation
-          "Smoke test for the `scope->group' function.")
-  scope->group/smoke
+(test scope->group/smoke
+  "Smoke test for the `scope->group' function."
 
   (ensure-cases (string expected)
       '(("/"         "6666cd76f96956469e7be39d750cc7d")
@@ -45,11 +43,9 @@ backend."))
       (ensure-same result (concatenate 'string expected '(#\Null))
                    :test #'string=))))
 
-(addtest (util-root
-          :documentation
-          "Smoke test for the non-caching variant of the
-`scope->groups' function.")
-  scope->groups/no-cache/smoke
+(test scope->groups/no-cache/smoke
+  "Smoke test for the non-caching variant of the
+`scope->groups' function."
 
   (ensure-cases (scope expected-groups)
       '(("/"        ("6666cd76f96956469e7be39d750cc7d"))
@@ -65,10 +61,8 @@ backend."))
       (ensure-same result expected
                    :test #'(rcurry #'set-equal :test #'string=)))))
 
-(addtest (util-root
-          :documentation
-          "Smoke test for the `scope->groups' function.")
-  scope->groups/smoke
+(test scope->groups/smoke
+  "Smoke test for the `scope->groups' function."
 
   (let ((*scope->groups-cache* (make-scope->groups-cache)))
     (ensure-cases (scope) '("/" "/foo" "/foo/bar")
@@ -78,11 +72,9 @@ backend."))
         (ensure-same result-1 result-2 :test #'eq)
         (ensure-same result-1 result-3 :test #'equal)))))
 
-(addtest (util-root
-          :documentation
-          "Test the cache flushing mechanism of the cache used by
-`scope->groups'.")
-  scope->groups/cache-flush
+(test scope->groups/cache-flush
+  "Test the cache flushing mechanism of the cache used by
+   `scope->groups'."
 
   (let ((*scope->groups-cache* (make-scope->groups-cache)))
     (iter (repeat (* 10 *scope->groups-cache-max-size*))

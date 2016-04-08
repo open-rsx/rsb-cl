@@ -1,13 +1,14 @@
 ;;;; rsb.asd --- Common Lisp implementation of RSB.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:defpackage #:rsb-system
   (:use
    #:cl
-   #:asdf)
+   #:asdf
+   #:uiop)
 
   (:export
    #:version/list
@@ -249,7 +250,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     #.(version/string)
-  :depends-on  ((:version "lift"                    "1.7.1")
+  :depends-on  ((:version "fiveam"                  "1.4")
 
                 (:version "rsb"                     #.(version/string))
                 (:version "rsb-transport-inprocess" #.(version/string)))
@@ -353,5 +354,5 @@
                               (:file       "reader"))))
 
   :perform (test-op (operation component)
-             (eval (read-from-string "(log:config :warn)")) ; less noise
-             (eval (read-from-string "(lift:run-tests :config :generic)"))))
+             (symbol-call '#:log '#:config :warn) ; less noise
+             (symbol-call '#:rsb.test '#:run-tests)))
