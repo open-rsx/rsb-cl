@@ -1,6 +1,6 @@
 ;;;; listener.lisp --- Unit tests for listener.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,62 +19,62 @@
 
 (define-basic-participant-test-cases listener
   '("/rsbtest/listener/construction"
-    () () ()
+    () ()
     "/rsbtest/listener/construction")
 
   '("/rsbtest/listener/construction"
-    () () (:transports ((:inprocess &inherit)))
+    () (:transports ((:inprocess &inherit)))
     "/rsbtest/listener/construction")
 
   '("/rsbtest/listener/construction"
-    () () (:transports ((t &inherit) (:inprocess &inherit)))
+    () (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/listener/construction")
 
   '("/rsbtest/listener/construction"
-    () () (:converters ((t . :foo)))
+    () (:converters ((t . :foo)))
     "/rsbtest/listener/construction")
 
   `("/rsbtest/listener/construction"
-    () () (:transform ,#'1+)
+    () (:transform ,#'1+)
     "/rsbtest/listener/construction")
 
   `("/rsbtest/listener/construction"
-    () () (:parent ,*simple-parent*)
+    () (:parent ,*simple-parent*)
     "/rsbtest/listener/construction")
 
   '("/rsbtest/listener/construction"
-    () () (:introspection? nil)
+    () (:introspection? nil)
     "/rsbtest/listener/construction")
 
   '("/rsbtest/listener/construction"
-    () () (:introspection? t)
+    () (:introspection? t)
     "/rsbtest/listener/construction")
 
   '("inprocess:/rsbtest/listener/construction"
-    () () ()
+    () ()
     "/rsbtest/listener/construction")
 
   `("inprocess:/rsbtest/listener/construction"
-    () () (:error-policy ,#'continue)
+    () (:error-policy ,#'continue)
     "/rsbtest/listener/construction")
 
   `("/rsbtest/listener/construction?foo=bar"
-    () () ()
+    () ()
     "/rsbtest/listener/construction")
 
   ;; Handlers
   `("/rsbtest/listener/construction"
-    () () (:handlers (list (lambda (event) (declare (ignore event)))))
+    () (:handlers (list (lambda (event) (declare (ignore event)))))
     "/rsbtest/listener/construction")
 
   ;; Filters
   `("/rsbtest/listener/construction"
-    () () (:filters (list (lambda (event) (declare (ignore event)))))
+    () (:filters (list (lambda (event) (declare (ignore event)))))
     "/rsbtest/listener/construction")
 
   ;; No transports => error
   '("/rsbtest/listener/construction"
-    () () (:transports ((t :enabled nil)))
+    () (:transports ((t :enabled nil)))
     error))
 
 (addtest (listener-root

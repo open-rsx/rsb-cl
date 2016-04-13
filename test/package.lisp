@@ -279,7 +279,7 @@
                           class 'make-participant))
          construction/make-participant
 
-         (ensure-cases (uri args initargs common-initargs expected-scope)
+         (ensure-cases (uri initargs common-initargs expected-scope)
              (list ,@cases)
 
            (let+ (((&flet do-it () (apply #'make-participant ,kind uri

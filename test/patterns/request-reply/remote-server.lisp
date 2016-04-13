@@ -1,6 +1,6 @@
 ;;;; remote-server.lisp --- Unit tests for the remote-server class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,39 +34,39 @@
 (define-basic-participant-test-cases (:remote-server
                                       :check-transport-urls? nil)
   '("/rsbtest/remoteserver/construction"
-    () () ()
+    () ()
     "/rsbtest/remoteserver/construction")
 
   '("/rsbtest/remoteserver/construction"
-    () () (:transports ((:inprocess &inherit)))
+    () (:transports ((:inprocess &inherit)))
     "/rsbtest/remoteserver/construction")
 
   '("/rsbtest/remoteserver/construction"
-    () () (:transports ((t &inherit) (:inprocess &inherit)))
+    () (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/remoteserver/construction")
 
   `("/rsbtest/remoteserver/construction"
-    () () (:parent ,*simple-parent*)
+    () (:parent ,*simple-parent*)
     "/rsbtest/remoteserver/construction")
 
   '("/rsbtest/remoteserver/construction"
-    () () (:introspection? nil)
+    () (:introspection? nil)
     "/rsbtest/remoteserver/construction")
 
   '("/rsbtest/remoteserver/construction"
-    () () (:introspection? t)
+    () (:introspection? t)
     "/rsbtest/remoteserver/construction")
 
   '("inprocess://localhost/rsbtest/remoteserver/construction"
-    () () ()
+    () ()
     "/rsbtest/remoteserver/construction")
 
   '("/rsbtest/remoteserver/construction?foo=bar"
-    () () ()
+    () ()
     "/rsbtest/remoteserver/construction")
 
   ;; No transports => error
-  '("/" () () (:transports ((t :enabled nil))) error))
+  '("/" () (:transports ((t :enabled nil))) error))
 
 (addtest (remote-server-root
           :documentation
