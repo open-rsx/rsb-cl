@@ -1,6 +1,6 @@
 ;;;; local-server.lisp --- Unit tests for the local-server class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -110,7 +110,7 @@
             (server-method server "echoevent" :argument :event)
             (lambda (x) (setf argument x) (event-data x))
             (server-method server "error")
-            (lambda (x) (error "intentional error")))
+            (lambda (x) (declare (ignore x)) (error "intentional error")))
 
       (ensure-cases (method arg expected-argument expected-result)
           '(("echopayload" "foo" "foo"  "foo")
