@@ -344,6 +344,7 @@
 
                               (:file       "scope-filter")
                               (:file       "type-filter")
+                              (:file       "origin-filter")
                               (:file       "method-filter")
                               (:file       "meta-data-filter")))
 

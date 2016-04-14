@@ -233,12 +233,16 @@
    rules))
 
 (defun make-access-checking-event-for-processor
-    (processor scope data &rest args)
+    (processor scope data
+     &rest args &key origin sequence-number &allow-other-keys)
   "Return an event based on SCOPE, DATA and ARGS that only permits
    read/write access to its parts as declared necessary by PROCESSOR."
-  (apply #'make-access-checking-event scope data
-         :rules (access-rules-for-processor processor)
-         args))
+  (let ((event (apply #'make-access-checking-event scope data
+                      :rules (access-rules-for-processor processor)
+                      (remove-from-plist args :origin :sequence-number))))
+    (when origin          (setf (event-origin          event) origin))
+    (when sequence-number (setf (event-sequence-number event) sequence-number))
+    event))
 
 ;;; Tools related to participants
 
