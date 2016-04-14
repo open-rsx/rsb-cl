@@ -46,7 +46,8 @@
   t)
 
 (defmethod matches? ((filter origin-filter) (event event))
-  (uuid:uuid= (filter-origin filter) (event-origin event)))
+  (when-let ((event-origin (event-origin event)))
+    (uuid:uuid= (filter-origin filter) (event-origin event))))
 
 (defmethod print-items:print-items append ((object origin-filter))
   `((:origin ,(filter-origin object) "~/rsb::print-id/")))
