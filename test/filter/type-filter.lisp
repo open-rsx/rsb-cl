@@ -6,22 +6,23 @@
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite type-filter-root (filter-root
-                                filter-suite)
-  ((simple-filter (make-instance 'type-filter :type t)))
+(deftestsuite type-filter-root (filter-root)
+  ()
   (:documentation
    "Unit tests for the `type-filter' class."))
 
-(define-basic-filter-test-cases (type-filter :type)
-    ;; Construct cases
-    '(;; Some invalid cases.
-      (()              error) ; missing initarg
-      ((:type 5)       error) ; wrong type for type specifier
+(define-basic-filter-tests (type-filter :type)
+  '(;; Some invalid cases.
+    (()              error) ; missing initarg
+    ((:type 5)       error) ; wrong type for type specifier
 
+    ;; These are ok.
+    ((:type t)       t)
+    ((:type integer) t)))
 
-      ;; These are ok.
-      ((:type t)       :ok)
-      ((:type integer) :ok))
-
-  ;; Expected matching results
-  t t t t)
+(define-filter-match-test (type-filter :type)
+  '(((:type t)       ("/" "bar") t)
+    ((:type integer) ("/" "bar") nil)
+    ((:type string)  ("/" "bar") t)
+    ((:type integer) ("/" 5)     t)
+    ((:type string)  ("/" 5)     nil)))

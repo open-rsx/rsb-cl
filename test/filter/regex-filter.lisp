@@ -1,30 +1,38 @@
 ;;;; regex-filter.lisp --- Unit tests for the regex-filter class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(deftestsuite regex-filter-root (filter-root
-                                 filter-suite)
-  ((simple-filter (make-instance 'regex-filter
-                                 :regex ".*")))
+(deftestsuite regex-filter-root (filter-root)
+  ()
   (:documentation
    "Unit tests for the `regex-filter' class."))
 
-(define-basic-filter-test-cases (regex-filter :regex)
-    ;; Construct cases
-    '(;; Some invalid cases.
-      (()                               error) ; missing initarg
-      ((:regex 5)                       error) ; wrong type for regex
-      ((:regex "*")                     error) ; invalid regex
+(define-basic-filter-tests (regex-filter :regex)
+  '(;; Some invalid cases.
+    (()                               error) ; missing initarg
+    ((:regex 5)                       error) ; wrong type for regex
+    ((:regex "*")                     error) ; invalid regex
 
 
-      ;; These are ok.
-      ((:regex ".*")                    :ok)
-      ((:regex ".*" :always :match)     :ok)
-      ((:regex ".*" :case-sensitive? t) :ok))
+    ;; These are ok.
+    ((:regex ".*")                    t)
+    ((:regex ".*" :always :match)     t)
+    ((:regex ".*" :case-sensitive? t) t)))
 
-  ;; Expected matching results
-  t t t t)
+(define-filter-match-test (regex-filter :regex)
+  '(((:regex "^bar$")                      ("/" "bar") t)
+    ((:regex "^bar$")                      ("/" "BAR") nil)
+    ((:regex "^bar$")                      ("/" "baz") nil)
+    ((:regex "^bar$")                      ("/" "BAZ") nil)
+
+    ((:regex "^bar$" :case-sensitive? nil) ("/" "bar") t)
+    ((:regex "^bar$" :case-sensitive? nil) ("/" "BAR") t)
+    ((:regex "^bar$" :case-sensitive? nil) ("/" "baz") nil)
+    ((:regex "^bar$" :case-sensitive? nil) ("/" "BAZ") nil)
+
+    ((:regex ".*")                         ("/" 1)     t)
+    ((:regex ".*" :always :do-not-match)   ("/" 1)     nil)))
