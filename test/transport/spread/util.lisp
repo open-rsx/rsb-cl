@@ -35,42 +35,43 @@
 (test scope->group/smoke
   "Smoke test for the `scope->group' function."
 
-  (ensure-cases (string expected)
-      '(("/"         "6666cd76f96956469e7be39d750cc7d")
-        ("/foo/"     "4f87be8f6e593d167f5fd1ab238cfc2")
-        ("/foo/bar/" "1c184f3891344400380281315d9e738"))
-    (let ((result (scope->group (make-scope string))))
-      (ensure-same result (concatenate 'string expected '(#\Null))
-                   :test #'string=))))
+  (mapc (lambda+ ((string expected))
+          (let ((result (scope->group (make-scope string))))
+            (is (string= (concatenate 'string expected '(#\Null)) result))))
+        '(("/"         "6666cd76f96956469e7be39d750cc7d")
+          ("/foo/"     "4f87be8f6e593d167f5fd1ab238cfc2")
+          ("/foo/bar/" "1c184f3891344400380281315d9e738"))))
 
 (test scope->groups/no-cache/smoke
-  "Smoke test for the non-caching variant of the
-`scope->groups' function."
+  "Smoke test for the non-caching variant of the `scope->groups'
+   function."
 
-  (ensure-cases (scope expected-groups)
-      '(("/"        ("6666cd76f96956469e7be39d750cc7d"))
-        ("/foo"     ("6666cd76f96956469e7be39d750cc7d"
-                     "4f87be8f6e593d167f5fd1ab238cfc2"))
-        ("/foo/bar" ("6666cd76f96956469e7be39d750cc7d"
-                     "4f87be8f6e593d167f5fd1ab238cfc2"
-                     "1c184f3891344400380281315d9e738")))
-    (let ((result   (scope->groups/no-cache (make-scope scope)))
-          (expected (map 'list (lambda (name)
-                                 (concatenate 'string name '(#\Null)))
-                         expected-groups)))
-      (ensure-same result expected
-                   :test #'(rcurry #'set-equal :test #'string=)))))
+  (mapc (lambda+ ((scope expected-groups))
+          (let+ ((result   (scope->groups/no-cache (make-scope scope)))
+                 (expected (map 'list (lambda (name)
+                                        (concatenate 'string name '(#\Null)))
+                                expected-groups))
+                 ((&flet set-equal/string= (left right)
+                    (set-equal left right :test #'string=))))
+            (is (set-equal/string= expected result))))
+        '(("/"        ("6666cd76f96956469e7be39d750cc7d"))
+          ("/foo"     ("6666cd76f96956469e7be39d750cc7d"
+                       "4f87be8f6e593d167f5fd1ab238cfc2"))
+          ("/foo/bar" ("6666cd76f96956469e7be39d750cc7d"
+                       "4f87be8f6e593d167f5fd1ab238cfc2"
+                       "1c184f3891344400380281315d9e738")))))
 
 (test scope->groups/smoke
   "Smoke test for the `scope->groups' function."
 
   (let ((*scope->groups-cache* (make-scope->groups-cache)))
-    (ensure-cases (scope) '("/" "/foo" "/foo/bar")
-      (let ((result-1 (scope->groups (make-scope scope :intern? t)))
-            (result-2 (scope->groups (make-scope scope :intern? t)))
-            (result-3 (scope->groups (make-scope scope))))
-        (ensure-same result-1 result-2 :test #'eq)
-        (ensure-same result-1 result-3 :test #'equal)))))
+    (mapc (lambda (scope)
+            (let ((result-1 (scope->groups (make-scope scope :intern? t)))
+                  (result-2 (scope->groups (make-scope scope :intern? t)))
+                  (result-3 (scope->groups (make-scope scope))))
+              (is (eq    result-2 result-1))
+              (is (equal result-3 result-1))))
+          '("/" "/foo" "/foo/bar"))))
 
 (test scope->groups/cache-flush
   "Test the cache flushing mechanism of the cache used by
@@ -78,8 +79,8 @@
 
   (let ((*scope->groups-cache* (make-scope->groups-cache)))
     (iter (repeat (* 10 *scope->groups-cache-max-size*))
-          (ensure (<= (hash-table-count *scope->groups-cache*)
-                      *scope->groups-cache-max-size*))
+          (is (>= *scope->groups-cache-max-size*
+                  (hash-table-count *scope->groups-cache*)))
           (scope->groups (make-scope "/bla/bli/boo"))
-          (ensure (<= (hash-table-count *scope->groups-cache*)
-                      *scope->groups-cache-max-size*)))))
+          (is (>= *scope->groups-cache-max-size*
+                  (hash-table-count *scope->groups-cache*))))))

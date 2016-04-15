@@ -22,29 +22,29 @@
 (test notification->event
   "Test `notification->event' method."
 
-  (ensure-cases (payload-data wire-schema connector-args expected)
-      `(;; In these cases, protocol buffer unpacking fails.
-        (,a-string           "foo"          (:error-policy nil)         decoding-error)
-        (,a-string           "foo"          (:error-policy ,#'continue) nil)
+  (mapc
+   (lambda+ ((payload-data wire-schema connector-args expected))
+     (let+ ((connector    (apply #'make-instance 'in-pull-connector
+                                 :converter :fundamental-utf-8-string
+                                 (append common-args connector-args)))
+            (notification (rsb.transport.spread::make-incoming-notification
+                           a-notification 0 payload-data :wire-schema wire-schema)
+                          payload-data)
+            ((&flet do-it ()
+               (rsb.ep:with-error-policy (connector)
+                 (notification->event connector notification wire-schema)))))
+       (case expected
+         (decoding-error (signals decoding-error (do-it)))
+         ((nil           (is (null (do-it)))))
+         (t              (is (equal expected (event-data (do-it))))))
 
-        ;; Protocol buffer unpacking succeeds, but conversion to event
-        ;; fails.
-        (,a-string           "utf-8-string" ()                          "foobarbaz"))
+    `(;; In these cases, protocol buffer unpacking fails.
+      (,a-string           "foo"          (:error-policy nil)         decoding-error)
+      (,a-string           "foo"          (:error-policy ,#'continue) nil)
 
-    (let+ ((connector    (apply #'make-instance 'in-pull-connector
-                                :converter :fundamental-utf-8-string
-                                (append common-args connector-args)))
-           (notification (rsb.transport.spread::make-incoming-notification
-                          (a-notification 0 payload-data :wire-schema wire-schema)
-                          payload-data))
-           ((&flet do-it ()
-              (rsb.ep:with-error-policy (connector)
-                (notification->event connector notification wire-schema)))))
-      (case expected
-        (decoding-error (ensure-condition 'decoding-error (do-it)))
-        ((nil)          (ensure-null (do-it)))
-        (t              (ensure-same (event-data (do-it)) expected
-                                     :test #'equal))))))
+      ;; Protocol buffer unpacking succeeds, but conversion to event
+      ;; fails.
+      (,a-string           "utf-8-string" ()                          "foobarbaz"))))
 
 ;;; Connector classes
 
@@ -72,21 +72,18 @@
               ,(format nil "Test constructing `~(~A~)' instances." class-name)
 
               ;; Missing :host, :port, :name or :bus initarg.
-              (ensure-condition 'missing-required-initarg
+              (signals missing-required-initarg
                 (make-instance ',class-name :schema    :spread
                                             :converter :fundamental-null
                                             :port      nil)))
 
-            (addtest (,suite-name
-                      :documentation
-                      ,(format nil "Test connecting `~(~A~)' instances."
-                               class-name))
-              connect/soke
+            (test connect/soke
+              ,(format nil "Test connecting `~(~A~)' instances." class-name)
 
               (let ((connector (apply #'make-instance ',class-name common-args))
                     (scope     (make-scope "/foo")))
-                (rsb.ep:notify connector scope :attached)
-                (rsb.ep:notify connector scope :detached)))))))
+                (finishes (rsb.ep:notify connector scope :attached))
+                (finishes (rsb.ep:notify connector scope :detached))))))))
 
   (define-connector-suite :out)
   (define-connector-suite :in-pull)

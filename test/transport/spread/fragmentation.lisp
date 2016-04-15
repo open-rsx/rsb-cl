@@ -17,86 +17,92 @@
   "Smoke test for the `merge-fragment' with an `assembly-pool'
    instance."
 
-  (ensure-cases (sequence-number num-parts parts part-ids expected)
-      `((0
-         5
-         ("foo" "bar" "baz" "a" "b")
-         (0     1     2     3   4)
-         "foobarbazab")
-        (1
-         2
-         ("foo" "baz" "foo" "a" "bar")
-         (0     5     0     2   1)
-         "foobar"))
-    ;; We repeat the assembly for all permutation of the fragments.
-    (let ((fragments (iter (for part in parts)
-                           (for i    in part-ids)
-                           (collect (a-fragment
-                                     sequence-number num-parts i (octetify part))))))
-      (map-permutations
-       (lambda (permutation)
-         (let* ((pool      (make-instance 'assembly-pool))
-                (returns   (map 'list (curry #'merge-fragment pool)
-                                permutation))
-                (assembly  (find-if (complement #'null) returns))
-                (result    (assembly-concatenated-data assembly)))
-           (ensure      (assembly-complete? assembly))
-           (ensure-same result (octetify expected)
-                        :test #'equalp)))
-       fragments))))
+(mapc
+ (lambda+ ((sequence-number num-parts parts part-ids expected))
+   ;; We repeat the assembly for all permutation of the fragments.
+   (let ((fragments (iter (for part in parts)
+                          (for i    in part-ids)
+                          (collect (a-fragment
+                                    sequence-number num-parts i
+                                    (octetify part))))))
+     (map-permutations
+      (lambda (permutation)
+        (handler-bind ((fragment-problem #'muffle-warning))
+          (let* ((pool      (make-instance 'assembly-pool))
+                 (returns   (map 'list (curry #'merge-fragment pool)
+                                 permutation))
+                 (assembly  (find-if (complement #'null) returns))
+                 (result    (assembly-concatenated-data assembly)))
+            (is-true (assembly-complete? assembly))
+            (is (equalp (octetify expected) result)))))
+      fragments)))
+
+ `(;; Everything normal.
+   (0
+    5
+    ("foo" "bar" "baz" "a" "b")
+    (0     1     2     3   4)
+    "foobarbazab")
+   ;; Duplicate and invalid fragments.
+   (1
+    2
+    ("foo" "baz" "foo" "a" "bar")
+    (0     5     0     2   1)
+    "foobar"))))
 
 (test fragment-smoke
   "Smoke test for the `split-notification' function."
 
-  (ensure-cases (data fragment-size-limit &optional expected)
-      `((""                   90)
-        ("foobarbazfezwhoop"  85)
-        ("foobarbazb"         88)
-        ("fooobaar"           89)
-        (,(make-string 1000) 100)
+  (mapc
+   (lambda+ ((data fragment-size-limit &optional expectec))
+     (let+ ((notification (make-notification
+                           0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
+                           nil :utf-8-string '() `(:create ,(local-time:now))))
+            ((&flet do-it ()
+               (collect-fragments (split-notification
+                                   notification (octetify data)
+                                   fragment-size-limit)))))
+       (case expected
+         (insufficient-room
+          (signals insufficient-room (do-it)))
+         (t
+          (is-true (every (compose (rcurry #'<= fragment-size-limit) ; TODO is-every?
+                                   #'pb:packed-size)
+                          (do-it)))))))
 
-        (""                   20 insufficient-room)
-        ("bla"                20 insufficient-room))
+   `((""                   90)
+     ("foobarbazfezwhoop"  85)
+     ("foobarbazb"         88)
+     ("fooobaar"           89)
+     (,(make-string 1000) 100)
 
-    (let+ ((notification (make-notification
-                          0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
-                          nil :utf-8-string '() `(:create ,(local-time:now))))
-           ((&flet do-it ()
-              (collect-fragments (split-notification
-                                  notification (octetify data)
-                                  fragment-size-limit)))))
-      (case expected
-        (insufficient-room
-         (ensure-condition 'insufficient-room (do-it)))
-        (t
-         (ensure (every (compose (rcurry #'<= fragment-size-limit)
-                                 #'pb:packed-size)
-                        (do-it))))))))
+     (""                   20 insufficient-room)
+     ("bla"                20 insufficient-room))))
 
 (test roundtrip
   "Do full roundtrips of fragmenting data using `split-notification'
    and then re-assemble the fragments using `merge-fragments'."
 
-  (ensure-cases (data fragment-size-limit)
-      `((""                   90)
-        ("foobarbazfezwhoop"  85)
-        ("foobarbazb"         88)
-        ("fooobaar"           89)
-        (,(make-string 1000) 100))
+  (mapc
+   (lambda+ ((data fragment-size-limit))
+     (let* ((notification  (make-notification
+                            0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
+                            nil :utf-8-string '() `(:create ,(local-time:now))))
+            (notifications (collect-fragments
+                            (split-notification
+                             notification (octetify data)
+                             fragment-size-limit)))
+            (pool          (make-instance 'assembly-pool))
+            (result        (assembly-concatenated-data
+                            (lastcar (map 'list (curry #'merge-fragment pool)
+                                          (shuffle notifications))))))
+       (is (equalp (octetify data) result))))
 
-    (let* ((notification  (make-notification
-                           0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
-                           nil :utf-8-string '() `(:create ,(local-time:now))))
-           (notifications (collect-fragments
-                           (split-notification
-                            notification (octetify data)
-                            fragment-size-limit)))
-           (pool          (make-instance 'assembly-pool))
-           (result        (assembly-concatenated-data
-                           (lastcar (map 'list (curry #'merge-fragment pool)
-                                         (shuffle notifications))))))
-      (ensure-same (octetify data) result
-                   :test #'equalp))))
+   `((""                   90)
+     ("foobarbazfezwhoop"  85)
+     ("foobarbazb"         88)
+     ("fooobaar"           89)
+     (,(make-string 1000) 100))))
 
 (test warnings
   "Ensure that warnings are signaled when invalid fragments are added
@@ -104,14 +110,15 @@
 
   (let ((sequence-number 0)
         (pool            (make-instance 'assembly-pool)))
-    (merge-fragment pool (a-fragment
-                          sequence-number 3 0 (octetify "foo")))
-
-    (ensure-condition 'invalid-fragment-id
+    ;; Invalid fragment id
+    (signals invalid-fragment-id
       (merge-fragment pool (a-fragment
                             sequence-number 3 5 (octetify "foo"))))
 
-    (ensure-condition 'duplicate-fragment
+    ;; Duplicate fragment
+    (merge-fragment pool (a-fragment
+                          sequence-number 3 0 (octetify "foo")))
+    (signals duplicate-fragment
       (merge-fragment pool (a-fragment
                             sequence-number 3 0 (octetify "foo"))))))
 
@@ -155,23 +162,19 @@
                              :age-limit 1)))
     (merge-fragment pool (a-fragment 0 2 0 (octetify "bla")))
     (let ((count (assembly-pool-count pool)))
-      (ensure-same
-       count 1
-       :test      #'=
-       :report    "~@<After submitting a fragment, the count of the pool ~
-                   was ~D, not ~D.~@:>"
-       :arguments (count 1)))
+      (is (= 1 count)
+          "~@<After submitting a fragment, the count of the pool was ~
+           ~D, not ~D.~@:>"
+          count 1))
     (sleep 2)
     (let ((count (assembly-pool-count pool)))
-      (ensure-same
-       count 0
-       :test #'=
-       :report    "~@<After submitting a fragment and waiting for it to ~
-                   get pruned, the count of the pool was ~D, not ~D.~@:>"
-       :arguments (count 0)))))
+      (is (= 0 count)
+          "~@<After submitting a fragment and waiting for it to get ~
+           pruned, the count of the pool was ~D, not ~D.~@:>"
+          count 0))))
 
 (test print-smoke
   "Test `print-object' method on `pruning-assembly-pool'."
 
-  (ensure (not (emptyp (princ-to-string
-                        (make-instance 'pruning-assembly-pool))))))
+  (is (not (emptyp (princ-to-string
+                    (make-instance 'pruning-assembly-pool))))))

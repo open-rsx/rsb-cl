@@ -1,6 +1,6 @@
 ;;;; connection.lisp --- Unit tests for the connection class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -107,10 +107,8 @@
               :do (receive-message connection nil)))
       (check-connection connection '()))))
 
-(addtest (spread-connection-root
-          :documentation
-          "Roundtrip test for `connenction' class.")
-  roundtrip
+(test roundtrip
+  "Roundtrip test for `connenction' class."
 
   (let ((group "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
     (with-connection (sender :port spread-port)
@@ -118,13 +116,14 @@
         ;; Join group and wait until it's done.
         (lparallel:force (ref-group receiver group :waitable? t))
         ;; Then send, receive and verify a message.
-        (ensure-cases (payload-size)
-            '(3 1000 100000)
-          (let* ((payload      (octetify (make-string payload-size
-                                                      :initial-element #\b)))
-                 (notification (make-wire-notification payload (length payload))))
-            (send-message sender (list group) notification)
-            (let* ((incoming (receive-message receiver t))
-                   (incoming (subseq (wire-notification-buffer incoming)
-                                     0 (wire-notification-end incoming))))
-              (ensure-same incoming payload :test #'equalp))))))))
+        (mapc
+         (lambda (payload-size)
+           (let* ((payload      (octetify (make-string payload-size
+                                                       :initial-element #\b)))
+                  (notification (make-wire-notification payload (length payload))))
+             (send-message sender (list group) notification)
+             (let* ((incoming (receive-message receiver t))
+                    (incoming (subseq (wire-notification-buffer incoming)
+                                      0 (wire-notification-end incoming))))
+               (is (equalp payload incoming)))))
+         '(3 1000 100000))))))
