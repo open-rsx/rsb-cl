@@ -21,10 +21,6 @@
    "Return list of names of Spread groups in which CONNECTION is a
     member."))
 
-(defgeneric disconnect (connection)
-  (:documentation
-   "Disconnect CONNECTION from the Spread daemon."))
-
 (defgeneric ref-group (connection group &key waitable?)
   (:documentation
    "Increase the reference count of GROUP, causing CONNECTION to join

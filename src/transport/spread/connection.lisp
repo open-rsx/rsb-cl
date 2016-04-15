@@ -70,7 +70,7 @@
 (defmethod connection-groups ((connection connection))
   (hash-table-keys (connection-%groups connection)))
 
-(defmethod disconnect ((connection connection))
+(defmethod detach ((connection connection))
   (network.spread:disconnect (connection-%connection connection)))
 
 (let+ (((&flet make-hook-promise (context connection hook group predicate)
