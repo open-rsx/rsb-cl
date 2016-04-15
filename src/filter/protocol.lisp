@@ -12,7 +12,7 @@
   (:documentation
    "Return non-nil if EVENT matches the criteria of FILTER."))
 
-;;; Default behavior
+;; Default behavior
 
 (defmethod matches? ((filter function) (event t))
   "Apply FILTER to EVENT."
@@ -23,6 +23,27 @@
 (defgeneric payload-matches? (filter payload)
   (:documentation
    "Return non-nil if PAYLOAD matches the criteria of FILTER."))
+
+;;; Filter function protocol
+
+(defgeneric filter-function (filter)
+  (:documentation
+   "Return the effective filter function of FILTER.
+
+    The returned function takes an event as its sole argument and
+    returns a Boolean indicating whether the event matches the
+    criteria of FILTER."))
+
+(defgeneric compute-filter-function (filter &key next)
+  (:documentation
+   "Compute and return an effective filter function for FILTER.
+
+    The returned function takes an event as its sole argument and
+    returns a Boolean indicating whether the event matches the
+    criteria of FILTER.
+
+    The computed function can call the function NEXT in case it cannot
+    decide whether the event matches the criteria of FILTER."))
 
 ;;; Filter service
 

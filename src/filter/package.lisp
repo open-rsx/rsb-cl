@@ -22,6 +22,11 @@
   (:export
    #:matches?)
 
+  ;; Filter function protocol
+  (:export
+   #:filter-function
+   #:compute-filter-function)
+
   ;; Filter construction
   (:export
    #:make-filter)
