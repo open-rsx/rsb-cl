@@ -17,7 +17,8 @@
    #:rsb.model
    #:rsb.model.inference
 
-   #:rsb.test)
+   #:rsb.test
+   #:rsb.model.test)
 
   (:import-from #:rsb
    #:make-scope)

@@ -35,9 +35,9 @@
                                        (from-right . to-right))
                                (and (puri:uri= from-left from-right)
                                     (puri:uri= to-left   to-right)))))))
-    (ensure-same result      expected-result)
-    (ensure-same definitive? expected-definitive?)
-    (ensure-same uris        expected-uris :test #'uri-pairs-set-equal)))
+    (is (eql                 expected-result      result))
+    (is (eql                 expected-definitive? definitive?))
+    (is (uri-pairs-set-equal expected-uris        uris))))
 
 ;;; `communication?'
 
@@ -45,120 +45,124 @@
   :in rsb-model-inference-root
   :description
   "Root unit test suite for the `communication?' generic function.")
+(in-suite rsb-model-inference-communication?-root)
 
 (test smoke/scope+uri
   "Smoke test for the `communication?' generic function focusing on
    scope and URI inputs."
 
-  (ensure-cases (from to expected)
-      `(;; Scopes
-        (,(make-scope "/foo")      ,(make-scope "/foo")               (t   t   ()))
-        (,(make-scope "/foo")      ,(make-scope "/bar")               (nil t   ()))
-        (,(make-scope "/foo")      ,(make-scope "/foo/bar")           (nil nil ()))
+  (mapc
+   (lambda+ ((from to expected))
+     (check-communication?-cases from to expected))
 
-        ;; URIs
-        (,(puri:uri "socket:/foo") ,(puri:uri "socket:/foo")          (t   t   ()))
-        (,(puri:uri "socket:/foo") ,(puri:uri "socket:/bar")          (nil t   ()))
-        (,(puri:uri "socket:/foo") ,(puri:uri "socket:/foo/bar")      (nil nil ()))
+   `(;; Scopes
+     (,(make-scope "/foo")      ,(make-scope "/foo")               (t   t   ()))
+     (,(make-scope "/foo")      ,(make-scope "/bar")               (nil t   ()))
+     (,(make-scope "/foo")      ,(make-scope "/foo/bar")           (nil nil ()))
 
-        (,(puri:uri "socket:/foo") ,(puri:uri "socket://baz/foo")     (nil t   ()))
-        (,(puri:uri "socket:/foo") ,(puri:uri "socket://baz/bar")     (nil t   ()))
-        (,(puri:uri "socket:/foo") ,(puri:uri "socket://baz/foo/bar") (nil t   ()))
+     ;; URIs
+     (,(puri:uri "socket:/foo") ,(puri:uri "socket:/foo")          (t   t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "socket:/bar")          (nil t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "socket:/foo/bar")      (nil nil ()))
 
-        (,(puri:uri "socket:/foo") ,(puri:uri "spread:/foo")          (nil t   ()))
-        (,(puri:uri "socket:/foo") ,(puri:uri "spread:/bar")          (nil t   ()))
-        (,(puri:uri "socket:/foo") ,(puri:uri "spread:/foo/bar")      (nil t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "socket://baz/foo")     (nil t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "socket://baz/bar")     (nil t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "socket://baz/foo/bar") (nil t   ()))
 
-        ;; Mixed
-        (,(puri:uri "/foo")        ,(make-scope "/foo")               (nil nil ()))
-        (,(puri:uri "/foo")        ,(make-scope "/bar")               (nil t   ()))
-        (,(puri:uri "/foo")        ,(make-scope "/foo/bar")           (nil nil ()))
-        (,(make-scope "/foo")      ,(puri:uri "/foo")                 (nil nil ()))
-        (,(make-scope "/foo")      ,(puri:uri "/bar")                 (nil t   ()))
-        (,(make-scope "/foo")      ,(puri:uri "/foo/bar")             (nil nil ())))
+     (,(puri:uri "socket:/foo") ,(puri:uri "spread:/foo")          (nil t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "spread:/bar")          (nil t   ()))
+     (,(puri:uri "socket:/foo") ,(puri:uri "spread:/foo/bar")      (nil t   ()))
 
-    (check-communication?-cases from to expected)))
+     ;; Mixed
+     (,(puri:uri "/foo")        ,(make-scope "/foo")               (nil nil ()))
+     (,(puri:uri "/foo")        ,(make-scope "/bar")               (nil t   ()))
+     (,(puri:uri "/foo")        ,(make-scope "/foo/bar")           (nil nil ()))
+     (,(make-scope "/foo")      ,(puri:uri "/foo")                 (nil nil ()))
+     (,(make-scope "/foo")      ,(puri:uri "/bar")                 (nil t   ()))
+     (,(make-scope "/foo")      ,(puri:uri "/foo/bar")             (nil nil ())))))
 
 (test smoke/participant-info
   "Smoke test for the `communication?' generic function focusing on
    `participant-info' inputs."
 
-  (ensure-cases (from to expected)
-      `(;; Kinds that do not communicate.
-        ((:listener "/foo" ("socket:")) (:listener "/foo" ("socket:"))
-         (nil t ()))
-        ((:informer "/foo" ("socket:")) (:informer "/foo" ("socket:"))
-         (nil t ()))
-        ((:listener "/foo" ("socket:")) (:informer "/foo" ("socket:"))
-         (nil t ()))
+  (mapc
+   (lambda+ ((from to expected))
+     (let ((from (apply #'make-participant-info from))
+           (to   (apply #'make-participant-info to)))
+       (check-communication?-cases from to expected)))
 
-        ;; informer -> listener
-        ((:informer "/foo" ("socket:")) (:listener "/foo" ("spread:"))
-         (nil t ()))
-        ((:informer "/foo" ("socket:")) (:listener "/bar" ("socket:"))
-         (nil t ()))
-        ((:informer "/foo" ("socket:")) (:listener "/foo/bar" ("socket:"))
-         (nil nil (("socket:" . "socket:"))))
-        ((:informer "/foo" ("socket:")) (:listener "/foo" ("socket:"))
-         (t t (("socket:" . "socket:"))))
+   `(;; Kinds that do not communicate.
+     ((:listener "/foo" ("socket:")) (:listener "/foo" ("socket:"))
+      (nil t ()))
+     ((:informer "/foo" ("socket:")) (:informer "/foo" ("socket:"))
+      (nil t ()))
+     ((:listener "/foo" ("socket:")) (:informer "/foo" ("socket:"))
+      (nil t ()))
 
-        ;; remote-method <-> local-method
-        ((:remote-method "/foo" ("socket:")) (:local-method  "/bar" ("socket:"))
-         (nil t ()))
-        ((:remote-method "/foo" ("socket:")) (:local-method  "/foo/bar" ("socket:"))
-         (nil t ()))
-        ((:remote-method "/foo" ("socket:")) (:local-method  "/foo" ("socket:"))
-         (t t (("socket:" . "socket:"))))
+     ;; informer -> listener
+     ((:informer "/foo" ("socket:")) (:listener "/foo" ("spread:"))
+      (nil t ()))
+     ((:informer "/foo" ("socket:")) (:listener "/bar" ("socket:"))
+      (nil t ()))
+     ((:informer "/foo" ("socket:")) (:listener "/foo/bar" ("socket:"))
+      (nil nil (("socket:" . "socket:"))))
+     ((:informer "/foo" ("socket:")) (:listener "/foo" ("socket:"))
+      (t t (("socket:" . "socket:"))))
 
-        ((:local-method "/foo" ("socket:")) (:remote-method  "/bar" ("socket:"))
-         (nil t ()))
-        ((:local-method "/foo" ("socket:")) (:remote-method  "/foo/bar" ("socket:"))
-         (nil t ()))
-        ((:local-method "/foo" ("socket:")) (:remote-method  "/foo" ("socket:"))
-         (t t (("socket:" . "socket:"))))
+     ;; remote-method <-> local-method
+     ((:remote-method "/foo" ("socket:")) (:local-method  "/bar" ("socket:"))
+      (nil t ()))
+     ((:remote-method "/foo" ("socket:")) (:local-method  "/foo/bar" ("socket:"))
+      (nil t ()))
+     ((:remote-method "/foo" ("socket:")) (:local-method  "/foo" ("socket:"))
+      (t t (("socket:" . "socket:"))))
 
-        ;; Multiple transports
-        ((:informer "/foo" ("socket:" "spread:" "inprocess:"))
-         (:listener "/foo" ("socket://localhost:40" "spread:" "inprocess:"))
-         (t t (("spread:" . "spread:") ("inprocess:" . "inprocess:"))))
+     ((:local-method "/foo" ("socket:")) (:remote-method  "/bar" ("socket:"))
+      (nil t ()))
+     ((:local-method "/foo" ("socket:")) (:remote-method  "/foo/bar" ("socket:"))
+      (nil t ()))
+     ((:local-method "/foo" ("socket:")) (:remote-method  "/foo" ("socket:"))
+      (t t (("socket:" . "socket:"))))
 
-        ;; No transports.
-        ((:informer "/foo" ()) (:listener "/foo" ()) (t t ())))
+     ;; Multiple transports
+     ((:informer "/foo" ("socket:" "spread:" "inprocess:"))
+      (:listener "/foo" ("socket://localhost:40" "spread:" "inprocess:"))
+      (t t (("spread:" . "spread:") ("inprocess:" . "inprocess:"))))
 
-    (let ((from (apply #'make-participant-info from))
-          (to   (apply #'make-participant-info to)))
-      (check-communication?-cases from to expected))))
+     ;; No transports.
+     ((:informer "/foo" ()) (:listener "/foo" ()) (t t ())))))
 
 (test smoke/nodes
   "Smoke test for the `communication?' generic function focusing on
    node inputs."
 
-  (ensure-cases (from to expected)
-      '(;; Unknown participant kind.
-        (((:some-participant "/foo" ("socket:")))
-         ((:some-participant "/bar" ("socket:")))
-         (nil nil ()))
-        ;; Unknown participant kind with children.
-        (((:some-participant "/foo" ("socket:"))
-          ((:informer "/foo" ("socket:"))))
-         ((:some-participant "/bar" ("socket:"))
-          ((:listener "/foo" ("socket:"))))
-         (t t (("socket:" . "socket:"))))
-        ;; Same with multiple children and transports.
-        (((:some-participant "/foo" ("socket:" "spread:"))
-          ((:informer "/foo" ("socket:" "spread:")))
-          ((:informer "/bar" ("socket:" "spread:"))))
-         ((:some-participant "/bar" ("spread:" "socket:"))
-          ((:listener "/foo"     ("spread:" "socket:")))
-          ((:listener "/bar/baz" ("spread:" "socket:"))))
-         (t t (("socket:" . "socket:") ("spread:" . "spread:"))))
-        ;; Local- and remote-server.
-        (((:remote-server "/foo" ("socket:"))
-          ((:remote-method "/foo/bar" ("socket:"))))
-         ((:local-server "/foo" ("socket:"))
-          ((:local-method "/foo/bar" ("socket:"))))
-         (t t (("socket:" . "socket:")))))
+  (mapc
+   (lambda+ ((from to expected))
+     (let ((from (apply #'make-participant-node from))
+           (to   (apply #'make-participant-node to)))
+       (check-communication?-cases from to expected)))
 
-    (let ((from (apply #'make-participant-node from))
-          (to   (apply #'make-participant-node to)))
-      (check-communication?-cases from to expected))))
+   '(;; Unknown participant kind.
+     (((:some-participant "/foo" ("socket:")))
+      ((:some-participant "/bar" ("socket:")))
+      (nil nil ()))
+     ;; Unknown participant kind with children.
+     (((:some-participant "/foo" ("socket:"))
+       ((:informer "/foo" ("socket:"))))
+      ((:some-participant "/bar" ("socket:"))
+       ((:listener "/foo" ("socket:"))))
+      (t t (("socket:" . "socket:"))))
+     ;; Same with multiple children and transports.
+     (((:some-participant "/foo" ("socket:" "spread:"))
+       ((:informer "/foo" ("socket:" "spread:")))
+       ((:informer "/bar" ("socket:" "spread:"))))
+      ((:some-participant "/bar" ("spread:" "socket:"))
+       ((:listener "/foo"     ("spread:" "socket:")))
+       ((:listener "/bar/baz" ("spread:" "socket:"))))
+      (t t (("socket:" . "socket:") ("spread:" . "spread:"))))
+     ;; Local- and remote-server.
+     (((:remote-server "/foo" ("socket:"))
+       ((:remote-method "/foo/bar" ("socket:"))))
+      ((:local-server "/foo" ("socket:"))
+       ((:local-method "/foo/bar" ("socket:"))))
+      (t t (("socket:" . "socket:")))))))

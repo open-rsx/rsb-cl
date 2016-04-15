@@ -24,6 +24,7 @@
            :description
            ,(format nil "Unit test suite for the `~(~A~)' model class."
                     class))
+         (in-suite ,suite-name)
 
          (test construct
            ,(format nil "Test constructing `~(~A~)' instances." class)
@@ -35,7 +36,7 @@
                        (missing-required-initarg
                         (signals missing-required-initarg (do-it)))
                        (t
-                        (do-it)))))
+                        (finishes (do-it))))))
                (list ,@cases)))
 
          (test print

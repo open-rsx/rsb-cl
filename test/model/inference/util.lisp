@@ -59,16 +59,16 @@
 ;;; Utilities
 
 (defun %call-with-tri-test-cases (function cases)
-  (ensure-cases (((left left-definitive?) (right right-definitive?)
-                  expected))
-      cases
-    (flet ((do-it ()
-             (multiple-value-list
-              (funcall function
-                       left left-definitive?
-                       right right-definitive?))))
-      (case expected
-        (incompatible-arguments
-         (ensure-condition 'incompatible-arguments (do-it)))
-        (t
-         (ensure-same expected (do-it) :test #'equal))))))
+  (mapc (lambda+ (((left left-definitive?) (right right-definitive?)
+                   expected))
+          (flet ((do-it ()
+                   (multiple-value-list
+                    (funcall function
+                             left left-definitive?
+                             right right-definitive?))))
+            (case expected
+              (incompatible-arguments
+               (ensure-condition 'incompatible-arguments (do-it)))
+              (t
+               (ensure-same expected (do-it) :test #'equal)))))
+        cases))
