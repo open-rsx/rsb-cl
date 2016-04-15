@@ -6,6 +6,28 @@
 
 (cl:in-package #:rsb.filter)
 
+;;; `function-caching-mixin'
+
+(defclass function-caching-mixin ()
+  ((function :type     function
+             :reader   filter-function
+             :writer   (setf filter-%function)))
+  (:documentation
+   "This mixin caches a computed filter function."))
+
+(defmethod shared-initialize :around ((instance   function-caching-mixin)
+                                      (slot-names t)
+                                      &key)
+  (call-next-method)
+  (update-filter-function instance))
+
+(defmethod matches? ((filter function-caching-mixin)
+                     (event  t))
+  (funcall (the function (filter-function filter)) event))
+
+(defun update-filter-function (filter)
+  (setf (filter-%function filter) (compute-filter-function filter)))
+
 ;;; `funcallable-filter-mixin'
 
 (defclass funcallable-filter-mixin ()

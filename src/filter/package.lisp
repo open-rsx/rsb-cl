@@ -31,6 +31,11 @@
   (:export
    #:make-filter)
 
+  ;; `function-caching-mixin' class
+  (:export
+   #:function-caching-mixin
+   #:update-filter-function)
+
   ;; `funcallable-filter-mixin' class
   (:export
    #:funcallable-filter-mixin)
