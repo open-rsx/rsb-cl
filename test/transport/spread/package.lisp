@@ -70,6 +70,9 @@ module"))
 
 ;;; Test utilities
 
+(defvar *simple-group-name*
+  (concatenate 'string "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" '(#\Nul)))
+
 (defun octetify (data)
   (etypecase data
     (string   (sb-ext:string-to-octets data))

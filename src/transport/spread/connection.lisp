@@ -93,16 +93,16 @@
             connection)
            ((&flet join ()
               (log:info "~@<~A is joining group ~A~@:>" connection group)
-              (network.spread:join %connection group)))
+              (network.spread:join %connection group)
+              t))
            ((&flet join/waitable ()
-              (prog1
-                  (make-hook-promise
-                   "join" %connection 'network.spread:join-hook group
-                   (lambda (members)
-                     (member (network.spread:connection-name
-                              %connection)
-                             members :test #'string=)))
-                (join))))
+              (let ((name (network.spread:connection-name %connection)))
+                (prog1
+                    (make-hook-promise
+                     "join" %connection 'network.spread:join-hook group
+                     (lambda (members)
+                       (member name members :test #'string=)))
+                  (join)))))
            (new-value (incf (gethash group groups 0))))
       (values new-value
               (hash-table-count groups)
@@ -126,16 +126,16 @@
            ((&flet leave ()
               (log:info "~@<~A is leaving group ~A~@:>" connection group)
               (remhash group groups)
-              (network.spread:leave %connection group)))
+              (network.spread:leave %connection group)
+              t))
            ((&flet leave/waitable ()
-              (prog1
-                  (make-hook-promise
-                   "leave" %connection 'network.spread:leave-hook group
-                   (lambda (members)
-                     (not (member (network.spread:connection-name
-                                   %connection)
-                                  members :test #'string=))))
-                (leave))))
+              (let ((name (network.spread:connection-name %connection)))
+                (prog1
+                    (make-hook-promise
+                     "leave" %connection 'network.spread:leave-hook group
+                     (lambda (members)
+                       (not (member name members :test #'string=))))
+                  (leave)))))
            (new-ref-count   (decf (gethash group groups 0)))
            (maybe-promise   (cond
                               ((plusp new-ref-count) nil)

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for transport.spread module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -49,6 +49,18 @@
   ;; Variables and constants
   (:export
    #:+protocol-version+)
+
+  ;; Connection protocol
+  (:export
+   #:connection-name
+   #:connection-daemon-name
+   #:connection-groups
+
+   #:ref-group
+   #:unref-group
+
+   #:receive-message
+   #:send-message)
 
   (:documentation
    "This package contains a transport implementation based on the
