@@ -95,3 +95,17 @@ module"))
     (setf (event-origin event)          (uuid:make-null-uuid)
           (event-sequence-number event) 0)
     event))
+
+(defun call-with-connection (thunk
+                             &key
+                             port
+                             (name (format nil "~D" port)))
+  (let ((connection (make-instance 'connection :name name)))
+    (unwind-protect
+         (funcall thunk connection)
+      (detach connection))))
+
+(defmacro with-connection ((connection-var &rest args &key port name)
+                           &body body)
+  (declare (ignore port name))
+  `(call-with-connection (lambda (,connection-var) ,@body) ,@args))

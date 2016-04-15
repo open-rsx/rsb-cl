@@ -16,28 +16,32 @@
           "Test construction of `connection' instances.")
   construct
 
-  (let ((name (format nil "~D" spread-port)))
-    (make-instance 'connection
-                   :connection (network.spread:connect name))
-    (make-instance 'connection
-                   :name name)
+  (let+ ((name (format nil "~D" spread-port))
+         ((&flet connect ()
+            (network.spread:connect name))))
+    (ensure-cases (initargs expected)
+        `(;; Some invalid cases.
+          (()                            missing-required-initarg) ; Neither :connection nor :name
+          ((:name       "3333@localhost"
+            :connection ,(connect))      incompatible-initargs)    ; Both :connection and :name
 
-    ;; Neither :connection nor :name => missing required initarg
-    (ensure-condition 'missing-required-initarg
-      (make-instance 'connection))
-    ;; Both :connection and :name => mutually exclusive initargs
-    (ensure-condition 'error
-      (make-instance 'connection
-                     :name       "3333@localhost"
-                     :connection (network.spread:connect name)))))
+          ;; These are OK.
+          ((:connection ,(connect))      t)
+          ((:name ,name)                 t))
+      (let+ (((&flet+ do-it ()
+                (apply #'make-instance 'connection initargs))))
+       (case expected
+         (missing-required-initarg
+          (ensure-condition 'missing-required-initarg (do-it)))
+         (incompatible-initargs
+          (ensure-condition 'incompatible-initargs (do-it)))
+         (t
+          (detach (do-it))))))))
 
 (addtest (spread-connection-root
           :documentation
           "Test printing `connection' instances.")
   print
 
-  (let* ((name       (format nil "~D" spread-port))
-         (connection (make-instance 'connection :name name)))
-    (unwind-protect
-         (ensure (not (emptyp (princ-to-string connection))))
-      (detach connection))))
+  (with-connection (connection :port spread-port)
+    (ensure (not (emptyp (princ-to-string connection))))))
