@@ -113,7 +113,29 @@ are added to an assembly.")
       (merge-fragment pool (make-fragment
                             sequence-number 3 0 (octetify "foo"))))))
 
-(addtest (fragmentation-root
+(deftestsuite assembly-root (fragmentation-root)
+  ()
+  (:documentation
+   "Unit tests for the `assembly' class."))
+
+(addtest (assembly-root
+          :documentation
+          "Test `print-object' method on `assembly'.")
+  print-smoke
+
+  (ensure (not (emptyp
+                (princ-to-string
+                 (make-instance 'assembly
+                                :id            (cons 0 (uuid:uuid-to-byte-array
+                                                        (uuid:make-null-uuid)))
+                                :num-fragments 1))))))
+
+(deftestsuite assembly-pool-root (fragmentation-root)
+  ()
+  (:documentation
+   "Unit tests for the `assembly-pool' class."))
+
+(addtest (assembly-pool-root
           :documentation
           "Test `print-object' method on `assembly-pool'.")
   print-smoke

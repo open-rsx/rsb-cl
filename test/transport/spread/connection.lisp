@@ -30,3 +30,14 @@
       (make-instance 'connection
                      :name       "3333@localhost"
                      :connection (network.spread:connect name)))))
+
+(addtest (spread-connection-root
+          :documentation
+          "Test printing `connection' instances.")
+  print
+
+  (let* ((name       (format nil "~D" spread-port))
+         (connection (make-instance 'connection :name name)))
+    (unwind-protect
+         (ensure (not (emptyp (princ-to-string connection))))
+      (detach connection))))

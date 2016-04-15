@@ -30,6 +30,7 @@
    #:scope->groups/no-cache
    #:scope->groups
 
+   #:assembly
    #:assembly-complete?
    #:assembly-concatenated-data
 

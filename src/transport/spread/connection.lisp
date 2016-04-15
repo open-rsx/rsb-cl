@@ -8,7 +8,7 @@
 
 ;;; `connection' class
 
-(defclass connection ()
+(defclass connection (print-items:print-items-mixin)
   ((connection     :initarg  :connection
                    :type     network.spread:connection
                    :accessor connection-%connection
@@ -183,10 +183,8 @@
         (network.spread:send-bytes
          (connection-%connection connection) destination buffer)))))
 
-(defmethod print-object ((object connection) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (let+ (((&structure-r/o connection- %groups) object))
-      (format stream "~A@~A (~D)"
-              (connection-name object)
-              (connection-daemon-name object)
-              (hash-table-count %groups)))))
+(defmethod print-items:print-items append ((object connection))
+  (let+ (((&structure-r/o connection- name daemon-name %groups) object))
+    `((:name        ,name                       "~A")
+      (:daemon-name ,daemon-name                "@~A"   ((:after :name)))
+      (:group-count ,(hash-table-count %groups) " (~D)" ((:after :daemon-name))))))

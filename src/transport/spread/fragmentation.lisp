@@ -22,7 +22,7 @@
 
 ;;; `assembly' class
 
-(defclass assembly ()
+(defclass assembly (print-items:print-items-mixin)
   ((id         :initarg  :id
                :type     (cons sequence-number simple-array)
                :reader   assembly-id
@@ -101,20 +101,20 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
 
   assembly)
 
-(defmethod print-object ((object assembly) stream)
-  (print-unreadable-object (object stream :type t)
-    (let ((id (assembly-id object)))
-      (format stream "~{~2,'0X~}:~{~2,'0X~}:~D (~D/~D) age ~5,2F s"
-              (coerce (subseq (cdr id) 4 8) 'list)
-              (coerce (subseq (cdr id) 0 4) 'list)
-              (car id)
-              (count-if-not #'null (assembly-fragments object))
-              (length (assembly-fragments object))
-              (assembly-age object)))))
+(defmethod print-items:print-items append ((object assembly))
+  (let+ (((&structure-r/o assembly- ((part . event-id) id) fragments age)
+          object)
+         (count  (count-if-not #'null fragments))
+         (length (length fragments)))
+    `((:id1    ,(coerce (subseq event-id 4 8) 'list) "~{~2,'0X~}")
+      (:id2    ,(coerce (subseq event-id 0 4) 'list) ":~{~2,'0X~}"  ((:after :id1)))
+      (:part   ,part                                 ":~D"          ((:after :id2)))
+      (:counts ,(list count length)                  " ~{(~D/~D)~}" ((:after :part)))
+      (:age    ,age                                  " age ~5,2F s" ((:after :counts))))))
 
 ;;; Partial assembly storage
 
-(defclass assembly-pool ()
+(defclass assembly-pool (print-items:print-items-mixin)
   ((assemblies :type     hash-table
                :reader   assembly-pool-%assemblies
                :initform (make-hash-table :test #'equalp)
@@ -154,9 +154,8 @@ necessary when fragments are submitted by calls to
       (remhash key assemblies)
       assembly)))
 
-(defmethod print-object ((object assembly-pool) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "(~D)" (assembly-pool-count object))))
+(defmethod print-items:print-items append ((object assembly-pool))
+  `((:assembly-count ,(assembly-pool-count object) "(~D)")))
 
 ;;; Automatic pruning of old incomplete assemblies
 
