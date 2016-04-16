@@ -24,8 +24,9 @@
 
 (defmethod event->notification ((connector out-connector)
                                 (event     event))
-  "Delegate conversion to `event->notifications'. The primary purpose
-of this method is performing the conversion with restarts installed."
+  ;; Delegate conversion to `event->notifications'. The primary
+  ;; purpose of this method is performing the conversion with restarts
+  ;; installed.
   (event->notification* connector event))
 
 (defmethod send-notification ((connector    out-connector)

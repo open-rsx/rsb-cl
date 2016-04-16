@@ -23,7 +23,7 @@ a socket."))
 
 (defmethod handle ((connector in-pull-connector)
                    (data      notification))
-  "Put DATA into the queue of CONNECTOR for later retrieval."
+  ;; Put DATA into the queue of CONNECTOR for later retrieval.
   (lparallel.queue:push-queue data (connector-queue connector)))
 
 (defmethod receive-notification ((connector in-pull-connector)

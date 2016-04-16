@@ -255,10 +255,9 @@ after calling NEW-VALUE."
       (pb:pack event buffer)
       (cons buffer length))))
 
-(defmethod handle ((connection bus-connection)
-                   (event      notification))
-  (bt:with-lock-held ((connection-lock connection))
-    (send-notification connection (event->notification connection event))))
+(defmethod handle ((sink bus-connection) (data notification))
+  (bt:with-lock-held ((connection-lock sink))
+    (send-notification sink (event->notification sink data))))
 
 ;;; Shutdown
 

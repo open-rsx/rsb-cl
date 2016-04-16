@@ -85,13 +85,14 @@ connected to the bus."))
         (call-next-method)
       (let ((added   (set-difference new-value old-value))
             (removed (set-difference old-value new-value)))
-        (log:info "~@<~A~:@_added   connections ~{~A~^, ~}~:@_removed ~
-                   connections ~{~A~^, ~}~@:>"
+        (log:info "~@<~A~:@_~
+                   added   connections ~{~A~^, ~}~:@_~
+                   removed connections ~{~A~^, ~}~@:>"
                   bus added removed)
 
         ;; Install our handler and error policy in added connections.
         (iter (for connection in added)
-              ;; Add ourselves as handlers to the added connection.
+              ;; Add ourselves to the handlers of the added connection.
               (push (curry proxy connection) (handlers connection))
 
               ;; Install an error policy that removes the connection.
@@ -134,29 +135,29 @@ connected to the bus."))
          (log:info "~@<~A got its first connector~@:>" bus)
          (notify bus t :attached))))))
 
-(defmethod notify ((connector rsb.transport:connector)
-                   (bus       bus)
+(defmethod notify ((recipient rsb.transport:connector)
+                   (subject   bus)
                    (action    (eql :attached)))
-  (log:debug "~@<~A is attaching connector ~A to bus provider ~A~@:>"
-            bus connector bus)
-  (with-locked-bus (bus)
-    (push connector (bus-connectors bus))))
+  (log:debug "~@<Connector ~A is attaching to bus provider ~A~@:>"
+            recipient subject)
+  (with-locked-bus (subject)
+    (push recipient (bus-connectors subject))))
 
-(defmethod notify ((connector rsb.transport:connector)
-                   (bus       bus)
+(defmethod notify ((recipient rsb.transport:connector)
+                   (subject   bus)
                    (action    (eql :detached)))
-  (log:debug "~@<~A is detaching connector ~A from bus provider ~A~@:>"
-            bus connector bus)
-  (with-locked-bus (bus)
-    (removef (bus-connectors bus) connector))
-  (close-removed-connections bus))
+  (log:debug "~@<Connector ~A is detaching from bus provider ~A~@:>"
+            recipient subject)
+  (with-locked-bus (subject)
+    (removef (bus-connectors subject) recipient))
+  (close-removed-connections subject))
 
-(defmethod notify ((bus     bus)
-                   (subject (eql t))
-                   (action  (eql :detached)))
+(defmethod notify ((recipient bus)
+                   (subject   (eql t))
+                   (action    (eql :detached)))
   ;; Schedule remaining connections for removal when all connectors
   ;; detach.
-  (setf (bus-connections bus) '()))
+  (setf (bus-connections recipient) '()))
 
 (defun close-removed-connections (bus)
   (iter (for removed next (lparallel.queue:try-pop-queue
@@ -172,35 +173,31 @@ connected to the bus."))
 
 ;;; Sending and receiving
 
-(defmethod dispatch ((bus  bus)
-                     (data notification))
-  "Dispatch DATA to interested connectors."
+(defmethod dispatch ((processor bus) (event notification))
+  ;; Dispatch outgoing notification EVENT to interested connectors.
   (let+ ((scope (make-scope
-                 (bytes->string (notification-scope data))))
+                 (bytes->string (notification-scope event))))
          ((&flet do-scope (connectors)
-            (handle connectors data))))
+            (handle connectors event))))
     (declare (dynamic-extent #'do-scope))
-    (rsb.ep:scope-trie-map #'do-scope scope (bus-%in-connectors bus))))
+    (rsb.ep:scope-trie-map #'do-scope scope (bus-%in-connectors processor))))
 
-(defmethod handle ((bus          bus)
-                   (notification notification))
-  "This method is used for outgoing notifications."
-  ;; Send to remote peer(s).
-  (mapc (rcurry #'handle notification)
-        (with-locked-bus (bus :connections? t)
-          (copy-list (bus-connections bus))))
+(defmethod handle ((sink bus) (data notification))
+  ;; Send outgoing notification DATA to remote peer(s).
+  (mapc (rcurry #'handle data)
+        (with-locked-bus (sink :connections? t)
+          (copy-list (bus-connections sink))))
 
   ;; Dispatch to our own connectors.
-  (dispatch bus notification))
+  (dispatch sink data))
 
-(defmethod handle ((bus  bus)
-                   (data cons))
-  "This method is used for incoming notifications."
+(defmethod handle ((sink bus) (data cons))
+  ;; Handle incoming notification DATA.
   (let+ (((received-via . notification) data))
-    ;; Dispatched to all connections except the one from which we
+    ;; Dispatch to all connections except the one from which we
     ;; received the notification.
-    (iter (for connection in (with-locked-bus (bus :connections? t)
-                               (copy-list (bus-connections bus))))
+    (iter (for connection in (with-locked-bus (sink :connections? t)
+                               (copy-list (bus-connections sink))))
           (unless (eq received-via connection)
             ;; We can ignore errors here since we installed an error
             ;; policy in CONNECTION that removes CONNECTION.
@@ -208,7 +205,7 @@ connected to the bus."))
              (handle connection notification))))
 
     ;; Dispatch to our own connectors.
-    (dispatch bus notification)))
+    (dispatch sink data)))
 
 ;;;
 
