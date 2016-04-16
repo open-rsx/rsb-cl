@@ -36,12 +36,6 @@
       The instances manages bus clients and servers corresponding to
       different connector configurations."))
 
-  (defmethod print-items:print-items append ((object socket-transport))
-    `((:client-count ,(hash-table-count (transport-clients object)) " (C ~D)"
-       ((:after :remote?)))
-      (:server-count ,(hash-table-count (transport-servers object)) " (S ~D)"
-       ((:after :client-count)))))
-
 ;;; Transport registration
 
   (register-transport
@@ -65,6 +59,12 @@
     participants distributed across many processes.")
 
   ) ; eval-when
+
+(defmethod print-items:print-items append ((object socket-transport))
+  `((:client-count ,(hash-table-count (transport-clients object)) " (C ~D)"
+     ((:after :remote?)))
+    (:server-count ,(hash-table-count (transport-servers object)) " (S ~D)"
+     ((:after :client-count)))))
 
 (#+sbcl sb-ext:defglobal #-sbcl defvar **transport**
         (service-provider:find-provider 'transport :socket))

@@ -6,7 +6,8 @@
 
 (cl:in-package #:rsb.transport.socket)
 
-(defclass bus (broadcast-processor)
+(defclass bus (broadcast-processor
+               print-items:print-items-mixin)
   ((connections         :type     list
                         :accessor bus-connections
                         :initform '()
@@ -211,8 +212,8 @@ connected to the bus."))
 
 ;;;
 
-(defmethod print-object ((object bus) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "(S ~D) (C ~D)"
-            (length (bus-connections object))
-            (length (bus-connectors  object)))))
+(defmethod print-items:print-items append ((object bus))
+  (let+ (((&structure-r/o bus- connections connectors) object))
+    `((:connection-count ,(length connections) "(S ~D)")
+      (:connector-count  ,(length connectors)  " (C ~D)"
+       ((:after :connection-count))))))

@@ -61,7 +61,8 @@
                           restart-notification-receiver-mixin
                           error-handling-push-receiver-mixin
                           restart-notification-sender-mixin
-                          error-handling-sender-mixin)
+                          error-handling-sender-mixin
+                          print-items:print-items-mixin)
   ((socket         :reader   connection-socket
                    :writer   (setf connection-%socket)
                    :documentation
@@ -317,10 +318,8 @@ after calling NEW-VALUE."
 
 ;;;
 
-(defmethod print-object ((object bus-connection) stream)
-  (let+ (((&accessors-r/o (socket   connection-socket)
-                          (closing? connection-closing?)) object))
-    (print-unreadable-object (object stream :type t)
-      (format stream "~:[open~;closing: ~:*~S~] ~
-                      ~/rsb.transport.socket::print-socket/"
-              closing? socket))))
+(defmethod print-items:print-items append ((object bus-connection))
+  (let+ (((&structure-r/o connection- socket closing?) object))
+    `((:closing? ,closing? "~:[open~;closing: ~:*~S~]")
+      (:socket   ,socket   " ~/rsb.transport.socket::print-socket/"
+       ((:after :closing?))))))

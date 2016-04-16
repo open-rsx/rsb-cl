@@ -101,8 +101,9 @@ closed."))
 
 ;;;
 
-(defmethod print-object ((object bus-server) stream)
-  (print-unreadable-object (object stream :type t)
-    (let+ (((&structure-r/o bus- connections connectors socket state) object))
-     (format stream "~A (S ~D) (C ~D) ~:/rsb.transport.socket::print-socket/"
-             state (length connections) (length connectors) socket))))
+(defmethod print-items:print-items append ((object bus-server))
+  (let+ (((&structure-r/o bus- socket state) object))
+    `((:state  ,state  "~A "
+       ((:before :connection-count)))
+      (:socket ,socket " ~:/rsb.transport.socket::print-socket/"
+       ((:after :connector-count))))))
