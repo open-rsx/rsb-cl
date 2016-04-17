@@ -184,6 +184,7 @@
                               (:file       "conditions")
                               (:file       "protocol")
 
+                              (:file       "util")
                               (:file       "filter-mixins")
                               (:file       "composite-filter")
 

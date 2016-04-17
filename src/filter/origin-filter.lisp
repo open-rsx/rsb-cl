@@ -28,17 +28,7 @@
                                      &key
                                      (origin nil origin-supplied?))
   (when origin-supplied?
-    (setf (filter-origin instance) origin)))
-
-(defgeneric (setf filter-origin) (new-value filter)
-  (:method ((new-value uuid:uuid) (filter origin-filter))
-    (setf (filter-%origin filter) new-value))
-  (:method ((new-value string) (filter origin-filter))
-    (setf (filter-%origin filter) (uuid:make-uuid-from-string new-value)))
-  (:method ((new-value simple-array) (filter origin-filter))
-    (if (typep new-value 'nibbles:octet-vector)
-        (setf (filter-%origin filter) (uuid:byte-array-to-uuid new-value))
-        (call-next-method))))
+    (setf (filter-%origin instance) (ensure-uuid origin))))
 
 (defmethod rsb.ep:access? ((processor origin-filter)
                            (part      (eql :origin))
