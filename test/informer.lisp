@@ -14,52 +14,52 @@
 
 (define-basic-participant-test-cases informer
   '("/rsbtest/informer/construction"
-    (:type t) ()
+    (:type t)
     "/rsbtest/informer/construction")
 
   '("/rsbtest/informer/construction"
-    (:type t) (:transports ((:inprocess &inherit)))
+    (:type t :transports ((:inprocess &inherit)))
     "/rsbtest/informer/construction")
 
   '("/rsbtest/informer/construction"
-    (:type t) (:transports ((t &inherit) (:inprocess &inherit)))
+    (:type t :transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/informer/construction")
 
   '("/rsbtest/informer/construction"
-    (:type t) (:converters ((t . :foo)))
+    (:type t :converters ((t . :foo)))
     "/rsbtest/informer/construction")
 
   `("/rsbtest/informer/construction"
-    (:type t) (:transform ,#'1+)
+    (:type t :transform ,#'1+)
     "/rsbtest/informer/construction")
 
   `("/rsbtest/informer/construction"
-    (:type t) (:parent ,*simple-parent*)
+    (:type t :parent ,*simple-parent*)
     "/rsbtest/informer/construction")
 
   '("/rsbtest/informer/construction"
-    (:type t) (:introspection? nil)
+    (:type t :introspection? nil)
     "/rsbtest/informer/construction")
 
   '("/rsbtest/informer/construction"
-    (:type t) (:introspection? t)
+    (:type t :introspection? t)
     "/rsbtest/informer/construction")
 
   '("inprocess:/rsbtest/informer/construction"
-    (:type t) ()
+    (:type t)
     "/rsbtest/informer/construction")
 
   `("inprocess:/rsbtest/informer/construction"
-    (:type t) (:error-policy ,#'continue)
+    (:type t :error-policy ,#'continue)
     "/rsbtest/informer/construction")
 
   `("/rsbtest/informer/construction?foo=bar"
-    (:type t) ()
+    (:type t)
     "/rsbtest/informer/construction")
 
   ;; No transports => error
   '("/rsbtest/informer/construction"
-    (:type t) (:transports ((t :enabled nil)))
+    (:type t :transports ((t :enabled nil)))
     error))
 
 (addtest (informer-root

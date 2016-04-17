@@ -16,36 +16,36 @@
 (define-basic-participant-test-cases (rsb.introspection::introspection-receiver
                                       :check-transport-urls? nil)
   '("/rsbtest/introspection-receiver/construction"
-    () ()
+    ()
     "/rsbtest/introspection-receiver/construction")
 
   '("/rsbtest/introspection-receiver/construction"
-    () (:transports ((:inprocess &inherit)))
+    (:transports ((:inprocess &inherit)))
     "/rsbtest/introspection-receiver/construction")
 
   '("/rsbtest/introspection-receiver/construction"
-    () (:transports ((t &inherit) (:inprocess &inherit)))
+    (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/introspection-receiver/construction")
 
   '("/rsbtest/introspection-receiver/construction"
-    () (:converters ((t . :foo)))
+    (:converters ((t . :foo)))
     "/rsbtest/introspection-receiver/construction")
 
   '("inprocess:/rsbtest/introspection-receiver/construction"
-    () ()
+    ()
     "/rsbtest/introspection-receiver/construction")
 
   `("inprocess:/rsbtest/introspection-receiver/construction"
-    () (:error-policy ,#'continue)
+    (:error-policy ,#'continue)
     "/rsbtest/introspection-receiver/construction")
 
   `("/rsbtest/introspection-receiver/construction?foo=bar"
-    () ()
+    ()
     "/rsbtest/introspection-receiver/construction")
 
   ;; No transports => error
   '("/rsbtest/introspection-receiver/construction"
-    () (:transports ((t :enabled nil)))
+    (:transports ((t :enabled nil)))
     error))
 
 ;;; Class `remote-introspection-database'
@@ -72,44 +72,44 @@
 
 (define-basic-participant-test-cases (rsb.introspection::remote-introspection)
   '("/rsbtest/remote-introspection/construction"
-    () ()
+    ()
     "/rsbtest/remote-introspection/construction")
 
   '("/rsbtest/remote-introspection/construction"
-    () (:transports ((:inprocess &inherit)))
+    (:transports ((:inprocess &inherit)))
     "/rsbtest/remote-introspection/construction")
 
   '("/rsbtest/remote-introspection/construction"
-    () (:transports ((t &inherit) (:inprocess &inherit)))
+    (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/remote-introspection/construction")
 
   '("/rsbtest/remote-introspection/construction"
-    () (:converters ((t . :foo)))
+    (:converters ((t . :foo)))
     "/rsbtest/remote-introspection/construction")
 
   '("/rsbtest/remote-introspection/construction"
-    () (:receiver-uris ("inprocess:"))
+    (:receiver-uris ("inprocess:"))
     "/rsbtest/remote-introspection/construction")
 
   '("/rsbtest/remote-introspection/construction"
-    () (:response-timeout 2.0)
+    (:response-timeout 2.0)
     "/rsbtest/remote-introspection/construction")
 
   '("inprocess:/rsbtest/remote-introspection/construction"
-    () ()
+    ()
     "/rsbtest/remote-introspection/construction")
 
   `("inprocess:/rsbtest/remote-introspection/construction"
-    () (:error-policy ,#'continue)
+    (:error-policy ,#'continue)
     "/rsbtest/remote-introspection/construction")
 
   `("/rsbtest/remote-introspection/construction?foo=bar"
-    () ()
+    ()
     "/rsbtest/remote-introspection/construction")
 
   ;; No transports => error
   '("/rsbtest/remote-introspection/construction"
-    () (:transports ((t :enabled nil)))
+    (:transports ((t :enabled nil)))
     error))
 
 (addtest (remote-introspection-root

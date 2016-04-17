@@ -13,36 +13,36 @@
 
 (rsb.test:define-basic-participant-test-cases (rsb.introspection::local-introspection)
   '("/rsbtest/local-introspection/construction"
-    () ()
+    ()
     "/rsbtest/local-introspection/construction")
 
   '("/rsbtest/local-introspection/construction"
-    () (:transports ((:inprocess &inherit)))
+    (:transports ((:inprocess &inherit)))
     "/rsbtest/local-introspection/construction")
 
   '("/rsbtest/local-introspection/construction"
-    () (:transports ((t &inherit) (:inprocess &inherit)))
+    (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/local-introspection/construction")
 
   '("/rsbtest/local-introspection/construction"
-    () (:converters ((t . :foo)))
+    (:converters ((t . :foo)))
     "/rsbtest/local-introspection/construction")
 
   '("inprocess:/rsbtest/local-introspection/construction"
-    () ()
+    ()
     "/rsbtest/local-introspection/construction")
 
   `("inprocess:/rsbtest/local-introspection/construction"
-    () (:error-policy ,#'continue)
+    (:error-policy ,#'continue)
     "/rsbtest/local-introspection/construction")
 
   `("/rsbtest/local-introspection/construction?foo=bar"
-    () ()
+    ()
     "/rsbtest/local-introspection/construction")
 
   ;; No transports => error
   '("/rsbtest/local-introspection/construction"
-    () (:transports ((t :enabled nil)))
+    (:transports ((t :enabled nil)))
     error))
 
 (defun listener-creation-error-caused-by-local-introspection-creation-error? (condition)

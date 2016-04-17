@@ -14,52 +14,52 @@
 
 (define-basic-participant-test-cases reader
   '("/rsbtest/reader/construction"
-    () ()
+    ()
     "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    () (:transports ((:inprocess &inherit)))
+    (:transports ((:inprocess &inherit)))
     "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    () (:transports ((t &inherit) (:inprocess &inherit)))
+    (:transports ((t &inherit) (:inprocess &inherit)))
     "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    () (:converters ((t . :foo)))
+    (:converters ((t . :foo)))
     "/rsbtest/reader/construction")
 
   `("/rsbtest/reader/construction"
-    () (:transform ,#'1+)
+    (:transform ,#'1+)
     "/rsbtest/reader/construction")
 
   `("/rsbtest/reader/construction"
-    () (:parent ,*simple-parent*)
+    (:parent ,*simple-parent*)
     "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    () (:introspection? nil)
+    (:introspection? nil)
     "/rsbtest/reader/construction")
 
   '("/rsbtest/reader/construction"
-    () (:introspection? t)
+    (:introspection? t)
     "/rsbtest/reader/construction")
 
   '("inprocess:/rsbtest/reader/construction"
-    () ()
+    ()
     "/rsbtest/reader/construction")
 
   `("inprocess:/rsbtest/reader/construction"
-    () (:error-policy ,#'continue)
+    (:error-policy ,#'continue)
     "/rsbtest/reader/construction")
 
   `("/rsbtest/reader/construction?foo=bar"
-    () ()
+    ()
     "/rsbtest/reader/construction")
 
   ;; No transports => error
   '("/rsbtest/reader/construction"
-    () (:transports ((t :enabled nil)))
+    (:transports ((t :enabled nil)))
     error))
 
 (addtest (reader-root

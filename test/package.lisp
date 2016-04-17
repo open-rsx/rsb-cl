@@ -283,11 +283,11 @@
                           class 'make-participant))
          construction/make-participant
 
-         (ensure-cases (uri initargs common-initargs expected-scope)
+         (ensure-cases (uri initargs expected-scope)
              (list ,@cases)
 
            (let+ (((&flet do-it () (apply #'make-participant ,kind uri
-                                          (append initargs common-initargs)))))
+                                          initargs))))
              (case expected-scope
                (error (ensure-condition error
                         (detach/ignore-errors (do-it))))
