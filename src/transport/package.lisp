@@ -42,6 +42,15 @@
    #:encoding-error
    #:encoding-error-event)
 
+  ;; Types
+  (:export
+   #:notification-index
+
+   #:wire-notification
+   #:wire-notification-buffer
+   #:wire-notification-end
+   #:make-wire-notification)
+
   ;; Variables
   (:export
    #:*transport-metrics*)
