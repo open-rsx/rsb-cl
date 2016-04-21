@@ -199,7 +199,7 @@ after calling NEW-VALUE."
           (unless (= received length)
             (error "~@<Short read (expected: ~D; got ~D)~@:>"
                    length received))
-          (values (cons buffer length) :undetermined)))))
+          (values (make-wire-notification buffer length) :undetermined))))) ; TODO ownership of BUFFER
 
 (defmethod receive-notification ((connection bus-connection)
                                  (block?     (eql nil)))
@@ -209,35 +209,30 @@ after calling NEW-VALUE."
       (call-next-method))))
 
 (defmethod notification->event ((connection   bus-connection)
-                                (notification cons)
+                                (notification wire-notification)
                                 (wire-schema  t))
-  ;; The whole static buffer and the length of the relevant
-  ;; subsequence.
-  (declare (type (cons octet-vector (unsigned-byte 32)) notification))
-
   ;; Try to unpack NOTIFICATION into a `notification' instance. Signal
   ;; `decoding-error' if that fails.
-  (let+ (((data . length) notification))
+  (let+ (((&structure-r/o wire-notification- buffer end) notification))
     (with-condition-translation
         (((error decoding-error)
-          :encoded          (subseq data 0 length)
+          :encoded          (subseq buffer 0 end)
           :format-control   "~@<The wire-data could not be unpacked as a ~
                              protocol buffer of kind ~S.~:@>"
           :format-arguments (list 'notification)))
-      (pb:unpack data 'notification 0 length))))
+      (pb:unpack buffer 'notification 0 end))))
 
 ;;; Sending
 
 (defmethod send-notification ((connection   bus-connection)
-                              (notification cons))
-  (declare (type (cons octet-vector (unsigned-byte 32)) notification))
-
+                              (notification wire-notification))
   (when (connection-%closing? connection)
     (log:info "~@<~A is dropping a message since it is closing~@:>" connection)
     (return-from send-notification))
-  (let ((stream (usocket:socket-stream (connection-socket connection))))
-    (write-ub32/le (cdr notification) stream)
-    (write-sequence (car notification) stream :end (cdr notification))
+  (let+ ((stream (usocket:socket-stream (connection-socket connection)))
+         ((&structure-r/o wire-notification- buffer end) notification))
+    (write-ub32/le end stream)
+    (write-sequence buffer stream :end end)
     (force-output stream)))
 
 (defmethod event->notification ((connection bus-connection)
@@ -246,14 +241,14 @@ after calling NEW-VALUE."
   (with-condition-translation
       (((error encoding-error)
         :event            event
-        :format-control "~@<The event ~S could not be packed using ~
-                         protocol buffer serialization.~@:>"
+        :format-control   "~@<The event ~S could not be packed using ~
+                           protocol buffer serialization.~@:>"
         :format-arguments (list event)))
     (let* ((length (pb:packed-size event))
            (buffer (%ensure-send-buffer connection length)))
-      (declare (type fixnum length))
+      (declare (type notification-index length))
       (pb:pack event buffer)
-      (cons buffer length))))
+      (make-wire-notification buffer length))))
 
 (defmethod handle ((sink bus-connection) (data notification))
   (bt:with-lock-held ((connection-lock sink))
