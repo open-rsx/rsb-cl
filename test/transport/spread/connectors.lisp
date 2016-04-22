@@ -9,12 +9,9 @@
 ;;; `in-connector' superclass
 
 (deftestsuite in-connector-root (transport-spread-root)
-  ((a-string           (let ((buffer (octetify "foobarbaz")))
-                         (cons buffer (length buffer))))
-   (empty-notification (let+ (((&values length buffer)
-                               (pb:pack (make-instance
-                                         'rsb.protocol:notification))))
-                         (cons buffer length))))
+  ((a-string           (octetify "foobarbaz"))
+   (empty-notification (nth-value 1 (pb:pack (make-instance
+                                              'rsb.protocol:notification)))))
   (:documentation
    "Tests for the `in-connector' class and associated methods."))
 
@@ -33,8 +30,10 @@
         (,empty-notification :foo (:error-policy nil)          decoding-error)
         (,empty-notification :foo (:error-policy ,#'continue)  nil))
 
-    (let+ ((connector (apply #'make-instance 'in-pull-connector ; TODO(jmoringe): class
-                             (append common-args connector-args)))
+    (let+ ((connector    (apply #'make-instance 'in-pull-connector ; TODO(jmoringe): class
+                                (append common-args connector-args)))
+           (notification (make-wire-notification
+                          notification (length notification)))
            ((&flet do-it ()
               (rsb.ep:with-error-policy (connector)
                 (notification->event connector notification wire-schema)))))

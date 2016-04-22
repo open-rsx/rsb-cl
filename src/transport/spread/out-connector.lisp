@@ -51,4 +51,7 @@ this method is sending the notifications with restarts installed."
   (let+ (((&accessors-r/o (connection connector-connection)) connector)
          ((group-names . notifications) groups-and-notifications))
     (iter (for notification in notifications)
-          (send-message connection group-names (pb:pack* notification)))))
+          (let* ((buffer       (pb:pack* notification))
+                 (notification (make-wire-notification
+                                buffer (length buffer))))
+            (send-message connection group-names notification)))))

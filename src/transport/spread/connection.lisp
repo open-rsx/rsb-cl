@@ -167,21 +167,21 @@
       ;; messages should be fast and do not need sender and group
       ;; information.
       (with-spread-condition-translation
-          (values buffer
-                  (network.spread:receive-into
-                   %connection buffer
-                   :block?         block?
-                   :return-sender? :when-membership
-                   :return-groups? :when-membership)))))
+        (make-wire-notification
+         buffer (network.spread:receive-into
+                 %connection buffer
+                 :block?         block?
+                 :return-sender? :when-membership
+                 :return-groups? :when-membership)))))
 
   (defmethod send-message ((connection  connection)
                            (destination list)
-                           (payload     simple-array))
-    (check-type payload simple-octet-vector "a simple-octet-vector")
-
-    (with-spread-condition-translation
-      (network.spread:send-bytes
-       (connection-%connection connection) destination payload))))
+                           (payload     wire-notification))
+    (let+ (((&structure-r/o wire-notification- buffer end) payload))
+      (assert (= (length buffer) end))
+      (with-spread-condition-translation
+        (network.spread:send-bytes
+         (connection-%connection connection) destination buffer)))))
 
 (defmethod print-object ((object connection) stream)
   (print-unreadable-object (object stream :type t :identity t)
