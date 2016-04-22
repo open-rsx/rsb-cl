@@ -52,8 +52,3 @@
   (call-next-method)
   (stop-receiver connector)
   (setf (connector-%state connector) :inactive))
-
-(defmethod receive-messages :around ((connector in-push-connector))
-  ;; Create a thread-local scope->groups cache for this connector.
-  (let ((*scope->groups-cache* (make-scope->groups-cache)))
-    (call-next-method)))

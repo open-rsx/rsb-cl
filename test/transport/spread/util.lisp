@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Unit tests for utilities used in the spread backend.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,8 +8,6 @@
 
 (deftestsuite util-root (transport-spread-root)
   ()
-  (:setup
-   (clrhash *scope->groups-cache*))
   (:documentation
    "Test suite for the utility functions used in the spread
 backend."))
@@ -52,12 +50,13 @@ backend."))
           "Smoke test for the `scope->groups' function.")
   scope->groups/smoke
 
-  (ensure-cases (scope) '("/" "/foo" "/foo/bar")
-    (let ((result-1 (scope->groups (make-scope scope :intern? t)))
-          (result-2 (scope->groups (make-scope scope :intern? t)))
-          (result-3 (scope->groups (make-scope scope))))
-      (ensure-same result-1 result-2 :test #'eq)
-      (ensure-same result-1 result-3 :test #'equal))))
+  (let ((*scope->groups-cache* (make-scope->groups-cache)))
+    (ensure-cases (scope) '("/" "/foo" "/foo/bar")
+      (let ((result-1 (scope->groups (make-scope scope :intern? t)))
+            (result-2 (scope->groups (make-scope scope :intern? t)))
+            (result-3 (scope->groups (make-scope scope))))
+        (ensure-same result-1 result-2 :test #'eq)
+        (ensure-same result-1 result-3 :test #'equal)))))
 
 (addtest (util-root
           :documentation
@@ -65,9 +64,10 @@ backend."))
 `scope->groups'.")
   scope->groups/cache-flush
 
-  (iter (repeat (* 10 *scope->groups-cache-max-size*))
-        (ensure (<= (hash-table-count *scope->groups-cache*)
-                    *scope->groups-cache-max-size*))
-        (scope->groups (make-scope "/bla/bli/boo"))
-        (ensure (<= (hash-table-count *scope->groups-cache*)
-                    *scope->groups-cache-max-size*))))
+  (let ((*scope->groups-cache* (make-scope->groups-cache)))
+    (iter (repeat (* 10 *scope->groups-cache-max-size*))
+          (ensure (<= (hash-table-count *scope->groups-cache*)
+                      *scope->groups-cache-max-size*))
+          (scope->groups (make-scope "/bla/bli/boo"))
+          (ensure (<= (hash-table-count *scope->groups-cache*)
+                      *scope->groups-cache-max-size*)))))

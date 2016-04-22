@@ -28,10 +28,7 @@
 
 ;;; Scope -> spread group mapping
 
-(declaim (special *scope->groups-cache* *scope->group-cache-max-size*))
-
-(defvar *scope->groups-cache* (make-hash-table :test #'eq
-                                               :size 1024)
+(defvar *scope->groups-cache* nil
   "This cache maps `scope' instances to the corresponding spread
 groups. The variable is special so each thread can have its own
 cache.")
@@ -58,14 +55,12 @@ cache.")
 super-scopes."
   (map 'list #'scope->group (super-scopes scope :include-self? t)))
 
-(defun scope->groups (scope)
+(defun scope->groups (scope &optional (cache *scope->groups-cache*))
   "Like `scope->groups/no-cache', but caches results.
 The cache implementation only works efficiently, if SCOPE is
 interned."
-  (or (gethash scope *scope->groups-cache*)
+  (or (gethash scope cache)
       (progn
-        (when (>= (hash-table-count *scope->groups-cache*)
-                  *scope->groups-cache-max-size*)
-          (clrhash *scope->groups-cache*))
-        (setf (gethash scope *scope->groups-cache*)
-              (scope->groups/no-cache scope)))))
+        (when (>= (hash-table-count cache) *scope->groups-cache-max-size*)
+          (clrhash cache))
+        (setf (gethash scope cache) (scope->groups/no-cache scope)))))

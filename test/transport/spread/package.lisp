@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the transport.spread module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,6 +23,13 @@
    #:rsb.transport.test)
 
   (:import-from #:rsb.transport.spread
+   #:*scope->groups-cache*
+   #:*scope->groups-cache-max-size*
+   #:make-scope->groups-cache
+   #:scope->group
+   #:scope->groups/no-cache
+   #:scope->groups
+
    #:assembly-complete?
    #:assembly-concatenated-data
 
@@ -33,12 +40,6 @@
    #:pruning-assembly-pool
 
    #:event->notifications
-
-   #:*scope->groups-cache*
-   #:*scope->groups-cache-max-size*
-   #:scope->group
-   #:scope->groups/no-cache
-   #:scope->groups
 
    #:connection
 
