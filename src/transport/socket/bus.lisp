@@ -174,7 +174,8 @@ connected to the bus."))
 ;;; Sending and receiving
 
 (defmethod dispatch ((processor bus) (event notification))
-  ;; Dispatch outgoing notification EVENT to interested connectors.
+  ;; Dispatch incoming or outgoing notification EVENT to interested
+  ;; connectors.
   (let+ ((scope (make-scope
                  (bytes->string (notification-scope event))))
          ((&flet do-scope (connectors)
@@ -205,7 +206,7 @@ connected to the bus."))
              (handle connection notification))))
 
     ;; Dispatch to our own connectors.
-    (dispatch sink data)))
+    (dispatch sink notification)))
 
 ;;;
 
