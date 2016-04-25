@@ -167,12 +167,12 @@
       ;; messages should be fast and do not need sender and group
       ;; information.
       (with-spread-condition-translation
-        (make-wire-notification
-         buffer (network.spread:receive-into
-                 %connection buffer
-                 :block?         block?
-                 :return-sender? :when-membership
-                 :return-groups? :when-membership)))))
+        (when-let ((length (network.spread:receive-into
+                            %connection buffer
+                            :block?         block?
+                            :return-sender? :when-membership
+                            :return-groups? :when-membership)))
+          (make-wire-notification buffer length)))))
 
   (defmethod send-message ((connection  connection)
                            (destination list)
