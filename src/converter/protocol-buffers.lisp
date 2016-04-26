@@ -11,13 +11,20 @@
                           (wire-schema symbol))
   (when-let* ((descriptor (pb:find-descriptor wire-schema :error? nil))
               (class      (pb:descriptor-class descriptor :error? nil)))
-    (values converter (class-name class))))
+    (let ((classes (list (load-time-value (find-class 'simple-array)) class)))
+      (declare (dynamic-extent classes))
+      (when (c2mop:compute-applicable-methods-using-classes
+             #'pb:unpack classes)
+        (values converter (class-name class))))))
 
 (defmethod domain->wire? ((converter     (eql :protocol-buffer))
                           (domain-object standard-object))
-  (when (pb:message-descriptor domain-object)
-    (values
-     converter 'octet-vector (class-name (class-of domain-object)))))
+  (let* ((class   (class-of domain-object))
+         (classes (list class)))
+    (declare (dynamic-extent classes))
+    (when (c2mop:compute-applicable-methods-using-classes
+           #'pb:pack classes)
+      (values converter 'octet-vector (class-name class)))))
 
 (defmethod wire->domain ((converter   (eql :protocol-buffer))
                          (wire-data   simple-array)
