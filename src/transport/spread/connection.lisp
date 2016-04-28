@@ -79,7 +79,7 @@
                  ((&labels notify-and-remove (message-group members)
                     (log:debug "~@<~A got ~A notification for ~
                                 group ~S with members ~S.~@:>"
-                               context connection message-group members)
+                               connection context message-group members)
                     (when (and (string= message-group group :end2 31)
                                (funcall predicate members))
                       (hooks:remove-from-hook hook #'notify-and-remove)
