@@ -20,43 +20,43 @@
    "This class is intended to be used as a superclass of in-direction
 connector classes for Spread."))
 
-(defmethod notify ((connector in-connector)
-                   (scope     scope)
+(defmethod notify ((recipient in-connector)
+                   (subject   scope)
                    (action    (eql :attached)))
   (let+ (((&values ref-count group-count promise)
-          (ref-group (connector-connection connector) (scope->group scope)
+          (ref-group (connector-connection recipient) (scope->group subject)
                      :waitable? t)))
     ;; When this was the initial reference to the initial group of the
-    ;; connection, attach CONNECTOR.
+    ;; connection, attach RECIPIENT.
     (when (and (= ref-count 1) (= group-count 1))
-      (notify connector t :attached))
+      (notify recipient t :attached))
     ;; If necessary, wait for the Spread group joining operation to
     ;; complete.
     (lparallel:force promise)))
 
-(defmethod notify ((connector in-connector)
-                   (scope     scope)
+(defmethod notify ((recipient in-connector)
+                   (subject   scope)
                    (action    (eql :detached)))
   (let+ (((&values &ign group-count promise)
-          (unref-group (connector-connection connector) (scope->group scope)
+          (unref-group (connector-connection recipient) (scope->group subject)
                        :waitable? t)))
     ;; If necessary, wait for the Spread group leaving operation to
     ;; complete.
     (lparallel:force promise)
     ;; If this was the final reference to the final group of the
-    ;; connection, detach CONNECTOR.
+    ;; connection, detach RECIPIENT.
     (when (zerop group-count)
-      (notify connector t :detached))))
+      (notify recipient t :detached))))
 
-(defmethod notify ((connector in-connector)
-                   (scope     (eql t))
+(defmethod notify ((recipient in-connector)
+                   (subject   (eql t))
                    (action    (eql :detached)))
   (call-next-method)
-  (detach (connector-assembly-pool connector)))
+  (detach (connector-assembly-pool recipient)))
 
 (defmethod receive-notification ((connector in-connector)
                                  (block?    t))
-  ;; Delegate receiving a notification to the connection of CONNECTOR.
+  ;; Delegate receiving a notification to the connection of RECIPIENT.
   (values (receive-message (connector-connection connector) block?)
           :undetermined))
 

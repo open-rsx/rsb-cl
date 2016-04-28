@@ -36,19 +36,19 @@
       (exit-receiver)
       (call-next-method)))
 
-(defmethod notify ((connector in-push-connector)
-                   (scope     (eql t))
+(defmethod notify ((recipient in-push-connector)
+                   (subject   (eql t))
                    (action    (eql :attached)))
   ;; When attaching, start a receiver thread.
   (call-next-method)
-  (setf (connector-%state connector) :active)
-  (start-receiver connector))
+  (setf (connector-%state recipient) :active)
+  (start-receiver recipient))
 
-(defmethod notify ((connector in-push-connector)
+(defmethod notify ((recipient in-push-connector)
                    (scope     (eql t))
                    (action    (eql :detached)))
   ;; When detaching, join the receiver thread.
-  (setf (connector-%state connector) :shutdown)
+  (setf (connector-%state recipient) :shutdown)
   (call-next-method)
-  (stop-receiver connector)
-  (setf (connector-%state connector) :inactive))
+  (stop-receiver recipient)
+  (setf (connector-%state recipient) :inactive))

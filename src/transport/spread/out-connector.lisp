@@ -27,34 +27,32 @@
 
 (register-connector :spread :out 'out-connector)
 
-(defmethod notify ((connector out-connector)
-                   (scope     scope)
+(defmethod notify ((recipient out-connector)
+                   (subject   scope)
                    (action    (eql :detached)))
-  (notify connector t :detached))
+  (notify recipient t :detached))
 
-(defmethod handle ((connector out-connector) (event event))
-  (let+ (((&structure-r/o connector- (cache %scope->groups-cache)) connector)
-         (group-names   (scope->groups (event-scope event) cache))
-         (notifications (event->notification connector event)))
+(defmethod handle ((sink out-connector) (data event))
+  (let+ (((&structure-r/o connector- (cache %scope->groups-cache)) sink)
+         (group-names   (scope->groups (event-scope data) cache))
+         (notifications (event->notification sink data)))
     ;; Due to large events being fragmented into multiple
     ;; notifications, we obtain a list of notifications here.
-    (send-notification connector (cons group-names notifications))))
+    (send-notification sink (cons group-names notifications))))
 
-(defmethod event->notification ((connector out-connector)
-                                (event     event))
+(defmethod event->notification ((connector out-connector) (event event))
   ;; Delegate conversion to `event->notifications'. The primary
   ;; purpose of this method is performing the conversion with restarts
   ;; installed.
   (event->notifications
    connector event (connector-max-fragment-size connector)))
 
-(defmethod send-notification ((connector                out-connector)
-                              (groups-and-notifications cons))
+(defmethod send-notification ((connector out-connector) (notification cons))
   ;; Send each notification using `send-message'. The primary purpose
   ;; of this method is sending the notifications with restarts
   ;; installed.
   (let+ (((&accessors-r/o (connection connector-connection)) connector)
-         ((group-names . notifications) groups-and-notifications))
+         ((group-names . notifications) notification))
     (iter (for notification in notifications)
           (let* ((buffer       (pb:pack* notification))
                  (notification (make-wire-notification
