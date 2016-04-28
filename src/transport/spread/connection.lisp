@@ -41,7 +41,7 @@
                                         connection
                                         name)
   (unless (or name connection)
-    (missing-required-initarg 'connector :either-name-or-connection)))
+    (missing-required-initarg 'connection :either-name-or-connection)))
 
 (defmethod shared-initialize :before ((instance   connection)
                                       (slot-names t)
