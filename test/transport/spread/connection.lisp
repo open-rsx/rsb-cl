@@ -73,8 +73,8 @@
       (ensure-same (unref-group connection group) (values 0 0 t))
       (check-connection connection '())
 
-      ;; Invalid unreference should not break anything.
-      (unref-group connection group))))
+      ;; Invalid unreference should signal an error.
+      (ensure-condition error (unref-group connection group)))))
 
 (addtest (spread-connection-root
           :documentation
