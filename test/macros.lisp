@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Unit tests for macros.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,6 +11,14 @@
   ()
   (:documentation
    "Unit tests for macros provided by the cl-rsb system."))
+
+(addtest (macros-root
+          :documentation
+          "Test creating an anonymous participant using the
+           `with-participant' macro.")
+  with-participant/anonymous
+
+  (with-participant (nil :listener "/rsbtest/macros-root/with-participant/anonymous")))
 
 ;;; Test `with-participant' macro with `listener' and test
 ;;; `listener'-related macros

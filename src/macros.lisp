@@ -1,6 +1,6 @@
 ;;;; marcos.lisp --- Convenience marcos for RSB-related functionality.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,11 +22,17 @@
   "Execute BODY with VAR bound to the result of evaluating PARTICIPANT-FORM.
 
    Deactivate the participant when the execution of BODY ends normally
-   or because of a control transfer."
+   or because of a control transfer.
+
+   VAR can be NIL to indicate that BODY does not access the created
+   participant."
   (check-type var symbol)
-  `(flet ((with-participant-thunk (,var) ,@body))
-     (declare (dynamic-extent #'with-participant-thunk))
-     (call-with-active-participant ,participant-form #'with-participant-thunk)))
+  (let ((effective-var (or var (gensym (string '#:var)))))
+    `(flet ((with-participant-thunk (,effective-var)
+              ,@(unless var `((declare (ignore ,effective-var))))
+              ,@body))
+       (declare (dynamic-extent #'with-participant-thunk))
+       (call-with-active-participant ,participant-form #'with-participant-thunk))))
 
 (defmacro with-active-participants (bindings &body body)
   "Execute BODY with participant bindings according to BINDINGS.
@@ -37,7 +43,10 @@
 
    Deactivate all already constructed participants when constructing a
    participant causes a control transfer or when the execution of BODY
-   ends normally or because of a control transfer."
+   ends normally or because of a control transfer.
+
+   VAR can be NIL to indicate that BODY does not access the created
+   participant."
   (destructuring-bind (&optional first &rest rest) bindings
     (if first
         `(with-active-participant ,first
@@ -50,7 +59,10 @@
   "Execute BODY with VAR bound to the participant KIND, SCOPE, INITARGS.
 
    Deactivate the participant when the execution of BODY ends normally
-   or because of a control transfer."
+   or because of a control transfer.
+
+   VAR can be NIL to indicate that BODY does not access the created
+   participant."
   (check-type var symbol)
   `(with-active-participant (,var (make-participant ,kind ,scope ,@initargs))
      ,@body))
@@ -64,7 +76,10 @@
 
    Deactivate all already constructed participants when constructing a
    participant causes a control transfer or when the execution of BODY
-   ends normally or because of a control transfer."
+   ends normally or because of a control transfer.
+
+   VAR can be NIL to indicate that BODY does not access the created
+   participant."
   (destructuring-bind (&optional first &rest rest) bindings
     (if first
         `(with-participant ,first
