@@ -1,6 +1,6 @@
 ;;;; server.lisp --- A superclass for local and remote server classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,9 +38,9 @@
   (when transform-option-supplied?
     (check-type transform-option transform-specification)))
 
-(defmethod print-object ((object method1) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~S" (method-name object))))
+(defmethod print-items:print-items append ((object method1))
+  `((:num-children nil                   "")
+    (:name         ,(method-name object) " ~S")))
 
 ;;; `server' class
 

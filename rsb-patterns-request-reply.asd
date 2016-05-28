@@ -20,6 +20,7 @@
                 :iterate
                 (:version :let-plus                      "0.2")
                 :more-conditions
+                (:version :utilities.print-items         "0.1")
 
                 (:version :bordeaux-threads              "0.8.4")
                 :closer-mop
