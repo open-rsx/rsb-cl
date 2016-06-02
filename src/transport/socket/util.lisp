@@ -62,11 +62,13 @@ connections associated to CONNECTOR."
                 (terpri stream)
                 (force-output stream)))))
       (log:debug "~@<Writing port ~D to ~S.~@:>" port filename)
-      (switch (filename :test #'equal)
-        ("-"
+      (cond
+        ((equal filename "-")
          (print-it *standard-output*))
-        ("-2"
+        ((equal filename "-2")
          (print-it *error-output*))
+        ((starts-with-subseq "call:" filename) ; for unit tests
+         (funcall (read-from-string (subseq filename 5)) port))
         (t
          (with-output-to-file (stream filename :if-exists :supersede)
            (print-it stream)))))))

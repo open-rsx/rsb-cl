@@ -148,9 +148,9 @@ connection.")
 
 (addtest (transport-socket-bus-root
           :documentation
-          "Test automatically assigned ports and the portfile
-           option.")
-  server/automatic-port
+          "Test automatically assigned ports and the portfile option
+           using the -[2] syntax.")
+  server/automatic-port.1
 
   (let* ((host        "localhost")
          (port        0)
@@ -168,12 +168,11 @@ connection.")
     ;; should succeed unless the port is in use.
     (let+ (((&flet ensure-bus (connector stream-name)
               (let+ ((bus)
-                     ((&flet make-bus (stream)
-                        (progv (list stream-name) (list stream)
-                          (setf bus (transport-ensure-bus
-                                     transport host port :server! connector)))))
                      (port (with-output-to-string (stream)
-                             (make-bus stream))))
+                             (progv (list stream-name) (list stream)
+                               (setf bus (transport-ensure-bus
+                                          transport host port
+                                          :server! connector))))))
                 (values bus port))))
            ((&values bus-1 port-1)
             (ensure-bus connector-1 '*standard-output*))
@@ -182,5 +181,48 @@ connection.")
       ;; Make sure that both connectors got the same port via their
       ;; respective "portfile" outputs.
       (ensure-same port-1 port-2 :test #'string=)
+
+      (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil))))
+
+(defvar *port-promise*)
+
+(defun note-port (port)
+  (lparallel:fulfill *port-promise* port))
+
+(addtest (transport-socket-bus-root
+          :documentation
+          "Test automatically assigned ports and the portfile
+           option using the call:NAME syntax.")
+  server/automatic-port.2
+
+  (let* ((host        "localhost")
+         (port        0)
+         (transport   (service-provider:find-provider
+                       'rsb.transport:transport :socket))
+         (connector-1 (make-socket-connector
+                       'connector host port :server? t
+                       :portfile "call:rsb.transport.socket.test::note-port"))
+         (connector-2 (make-socket-connector
+                       'connector host port :server? t
+                       :portfile "call:rsb.transport.socket.test::note-port")))
+
+    ;; Create two connectors and request a bus server with automatic
+    ;; port assignment for each of them. The first request should
+    ;; cause the bus server to be created, while the second should
+    ;; just return the existing bus server. Creating a bus server
+    ;; should succeed unless the port is in use.
+    (let+ ((promise (lparallel:promise))
+           ((&flet ensure-bus (connector)
+              (values (let ((*port-promise* promise))
+                        (transport-ensure-bus
+                         transport host port :server! connector))
+                      (lparallel:force promise))))
+           ((&values bus-1 port-1)
+            (ensure-bus connector-1))
+           ((&values bus-2 port-2)
+            (ensure-bus connector-2)))
+      ;; Make sure that both connectors got the same port via their
+      ;; respective "portfile" outputs.
+      (ensure-same port-1 port-2 :test #'=)
 
       (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil))))
