@@ -15,7 +15,10 @@
    #:rsb)
 
   (:export
-   #:universal-builder-for-event-data))
+   #:universal-builder-for-event-data)
+
+  (:documentation
+   "This package contains builder support for scopes and events."))
 
 (cl:in-package #:rsb.builder)
 
