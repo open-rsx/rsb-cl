@@ -43,7 +43,7 @@
 
 (addtest (rsb-builder-root
           :documentation
-          "Smoke test for the `transport-options'.")
+          "Smoke test for \"unbuilding\" `scope' instances.")
   scope/smoke
 
   (check-un-build-calls
@@ -60,7 +60,7 @@
 
 (addtest (rsb-builder-root
           :documentation
-          "Smoke test for the `transport-options'.")
+          "Smoke test for the \"unbuilding\" `event' instances.")
   event/smoke
 
   (check-un-build-calls
