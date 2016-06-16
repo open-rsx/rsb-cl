@@ -95,6 +95,7 @@
    [2] See `architecture.builder-protocol.universal-builder' package."
   (let ((universal (make-instance 'architecture.builder-protocol.universal-builder:universal-builder)))
     (lambda (builder relation relation-args node)
+      (declare (ignore builder relation-args node))
       (if (eq relation :data)
           (values t nil nil nil universal)
           t))))
