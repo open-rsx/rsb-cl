@@ -13,9 +13,10 @@
   :version     (:read-file-form "version-string.sexp")
   :defsystem-depends-on ("rsb-version"
                          "cl-protobuf")
+  :depends-on  ("rsb-protocol-config")
 
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-                 :pathname   #.rsb-system:+protocol-directory+
+                 :pathname   data
                  :serial     t
                  :components ((:file       "EventId"
                                :pathname   "rsb/protocol/EventId")

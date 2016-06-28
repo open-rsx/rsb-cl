@@ -13,7 +13,9 @@
   :version     (:read-file-form "version-string.sexp")
   :defsystem-depends-on ("rsb-version"
                          "cl-protobuf")
-  :depends-on  ("utilities.print-items"
+  :depends-on  ("rsb-protocol-config"
+
+                "utilities.print-items"
                 (:version "uiop"                       "3") ; for portable platform information
 
                 (:version "rsb"                        (:read-file-form "version-string.sexp"))
@@ -21,7 +23,7 @@
                 (:version "rsb-patterns-request-reply" (:read-file-form "version-string.sexp")))
 
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-                 :pathname   #.rsb-system:+protocol-directory+
+                 :pathname   "data"
                  :components ((:file       "Hello"
                                :pathname   "rsb/protocol/introspection/Hello")
                               (:file       "Bye"
