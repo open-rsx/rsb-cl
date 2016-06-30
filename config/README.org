@@ -1,0 +1,111 @@
+#+TITLE: Design Overview for the rsb-config and rsb-version Systems
+
+* Overview
+  The goal is loading one or more of several systems that make up a
+  project. Two prototypical systems are:
+
+  + ~rsb~ :: "main" system, independent of concrete protocol.
+
+  + ~rsb-protocol~ :: Loads protocol buffer definitions into the image
+       (without writing Lisp code into files), thereby extending the
+       functionality of the "main" system.
+
+       Protocol buffer definitions (i.e. =.proto= files) are declared
+       as src_lisp[:exports code]{:components} using a suitable
+       ~component~ subclass.
+
+  Problems:
+
+  + For both systems, the system version should be of the form
+    =MAJOR.MINOR.NUMBER-OF-COMMITS-SINCE-RELEASE=. where =MAJOR= and
+    =MINOR= are maintained manually and
+    =NUMBER-OF-COMMITS-SINCE-RELEASE= is implied by the containing GIT
+    repository.
+
+  + For the ~rsb-protocol~ system, the =.proto= files are installed
+    somwhere in the filesystem by some other project and thus neither
+    contained in the repository (not even as a submodule or subtree)
+    nor located in a subdirectory of the system's directory. Since
+    ASDF does not allow src_lisp[:exports code]{:components} located
+    outside the system's directory, the =.proto= files have to be
+    copied into the system's directory before the ~rsb-protocol~
+    system can be loaded.
+
+  + Of course, any relevant change such as a manual change of the
+    =MAJOR= or =MINOR= version components or a commit or a change in a
+    =.proto= file should cause the appropriate actions when a system
+    is loaded or reloaded.
+
+* Solution
+
+  + Manually maintain =MAJOR= and =MINOR= version components in a file
+    =version.sexp=
+
+  + Introduce auxiliary systems:
+
+    + ~rsb-config~ :: Contains code to interact with GIT and utilities
+         for copying files.
+
+    + ~rsb-version~ :: When compiled, combines manually specified
+         =MAJOR= and =MINOR= information (read from =version.sexp=)
+         with =NUMBER-OF-COMMITS-SINCE-RELEASE= which is obtained from
+         GIT by running code from the ~rsb-config~ system.
+
+    + ~rsb-protocol-config~ :: When compiled, copies =.proto= files to
+         the directory of the ~rsb-protocol~ system.
+
+  The following diagram summarizes these relations:
+  #+BEGIN_SRC dot :file "dependencies.png" :export results
+  digraph {
+    version_sexp [label="version.sexp\ne.g. 0 15", shape=box]
+    // version_details_sexp [label="version-details.sexp", shape=box]
+    version_string_sexp [label="version-string.sexp\ne.g. \"0.15.37\"", shape=box]
+    git_index [label=".git/index", shape=box]
+
+    prefix_notification_proto [label="$prefix/…/Notification.proto", shape=box]
+    workspace_notification_proto [label="$workspace/data/…/Notification.proto", shape=box]
+
+    rsb_config [label="rsb-config"]
+    rsb_version [label="rsb-version"]
+    rsb_protocol_config [label="rsb-protocol-config"]
+
+    rsb
+    rsb_protocol [label="rsb-protocol"]
+
+    version_sexp -> rsb_version [color="blue", label="input\nreads"]
+    git_index -> rsb_version [color="blue", label="input"]
+
+    rsb_config -> rsb_version [label="depends-on", arrowhead=none, arrowtail=normal, dir=both]
+
+    // rsb_version -> version_details_sexp [color="blue", label="output\nwrites"]
+    rsb_version -> version_string_sexp [color="blue", label="output\nwrites"]
+
+    rsb_config -> rsb_protocol_config [label="depends-on", arrowhead=none, arrowtail=normal, dir=both]
+    prefix_notification_proto -> rsb_protocol_config [color="blue", label="input\ncopies from"]
+    rsb_protocol_config -> workspace_notification_proto [color="blue", label="output\ncopies to"]
+
+    rsb_version -> rsb [style=dashed, label="defsystem-depends-on", arrowhead=none, arrowtail=normal, dir=both]
+    version_string_sexp -> rsb [style=dashed, color="blue", label="defsystem-reads"]
+
+    rsb_version -> rsb_protocol [style=dashed, label="defsystem-depends-on", arrowhead=none, arrowtail=normal, dir=both]
+    version_string_sexp -> rsb_protocol [style=dashed, color="blue", label="defsystem-reads"]
+    rsb -> rsb_protocol [label="depends-on", arrowhead=none, arrowtail=normal, dir=both]
+    rsb_protocol_config -> rsb_protocol [label="depends-on", arrowhead=none, arrowtail=normal, dir=both]
+    workspace_notification_proto -> rsb_protocol [color="red", label="input\nreads"]
+  }
+  #+END_SRC
+
+  #+RESULTS:
+  [[file:dependencies.png]]
+
+  + =defsystem-reads= is an abbreviation for
+    src_lisp[:exports code]{(:version (:read-file-form "version-string.sexp"))}
+  + Solid blue arrows indicate src_lisp[:exports code]{compile-op}
+    inputs and outputs
+  + Solid red arrows indicate src_lisp[:exports code]{load-op} inputs
+
+* settings                                                         :noexport:
+  #+STARTUP: content
+  #+STARTUP: hideblocks
+
+  #+OPTIONS H:3
