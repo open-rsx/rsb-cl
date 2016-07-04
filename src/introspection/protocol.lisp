@@ -99,7 +99,7 @@
 ;; Default behavior
 
 (defmethod introspection-participants/roots ((container t))
-  (remove container (introspection-participants container)
+  (remove container (introspection-participants container) ; TODO this is super slow
           :test-not #'eq :key #'node-parent))
 
 ;;; Process table protocol

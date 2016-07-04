@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixins for introspection-related classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,21 +36,34 @@
 ;;; `participant-table-mixin'
 
 (defclass participant-table-mixin ()
-  ((participants :type     hash-table
+  ((participants/by-id :type     hash-table
                  :accessor introspection-%participants
                  :initform (make-hash-table :test #'equalp)
                  :documentation
                  "Stores a mapping of participant ids to
-                  `participant-info' instances."))
+                  `participant-info' instances.")
+   (participants/list :type list
+                      :accessor introspection-%participants/list
+                      :initform nil)
+   (participants/roots :type list
+                       :accessor introspection-%participants/roots
+                       :initform '()))
   (:documentation
    "This mixin class adds a table of `participant-info' instances
     indexed by id."))
 
 (defmethod print-items:print-items append ((object participant-table-mixin))
-  `((:num-participants ,(length (introspection-participants object)) " (~D)")))
+  (let ((count (hash-table-count (introspection-%participants object))))
+    `((:num-participants ,count " (~D)"))))
 
 (defmethod introspection-participants ((container participant-table-mixin))
-  (hash-table-values (introspection-%participants container)))
+  (let+ (((&structure introspection- %participants %participants/list)
+          container))
+    (or %participants/list
+        (setf %participants/list (hash-table-values %participants)))))
+
+(defmethod introspection-participants/roots ((container participant-table-mixin))
+  (introspection-%participants/roots container))
 
 (defmethod (setf introspection-participants) ((new-value sequence)
                                               (container participant-table-mixin))
@@ -78,9 +91,13 @@
                                     &key
                                     parent-id
                                     if-does-not-exist)
-  (declare (ignore parent-id if-does-not-exist))
+  (declare (ignore if-does-not-exist))
   (let+ (((&structure-r/o introspection- %participants) container)
          (key (uuid:uuid-to-byte-array id)))
+    (unless parent-id
+      (push new-value (introspection-%participants/roots container)))
+    (when (introspection-%participants/list container)
+      (setf (introspection-%participants/list container) nil))
     (setf (gethash key %participants) new-value)))
 
 (defmethod (setf find-participant) ((new-value (eql nil))
@@ -92,15 +109,18 @@
   (declare (ignore parent-id))
   (let+ (((&structure-r/o introspection- %participants) container)
          (key (uuid:uuid-to-byte-array id)))
-    (if (gethash key %participants)
-        (remhash key %participants)
-        (error-behavior-restart-case
-            (if-does-not-exist
-             (simple-error ; TODO condition
-              :format-control   "~@<Cannot remove unknown participant ~
+    (when-let ((value (gethash key %participants)))
+      (remhash key %participants)
+      (removef (introspection-%participants/roots container) value :count 1)
+      (setf (introspection-%participants/list container) nil)
+      (return-from find-participant))
+    (error-behavior-restart-case
+        (if-does-not-exist
+         (simple-error ; TODO condition
+          :format-control   "~@<Cannot remove unknown participant ~
                                  with id ~A~@:>"
-              :format-arguments (list id))
-             :warning-condition simple-warning)))))
+          :format-arguments (list id))
+         :warning-condition simple-warning))))
 
 (defmethod ensure-participant ((id          uuid:uuid)
                                (container   participant-table-mixin)
