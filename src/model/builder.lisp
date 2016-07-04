@@ -121,8 +121,8 @@
 ;;; Traverses tree from children to parents and only included basic
 ;;; information in each node.
 
-(defmethod node-relations ((builder (eql :reverse))
-                           (node    node))
+(defmethod node-relations :around ((builder (eql :reverse))
+                                   (node    node))
   (when-let ((parent (node-parent node)))
     '((:parent . 1))))
 
