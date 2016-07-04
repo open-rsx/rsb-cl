@@ -48,7 +48,8 @@
         `(:id ,id))
     ,@(when-let ((origin (event-origin node)))
         `(:origin ,origin))
-    :method ,(event-method node)))
+    ,@(when-let ((method (event-method node)))
+        `(:method ,method))))
 
 (defmethod node-relations ((builder t) (node event))
   '((:meta-data . (:map . :key))

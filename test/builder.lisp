@@ -69,7 +69,8 @@
    t '(or number string
           uuid:uuid local-time:timestamp
           puri:uri scope)
-   `(,(let* ((scope  (make-scope "/foo"))
+   `(;; Almost maximal event.
+     ,(let* ((scope  (make-scope "/foo"))
              (create (local-time:now))
              (event  (make-event scope "baz"
                                  :method            :|request|
@@ -85,7 +86,19 @@
                           (:scope ,scope :method :|request|))
                   (:peek  :meta-data (:key :foo)    "bar")
                   (:peek  :timestamp (:key :create) ,create)
-                  (:peek  :data      ()             "baz")))))))
+                  (:peek  :data      ()             "baz"))))
+
+     ;; Minimal event, in particular without method.
+     ,(let* ((scope  (make-scope "/foo"))
+             (event  (make-event scope "baz" :create-timestamp? nil)))
+         `(,event ((:peek  nil   () ,event)
+                   (:visit nil   () ,event rsb:event
+                           ((:meta-data . (:map . :key))
+                            (:timestamp . (:map . :key))
+                            (:cause     . *)
+                            (:data      . 1))
+                           (:scope ,scope))
+                   (:peek  :data  ()             "baz")))))))
 
 (defclass mock-payload ()
   ((slot :initarg  :slot
