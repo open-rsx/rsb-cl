@@ -15,7 +15,6 @@
 ;; Default behavior
 
 (defmethod matches? ((filter function) (event t))
-  "Apply FILTER to EVENT."
   (funcall filter event))
 
 ;;; Payload matching protocol
@@ -66,21 +65,19 @@
                     &key &allow-other-keys)
   (:documentation
    "Construct and return a filter instance according to SPEC and
-ARGS. SPEC is either a keyword designating a filter class or a list of
-the form
+    ARGS. SPEC is either a keyword designating a filter class or a
+    list of the form
 
-  (CLASS (CHILDSPEC1) (CHILDSPEC2) ...)
+      (CLASS (CHILDSPEC1) (CHILDSPEC2) ...)
 
-where CLASS designates a filter class and CHILDSPECN is of the same
-form as SPEC. When this second form is used, CLASS has to designate a
-composite filter class for which will `make-instance' will be called
-with initargs consisting of ARGS and an additional :children
-initarg. The value of this initarg is computed by recursively applying
-`filter' to each CHILDSPECN."))
+    where CLASS designates a filter class and CHILDSPECN is of the
+    same form as SPEC. When this second form is used, CLASS has to
+    designate a composite filter class for which will `make-instance'
+    will be called with initargs consisting of ARGS and an additional
+    :children initarg. The value of this initarg is computed by
+    recursively applying `filter' to each CHILDSPECN."))
 
-(defmethod filter ((spec symbol)
-                   &rest args
-                   &key)
+(defmethod filter ((spec symbol) &rest args &key)
   (handler-bind
       ((error (lambda (condition)
                 (error 'filter-construction-error
@@ -88,9 +85,7 @@ initarg. The value of this initarg is computed by recursively applying
                        :cause condition))))
     (apply #'make-filter spec args)))
 
-(defmethod filter ((spec list)
-                   &rest args
-                   &key)
+(defmethod filter ((spec list) &rest args &key)
   (let+ (((class &rest child-specs) spec)
          (children (map 'list (curry  #'apply #'filter) child-specs)))
     (apply #'filter class :children children args)))
