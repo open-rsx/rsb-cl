@@ -93,26 +93,21 @@
   (:function
    (make-id (source)
      (uuid:make-uuid-from-string source)))
-  (:function
-   (check-print (thing)
-     (ensure
-      (funcall
-       (conjoin #'stringp (complement #'emptyp))
-       (with-output-to-string (stream)
-         (print-object thing stream))))))
-  (:function
-   (check-event (event scope data)
-     (ensure
-      (typep (event-id event) '(or null uuid:uuid)))
-     (ensure-same
-      (event-scope event) (make-scope scope)
-      :test #'scope=)
-     (ensure-same
-      (event-data event) data
-      :test #'equalp)))
   (:timeout 20)
   (:documentation
    "Root unit test suite of the cl-rsb system."))
+
+;;; Tests Utilities
+
+(defun check-print (thing)
+  (ensure (funcall (conjoin #'stringp (complement #'emptyp))
+                   (with-output-to-string (stream)
+                     (print-object thing stream)))))
+
+(defun check-event (event scope data)
+  (ensure (typep (event-id event) '(or null uuid:uuid)))
+  (ensure-same (event-scope event) (make-scope scope) :test #'scope=)
+  (ensure-same (event-data event) data :test #'equalp))
 
 ;;; Tools related to events
 
