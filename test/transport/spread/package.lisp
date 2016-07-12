@@ -23,6 +23,8 @@
    #:rsb.transport.test)
 
   (:import-from #:rsb.transport.spread
+   #:normalize-daemon-endpoint
+
    #:*scope->groups-cache*
    #:*scope->groups-cache-max-size*
    #:make-scope->groups-cache

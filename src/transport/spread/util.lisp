@@ -20,9 +20,12 @@
    Exactly one of NAME and PORT has to be non-nil."
   (let+ (((&values host port)
           (cond
-            (name            (network.spread:parse-daemon-name name))
-            ((and host port) (values host port))
-            (port            (values nil  port))))
+            (name (network.spread:parse-daemon-name name))
+            (port (values host port))
+            (t    (missing-required-argument :name-or-port))))
+         (port (if (stringp port)
+                   (parse-integer port)
+                   port))
          (name (format nil "~D~@[@~A~]" port host)))
     (values name host port)))
 

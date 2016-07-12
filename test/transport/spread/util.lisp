@@ -14,6 +14,26 @@ backend."))
 
 (addtest (util-root
           :documentation
+          "Smoke test for the `normalize-daemon-endpoint' function.")
+  normalize-daemon-endpoint/smoke
+
+  (ensure-cases (name host port
+                 expected-name &optional expected-host expected-port)
+      '((nil         nil    nil  missing-required-argument)
+        ("4803@host" nil    nil  "4803@host" "host" 4803)
+        (nil         "host" 4803 "4803@host" "host" 4803)
+        (nil         nil    4803 "4803"      nil    4803))
+    (case expected-name
+      (missing-required-argument
+       (ensure-condition missing-required-argument
+         (normalize-daemon-endpoint name host port)))
+      (t
+       (ensure-same (normalize-daemon-endpoint name host port)
+                    (values expected-name expected-host expected-port)
+                    :test #'equal)))))
+
+(addtest (util-root
+          :documentation
           "Smoke test for the `scope->group' function.")
   scope->group/smoke
 
