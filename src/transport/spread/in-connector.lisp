@@ -69,7 +69,7 @@ connector classes for Spread."))
          (expose-payload-size? (connector-expose? connector :rsb.transport.payload-size))
          notification)
 
-    ;; Try to unpack NOTIFICATION into a `notification'
+    ;; Try to unpack NOTIFICATION into a `fragmented-notification'
     ;; instance. Signal `decoding-error' if that fails.
     (handler-bind
         ((error (lambda (condition)
@@ -84,18 +84,19 @@ connector classes for Spread."))
                           buffer (make-instance 'fragmented-notification)
                           0 end)))
 
-    ;; If NOTIFICATION could be unpacked into a `notification' instance,
-    ;; try to convert it, and especially its payload, into an `event'
-    ;; instance and an event payload. There are three possible
-    ;; outcomes:
-    ;; 1. The notification (maybe in conjunction with previously
-    ;;    received notifications) forms a complete event
-    ;;    a) The payload conversion succeeds
-    ;;       In this case, an `event' instance is returned
-    ;;    b) The payload conversion fails
-    ;;       In this case, an error is signaled
-    ;; 2. The notification does not form a complete event
-    ;;    In this case, nil is returned.
+    ;; After unpacking, there are two possible cases:
+    ;; 1. NOTIFICATION (maybe in conjunction with previously received
+    ;;    notifications) forms a complete event
+    ;; 2. NOTIFICATION does not form a complete event. In this case,
+    ;;    return `nil'.
+    (setf notification (or (assemble-notification assembly-pool notification)
+                           (return-from notification->event nil)))
+
+    ;; Convert the `notification' instance NOTIFICATION, and its
+    ;; payload, into an `event' instance.
+    ;; * If the payload conversion succeeds, return the `event'
+    ;;   instance.
+    ;; * If the payload conversion fails, signal an appropriate error.
     (handler-bind
         ((error (lambda (condition)
                   (error 'decoding-error
@@ -107,6 +108,6 @@ connector classes for Spread."))
                          :format-arguments `(,(with-output-to-string (stream)
                                                 (describe notification stream)))
                          :cause            condition))))
-      (notification->event* assembly-pool converter notification
-                            :expose-wire-schema?  expose-wire-schema?
-                            :expose-payload-size? expose-payload-size?))))
+      (one-notification->event converter notification (notification-data notification)
+                               :expose-wire-schema?  expose-wire-schema?
+                               :expose-payload-size? expose-payload-size?))))

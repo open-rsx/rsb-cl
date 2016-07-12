@@ -1,6 +1,6 @@
 ;;;; conversion.lisp --- Event <-> notification conversion for Spread transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,45 +8,33 @@
 
 ;;; Notification -> Event
 
-(defun notification->event* (pool converter notification
-                             &key
-                             expose-wire-schema?
-                             expose-payload-size?)
-  "Try to convert NOTIFICATION into an event. This may not be possible
-in a single step since NOTIFICATION can be a part of an event that has
-been fragmented into multiple notifications."
-  (if (<= (fragmented-notification-num-data-parts notification) 1)
+(defun assemble-notification (pool notification)
+  "Maybe assemble the `fragmented-notification' NOTIFICATION using POLL.
 
+   Return assembled `notification' instance or `nil'."
+  (declare (type fragmented-notification notification))
+  (if (<= (fragmented-notification-num-data-parts notification) 1)
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
-      (one-notification->event
-       converter
-       (fragmented-notification-notification notification)
-       :expose-wire-schema?  expose-wire-schema?
-       :expose-payload-size? expose-payload-size?)
-
+      (fragmented-notification-notification notification)
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
       ;; notification. `merge-fragment' returns nil until all
       ;; fragments have arrived.
       (when-let ((assembly (merge-fragment pool notification)))
-        (one-notification->event
-         converter
-         (fragmented-notification-notification
-          (aref (assembly-fragments assembly) 0))
-         :data                (assembly-concatenated-data assembly)
-         :expose-wire-schema?  expose-wire-schema?
-         :expose-payload-size? expose-payload-size?))))
+        (let ((notification (fragmented-notification-notification
+                             (aref (assembly-fragments assembly) 0)))
+              (data         (assembly-concatenated-data assembly)))
+          (setf (notification-data notification) data)
+          notification))))
 
-(defun one-notification->event (converter notification
+(defun one-notification->event (converter notification data
                                 &key
-                                data
                                 expose-wire-schema?
                                 expose-payload-size?)
-  "Convert NOTIFICATION to an `event' instance using CONVERTER for the
-payload. Return the decoded event. The optional parameter DATA can be
-used to supply encoded data that should be used instead of the data
-contained in NOTIFICATION."
+  "Convert NOTIFICATION to an `event' using CONVERTER for DATA.
+
+   Return the decoded event."
   (let+ (((&flet event-id->cons (event-id)
             (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
                   (event-id-sequence-number event-id))))
@@ -55,16 +43,16 @@ contained in NOTIFICATION."
            (event-id    notification-event-id)
            (method      notification-method)
            (wire-schema notification-wire-schema)
-           (payload     notification-data)
            (meta-data   notification-meta-data)
-           (causes      notification-causes)) notification)
+           (causes      notification-causes))
+          notification)
          ((&accessors-r/o
            (sender-id       event-id-sender-id)
-           (sequence-number event-id-sequence-number)) event-id)
+           (sequence-number event-id-sequence-number))
+          event-id)
          (wire-schema (bytes->wire-schema wire-schema))
          (data*       (rsb.converter:wire->domain
-                       converter (or data payload)
-                       wire-schema))
+                       converter data wire-schema))
          (event       (make-instance
                        'rsb:event
                        :origin            (uuid:byte-array-to-uuid sender-id)
@@ -101,11 +89,9 @@ contained in NOTIFICATION."
 
     ;; When requested, store transport metrics as meta-data items.
     (when expose-wire-schema?
-      (setf (rsb:meta-data event :rsb.transport.wire-schema)
-            wire-schema))
+      (setf (rsb:meta-data event :rsb.transport.wire-schema) wire-schema))
     (when expose-payload-size?
-      (setf (rsb:meta-data event :rsb.transport.payload-size)
-            (length (or data payload))))
+      (setf (rsb:meta-data event :rsb.transport.payload-size) (length data)))
 
     event))
 
