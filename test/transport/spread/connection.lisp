@@ -112,3 +112,25 @@
         (loop :until (lparallel:fulfilledp promise)
               :do (receive-message connection nil)))
       (check-connection connection '()))))
+
+(addtest (spread-connection-root
+          :documentation
+          "Roundtrip test for `connenction' class.")
+  roundtrip
+
+  (let ((group "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
+    (with-connection (sender :port spread-port)
+      (with-connection (receiver :port spread-port)
+        ;; Join group and wait until it's done.
+        (lparallel:force (ref-group receiver group :waitable? t))
+        ;; Then send, receive and verify a message.
+        (ensure-cases (payload-size)
+            '(3 1000 100000)
+          (let* ((payload      (octetify (make-string payload-size
+                                                      :initial-element #\b)))
+                 (notification (make-wire-notification payload (length payload))))
+            (send-message sender (list group) notification)
+            (let* ((incoming (receive-message receiver t))
+                   (incoming (subseq (wire-notification-buffer incoming)
+                                     0 (wire-notification-end incoming))))
+              (ensure-same incoming payload :test #'equalp))))))))
