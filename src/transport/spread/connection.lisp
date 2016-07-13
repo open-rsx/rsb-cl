@@ -62,10 +62,12 @@
           (network.spread:connect name))))
 
 (defmethod connection-name ((connection connection))
-  (network.spread:connection-name (connection-%connection connection)))
+  (when (slot-boundp connection 'connection)
+    (network.spread:connection-name (connection-%connection connection))))
 
 (defmethod connection-daemon-name ((connection connection))
-  (network.spread:connection-daemon-name (connection-%connection connection)))
+  (when (slot-boundp connection 'connection)
+    (network.spread:connection-daemon-name (connection-%connection connection))))
 
 (defmethod connection-groups ((connection connection))
   (hash-table-keys (connection-%groups connection)))
