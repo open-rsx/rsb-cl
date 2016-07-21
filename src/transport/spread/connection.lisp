@@ -148,7 +148,7 @@
 (macrolet
     ((with-spread-condition-translation (&body body)
        `(handler-bind
-            ((network.spread:spread-error
+            ((network.spread:spread-client-error
               (lambda (condition)
                 (when (member (network.spread:spread-error-code condition)
                               '(:net-error-on-session :connection-closed))
