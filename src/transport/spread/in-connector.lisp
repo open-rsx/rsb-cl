@@ -82,15 +82,15 @@ connector classes for Spread."))
                          :cause            condition))))
       (setf notification (pb:unpack
                           buffer (make-instance 'fragmented-notification)
-                          0 end)))
+                          0 end))
 
-    ;; After unpacking, there are two possible cases:
-    ;; 1. NOTIFICATION (maybe in conjunction with previously received
-    ;;    notifications) forms a complete event
-    ;; 2. NOTIFICATION does not form a complete event. In this case,
-    ;;    return `nil'.
-    (setf notification (or (assemble-notification assembly-pool notification)
-                           (return-from notification->event nil)))
+      ;; After unpacking, there are two possible cases:
+      ;; 1. NOTIFICATION (maybe in conjunction with previously
+      ;; received notifications) forms a complete event
+      ;; 2. NOTIFICATION does not form a complete event. In this case,
+      ;; return `nil'.
+      (setf notification (or (assemble-notification assembly-pool notification)
+                             (return-from notification->event nil))))
 
     ;; Convert the `notification' instance NOTIFICATION, and its
     ;; payload, into an `event' instance.
