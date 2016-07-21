@@ -132,7 +132,9 @@
 (defclass out-connector (error-handling-sender-mixin
                          restart-handler-mixin
                          connector)
-  ()
+  ((scope-sinks :accessor connector-%scope-sinks
+                :documentation
+                "Caches the sink trie of the associated transport."))
   (:metaclass connector-class)
   (:direction :out)
   (:documentation
@@ -141,14 +143,22 @@
 
 (register-connector :inprocess :out 'out-connector)
 
+(defmethod shared-initialize :after
+    ((instance   out-connector)
+     (slot-names t)
+     &key
+     ((%transport transport) nil transport-supplied?))
+  (when transport-supplied?
+    (setf (connector-%scope-sinks instance)
+          (transport-scope-sinks transport))))
+
 (defmethod handle :before ((connector out-connector)
                            (event     event))
   (setf (timestamp event :send) (local-time:now)))
 
 (defmethod handle ((connector out-connector) (event event))
-  (let+ (((&structure-r/o transport- scope-sinks)
-          (connector-transport connector))
-         ((&flet do-scope (connectors)
-            (handle connectors event))))
+  (flet ((do-scope (connectors)
+           (handle connectors event)))
     (declare (dynamic-extent #'do-scope))
-    (rsb.ep:scope-trie-map #'do-scope (event-scope event) scope-sinks)))
+    (rsb.ep:scope-trie-map #'do-scope (event-scope event)
+                           (connector-%scope-sinks connector))))
