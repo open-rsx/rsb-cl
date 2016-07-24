@@ -1,10 +1,73 @@
 ;;;; conversion.lisp --- Event <-> notification conversion for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
+
+;;; Utility functions
+
+(defun timestamp->unix-microseconds (timestamp)
+  "Convert the `local-time:timestamp' instance TIMESTAMP into an
+integer which counts the number of microseconds since UNIX epoch."
+  (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
+     (* 1       (local-time:timestamp-microsecond timestamp))))
+
+(defun unix-microseconds->timestamp (unix-microseconds)
+  "Convert UNIX-MICROSECONDS to an instance of
+`local-time:timestamp'."
+  (let+ (((&values unix-seconds microseconds)
+          (floor unix-microseconds 1000000)))
+    (local-time:unix-to-timestamp
+     unix-seconds :nsec (* 1000 microseconds))))
+
+(declaim (inline string->bytes bytes->string))
+
+(defun string->bytes (string)
+  "Converter STRING into an octet-vector."
+  (declare (notinline string->bytes))
+  (if (stringp string)
+      (sb-ext:string-to-octets string :external-format :ascii)
+      (string->bytes (princ-to-string string))))
+
+(defun bytes->string (bytes)
+  "Convert BYTES into a string."
+  (sb-ext:octets-to-string bytes :external-format :ascii))
+
+(defvar *keyword-readtable*
+  (let ((readtable (copy-readtable nil)))
+    (setf (readtable-case readtable) :invert)
+    readtable)
+  "This readtable is used to print and read keywords. The goal is to
+get a natural mapping between Lisp keywords and corresponding strings
+for most cases.")
+
+(defun keyword->bytes (keyword)
+  "Convert the name of KEYWORD into an octet-vector."
+  (if (find #\: (symbol-name keyword))
+      (string->bytes (symbol-name keyword))
+      (let ((*readtable* *keyword-readtable*))
+        (string->bytes (princ-to-string keyword)))))
+
+(defun bytes->keyword (bytes)
+  "Converter BYTES into a keyword."
+  (if (find (char-code #\:) bytes)
+      (intern (bytes->string bytes) (find-package :keyword))
+      (let ((*package*   (find-package :keyword))
+            (*readtable* *keyword-readtable*))
+        (read-from-string (bytes->string bytes)))))
+
+(defun wire-schema->bytes (wire-schema)
+  "Convert WIRE-SCHEMA to an ASCII representation stored in an
+octet-vector."
+  (keyword->bytes wire-schema))
+
+(defun bytes->wire-schema (bytes)
+  "Return a keyword representing the wire-schema encoded in bytes."
+  (when (emptyp bytes)
+    (error "~@<Empty wire-schema.~:@>"))
+  (bytes->keyword bytes))
 
 ;;; Notification -> Event
 
@@ -98,16 +161,6 @@ into one notification."
                        wire-schema wire-data
                        meta-data timestamps causes)))
 
-;;; Utility functions
-
-(defvar *keyword-readtable*
-  (let ((readtable (copy-readtable nil)))
-    (setf (readtable-case readtable) :invert)
-    readtable)
-  "This readtable is used to print and read keywords. The goal is to
-get a natural mapping between Lisp keywords and corresponding strings
-for most cases.")
-
 (defun make-notification (sequence-number origin scope method
                           wire-schema data
                           meta-data timestamps causes)
@@ -171,56 +224,3 @@ and CAUSES."
 
     ;; Return the complete notification instance.
     notification))
-
-(defun timestamp->unix-microseconds (timestamp)
-  "Convert the `local-time:timestamp' instance TIMESTAMP into an
-integer which counts the number of microseconds since UNIX epoch."
-  (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
-     (* 1       (local-time:timestamp-microsecond timestamp))))
-
-(defun unix-microseconds->timestamp (unix-microseconds)
-  "Convert UNIX-MICROSECONDS to an instance of
-`local-time:timestamp'."
-  (let+ (((&values unix-seconds microseconds)
-          (floor unix-microseconds 1000000)))
-   (local-time:unix-to-timestamp
-    unix-seconds :nsec (* 1000 microseconds))))
-
-(declaim (inline string->bytes bytes->string))
-
-(defun string->bytes (string)
-  "Converter STRING into an octet-vector."
-  (declare (notinline string->bytes))
-  (if (stringp string)
-      (sb-ext:string-to-octets string :external-format :ascii)
-      (string->bytes (princ-to-string string))))
-
-(defun bytes->string (bytes)
-  "Convert BYTES into a string."
-  (sb-ext:octets-to-string bytes :external-format :ascii))
-
-(defun keyword->bytes (keyword)
-  "Convert the name of KEYWORD into an octet-vector."
-  (if (find #\: (symbol-name keyword))
-      (string->bytes (symbol-name keyword))
-      (let ((*readtable* *keyword-readtable*))
-        (string->bytes (princ-to-string keyword)))))
-
-(defun bytes->keyword (bytes)
-  "Converter BYTES into a keyword."
-  (if (find (char-code #\:) bytes)
-      (intern (bytes->string bytes) (find-package :keyword))
-      (let ((*package*   (find-package :keyword))
-            (*readtable* *keyword-readtable*))
-        (read-from-string (bytes->string bytes)))))
-
-(defun wire-schema->bytes (wire-schema)
-  "Convert WIRE-SCHEMA to an ASCII representation stored in an
-octet-vector."
-  (keyword->bytes wire-schema))
-
-(defun bytes->wire-schema (bytes)
-  "Return a keyword representing the wire-schema encoded in bytes."
-  (when (emptyp bytes)
-    (error "~@<Empty wire-schema.~:@>"))
-  (bytes->keyword bytes))
