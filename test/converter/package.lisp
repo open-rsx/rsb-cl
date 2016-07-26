@@ -71,7 +71,7 @@
              ((eq domain-object :not-applicable)
               (ensure-null (do-it)))
              (t
-              `(if simple?
+              ,(if simple?
                    `(ensure-same (do-it) converter :ignore-multiple-values? t)
                    `(ensure (do-it))))))))
 
