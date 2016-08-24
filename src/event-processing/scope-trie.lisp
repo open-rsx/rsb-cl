@@ -33,10 +33,14 @@
 ;;;                    │ edges ●──┼────▶│ scope-node-edges │
 ;;;                    └──────────┘     └──────────────────┘
 ;;;
-;;; The state is separate from the node to allow compare-and-swapping
-;;; the value and edges simultaneously. `scope-node-edges' is an
-;;; abstract data structure mapping scope components to child nodes of
-;;; the node.
+;;; The state is separate from the node to allow atomically
+;;; compare-and-swapping the value and edges
+;;; simultaneously.
+;;;
+;;; `scope-node-edges' is an abstract data structure mapping scope
+;;; components to child nodes of the node. Dynamic switchover between
+;;; multiple implementations can be used to implement different usage
+;;; patterns efficiently w.r.t. computation time and memory use.
 
 (deftype scope-node-edges ()
   `list)
@@ -104,8 +108,8 @@
 ;; corresponding to the full path COMPONENTS.
 (defun scope-trie-%map (function components trie extend? leaf-only?)
   (declare (type function function)
-           (type list components)
-           (type node trie))
+           (type list     components)
+           (type node     trie))
   (tagbody
      ;; We restart here when encountering an in-progress deletion.
    :global-start
