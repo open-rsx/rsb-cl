@@ -114,7 +114,7 @@
      ;; We restart here when encountering an in-progress deletion.
    :global-start
      (let+ ((deleting?)
-            ((&labels+ visit ((&optional component &rest rest) node)
+            ((&labels visit (component rest node)
                (tagbody
                   ;; We restart here in case CASing the node state
                   ;; fails, redoing all computations to construct the
@@ -154,7 +154,9 @@
                     ;; (including ancestors), then check whether it
                     ;; should be deleted.
                     (when next
-                      (let ((child (visit rest next)))
+                      (let* ((component* (first rest))
+                             (rest*      (rest rest))
+                             (child      (visit component* rest* next)))
                         (unless (node-state child)
                           (setf deleting? t)
                           (let ((new-edges (scope-node-edges-remove-edge
@@ -175,7 +177,7 @@
                       (go :start))
                     (return-from visit node))))))
        (declare (dynamic-extent #'visit))
-       (visit components trie))))
+       (visit (first components) (rest components) trie))))
 
 (macrolet
     ((define-scope-trie-function (name parameters &body body)
