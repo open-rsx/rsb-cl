@@ -178,7 +178,8 @@ connected to the bus."))
   ;; connectors.
   (let+ ((scope (make-scope
                  (bytes->string (notification-scope event))))
-         ((&flet do-scope (connectors)
+         ((&flet do-scope (scope connectors)
+            (declare (ignore scope))
             (handle connectors event))))
     (declare (dynamic-extent #'do-scope))
     (rsb.ep:scope-trie-map #'do-scope scope (bus-%in-connectors processor))))

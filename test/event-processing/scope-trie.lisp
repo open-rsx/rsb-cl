@@ -90,7 +90,10 @@
           ("/a/b/c" (("/") ("/a/") ("/a/b/") ("/a/b/c/" "/a/b/c/"))))
       (let ((scope  (make-scope scope))
             (values '()))
-        (scope-trie-map (lambda (value) (push value values)) scope trie)
+        (scope-trie-map (lambda (scope value)
+                          (ensure-same scope (first value) :test #'scope=)
+                          (push value values))
+                        scope trie)
         (ensure-same (reverse values) expected :test #'equal)))))
 
 (defun cleanup-test (thunk)
@@ -227,7 +230,9 @@
     (unwind-protect
          ;; Foreground thread queries items at the same time.
          (loop :repeat (* 3 count) :do
-            (scope-trie-map #'identity scope trie))
+            (scope-trie-map (lambda (scope value)
+                              (declare (ignore scope value)))
+                            scope trie))
       (mapc #'bt:join-thread threads))
     ;; Check result of concurrent adding and removing.
     (ensure-same (length (scope-trie-get scope trie)) (* 2 count))))

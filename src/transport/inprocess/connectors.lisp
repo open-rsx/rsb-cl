@@ -157,8 +157,9 @@
   (setf (timestamp event :send) (local-time:now)))
 
 (defmethod handle ((connector out-connector) (event event))
-  (flet ((do-scope (connectors)
+  (flet ((do-scope (scope connectors)
+           (declare (ignore scope))
            (handle connectors event)))
     (declare (dynamic-extent #'do-scope))
-    (rsb.ep:scope-trie-map #'do-scope (event-scope event)
-                           (connector-%scope-sinks connector))))
+    (rsb.ep:scope-trie-map
+     #'do-scope (event-scope event) (connector-%scope-sinks connector))))

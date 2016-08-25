@@ -114,7 +114,7 @@
      ;; We restart here when encountering an in-progress deletion.
    :global-start
      (let+ ((deleting?)
-            ((&labels visit (component rest node)
+            ((&labels visit (path path-tail component rest node)
                (tagbody
                   ;; We restart here in case CASing the node state
                   ;; fails, redoing all computations to construct the
@@ -130,7 +130,7 @@
                          ;; requested or we have reached the end of
                          ;; COMPONENTS.
                          (new-state (if (or (not component) (not leaf-only?))
-                                        (funcall function old-state)
+                                        (funcall function path old-state)
                                         old-state))
                          (old-value (node-state-value (or new-state old-state)))
                          (old-edges (node-state-edges (or new-state old-state)))
@@ -156,7 +156,14 @@
                     (when next
                       (let* ((component* (first rest))
                              (rest*      (rest rest))
-                             (child      (visit component* rest* next)))
+                             (cell       (list component))
+                             (path       (if path
+                                             (progn
+                                               (setf (cdr path-tail) cell)
+                                               path)
+                                             cell))
+                             (child      (visit path cell component* rest* next)))
+                        (declare (dynamic-extent cell))
                         (unless (node-state child)
                           (setf deleting? t)
                           (let ((new-edges (scope-node-edges-remove-edge
@@ -177,7 +184,7 @@
                       (go :start))
                     (return-from visit node))))))
        (declare (dynamic-extent #'visit))
-       (visit (first components) (rest components) trie))))
+       (visit '() nil (first components) (rest components) trie))))
 
 (macrolet
     ((define-scope-trie-function (name parameters &body body)
@@ -187,9 +194,13 @@
             ,@(when documentation `(,documentation))
             ,@declarations
             (macrolet
-                ((visit ((state-var extend? leaf-only?) &body body)
-                   (with-unique-names (visit-name)
-                     `(flet ((,visit-name (,state-var)
+                ((visit ((scope-var state-var extend? leaf-only?) &body body)
+                   (let+ (((&values scope-var ignore-scope-var)
+                           (or scope-var (values (gensym) t)))
+                          ((&with-gensyms visit-name)))
+                     `(flet ((,visit-name (,scope-var ,state-var)
+                               ,@(when ignore-scope-var
+                                   `((declare (ignore ,scope-var))))
                                ,@body))
                         (declare (dynamic-extent #',visit-name))
                         (scope-trie-%map
@@ -201,7 +212,7 @@
     "Return two values: 1) nil or the value associated with SCOPE in
      TRIE 2) a Boolean indicating whether a value is associated with
      SCOPE in TRIE."
-    (visit (state nil t)
+    (visit (nil state nil t)
       (return-from scope-trie-get
         (let ((value (node-state-value state)))
           (values value (not (eq value +no-value+)))))))
@@ -209,25 +220,29 @@
   (define-scope-trie-function (setf scope-trie-get) (new-value)
     "Set the value associated with SCOPE in TRIE to NEW-VALUE, return
      NEW-VALUE."
-    (visit (state t t)
+    (visit (nil state t t)
       (make-node-state new-value (node-state-edges state)))
     new-value)
 
   (define-scope-trie-function scope-trie-rem ()
     "Remove the value associated with SCOPE in TRIE, if any."
-    (visit (state nil t)
+    (visit (nil state nil t)
       (let ((old-edges (node-state-edges state)))
         (unless (scope-node-edges-empty? old-edges)
           (make-node-state +no-value+ old-edges)))))
 
   (define-scope-trie-function scope-trie-map (function)
     "Call FUNCTION for values associated to super-scopes of SCOPE in
-     TRIE."
+     TRIE.
+
+     FUNCTION is called with two arguments: 1) a dynamic-extent list
+     of components of a super-scope of SCOPE 2) the value associated
+     to that scope."
     (let ((function (ensure-function function)))
-      (visit (state nil nil)
+      (visit (scope state nil nil)
         (let ((value (node-state-value state)))
           (unless (eq value +no-value+)
-            (funcall function value))
+            (funcall function scope value))
           state))))
 
   (define-scope-trie-function scope-trie-update (function)
@@ -249,7 +264,7 @@
      in which case the return values of all but the most recent call
      are discarded."
     (let (new new?)
-      (visit (state t t)
+      (visit (nil state t t)
         (let* ((old-value (node-state-value state))
                (old-edges (node-state-edges state)))
           (setf (values new new?)
