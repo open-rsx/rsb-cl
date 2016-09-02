@@ -163,19 +163,21 @@ endfunction()
 
 test(test                  ${SYSTEM_NAME})
 
-test(test-transport-inprocess rsb-transport-inprocess)
-test(test-transport-socket    rsb-transport-socket)
-test(test-transport-spread    rsb-transport-spread)
+test(test-transport-inprocess    rsb-transport-inprocess)
+test(test-transport-socket       rsb-transport-socket)
+test(test-transport-spread       rsb-transport-spread)
 
-test(test-filter-regex        rsb-filter-regex)
-test(test-filter-xpath        rsb-filter-xpath)
+test(test-filter-regex           rsb-filter-regex)
+test(test-filter-xpath           rsb-filter-xpath)
 
-test(test-introspection       rsb-introspection)
+test(test-patterns-request-reply rsb-patterns-request-reply)
 
-test(test-model               rsb-model)
+test(test-introspection          rsb-introspection)
 
-test(test-builder             rsb-builder)
-test(test-model-builder       rsb-model-builder)
+test(test-model                  rsb-model)
+
+test(test-builder                rsb-builder)
+test(test-model-builder          rsb-model-builder)
 
 # Installation
 set(VERSION_SUFFIX "${RSB_VERSION_MAJOR}.${RSB_VERSION_MINOR}")
