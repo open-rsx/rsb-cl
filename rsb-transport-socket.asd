@@ -16,7 +16,7 @@
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
   :description "This system provides a simple socket-based transport."
-  :depends-on  (:usocket
+  :depends-on  ((:version :usocket      "0.6.4") ; for `socket-shutdown'
                 :cl-protobuf
 
                 (:version :cl-rsb       #.(version/string :revision? t))

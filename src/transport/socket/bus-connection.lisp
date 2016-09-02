@@ -157,9 +157,7 @@ after calling NEW-VALUE."
     (if (and (eq phase :shutdown) (eq role :send))
         (progn
           (finish-output stream)
-          (sb-bsd-sockets:socket-shutdown
-           (usocket::socket (connection-socket connection))
-           :direction :output))
+          (usocket:socket-shutdown (connection-socket connection) :output))
         (ecase role
           (:send
            (write-ub32/le 0 stream)
