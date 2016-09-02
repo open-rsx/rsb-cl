@@ -125,10 +125,6 @@ but shares these among participants in the process."))
                                    :element-type '(unsigned-byte 8)
                                    :nodelay      nodelay?))))
 
-  ;; TODO(jmoringe, 2013-02-13): this unportable hack is required
-  ;; until usocket adds support. Note redundant initarg above.
-  (setf (sb-bsd-sockets::sockopt-tcp-nodelay (usocket:socket (connection-socket instance))) nodelay?)
-
   ;; If requested, perform handshake in the requested role.
   (when handshake
     (handshake instance :setup handshake)))
