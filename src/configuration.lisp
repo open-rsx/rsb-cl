@@ -61,8 +61,32 @@
                 (error "~@<Syntax error in line ~D, contents ~S.~@:>"
                        line-num line)))))))
 
+  (defun configuration-files ()
+    (let+ ((raw-specs (if-let ((specs (uiop:getenv "RSB_CONFIG_FILES")))
+                        (split-sequence #\: specs)
+                        *default-configuration-files*))
+           ((&flet process-spec (spec)
+              (switch (spec :test #'equal)
+                (+config-file-pwd-placeholder+
+                 (list #P"rsb.conf"
+                       "Current directory file"))
+
+                (+config-file-user-placeholder+
+                 (list #+unix  #P"~/.config/rsb.conf"
+                       #+win32 (merge-pathnames "rsb.conf" (user-homedir-pathname))
+                       "User config file"))
+
+                (+config-file-system-placeholder+
+                 (list #+unix  #P"/etc/rsb.conf"
+                       #+win32 "/rsb.conf"
+                       "System wide config file"))
+
+                (t
+                 (list spec "User specified config file"))))))
+      (mapcar #'process-spec raw-specs)))
+
   (defun options-from-default-sources (&key
-                                       (config-files *default-configuration-files*))
+                                       (config-files (configuration-files)))
     "Combine options from the configuration sources mentioned in
      CONFIG-FILES.
 
@@ -77,11 +101,11 @@
               (reverse
                (append (progn
                          (debug "~2@T1. Configuration files~%")
-                         (iter (for file in (reverse config-files))
+                         (iter (for (file description) in (reverse config-files))
                                (for i :from 1)
                                (with-open-file (stream file :if-does-not-exist nil)
-                                 (debug "~5@T~D. ~A ~A ~:[does not exist~;exists~]~%"
-                                        i "foo" file stream)
+                                 (debug "~5@T~D. ~A ~S ~:[does not exist~;exists~]~%"
+                                        i description (namestring file) stream)
                                  (when stream
                                    (collect (options-from-stream stream))))))
                        (list (options-from-environment))))

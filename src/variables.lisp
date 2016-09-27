@@ -1,6 +1,6 @@
 ;;;; variables.lisp --- Global and special variables used within RSB.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2010-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -35,19 +35,16 @@ of random IDs and similar things requiring pseudo randomness.")
 
 ;;; Configuration
 
+(define-constant +config-file-system-placeholder+ "%system" :test #'string=)
+(define-constant +config-file-user-placeholder+   "%user"   :test #'string=)
+(define-constant +config-file-pwd-placeholder+    "%pwd"    :test #'string=)
+
 (declaim (type list *default-configuration-files*))
 
 (defvar *default-configuration-files*
-  `(;; Current directory
-    "rsb.conf"
-
-    ;; User-specific configuration
-    #+unix  #P"~/.config/rsb.conf"
-    #+win32 ,(merge-pathnames "rsb.conf" (user-homedir-pathname))
-
-    ;; System-wide configuration
-    #+unix  #P"/etc/rsb.conf"
-    #+win32 #P"/rsb.conf")
+  `(,+config-file-pwd-placeholder+
+    ,+config-file-system-placeholder+
+    ,+config-file-user-placeholder+)
   "List of configuration file names in order of decreasing priority.")
 
 (declaim (type list *default-configuration*))
