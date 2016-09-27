@@ -6,70 +6,87 @@
 
 (cl:in-package #:rsb)
 
-;;; Environment variables
+(defvar *config-debug?* nil)
 
-(defun options-from-environment ()
-  "Obtain configuration options from environment variables."
-  #+sbcl
-  (let+ (((&flet name->option-name (name)
-            (when (starts-with-subseq "RSB_" name)
-              (string->option-name (subseq name 4) #\_))))
-         ((&flet variable->option (string)
-            (let+ (((name value) (split-sequence #\= string :count 2))
-                   (name (name->option-name name)))
-              (when name
-                (cons name value))))))
-    (remove-if #'null (mapcar #'variable->option (sb-ext:posix-environ)))))
+;;; Environment variables and configuration files
 
-;;; Configuration file
+(flet ((debug (format-control &rest format-arguments)
+         (when *config-debug?*
+           (apply #'format *error-output* format-control format-arguments))))
 
-(defun options-from-stream (stream)
-  "Obtain configuration options from STREAM."
-  (effective-options
-   (iter (for  line     in-stream stream :using #'read-line)
-         (for  line-num :from     1)
-         (with section  =         nil)
-         (let+ (((&flet trim (string)
-                   (string-trim '(#\Space #\Tab) string)))
-                (content (trim (subseq line 0 (position #\# line)))))
-           (cond
-             ;; Empty/comment-only line
-             ((emptyp content))
+  (defun options-from-environment (&key (prefix "RSB_"))
+    "Obtain configuration options from environment variables."
+    (debug "~2@T2. Environment variables with prefix ~S~%" prefix)
+    #+sbcl
+    (let+ (((&flet name->option-name (name)
+              (when (starts-with-subseq prefix name)
+                (string->option-name (subseq name 4) #\_))))
+           ((&flet variable->option (string)
+              (let+ (((raw-name value) (split-sequence #\= string :count 2))
+                     (name (name->option-name raw-name)))
+                (when name
+                  (debug "~5@T~48@<~A (mapped to ~S)~> -> ~S~%"
+                         raw-name name value)
+                  (cons name value))))))
+      (remove-if #'null (mapcar #'variable->option (sb-ext:posix-environ)))))
 
-             ;; Section header
-             ((and (starts-with #\[ content) (ends-with #\] content))
-              (setf section (string->option-name
-                             (subseq content 1 (1- (length content))))))
-             ;; Value
-             ((find #\= content)
-              (let+ ((index (position #\= content))
-                     (name (string->option-name
-                            (trim (subseq content 0 index))))
-                     (value (trim (subseq content (1+ index)))))
-                (collect (cons (append section name) value))))
-             ;; Invalid
-             (t
-              (error "~@<Syntax error in line ~D, contents ~S.~@:>"
-                     line-num line)))))))
+  (defun options-from-stream (stream)
+    "Obtain configuration options from STREAM."
+    (effective-options
+     (iter (for  line     in-stream stream :using #'read-line)
+           (for  line-num :from     1)
+           (with section  =         nil)
+           (let+ (((&flet trim (string)
+                     (string-trim '(#\Space #\Tab) string)))
+                  (content (trim (subseq line 0 (position #\# line)))))
+             (cond
+               ;; Empty/comment-only line
+               ((emptyp content))
 
-;;;
+               ;; Section header
+               ((and (starts-with #\[ content) (ends-with #\] content))
+                (setf section (string->option-name
+                               (subseq content 1 (1- (length content))))))
+               ;; Value
+               ((find #\= content)
+                (let+ ((index (position #\= content))
+                       (name  (string->option-name
+                              (trim (subseq content 0 index))))
+                       (value (trim (subseq content (1+ index))))
+                       (path  (append section name)))
+                  (debug "~8@T~45@<~S~> -> ~S~%" path value)
+                  (collect (cons path value))))
+               ;; Invalid
+               (t
+                (error "~@<Syntax error in line ~D, contents ~S.~@:>"
+                       line-num line)))))))
 
-(defun options-from-default-sources (&key
-                                     (config-files *default-configuration-files*))
-  "Combine options from the configuration sources mentioned in
-CONFIG-FILES. Default:
-+ System-wide rsb.conf file (e.g. /etc/rsb.conf on UNIX)
-+ User-wide rsb.conf file (e.g. ~/.config/rsb.conf on UNIX)
-+ $(PWD)/rsb.conf
-+ Environment Variables"
-  (reduce #'merge-options
-          (list* (options-from-environment)
-                 (iter (for file in config-files)
-                       (with-open-file (stream file :if-does-not-exist nil)
-                         (when stream
-                           (collect (options-from-stream stream))))))
-          :initial-value *default-configuration*
-          :from-end      t))
+  (defun options-from-default-sources (&key
+                                       (config-files *default-configuration-files*))
+    "Combine options from the configuration sources mentioned in
+     CONFIG-FILES.
+
+     Default:
+     + System-wide rsb.conf file (e.g. /etc/rsb.conf on UNIX)
+     + User-wide rsb.conf file (e.g. ~/.config/rsb.conf on UNIX)
+     + $(PWD)/rsb.conf
+     + Environment Variables"
+    (let ((*config-debug?* (uiop:getenv "RSB_CONFIG_DEBUG")))
+      (debug "Configuring with sources (lowest priority first)~%")
+      (reduce #'merge-options
+              (reverse
+               (append (progn
+                         (debug "~2@T1. Configuration files~%")
+                         (iter (for file in (reverse config-files))
+                               (for i :from 1)
+                               (with-open-file (stream file :if-does-not-exist nil)
+                                 (debug "~5@T~D. ~A ~A ~:[does not exist~;exists~]~%"
+                                        i "foo" file stream)
+                                 (when stream
+                                   (collect (options-from-stream stream))))))
+                       (list (options-from-environment))))
+              :initial-value *default-configuration*
+              :from-end      t))))
 
 ;;;
 
