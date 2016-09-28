@@ -1,6 +1,6 @@
 ;;;; event.lisp --- RSB event class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -264,9 +264,9 @@ event."
       (and (= (cdr left) (cdr right))
            (uuid:uuid= (car left) (car right)))))
 
-(declaim (ftype (function (event-id) uuid:uuid) event-id->uuid)
+(declaim (ftype (function (event-id) (values uuid:uuid &optional nil))
+                event-id->uuid)
          (inline event-id->uuid))
-
 (defun event-id->uuid (event-id)
   "Derive a UUID from EVENT-ID."
   (uuid:make-v5-uuid
