@@ -264,7 +264,7 @@ event."
       (and (= (cdr left) (cdr right))
            (uuid:uuid= (car left) (car right)))))
 
-(declaim (ftype (function (event-id) (values uuid:uuid &optional nil))
+(declaim (ftype (function (event-id) (values uuid:uuid &optional))
                 event-id->uuid)
          (inline event-id->uuid))
 (defun event-id->uuid (event-id)
