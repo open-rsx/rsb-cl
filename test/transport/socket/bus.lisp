@@ -38,20 +38,20 @@
     ;; Ensure that connectors of BUS match EXPECTED-CONNECTORS.
     (check-thing :connector  #'bus-connectors  expected-connectors)))
 
-(defun check-buses-and-connectors (bus-1 bus-2 connector-1 connector-2
-                                   expect-connection?)
-  ;; Make sure that both connectors got the same bus server.
-  (check-bus bus-1 (if expect-connection? 1 0) (list connector-1 connector-2))
-  (check-bus bus-2 (if expect-connection? 1 0) (list connector-1 connector-2))
-  (ensure-same bus-1 bus-2 :test #'eq)
+(defun check-buses-and-connectors (buses connectors
+                                   &optional expect-connection?)
+  (let ((expected-connection-count (if expect-connection? 1 0)))
+    ;; Make sure that both connectors got the same bus server.
+    (loop :for (bus-1 bus-2) :on buses :do
+       (check-bus bus-1 expected-connection-count connectors)
+       (when bus-2
+         (ensure-same bus-1 bus-2 :test #'eq)))
 
-  ;; Detach connector-1 and check the resulting state.
-  (notify connector-1 bus-1 :detached)
-  (check-bus bus-1 (if expect-connection? 1 0) (list connector-2))
-
-  ;; Detach connector-2 and check the resulting state.
-  (notify connector-2 bus-1 :detached)
-  (check-bus bus-1 0 0))
+    ;; Detach connectors one-by-one and check the resulting state.
+    (let ((bus (first buses)))
+      (loop :for (connector . rest) :on connectors :do
+         (notify connector bus :detached)
+         (check-bus bus (if rest expected-connection-count 0) rest)))))
 
 (deftestsuite transport-socket-bus-root (transport-socket-root)
   ()
@@ -109,7 +109,8 @@ connection.")
                       transport host port :client! connector-1))
               (bus-2 (transport-ensure-bus
                       transport host port :client! connector-2)))
-          (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 t))))))
+          (check-buses-and-connectors
+           (list bus-1 bus-2) (list connector-1 connector-2) t))))))
 
 (addtest (transport-socket-bus-root
           :documentation
@@ -142,7 +143,8 @@ connection.")
                     transport host port :server! connector-1))
             (bus-2 (transport-ensure-bus
                     transport host port :server! connector-2)))
-        (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil)))))
+        (check-buses-and-connectors
+         (list bus-1 bus-2) (list connector-1 connector-2))))))
 
 (addtest (transport-socket-bus-root
           :documentation
@@ -180,7 +182,8 @@ connection.")
       ;; respective "portfile" outputs.
       (ensure-same port-1 port-2 :test #'string=)
 
-      (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil))))
+      (check-buses-and-connectors
+       (list bus-1 bus-2) (list connector-1 connector-2)))))
 
 (defvar *port-promise*)
 
@@ -223,4 +226,5 @@ connection.")
       ;; respective "portfile" outputs.
       (ensure-same port-1 port-2 :test #'=)
 
-      (check-buses-and-connectors bus-1 bus-2 connector-1 connector-2 nil))))
+      (check-buses-and-connectors
+       (list bus-1 bus-2) (list connector-1 connector-2)))))
