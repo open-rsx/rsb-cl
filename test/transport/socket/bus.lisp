@@ -226,6 +226,28 @@ connection.")
       (check-buses-and-connectors
        (list bus-1 bus-2 bus-3) (list connector-1 connector-2 connector-3)))))
 
+#+(and sbcl (not win32))
+(addtest (transport-socket-bus-root
+          :documentation
+          "Test automatically assigned ports and the portfile option
+           with custom file descriptors.")
+  server/automatic-port.portfile-fd
+
+  (let+ (((&values read-fd write-fd) (sb-posix:pipe))
+         (portfile  (format nil "-~D" write-fd))
+         (host      "localhost")
+         (port      0)
+         (transport (service-provider:find-provider
+                     'rsb.transport:transport :socket))
+         (connector (make-socket-connector
+                     'connector host port :server? t :portfile portfile))
+         (bus       (transport-ensure-bus
+                     transport host port :server! connector))
+         (output    (with-open-stream (stream (sb-sys:make-fd-stream
+                                               read-fd :input t))
+                      (read-line stream))))
+    (ensure (typep (parse-integer output) '(unsigned-byte 16)))))
+
 (defvar *port-promise*)
 
 (defun note-port (port)

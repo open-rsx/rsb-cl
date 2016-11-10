@@ -84,6 +84,14 @@ connections associated to CONNECTOR."
          (print-it *standard-output*))
         ((equal filename "-2")
          (print-it *error-output*))
+        #+(and sbcl (not win32))
+        ((starts-with #\- filename)
+         (let ((fd (parse-integer filename :start 1)))
+           (log:debug "~@<Trying to write port ~D to file ~
+                              descriptor ~:D.~@:>"
+                      port fd)
+           (with-open-stream (stream (sb-sys:make-fd-stream fd :output t))
+             (print-it stream))))
         ((starts-with-subseq "call:" filename) ; for unit tests
          (funcall (read-from-string (subseq filename 5)) port))
         (t
