@@ -68,12 +68,10 @@ connection.")
   ;; Has to signal an error since the incompatible options are
   ;; supplied for a single host-port combination.
   (ensure-condition participant-creation-error
-    (with-participant (r1 :reader (make-socket-url t nil))
-      (declare (ignore r1))
-      (with-participant (r2 :reader (make-socket-url nil '("tcpnodelay" "0")))
-        (declare (ignore r2))
-        (with-participant (r3 :reader (make-socket-url nil nil))
-          (declare (ignore r3))))))) ; body is not important
+    (with-participants
+        ((nil :reader (make-socket-url t nil))
+         (nil :reader (make-socket-url nil '("tcpnodelay" "0")))
+         (nil :reader (make-socket-url nil nil)))))) ; body is not important
 
 (addtest (transport-socket-bus-root
           :documentation
