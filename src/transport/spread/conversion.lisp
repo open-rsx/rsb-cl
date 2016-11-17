@@ -260,13 +260,13 @@ CAUSES."
                                       :timestamp (timestamp->unix-microseconds value))
                        (event-meta-data-user-times result))))
               result)))
-         (notification (apply #'make-instance 'notification
-                              :event-id event-id
-                              (when full?
-                                (list
-                                 :scope       (string->bytes (scope-string scope))
-                                 :wire-schema (wire-schema->bytes wire-schema)
-                                 :meta-data   (make-meta-data))))))
+         (notification (if full?
+                           (make-instance 'notification
+                                          :event-id    event-id
+                                          :scope       (string->bytes (scope-string scope))
+                                          :wire-schema (wire-schema->bytes wire-schema)
+                                          :meta-data   (make-meta-data))
+                           (make-instance 'notification :event-id event-id))))
     (when full?
       ;; Store the method of the event in the new notification if the
       ;; event has one.
