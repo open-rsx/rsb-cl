@@ -29,7 +29,7 @@
     :description
     "The hostname of the spread daemon. Mutually exclusive with NAME.")
    (:port (integer 0 65534)
-    :default network.spread:*default-port*
+    :default network.spread.daemon:*default-port*
     :description
     "The port number of the spread daemon. Mutually exclusive with NAME.")
    (:tcpnodelay boolean

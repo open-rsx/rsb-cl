@@ -21,7 +21,7 @@
                 :ironclad
                 :cl-protobuf
 
-                (:version :network.spread "0.2")
+                (:version :network.spread "0.3")
 
                 (:version :cl-rsb         #.(version/string :revision? t))
                 (:version :rsb-protocol   #.(version/string :revision? t)))
@@ -77,8 +77,9 @@
 (defmethod perform ((op test-op) (system (eql (find-system :rsb-transport-spread-test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string
-         "(network.spread:with-daemon (:port (asdf:component-property
-                                              (asdf:find-system :rsb-transport-spread-test)
-                                              :spread-port))
+         "(network.spread.daemon:with-daemon
+              (:port (asdf:component-property
+                      (asdf:find-system :rsb-transport-spread-test)
+                      :spread-port))
             (lift:run-tests :config (lift::lift-relative-pathname
                                      \"lift-transport-spread.config\")))")))
