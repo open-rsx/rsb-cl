@@ -285,9 +285,9 @@
                               (:file       "protocol")
                               (:file       "mixins"))))
 
-  :in-order-to ((test-op (test-op :cl-rsb-test))))
+  :in-order-to ((test-op (test-op :cl-rsb/test))))
 
-(defsystem :cl-rsb-test
+(defsystem :cl-rsb/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -389,6 +389,7 @@
                               (:file       "protocol")
                               (:file       "mixins")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :cl-rsb-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :cl-rsb/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string "(lift:run-tests :config :generic)")))

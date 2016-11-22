@@ -1,6 +1,6 @@
 ;;;; rsb-model.asd --- System definition for model for RSB.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -41,9 +41,9 @@
                               (:file       "util")
                               (:file       "inference"))))
 
-  :in-order-to ((test-op (test-op :rsb-model-test))))
+  :in-order-to ((test-op (test-op :rsb-model/test))))
 
-(defsystem :rsb-model-test
+(defsystem :rsb-model/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -53,7 +53,7 @@
 
                 (:version :rsb-model   #.(version/string))
 
-                (:version :cl-rsb-test #.(version/string)))
+                (:version :cl-rsb/test #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "model"
                  :pathname   "test/model"
@@ -68,7 +68,8 @@
                               (:file       "util")
                               (:file       "inference")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-model-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-model/test))))
   (eval (read-from-string "(lift:run-tests :config
                              (asdf:system-relative-pathname
-                              :rsb-model-test \"lift-model.config\"))")))
+                              :rsb-model/test \"lift-model.config\"))")))

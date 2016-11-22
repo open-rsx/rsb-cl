@@ -1,6 +1,6 @@
 ;;;; rsb-model-builder.asd --- Builder support for RSB model objects.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,9 +28,9 @@
                  :pathname "src/introspection"
                  :components ((:file       "builder"))))
 
-  :in-order-to ((test-op (test-op :rsb-model-builder-test))))
+  :in-order-to ((test-op (test-op :rsb-model-builder/test))))
 
-(defsystem :rsb-model-builder-test
+(defsystem :rsb-model-builder/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -38,11 +38,11 @@
   :description "Unit tests for the rsb-model-builder system."
   :depends-on  ((:version :lift                               "1.7.1")
 
-                (:version :architecture.builder-protocol-test "0.3")
+                (:version :architecture.builder-protocol/test "0.3")
 
                 (:version :rsb-model-builder                  #.(version/string))
 
-                (:version :cl-rsb-test                        #.(version/string)))
+                (:version :cl-rsb/test                        #.(version/string)))
   :components  ((:module     "model"
                  :pathname   "test/model"
                  :components ((:file       "builder")))
@@ -51,7 +51,8 @@
                  :pathname   "test/introspection"
                  :components ((:file       "builder")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-model-builder-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-model-builder/test))))
   (eval (read-from-string "(lift:run-tests :config
                              (asdf:system-relative-pathname
-                              :rsb-model-builder-test \"lift-model-builder.config\"))")))
+                              :rsb-model-builder/test \"lift-model-builder.config\"))")))

@@ -47,9 +47,9 @@
                               (:file       "in-pull-connector")
                               (:file       "out-connector"))))
 
-  :in-order-to ((test-op (test-op :rsb-transport-spread-test))))
+  :in-order-to ((test-op (test-op :rsb-transport-spread/test))))
 
-(defsystem :rsb-transport-spread-test
+(defsystem :rsb-transport-spread/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -60,7 +60,7 @@
                 (:version :cl-rsb               #.(version/string))
                 (:version :rsb-transport-spread #.(version/string))
 
-                (:version :cl-rsb-test          #.(version/string)))
+                (:version :cl-rsb/test          #.(version/string)))
   :properties  ((:spread-port  . #.(or (let ((value (uiop:getenv "SPREAD_PORT")))
                                          (when value (read-from-string value)))
                                        5678)))
@@ -74,12 +74,13 @@
                               (:file       "connection")
                               (:file       "connectors")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-transport-spread-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-transport-spread/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string
          "(network.spread.daemon:with-daemon
               (:port (asdf:component-property
-                      (asdf:find-system :rsb-transport-spread-test)
+                      (asdf:find-system :rsb-transport-spread/test)
                       :spread-port))
             (lift:run-tests :config (lift::lift-relative-pathname
                                      \"lift-transport-spread.config\")))")))

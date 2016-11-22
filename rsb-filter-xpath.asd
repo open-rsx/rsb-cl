@@ -1,6 +1,6 @@
 ;;;; rsb-xpath-filter.asd --- System containing XPath-based filter.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,9 +25,9 @@
                  :pathname   "src/filter"
                  :components ((:file       "xpath-filter"))))
 
-  :in-order-to ((test-op (test-op :rsb-filter-xpath-test))))
+  :in-order-to ((test-op (test-op :rsb-filter-xpath/test))))
 
-(defsystem :rsb-filter-xpath-test
+(defsystem :rsb-filter-xpath/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -38,13 +38,14 @@
                 (:version :cl-rsb           #.(version/string))
                 (:version :rsb-filter-xpath #.(version/string))
 
-                (:version :cl-rsb-test      #.(version/string)))
+                (:version :cl-rsb/test      #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "filter"
                  :pathname   "test/filter"
                  :components ((:file       "xpath-filter")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-filter-xpath-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-filter-xpath/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string
          "(lift:run-tests :config (lift::lift-relative-pathname

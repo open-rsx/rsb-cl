@@ -25,9 +25,9 @@
                               (:file       "transport")
                               (:file       "connectors"))))
 
-  :in-order-to ((test-op (test-op :rsb-transport-inprocess-test))))
+  :in-order-to ((test-op (test-op :rsb-transport-inprocess/test))))
 
-(defsystem :rsb-transport-inprocess-test
+(defsystem :rsb-transport-inprocess/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -37,7 +37,7 @@
 
                 (:version :rsb-transport-inprocess #.(version/string))
 
-                (:version :cl-rsb-test          #.(version/string)))
+                (:version :cl-rsb/test          #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "inprocess"
                  :pathname   "test/transport/inprocess"
@@ -45,7 +45,8 @@
                  :components ((:file       "package")
                               (:file       "connectors")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-transport-inprocess-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-transport-inprocess/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string
          "(lift:run-tests :config (lift::lift-relative-pathname

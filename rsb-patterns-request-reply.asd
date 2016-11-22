@@ -44,9 +44,9 @@
 
                               (:file       "macros"))))
 
-  :in-order-to ((test-op (test-op :rsb-patterns-request-reply-test))))
+  :in-order-to ((test-op (test-op :rsb-patterns-request-reply/test))))
 
-(defsystem :rsb-patterns-request-reply-test
+(defsystem :rsb-patterns-request-reply/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -57,7 +57,7 @@
                 (:version :rsb-patterns-request-reply #.(version/string))
                 (:version :rsb-transport-inprocess    #.(version/string))
 
-                (:version :cl-rsb-test                #.(version/string)))
+                (:version :cl-rsb/test                #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "patterns-request-reply"
                  :pathname   "test/patterns/request-reply"
@@ -74,9 +74,9 @@
 
                               (:file       "integration")))))
 
-(defmethod perform ((op     test-op)
-                    (system (eql (find-system :rsb-patterns-request-reply-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-patterns-request-reply/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string "(lift:run-tests :config
                              (asdf:system-relative-pathname
-                              :rsb-patterns-request-reply-test \"lift-patterns-request-reply.config\"))")))
+                              :rsb-patterns-request-reply/test \"lift-patterns-request-reply.config\"))")))

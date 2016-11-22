@@ -65,9 +65,9 @@
                               (:file       "reloading"
                                :if-feature :sbcl))))
 
-  :in-order-to ((test-op (test-op :rsb-introspection-test))))
+  :in-order-to ((test-op (test-op :rsb-introspection/test))))
 
-(defsystem :rsb-introspection-test
+(defsystem :rsb-introspection/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -77,8 +77,8 @@
 
                 (:version :rsb-introspection #.(version/string))
 
-                (:version :cl-rsb-test       #.(version/string))
-                (:version :rsb-model-test    #.(version/string)))
+                (:version :cl-rsb/test       #.(version/string))
+                (:version :rsb-model/test    #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "introspection"
                  :pathname   "test/introspection"
@@ -96,8 +96,9 @@
                               (:file       "reloading"
                                :if-feature :sbcl)))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-introspection-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-introspection/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string "(lift:run-tests :config
                              (asdf:system-relative-pathname
-                              :rsb-introspection-test \"lift-introspection.config\"))")))
+                              :rsb-introspection/test \"lift-introspection.config\"))")))

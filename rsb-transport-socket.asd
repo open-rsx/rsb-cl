@@ -46,9 +46,9 @@
                               (:file       "in-push-connector")
                               (:file       "out-connector"))))
 
-  :in-order-to ((test-op (test-op :rsb-transport-socket-test))))
+  :in-order-to ((test-op (test-op :rsb-transport-socket/test))))
 
-(defsystem :rsb-transport-socket-test
+(defsystem :rsb-transport-socket/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -58,7 +58,7 @@
 
                 (:version :rsb-transport-socket #.(version/string))
 
-                (:version :cl-rsb-test          #.(version/string)))
+                (:version :cl-rsb/test          #.(version/string)))
   :encoding    :utf-8
   :components  ((:module     "socket"
                  :pathname   "test/transport/socket"
@@ -67,7 +67,8 @@
                               (:file       "bus")
                               (:file       "connectors")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rsb-transport-socket-test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsb-transport-socket/test))))
   (eval (read-from-string "(log:config :warn)")) ; less noise
   (eval (read-from-string
          "(lift:run-tests :config (lift::lift-relative-pathname
