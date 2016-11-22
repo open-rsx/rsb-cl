@@ -98,8 +98,7 @@
             (with-locked-bus (candidate)
               (when (bus-connectors candidate)
                 (check-connection-options (bus-options candidate) options)
-                (maybe-write-port-file
-                 port-file candidate (getf (bus-options candidate) :portfile))
+                (maybe-write-port-file port-file candidate)
                 (notify connector candidate :attached)
                 candidate)))
           (let ((bus (make-instance 'bus-server

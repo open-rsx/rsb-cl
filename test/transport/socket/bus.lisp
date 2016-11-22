@@ -185,6 +185,47 @@ connection.")
       (check-buses-and-connectors
        (list bus-1 bus-2) (list connector-1 connector-2)))))
 
+(addtest (transport-socket-bus-root
+          :documentation
+          "Test automatically assigned ports and the portfile option
+           with multiple/mixed portfile options.")
+  server/automatic-port.2
+
+  (let* ((host        "localhost")
+         (port        0)
+         (transport   (service-provider:find-provider
+                       'rsb.transport:transport :socket))
+         (connector-1 (make-socket-connector
+                       'connector host port :server? t))
+         (connector-2 (make-socket-connector
+                       'connector host port :server? t :portfile "-"))
+         (connector-3 (make-socket-connector
+                       'connector host port :server? t :portfile "-")))
+
+    ;; Create three connectors and request a bus server with automatic
+    ;; port assignment for each of them. The first connector does not
+    ;; specify a port-file while the second and third do. The correct
+    ;; behavior is writing the port-file once for the second connector
+    ;; (i.e. not a second time for the third connector).
+    (let+ (((&flet ensure-bus (connector)
+              (let+ ((bus)
+                     (output (with-output-to-string (*standard-output*)
+                               (setf bus (transport-ensure-bus
+                                          transport host port
+                                          :server! connector)))))
+                (values bus output))))
+           ((&values bus-1 output-1) (ensure-bus connector-1))
+           ((&values bus-2 output-2) (ensure-bus connector-2))
+           ((&values bus-3 output-3) (ensure-bus connector-3)))
+      ;; Make sure that only the second connector caused the port-file
+      ;; to be written.
+      (ensure-same      output-1 "" :test #'string=)
+      (ensure-different output-2 "" :test #'string=)
+      (ensure-same      output-3 "" :test #'string=)
+
+      (check-buses-and-connectors
+       (list bus-1 bus-2 bus-3) (list connector-1 connector-2 connector-3)))))
+
 (defvar *port-promise*)
 
 (defun note-port (port)
@@ -194,7 +235,7 @@ connection.")
           :documentation
           "Test automatically assigned ports and the portfile
            option using the call:NAME syntax.")
-  server/automatic-port.2
+  server/automatic-port.call
 
   (let* ((host        "localhost")
          (port        0)

@@ -53,8 +53,25 @@ connections associated to CONNECTOR."
                       bus uses value ~S; requested value is ~S.~@:>"
                      key bus-value value))))))
 
-(defun maybe-write-port-file (filename bus &optional existing)
-  (when (and filename (not (equalp filename existing)))
+(#-sbcl defvar #+sbcl sb-ext:defglobal **written-port-files**
+  ;; Associates to `bus' instances lists of port-files that have been
+  ;; written for the respective instances.
+  (tg:make-weak-hash-table :test #'eq :weakness :key))
+
+(defun should-write-port-file? (filename bus)
+  ;; A port-file should be written if FILENAME is true and the same
+  ;; port-file has not already been written for BUS.
+  ;;
+  ;; Additional locking is not necessary since this is always executed
+  ;; under the transport lock.
+  (when (and filename
+             (not (member filename (gethash bus **written-port-files**)
+                          :test #'equalp)))
+    (push filename (gethash bus **written-port-files** '()))
+    t))
+
+(defun maybe-write-port-file (filename bus)
+  (when (should-write-port-file? filename bus)
     (let+ ((port (usocket:get-local-port (bus-socket bus)))
            ((&flet print-it (stream)
               (with-standard-io-syntax
