@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol provided by the model module.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -86,6 +86,20 @@
    "Return a `local-time:timestamp' instance corresponding to the
     start time of the process represented by INFO."))
 
+(defgeneric process-info-executing-user (info)
+  (:documentation
+   "Return the login- or account-name of the user executing the
+    process represented by INFO."))
+
+(defgeneric process-info-rsb-version (info)
+  (:documentation
+   "Return the RSB version used in the process represented by INFO."))
+
+(defgeneric process-info-display-name (info)
+  (:documentation
+   "Return nil or the supplied display name of the process represented
+    by INFO."))
+
 ;; Remote process information protocol
 
 (defgeneric process-info-state (info)
@@ -100,11 +114,6 @@
    "Return a list of `puri:uri' instances describing the transports
     through which the process represented by INFO has been
     contacted."))
-
-(defgeneric process-info-executing-user (info)
-  (:documentation
-   "Return the login- or account-name of the user executing the
-    process represented by INFO."))
 
 ;;; Host information protocol
 
