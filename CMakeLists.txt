@@ -127,7 +127,7 @@ git_version_components(${VERSION_FROM_LISP} RSB_VERSION_MAJOR
 
 # If necessary, try to run git describe and determine remaining
 # version components.
-if(NOT RSB_VERSION_PATCH)
+if(NOT DEFINED RSB_VERSION_PATCH)
     git_based_version(${RSB_VERSION_MAJOR} ${RSB_VERSION_MINOR})
     set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.2.err\"")
     execute_lisp("version"
