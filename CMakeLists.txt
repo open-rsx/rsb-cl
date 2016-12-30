@@ -147,7 +147,7 @@ find_package(RSBProtocol "${RSB_VERSION_MAJOR}.${RSB_VERSION_MINOR}.8" REQUIRED)
 
 message(STATUS "Protocol directory: ${RSBProtocol_DIR}")
 
-write_file("${CMAKE_SOURCE_DIR}/protocol-directory.sexp"
+file(WRITE "${CMAKE_SOURCE_DIR}/protocol-directory.sexp"
            "\"${RSBProtocol_DIR}/\"")
 
 # Tests
