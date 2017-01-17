@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- In-direction connector for socket transport.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,9 +18,10 @@
           "Stores the scope to which the connector is attached."))
   (:metaclass connector-class)
   (:documentation
-   "Superclass for in-direction socket connectors. Instances of this
-class observe a bus (which owns the actual socket) when attached and
-queue received events for delivery."))
+   "Superclass for in-direction socket connectors.
+
+    Instances of this class observe a bus (which owns the actual
+    socket) when attached and queue received events for delivery."))
 
 (defmethod notify ((connector in-connector)
                    (scope     scope)

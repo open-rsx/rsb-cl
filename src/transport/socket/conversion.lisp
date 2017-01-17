@@ -1,6 +1,6 @@
 ;;;; conversion.lisp --- Event <-> notification conversion for socket transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
 
 (defun timestamp->unix-microseconds (timestamp)
   "Convert the `local-time:timestamp' instance TIMESTAMP into an
-integer which counts the number of microseconds since UNIX epoch."
+   integer which counts the number of microseconds since UNIX epoch."
   (+ (* 1000000 (local-time:timestamp-to-unix timestamp))
      (* 1       (local-time:timestamp-microsecond timestamp))))
 
@@ -39,9 +39,10 @@ integer which counts the number of microseconds since UNIX epoch."
   (let ((readtable (copy-readtable nil)))
     (setf (readtable-case readtable) :invert)
     readtable)
-  "This readtable is used to print and read keywords. The goal is to
-get a natural mapping between Lisp keywords and corresponding strings
-for most cases.")
+  "This readtable is used to print and read keywords.
+
+   The goal is to get a natural mapping between Lisp keywords and
+   corresponding strings for most cases.")
 
 (defun keyword->bytes (keyword)
   "Convert the name of KEYWORD into an octet-vector."
@@ -60,7 +61,7 @@ for most cases.")
 
 (defun wire-schema->bytes (wire-schema)
   "Convert WIRE-SCHEMA to an ASCII representation stored in an
-octet-vector."
+   octet-vector."
   (keyword->bytes wire-schema))
 
 (defun bytes->wire-schema (bytes)
@@ -76,9 +77,10 @@ octet-vector."
                              expose-wire-schema?
                              expose-payload-size?)
   "Convert NOTIFICATION to an `event' instance using CONVERTER for the
-payload. Return the decoded event. The optional parameter DATA can be
-used to supply encoded data that should be used instead of the data
-contained in NOTIFICATION."
+   payload. Return the decoded event.
+
+   The optional parameter DATA can be used to supply encoded data that
+   should be used instead of the data contained in NOTIFICATION."
   (let+ (((&flet event-id->cons (event-id)
             (cons (uuid:byte-array-to-uuid (event-id-sender-id event-id))
                   (event-id-sequence-number event-id))))
@@ -143,9 +145,10 @@ contained in NOTIFICATION."
 ;;; Event -> Notification
 
 (defun event->notification* (converter event)
-  "Convert EVENT into one or more notifications. More than one
-notification is required when data contained in event does not fit
-into one notification."
+  "Convert EVENT into one or more notifications.
+
+   More than one notification is required when data contained in event
+   does not fit into one notification."
   ;; Put EVENT into one or more notifications.
   (let+ (((&accessors-r/o (origin          event-origin)
                           (sequence-number event-sequence-number)
@@ -164,9 +167,9 @@ into one notification."
 (defun make-notification (sequence-number origin scope method
                           wire-schema data
                           meta-data timestamps causes)
-  "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
-SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally META-DATA, TIMESTAMPS
-and CAUSES."
+  "Make and return a `rsb.protocol:notification' instance with
+   SEQUENCE-NUMBER, SCOPE, METHOD, WIRE-SCHEMA, DATA and optionally
+   META-DATA, TIMESTAMPS and CAUSES."
   (let* ((event-id     (make-instance
                         'rsb.protocol:event-id
                         :sender-id       (uuid:uuid-to-byte-array origin)

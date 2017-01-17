@@ -1,6 +1,6 @@
 ;;;; in-pull-connector.lisp --- In-direction, pull-style socket connector.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,7 +17,7 @@
   (:direction :in-pull)
   (:documentation
    "This class implements in-direction, push-style communication over
-a socket."))
+    a socket."))
 
 (register-connector :socket :in-pull 'in-pull-connector)
 

@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol used in the socket transport module.
 ;;;;
-;;;; Copyright (C) 2013, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -47,11 +47,11 @@
 (defgeneric shutdown-handshake-for (condition)
   (:documentation
    "Return a keyword indicating the appropriate kind of shutdown
-handshake to perform for CONDITION."))
+    handshake to perform for CONDITION."))
 
 (defmethod shutdown-handshake-for ((condition error))
-  "Default behavior consists in not performing a shutdown handshake
-when encountering an error condition."
+  ;; Default behavior consists in not performing a shutdown handshake
+  ;; when encountering an error condition.
   nil)
 
 (defgeneric disconnect (connection
@@ -60,8 +60,9 @@ when encountering an error condition."
                         handshake)
   (:documentation
    "Maybe perform shutdown handshake, stop receiver thread and close
-socket of connection.
+    socket of connection.
 
-When ABORT is non-nil, skip the shutdown handshake unconditionally.
+    When ABORT is non-nil, skip the shutdown handshake
+    unconditionally.
 
-HANDSHAKE can be either nil, :send or :receive."))
+    HANDSHAKE can be either nil, :send or :receive."))

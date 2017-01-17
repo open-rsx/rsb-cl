@@ -1,6 +1,6 @@
 ;;;; bus.lisp --- Superclass for bus provider classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -64,9 +64,10 @@
    :options (missing-required-initarg 'bus :options))
   (:documentation
    "This class is intended to be used as a superclass of client and
-server providers of bus access. It manages a list of connections to
-remote processes using the bus and a list of local connectors
-connected to the bus."))
+    server providers of bus access.
+
+    It manages a list of connections to remote processes using the bus
+    and a list of local connectors connected to the bus."))
 
 (defmethod shared-initialize :after ((instance   bus)
                                      (slot-names t)

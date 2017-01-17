@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utilities used in the transport.socket module
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,7 +33,7 @@
 
 (defun make-connection-options (connector)
   "Return a plist of connection options that should be used by
-connections associated to CONNECTOR."
+   connections associated to CONNECTOR."
   (let+ (((&structure-r/o connector- portfile nodelay?) connector))
     (list* :nodelay? nodelay?
            (when portfile

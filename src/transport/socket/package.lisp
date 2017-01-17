@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,4 +34,4 @@
 
   (:documentation
    "This package contains a transport implementation that uses
-multiple point-to-point socket connections to simulate a bus."))
+    multiple point-to-point socket connections to simulate a bus."))

@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for socket-based connectors.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,8 +10,8 @@
                      conversion-mixin)
   ((bus      :accessor connector-bus
              :documentation
-             "Stores the bus object representing the socked-based
-bus to which the connector provides access.")
+             "Stores the bus object representing the socked-based bus
+              to which the connector provides access.")
    ;; Option slots
    (host     :initarg  :host
              :type     string

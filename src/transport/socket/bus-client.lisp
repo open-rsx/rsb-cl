@@ -1,6 +1,6 @@
 ;;;; bus-client.lisp --- A bus provider that used a client socket.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,7 @@
   ()
   (:documentation
    "Instances of this class provide access to a bus by means of a
-client socket."))
+    client socket."))
 
 (defmethod shared-initialize :after ((instance   bus-client)
                                      (slot-names t)

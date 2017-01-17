@@ -67,47 +67,52 @@
                    :writer   (setf connection-%socket)
                    :documentation
                    "Stores the socket through which access to he bus
-is implemented.")
+                    is implemented.")
    (receive-buffer :type     (or null octet-vector)
                    :accessor connection-%receiver-buffer
                    :initform nil
                    :documentation
                    "Static (occasionally enlarged) buffer for
-receiving and unpacking serialized notifications.")
+                    receiving and unpacking serialized
+                    notifications.")
    (send-buffer    :type     (or null octet-vector)
                    :accessor connection-%send-buffer
                    :initform nil
                    :documentation
                    "Static (occasionally enlarged) buffer for packing
-and sending notifications.")
+                    and sending notifications.")
    (closing?       :type     (member nil t :send :receive)
                    :reader   connection-closing?
                    :accessor connection-%closing?
                    :initform nil
                    :documentation
                    "Indicates indicates whether the connection is
-currently closing and, potentially, the role of the connection within
-the shutdown handshake.")
+                    currently closing and, potentially, the role of
+                    the connection within the shutdown handshake.")
    (lock           :reader   connection-lock
                    :initform (bt:make-lock "Connection lock")
                    :documentation
                    "Stores a lock that protects the connection from
-concurrent modifications. Currently, this is only used to prevent
-parallel attempts to close the connection."))
+                    concurrent modifications. Currently, this is only
+                    used to prevent parallel attempts to close the
+                    connection."))
   (:documentation
    "Instances of this class manage connections to/from clients of a
-socket-based bus. A bus connection is a bi-direction stream of
-notifications which are sent and received by participants in different
-processes. Client processes use `bus-connection' instances to connect
-to socket-based buses and server processes providing these buses
-maintain one `bus-connection' instance for each connected client
-process.
+    socket-based bus.
 
-When a process is connected to a socket-based bus as a client, the
-process uses a single `bus-connection' instance for all participants
-in the process. Similarly, a process that provides a socket-based bus
-as a server creates `bus-connection' instances for remote processes,
-but shares these among participants in the process."))
+    A bus connection is a bi-direction stream of notifications which
+    are sent and received by participants in different
+    processes. Client processes use `bus-connection' instances to
+    connect to socket-based buses and server processes providing these
+    buses maintain one `bus-connection' instance for each connected
+    client process.
+
+    When a process is connected to a socket-based bus as a client, the
+    process uses a single `bus-connection' instance for all
+    participants in the process. Similarly, a process that provides a
+    socket-based bus as a server creates `bus-connection' instances
+    for remote processes, but shares these among participants in the
+    process."))
 
 (defmethod initialize-instance :after ((instance bus-connection)
                                        &key
@@ -142,8 +147,8 @@ but shares these among participants in the process."))
 
 (defmethod (setf processor-error-policy) ((new-value  t)
                                           (connection bus-connection))
-  "Wrap NEW-VALUE in an error policy that exits the receiver thread
-after calling NEW-VALUE."
+  ;; Wrap NEW-VALUE in an error policy that exits the receiver thread
+  ;; after calling NEW-VALUE.
   (call-next-method (%make-error-policy connection new-value) connection))
 
 ;;; Protocol
