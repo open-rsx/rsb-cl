@@ -1,6 +1,6 @@
 ;;;; bus-connection.lisp --- Connection class used by bus provider.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -122,8 +122,11 @@ but shares these among participants in the process."))
           (socket)
           ((and host port)
            (usocket:socket-connect host port
-                                   :element-type '(unsigned-byte 8)
-                                   :nodelay      nodelay?))))
+                                   :element-type '(unsigned-byte 8)))))
+
+  ;; Set requested TCPNODELAY behavior.
+  (setf (usocket:socket-option (connection-socket instance) :tcp-nodelay)
+        nodelay?)
 
   ;; If requested, perform handshake in the requested role.
   (when handshake
