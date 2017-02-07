@@ -117,11 +117,12 @@ handle conditions according to a client-supplied policy."))
            "When not null, the filter object is used to hold a list of
             filters that act in a conjunctive manner."))
   (:documentation
-   "This mixin class adds filtering of events before further
-processing. Processors of this kind maintain a list of filters that
-can be accessed and modified using the `processor-filters'
-accessor. Events are dropped in a method on `handle' before any
-further processing unless they match all filters."))
+   "Adds filtering of events before further processing.
+
+    Processors of this kind maintain a list of filters that can be
+    accessed and modified using the `processor-filters'
+    accessor. Events are dropped in a method on `handle' before any
+    further processing unless they match all filters."))
 
 (defmethod processor-filters ((processor filtering-processor-mixin))
   (when-let ((filter (processor-%filter processor)))
