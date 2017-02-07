@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition cl-rsb unit tests.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -93,7 +93,7 @@
   (:function
    (make-id (source)
      (uuid:make-uuid-from-string source)))
-  (:timeout 20)
+  (:timeout 60)
   (:documentation
    "Root unit test suite of the cl-rsb system."))
 
