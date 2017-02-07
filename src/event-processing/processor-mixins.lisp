@@ -1,6 +1,6 @@
 ;;;; processor-mixins.lisp --- Mixin classes for processor classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -110,12 +110,12 @@ handle conditions according to a client-supplied policy."))
 
 (defclass filtering-processor-mixin ()
   ((filter :initarg  :filter
-           :type     rsb.filter:conjoin-filter
-           :reader   processor-%filter
-           :initform (make-instance 'rsb.filter:conjoin-filter)
+           :type     (or null rsb.filter:conjoin-filter)
+           :accessor processor-%filter
+           :initform nil
            :documentation
-           "The filter object is used to hold a list of filters that
-act in a conjunctive manner."))
+           "When not null, the filter object is used to hold a list of
+            filters that act in a conjunctive manner."))
   (:documentation
    "This mixin class adds filtering of events before further
 processing. Processors of this kind maintain a list of filters that
@@ -124,18 +124,28 @@ accessor. Events are dropped in a method on `handle' before any
 further processing unless they match all filters."))
 
 (defmethod processor-filters ((processor filtering-processor-mixin))
-  (rsb.filter:filter-children (processor-%filter processor)))
+  (when-let ((filter (processor-%filter processor)))
+    (rsb.filter:filter-children filter)))
+
+(defmethod (setf processor-filters) ((new-value null)
+                                     (processor filtering-processor-mixin))
+  (setf (processor-%filter processor) nil))
 
 (defmethod (setf processor-filters) ((new-value list)
                                      (processor filtering-processor-mixin))
-  (setf (rsb.filter:filter-children (processor-%filter processor))
-        new-value))
+  (if-let ((filter (processor-%filter processor)))
+    (setf (rsb.filter:filter-children filter) new-value)
+    (setf (processor-%filter processor)
+          (make-instance 'rsb.filter:conjoin-filter :children new-value)))
+  new-value)
 
 (defmethod handle :around ((processor filtering-processor-mixin)
                            (event     event))
-  "Terminate processing of EVENT unless it matches PROCESSOR's
-filters."
-  (when (rsb.filter:matches? (processor-%filter processor) event)
+  ;; Terminate processing of EVENT unless it matches PROCESSOR's
+  ;; filters.
+  (if-let ((filter (processor-%filter processor)))
+    (when (rsb.filter:matches? filter event)
+      (call-next-method))
     (call-next-method)))
 
 ;;; `deliver-timestamp-mixin' class
