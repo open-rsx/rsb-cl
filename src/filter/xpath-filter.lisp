@@ -1,6 +1,6 @@
 ;;;; xpath-filter.lisp --- XPath-based filtering.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -44,7 +44,7 @@
     (setf (filter-%xpath instance) xpath)))
 
 (defmethod (setf filter-%xpath) :before ((new-value t)
-                                        (filter    xpath-filter))
+                                         (filter    xpath-filter))
   (check-type new-value xpath::xpath-expr
               "an XPath string or an XPath sexp expression")
   (setf (filter-%compiled-xpath filter) (xpath:compile-xpath new-value)))
@@ -69,8 +69,8 @@
 ;;; Utility functions
 
 (defun xpath-result->filter-result (result)
-  "Return a non-nil if RESULT represents a matching XPath result and
-   nil otherwise."
+  ;; Return a non-nil if RESULT represents a matching XPath result and
+  ;; nil otherwise.
   (typecase result
     (xpath:node-set (not (xpath:node-set-empty-p result)))
     (string         (emptyp result))
