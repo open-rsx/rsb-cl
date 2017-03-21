@@ -18,6 +18,17 @@
                    :writer   (setf filter-%xpath)
                    :documentation
                    "The XPath used by the filter to discriminate events.")
+   (namespaces     :initarg  :namespaces
+                   :type     (or null (cons (cons string string) list))
+                   :reader   filter-namespaces
+                   :initform '()
+                   :documentation
+                   "Stores a mapping of prefixes to namespace URIs as
+                    an alist with elements of the form
+
+                      (PREFIX . NAMESPACE-URI)
+
+                    .")
    (compiled-xpath :type     function
                    :reader   filter-compiled-xpath
                    :writer   (setf filter-%compiled-xpath)
@@ -47,7 +58,11 @@
                                          (filter    xpath-filter))
   (check-type new-value xpath::xpath-expr
               "an XPath string or an XPath sexp expression")
-  (setf (filter-%compiled-xpath filter) (xpath:compile-xpath new-value)))
+  (setf (filter-%compiled-xpath filter)
+        (let ((xpath::*dynamic-namespaces*
+               (append (filter-namespaces filter)
+                       xpath::*dynamic-namespaces*)))
+          (xpath:compile-xpath new-value))))
 
 (defmethod rsb.ep:access? ((processor xpath-filter)
                            (part      t)

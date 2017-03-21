@@ -1,6 +1,6 @@
 ;;;; xpath-filter.lisp --- Unit tests for the xpath-filter class.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,13 +13,14 @@
 
 (define-basic-filter-tests (xpath-filter :xpath)
   '(;; Some invalid cases.
-    (()                          error) ; missing initarg
-    ((:xpath 5)                  error) ; wrong type for XPath
-    ((:xpath ".*")               error) ; invalid XPath
+    (()                                             error) ; missing initarg
+    ((:xpath 5)                                     error) ; wrong type for XPath
+    ((:xpath ".*")                                  error) ; invalid XPath
 
     ;; These are ok.
-    ((:xpath "*")                t)
-    ((:xpath "*" :always :match) t)))
+    ((:xpath "*")                                   t)
+    ((:xpath "*" :always :match)                    t)
+    ((:xpath "*" :namespaces (("" . "http://foo"))) t)))
 
 (define-filter-match-test (xpath-filter :xpath)
   '(((:xpath "*")                       ("/" "bar") t)
