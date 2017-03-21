@@ -10,8 +10,6 @@
 
 (defclass xpath-filter (function-caching-mixin
                         funcallable-filter-mixin
-                        payload-matching-mixin
-                        fallback-policy-mixin
                         print-items:print-items-mixin)
   ((xpath          :type     xpath::xpath-expr
                    :reader   filter-xpath
@@ -33,7 +31,12 @@
                    :reader   filter-compiled-xpath
                    :writer   (setf filter-%compiled-xpath)
                    :documentation
-                   "A compiled version of the XPath of the filter."))
+                   "A compiled version of the XPath of the filter.")
+   (navigator      :accessor filter-%navigator
+                   :initform (xpath-navigator)
+                   :documentation
+                   "Stores the navigator to be used when evaluating
+                    the xpath."))
   (:metaclass closer-mop:funcallable-standard-class)
   (:default-initargs
    :xpath (missing-required-initarg 'xpath-filter :xpath))
@@ -50,9 +53,12 @@
 (defmethod shared-initialize :after ((instance   xpath-filter)
                                      (slot-names t)
                                      &key
-                                     (xpath nil xpath-supplied?))
+                                     (xpath   nil xpath-supplied?)
+                                     (builder t   builder-supplied?))
   (when xpath-supplied?
-    (setf (filter-%xpath instance) xpath)))
+    (setf (filter-%xpath instance) xpath))
+  (when builder-supplied?
+    (setf (filter-%navigator instance) (xpath-navigator :builder builder))))
 
 (defmethod (setf filter-%xpath) :before ((new-value t)
                                          (filter    xpath-filter))
@@ -70,28 +76,43 @@
   t)
 
 (defmethod compute-filter-function ((filter xpath-filter) &key next)
-  (declare (type function next))
-  (if next
-      (locally (declare (type function next))
-        (lambda (payload)
-          (case (payload-matches? filter payload)
-            (:cannot-tell (funcall next payload))
-            ((nil)        nil)
-            (t            t))))
-      (lambda (payload)
-        (case (payload-matches? filter payload)
-          ((:cannot-tell nil) nil)
-          (t                  t)))))
+  (declare (ignore next))
+  (let+ (((&structure-r/o filter- compiled-xpath %navigator) filter))
+    (lambda (event)
+      (xpath-result->filter-result
+       %navigator
+       (architecture.builder-protocol.xpath:evaluate-using-navigator
+        compiled-xpath %navigator event :node-order nil)))))
 
 (defmethod print-items:print-items append ((object xpath-filter))
   `((:xpath ,(filter-xpath object) "~S")))
 
 ;;; Utility functions
 
-(defun xpath-result->filter-result (result)
+(defun xpath-navigator (&key (builder t))
+  (make-instance 'architecture.builder-protocol.xpath:navigator
+                 :builder       builder
+                 :peek-function (rsb.builder:universal-builder-for-event-data)
+                 :printers      `((,(lambda (builder node)
+                                      (declare (ignore builder))
+                                      (typep node 'scope))
+                                   .
+                                   ,(lambda (builder node)
+                                      (declare (ignore builder))
+                                      (scope-string node)))
+                                  (,(lambda (builder node)
+                                      (declare (ignore builder))
+                                      (typep node '(or uuid:uuid local-time:timestamp)))
+                                   .
+                                   ,(lambda (builder node)
+                                      (declare (ignore builder))
+                                      (princ-to-string node))))))
+
+(defun xpath-result->filter-result (navigator result)
   ;; Return a non-nil if RESULT represents a matching XPath result and
   ;; nil otherwise.
   (typecase result
-    (xpath:node-set (not (xpath:node-set-empty-p result)))
-    (string         (emptyp result))
-    (t              result)))
+    (xpath:node-set (let ((xpath:*navigator* navigator))
+                      (not (xpath:node-set-empty-p result))))
+    (t              (architecture.builder-protocol.xpath:unwrap
+                     navigator result))))

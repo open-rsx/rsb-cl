@@ -19,9 +19,46 @@
 
     ;; These are ok.
     ((:xpath "*")                                   t)
-    ((:xpath "*" :always :match)                    t)
-    ((:xpath "*" :namespaces (("" . "http://foo"))) t)))
+    ((:xpath "*" :namespaces (("" . "http://foo"))) t)
+    ((:xpath "*" :builder t)                        t)))
 
 (define-filter-match-test (xpath-filter :xpath)
-  '(((:xpath "*")                       ("/" "bar") t)
-    ((:xpath "*" :always :do-not-match) ("/" "baz") nil)))
+  `(((:xpath "@no-such-attribute")              ("/"    "bar")                     nil)
+    ((:xpath "no-such-node")                    ("/"    "bar")                     nil)
+    ((:xpath "*")                               ("/"    "bar")                     t)
+    ((:xpath ".//*")                            ("/"    "bar")                     t)
+
+    ((:xpath "@scope")                          ("/foo" "bar")                     t)
+    ((:xpath "contains(@scope, \"foo\")")       ("/foo" "bar")                     t)
+    ((:xpath "contains(@scope, \"bar\")")       ("/foo" "bar")                     nil)
+
+    ((:xpath "not(@origin)")                    ("/"    "bar")                     t)
+    ((:xpath "@origin")
+     ("/" "bar" :origin ,(uuid:make-null-uuid))
+     t)
+
+    ((:xpath "not(@sequence-number)")           ("/"    "bar")                     t)
+    ((:xpath "@sequence-number > 0")            ("/"    "bar" :sequence-number 10) t)
+
+    ((:xpath "not(@method)")                    ("/"    "bar")                     t)
+    ((:xpath "@method")                         ("/"    "bar" :method :|foo|)      t)
+    ((:xpath "@method = 'foo'")                 ("/"    "bar" :method :|foo|)      t)
+
+    ((:xpath "data/node()")                     ("/"    "bar")                     t)
+    ((:xpath "data/node() = 'bar'")             ("/"    "bar")                     t)
+
+    ((:xpath "meta-data/node()")                ("/"    "bar")                     nil)
+    ((:xpath "meta-data[@key='foo']/node()")    ("/"    "bar" :|foo| "a")          t)
+
+    ((:xpath "timestamp[@key='CREATE']/node()") ("/"    "bar")                     t)
+
+    ((:xpath "cause/node()")                    ("/"    "bar")                     nil)
+    ((:xpath "cause/node()")
+     ("/" "bar" :causes (,(cons (uuid:make-null-uuid) 0)))
+     t)
+
+    ;; Some functions and operators.
+    ((:xpath "count(cause) = 0")                ("/"    "bar")                     t)
+    ((:xpath "contains(data/node(), 'ar')")     ("/"    "bar")                     t)
+    ((:xpath "contains(data/node(), 'az')")     ("/"    "bar")                     nil)
+    ((:xpath "data/node() = 0")                 ("/"    0)                         t)))
