@@ -1,10 +1,54 @@
 ;;;; protocol.lisp --- Protocol of the transport module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport)
+
+;;; Transport service
+
+(service-provider:define-service transport
+  (:documentation
+   "Transports implement possibly networked communication protocols.
+
+    Each transport is implemented by associated connector classes for
+    incoming and outgoing communication. The \"directions\" of
+    connector classes are :in-push, :in-pull and :out. Instances of
+    connector classes of a particular transport are created to
+    actually perform communication."))
+
+(defmethod service-provider:find-provider
+    ((service  (eql (service-provider:find-service 'transport)))
+     (provider symbol)
+     &key if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+  (or (call-next-method)
+      (find provider (service-provider:service-providers service)
+            :test #'member :key #'transport-schemas)))
+
+(defmethod service-provider:find-provider
+    ((service  (eql (service-provider:find-service 'transport)))
+     (provider cons)
+     &key if-does-not-exist)
+  (let+ (((schema . direction) provider))
+    (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
+    (when-let ((provider (service-provider:find-provider
+                          service schema
+                          :if-does-not-exist if-does-not-exist)))
+      (service-provider:find-provider
+       provider direction :if-does-not-exist if-does-not-exist))))
+
+(defmethod service-provider:make-provider
+    ((service  (eql (service-provider:find-service 'transport)))
+     (provider cons)
+     &rest args &key)
+  (let+ (((schema . direction) provider))
+    (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
+    (apply #'call-next-method service provider
+           :schema    schema
+           :direction direction
+           args)))
 
 ;;; Transport protocol
 
