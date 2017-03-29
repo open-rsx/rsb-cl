@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocols provided by the event-processing module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,28 +34,28 @@
 
 (defgeneric handle (sink data)
   (:documentation
-   "Put DATA into SINK. SINK may for example process, relay or discard
-DATA."))
+   "Put DATA into SINK.
+
+    SINK may for example process, relay or discard DATA."))
 
 ;;; Default behavior
 
-(defmethod handle ((sink function)
-                   (data t))
-  "If SINK is a function, call it with DATA."
+(defmethod handle ((sink function) (data t))
+  ;; If SINK is a function, call it with DATA.
   (funcall sink data))
 
-(defmethod handle ((sink list)
-                   (data t))
-  "If SINK is a list, treat it as a list of sinks and let each
-contained sink handle DATA."
+(defmethod handle ((sink list) (data t))
+  ;; If SINK is a list, treat it as a list of sinks and let each
+  ;; contained sink handle DATA.
   (map nil (rcurry #'handle data) sink))
 
 ;;; Dispatching processor protocol
 
 (defgeneric dispatch (processor event)
   (:documentation
-   "Dispatch EVENT in the manner implemented by PROCESSOR. This may
-mean to call some handlers, for example."))
+   "Dispatch EVENT in the manner implemented by PROCESSOR.
+
+    This may imply calling some handlers, for example."))
 
 ;;; Processor access protocol
 ;;;
@@ -79,8 +79,9 @@ mean to call some handlers, for example."))
                                      (rsb:timestamp-alist   ()    (:read       ))
                                      (rsb:timestamp         (key) (:read :write)))))
     (:causes          . (:accessors ((event-causes          ()    (:read :write))))))
-  "Parts of events with access and mode information. Entries are of
-   the form:
+  "Parts of events with access and mode information.
+
+   Entries are of the form:
 
      (PART . (:accessors ACCESSORS)
 
@@ -101,7 +102,7 @@ mean to call some handlers, for example."))
 ;; Default behavior
 
 (defmethod access? ((processor t) (part t) (mode t))
-  ;; Since we do not known which PART and MODE values will be defined
+  ;; Since we do not know which PART and MODE values will be defined
   ;; in the future, we can only default to false.
   ;;
   ;; This default behavior is slightly dangerous because processor
