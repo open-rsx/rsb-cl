@@ -25,11 +25,15 @@
          (processor2 (make-instance 'mock-access-processor
                                     :access '(((:scope . :read) . t))))
          (processors (list processor1 processor2)))
-    (ensure-same (access? processor1 :data      :read)  t)
-    (ensure-same (access? processor1 :data      :write) nil)
-    (ensure-same (access? processor1 :scope     :read)  nil)
-    (ensure-same (access? processor1 :meta-data :read)  nil)
+    (ensure-same (access? processor1 :data           :read)  t)
+    (ensure-same (access? processor1 :data           :write) nil)
+    (ensure-same (access? processor1 :scope          :read)  nil)
+    (ensure-same (access? processor1 :meta-data      :read)  nil)
 
-    (ensure-same (access? processors :data      :read)  t)
-    (ensure-same (access? processors :scope     :read)  t)
-    (ensure-same (access? processors :meta-data :read)  nil)))
+    (ensure-same (access? processor1 '(:data)        :read)  t)
+    (ensure-same (access? processor1 '(:scope)       :read)  nil)
+    (ensure-same (access? processor1 '(:data :scope) :read)  t)
+
+    (ensure-same (access? processors :data           :read)  t)
+    (ensure-same (access? processors :scope          :read)  t)
+    (ensure-same (access? processors :meta-data      :read)  nil)))

@@ -113,6 +113,9 @@
 (defmethod access? ((processor sequence) (part t) (mode t))
   (some (rcurry #'access? part mode) processor))
 
+(defmethod access? ((processor t) (part sequence) (mode t))
+  (some (lambda (part) (access? processor part mode)) part))
+
 ;;; Filterting processor protocol
 
 (defgeneric processor-filters (processor)
