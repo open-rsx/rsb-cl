@@ -1,6 +1,6 @@
 ;;;; cl-rsb.asd --- Common Lisp implementation of RSB.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -353,6 +353,7 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "util")
+                              (:file       "protocol")
 
                               (:file       "scope-trie")
 
