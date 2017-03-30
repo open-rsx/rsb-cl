@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the event-processing module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,7 @@
 
   (:documentation
    "This package contains unit tests for the event-processing
-module"))
+    module"))
 
 (cl:in-package #:rsb.event-processing.test)
 
@@ -33,7 +33,7 @@ module"))
   ((handled :initarg  :handled
             :type     list
             :accessor processor-handled
-            :initform nil)))
+            :initform '())))
 
 (defmethod handle ((sink mock-processor) (data t))
   (appendf (processor-handled sink) (list data)))
