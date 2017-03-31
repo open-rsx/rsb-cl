@@ -49,6 +49,11 @@
               "an XPath string or an XPath sexp expression")
   (setf (filter-%compiled-xpath filter) (xpath:compile-xpath new-value)))
 
+(defmethod rsb.ep:access? ((processor xpath-filter)
+                           (part      t)
+                           (mode      (eql :read)))
+  t)
+
 (defmethod compute-filter-function ((filter xpath-filter) &key next)
   (declare (type function next))
   (if next
