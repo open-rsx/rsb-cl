@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utility functions used in the transport.spread module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,6 +8,7 @@
 
 ;;; Generic utility functions
 
+(declaim (inline internal-real-time-in-seconds))
 (defun internal-real-time-in-seconds ()
   "Return the current \"internal\" time in seconds."
   (/ (get-internal-real-time) internal-time-units-per-second))
@@ -32,13 +33,14 @@
 ;;; Scope -> spread group mapping
 
 (defvar *scope->groups-cache* nil
-  "This cache maps `scope' instances to the corresponding spread
-groups. The variable is special so each thread can have its own
-cache.")
+  "This cache maps `scope' instances to the corresponding Spread
+   groups.
+
+   The variable is special so each thread can have its own cache.")
 
 (defvar *scope->groups-cache-max-size* 1024
   "The maximum number of allowed entries in the scope -> group mapping
-cache.")
+   cache.")
 
 (defun make-scope->groups-cache ()
   "Return a cache to which `*scope->groups-cache*' can be bound."
@@ -55,13 +57,14 @@ cache.")
 
 (defun scope->groups/no-cache (scope)
   "Return a list of spread group names derived from SCOPE and its
-super-scopes."
+   super-scopes."
   (map 'list #'scope->group (super-scopes scope :include-self? t)))
 
 (defun scope->groups (scope &optional (cache *scope->groups-cache*))
   "Like `scope->groups/no-cache', but caches results.
-The cache implementation only works efficiently, if SCOPE is
-interned."
+
+   The cache implementation only works efficiently, if SCOPE is
+   interned."
   (or (gethash scope cache)
       (progn
         (when (>= (hash-table-count cache) *scope->groups-cache-max-size*)
