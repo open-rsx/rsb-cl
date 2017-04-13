@@ -225,6 +225,7 @@
    If supplied, CONFIG specifies the configuration that should be used
    to determine the set of default converters. if CONFIG is not
    supplied, the value of `*configuration*' is used."
+  (declare (ignore config))
   *default-converters*)
 
 (defun default-converter (wire-type &key (config *configuration*))
