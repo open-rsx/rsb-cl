@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Wire <-> domain conversion protocol.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,26 +10,28 @@
 
 (defgeneric wire->domain? (converter wire-data wire-schema)
   (:documentation
-   "Return non-nil if CONVERTER can be used to convert WIRE-DATA into
-    a Lisp object using the interpretation designated by
-    WIRE-SCHEMA. If such a conversion is possible, return two values:
-    CONVERTER and the type of the Lisp object that the conversion
-    would produce.
+   "Return non-nil if CONVERTER can convert WIRE-DATA into a Lisp
+    object using the interpretation designated by WIRE-SCHEMA.
+
+    If such a conversion is possible, return two values: 1) CONVERTER
+    2) the type of the Lisp object that the conversion would produce.
 
     Example:
-    RSB.CONVERTER> (wire->domain? :fundamental-string #(102 111 111) :string)
-    => :fundamental-string 'string"))
+    RSB.CONVERTER> (wire->domain? :fundamental-utf-8-string #(102 111 111) :utf-8-string)
+    => :fundamental-utf-8-string 'string"))
 
 (defgeneric domain->wire? (converter domain-object)
   (:documentation
-   "Return non-nil if CONVERTER can be used to convert DOMAIN-OBJECT
-    to its wire-type. If such a conversion is possible, return three
-    values: CONVERTER, the wire-type and the wire-schema the
-    conversion would produce.
+   "Return non-nil if CONVERTER can convert DOMAIN-OBJECT to its
+    wire-type.
+
+    If such a conversion is possible, return three values: 1)
+    CONVERTER 2) the wire-type 3) the wire-schema the conversion would
+    produce.
 
     Example:
-    RSB.CONVERTER> (domain->wire? :fundamental-string \"foo\")
-    => :fundamental-string 'octet-vector :string"))
+    RSB.CONVERTER> (domain->wire? :fundamental-utf-8-string \"foo\")
+    => :fundamental-utf-8-string 'octet-vector :utf-8-string"))
 
 ;; Default behavior
 
