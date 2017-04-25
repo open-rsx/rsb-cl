@@ -14,15 +14,17 @@
                  :accessor processor-error-policy
                  :initform nil
                  :documentation
-                 "Stores the error policy that should be applied in
-case of errors. Nil or a function to be called in case of dispatch
-errors. Functions will be called with the condition object is sole
-argument.
-Functions installed here should be prepared to be called from multiple
-threads simultaneously."))
+                 "Stores the policy that should be applied in case of
+                  errors.
+
+                  Nil or a function to be called in case of dispatch
+                  errors. Functions will be called with the condition
+                  object is sole argument.  Functions installed here
+                  should be prepared to be called from multiple
+                  threads simultaneously."))
   (:documentation
-   "This class is intended to be mixed into classes that need to
-handle conditions according to a client-supplied policy."))
+   "Intended to be mixed into classes that need to handle conditions
+    according to a client-supplied policy."))
 
 (defmethod apply-error-policy ((processor error-policy-mixin)
                                (condition t))
@@ -154,9 +156,9 @@ handle conditions according to a client-supplied policy."))
 (defclass deliver-timestamp-mixin ()
   ()
   (:documentation
-   "This class can be mixed into event processor classes that used in
-event delivery contexts to attach :deliver timestamps to processed
-events."))
+   "Can be mixed into event processor classes that used in event
+    delivery contexts to attach :deliver timmestamps to processed
+    events."))
 
 (defmethod handle :before ((processor deliver-timestamp-mixin)
                            (event     event))
@@ -174,9 +176,8 @@ events."))
   (:default-initargs
    :transform (missing-required-initarg 'transform-mixin :transform))
   (:documentation
-   "This mixin class adds to processor classes the ability to apply a
-transform (in the sense of being usable with `transform!') to all
-handled data."))
+   "Adds to processor classes the ability to apply a transform (in the
+    sense of being usable with `transform!') to all handled data."))
 
 (defmethod handle :around ((sink transform-mixin) (data t))
   (call-next-method sink (rsb.transform:transform! (processor-transform sink) data)))

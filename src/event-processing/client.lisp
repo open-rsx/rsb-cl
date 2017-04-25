@@ -1,6 +1,6 @@
 ;;;; client.lisp --- A client that knows its configurator.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,13 +11,13 @@
                  :type     configurator
                  :reader   client-configurator
                  :documentation
-                 "The configurator instance working for this
-client."))
+                 "Stores the configurator instance working for this
+                  client."))
   (:default-initargs
    :configurator (missing-required-initarg 'client :configurator))
   (:documentation
-   "Instance of this of this class are clients of the event processing
-subsystem in the sense that they have an associated `configurator'."))
+   "A client of the event processing subsystem in the sense that they
+    have an associated `configurator'."))
 
 (defmethod transport-specific-urls ((component client))
   ;; Return a list of transport URLs for connectors used by COMPONENT.

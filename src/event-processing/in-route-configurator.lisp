@@ -1,6 +1,6 @@
 ;;;; in-route-configurator.lisp --- Configurator for incoming event route.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,9 +13,9 @@
             :documentation
             "Stores the list of filters installed by the client."))
   (:documentation
-   "Instances of this class configure in-direction connectors, filters
-and an event process for a client that is an event receiving
-participant."))
+   "Configure in-direction connectors, filters and a processor for a client.
+
+    The client generally is an event receiving participant."))
 
 (defmethod collect-processor-mixins append ((configurator in-route-configurator))
   `(error-policy-handler-mixin

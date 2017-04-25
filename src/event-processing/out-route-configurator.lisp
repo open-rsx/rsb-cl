@@ -1,6 +1,6 @@
 ;;;; out-route-configurator.lisp --- Configurator class for out-direction processing.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,8 +11,9 @@
   (:default-initargs
    :direction :out)
   (:documentation
-   "Instances of this class configure out-direction connectors and an
-event processor for sending of events."))
+   "Configure out-direction connectors and a processor for a client.
+
+    The client generally is an event-sending participant."))
 
 (defmethod collect-processor-mixins append ((configurator out-route-configurator))
   '(broadcast-processor))

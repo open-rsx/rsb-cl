@@ -1,6 +1,6 @@
-;;;; configurator.lisp ---
+;;;; configurator.lisp --- Superclass for configurator classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,32 +13,34 @@
                :type     direction
                :reader   configurator-direction
                :documentation
-               "The direction of the communication situation the
-configurator is responsible for.")
+               "Stores the direction of the communication situation
+                the configurator is responsible for.")
    (connectors :initarg  :connectors
                :type     list
                :accessor configurator-connectors
                :initform '()
                :documentation
                "Stores the list of connector instances the client uses
-to access the bus.")
+                to access the bus.")
    (processor  :initarg  :processor
                :reader   configurator-processor
                :documentation
                "Stores the processor instance that handles incoming or
-outgoing events.")
+                outgoing events.")
    (transform  :initarg  :transform
                :reader   configurator-transform
                :initform nil
                :documentation
                "Stores the transform which should be applied to
-processed events."))
+                processed events."))
   (:default-initargs
    :direction (missing-required-initarg 'configurator :direction))
   (:documentation
-   "This class is intended to be used as a superclass of configurator
-classes for specific directions. Every configurator instance has a
-participant instance as its \"client\"."))
+   "Intended as a superclass of configurator classes for specific
+    directions.
+
+    Every configurator instance has a participant instance as its
+    \"client\"."))
 
 (defmethod shared-initialize :after ((instance   configurator)
                                      (slot-names t)
@@ -116,7 +118,7 @@ participant instance as its \"client\"."))
     (apply #'make-instance class args)))
 
 (defmethod detach ((configurator configurator))
-  "Detach all connectors from the scope of CONFIGURATOR."
+  ;; Detach all connectors from the scope of CONFIGURATOR.
   (log:trace "~@<~A is detaching ~D connector~:P~@:>"
              configurator (length (configurator-connectors configurator)))
   (iter (for connector in (configurator-connectors configurator))
@@ -132,7 +134,8 @@ participant instance as its \"client\"."))
                    (action       (eql :connector-added)))
   (let+ (((&accessors-r/o
            (scope        configurator-scope)
-           (error-policy processor-error-policy)) configurator))
+           (error-policy processor-error-policy))
+          configurator))
     (log:trace "~@<~A is installing new error policy ~A in connector ~A~@:>"
                configurator error-policy connector)
     (setf (processor-error-policy connector) error-policy)

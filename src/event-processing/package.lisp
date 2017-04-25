@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for event-processing module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -144,5 +144,5 @@
    #:merge-implementation-infos)
 
   (:documentation
-   "This package contains protocol, classes and methods for routing
-and processing of events."))
+   "A protocol, classes and methods for routing and processing of
+    events."))

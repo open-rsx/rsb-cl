@@ -1,6 +1,6 @@
 ;;;; pull-processor.lisp --- Pull-based processor implementation.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,22 +12,23 @@
                   :accessor processor-connectors
                   :initform '()
                   :documentation
-                  "A list of connector instances from which the
-processor retrieves events.")
+                  "Stores a list of connector instances from which the
+                   processor retrieves events.")
    (current-event :accessor processor-current-event
                   :initform nil
                   :documentation
-                  "The event currently being retrieved from a
-connector."))
+                  "Stores the event currently being retrieved from a
+                   connector."))
   (:documentation
-   "Instances of this class allow pull-based, blocking and
-non-blocking retrieval of events from multiple connectors. To achieve
-this, the processor is added to the handler list of each
-connector. When asked to retrieve an event, it walks through its list
-of connectors, asking each connector to emit an event until one
-succeeds. The emitted event is dispatched to the processor via the
-`handle' interface. This enables arbitrary event processing by methods
-on `handle' in the usual way."))
+   "Allows pull-based, blocking and non-blocking retrieval of events
+    from multiple connectors.
+
+    To achieve this, the processor is added to the handler list of
+    each connector. When asked to retrieve an event, it walks through
+    its list of connectors, asking each connector to emit an event
+    until one succeeds. The emitted event is dispatched to the
+    processor via the `handle' interface. This enables arbitrary event
+    processing by methods on `handle' in the usual way."))
 
 (defmethod notify ((processor pull-processor)
                    (connector t)

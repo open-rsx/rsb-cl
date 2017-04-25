@@ -131,28 +131,28 @@
 (defgeneric notify (recipient subject action)
   (:documentation
    "When ACTION is either :filter-added or :filter-removed, methods
-should return one of the symbols :not-implemented or :implemented to
-indicate whether the combination of the filter SUBJECT and ACTION
-could be implemented by RECIPIENT."))
+    should return one of the symbols :not-implemented or :implemented
+    to indicate whether the combination of the filter SUBJECT and
+    ACTION could be implemented by RECIPIENT."))
 
 ;;; Default behavior
 
 (defmethod notify ((recipient t) (subject t) (action t))
-  "The default behavior is to do nothing."
+  ;; The default behavior is to do nothing.n
   (values))
 
 (defmethod notify ((recipient t)
                    (subject   t)
                    (action    (eql :filter-added)))
-  "The default behavior for filter actions is to do nothing and state
-the fact."
+  ;; The default behavior for filter actions is to do nothing and
+  ;; state the fact.
   :not-implemented)
 
 (defmethod notify ((recipient t)
                    (subject   t)
                    (action    (eql :filter-removed)))
-  "The default behavior for filter actions is to do nothing and state
-the fact."
+  ;; The default behavior for filter actions is to do nothing and
+  ;; state the fact.
   :not-implemented)
 
 ;;; Error policy protocol
@@ -167,8 +167,9 @@ the fact."
                             &rest args
                             &key &allow-other-keys)
   (:documentation
-   "Make and return a suitable processor instance for
-    CONFIGURATOR. Methods of this generic function will usually call
+   "Make and return a suitable processor instance for CONFIGURATOR.
+
+    Methods of this generic function will usually call
     `collect-processor-mixins' and `ensure-processor-class' obtain the
     desired class of the processor being made. ARGS are passed to
     `make-instance' after the class has been determined."))
