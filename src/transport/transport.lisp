@@ -116,13 +116,12 @@
                            &key
                            (transport-class 'transport)
                            &allow-other-keys)
-  (service-provider::register-provider
-   'transport name transport-class
-   (remove-from-plist initargs :transport-class)))
+  (apply #'service-provider:register-provider
+         'transport name transport-class
+         (remove-from-plist initargs :transport-class)))
 
 (defun register-connector (transport-name direction class-name)
   (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
-  (service-provider::register-provider
+  (service-provider:register-provider
    (service-provider:find-provider 'transport transport-name)
-   direction 'connector-provider
-   `(:class ,class-name)))
+   direction 'connector-provider :class class-name))

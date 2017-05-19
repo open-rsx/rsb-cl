@@ -139,7 +139,7 @@
                 :trivial-garbage
                 :closer-mop
                 :cl-hooks
-                (:version :architecture.service-provider "0.1")
+                (:version :architecture.service-provider "0.4")
                 :log4cl
 
                 :nibbles
