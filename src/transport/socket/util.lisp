@@ -87,8 +87,8 @@
         #+(and sbcl (not win32))
         ((starts-with #\- filename)
          (let ((fd (parse-integer filename :start 1)))
-           (log:debug "~@<Trying to write port ~D to file ~
-                              descriptor ~:D.~@:>"
+           (log:debug "~@<Trying to write port ~D to file descriptor ~
+                       ~:D.~@:>"
                       port fd)
            (with-open-stream (stream (sb-sys:make-fd-stream fd :output t))
              (print-it stream))))
