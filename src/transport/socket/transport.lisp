@@ -12,65 +12,53 @@
 (defvar *default-port* 55555
   "Default port used by the socket-based transport.")
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
+(defclass socket-transport (transport)
+  ((servers :reader   transport-servers
+            :initform (make-hash-table :test #'equalp)
+            :documentation
+            "Map host names and ports to `bus-servers' instances.")
+   (clients :reader   transport-clients
+            :initform (make-hash-table :test #'equalp)
+            :documentation
+            "Map host names and ports to `bus-client' instances.")
+   (lock    :reader   transport-lock
+            :initform (bt:make-recursive-lock "Bus clients+servers lock")
+            :documentation
+            "Protects accesses to clients and servers slots."))
+  (:documentation
+   "The (usually singleton) instance of this represents the socket
+    transport.
 
-;;; `socket-transport' transport class
-
-  (defclass socket-transport (transport)
-    ((servers :reader   transport-servers
-              :initform (make-hash-table :test #'equalp)
-              :documentation
-              "Map host names and ports to `bus-servers' instances.")
-     (clients :reader   transport-clients
-              :initform (make-hash-table :test #'equalp)
-              :documentation
-              "Map host names and ports to `bus-client' instances.")
-     (lock    :reader   transport-lock
-              :initform (bt:make-recursive-lock "Bus clients+servers lock")
-              :documentation
-              "Protects accesses to clients and servers slots."))
-    (:documentation
-     "The (usually singleton) instance of this represents the socket
-      transport.
-
-      The instances manages bus clients and servers corresponding to
-      different connector configurations."))
-
-;;; Transport registration
-
-  (register-transport
-   :socket
-   :transport-class 'socket-transport
-   :schemas         :socket
-   :wire-type       'nibbles:octet-vector
-   :remote?         t
-   :documentation
-   "TCP-Socket-based transport for small numbers of communicating processes.
-
-    One of the communicating processes acts as the server, opening a
-    TCP-listen-socket. Other processes connect to this socket to send
-    and receive events. Within each processes, arbitrary numbers of
-    participants can share the respective socket connection of the
-    process.
-
-    Since currently all events are independently delivered to all
-    processes, regardless of whether the individual processes actually
-    contain participants, this transport cannot work efficiently with
-    participants distributed across many processes.")
-
-  ) ; eval-when
+    The instances manages bus clients and servers corresponding to
+    different connector configurations."))
 
 (defmethod print-items:print-items append ((object socket-transport))
   `((:client-count ,(hash-table-count (transport-clients object)) " (C ~D)"
-     ((:after :remote?)))
+                   ((:after :remote?)))
     (:server-count ,(hash-table-count (transport-servers object)) " (S ~D)"
-     ((:after :client-count)))))
+                   ((:after :client-count)))))
 
-(#+sbcl sb-ext:defglobal #-sbcl defvar **transport**
-        (service-provider:find-provider 'transport :socket))
+;;; Transport registration
 
-(declaim #+sbcl (sb-ext:always-bound **transport**)
-         (type socket-transport **transport**))
+(register-transport
+ :socket
+ :transport-class 'socket-transport
+ :schemas         :socket
+ :wire-type       'nibbles:octet-vector
+ :remote?         t
+ :documentation
+ "TCP-Socket-based transport for small numbers of communicating processes.
+
+  One of the communicating processes acts as the server, opening a
+  TCP-listen-socket. Other processes connect to this socket to send
+  and receive events. Within each processes, arbitrary numbers of
+  participants can share the respective socket connection of the
+  process.
+
+  Since currently all events are independently delivered to all
+  processes, regardless of whether the individual processes actually
+  contain participants, this transport cannot work efficiently with
+  participants distributed across many processes.")
 
 ;;; Ensuring bus clients and servers
 ;;;
