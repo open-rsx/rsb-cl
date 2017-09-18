@@ -73,9 +73,9 @@
 
 (defmethod describe-object ((object transport) stream)
   (format stream "~A~
-                  ~2&Schemas: ~{~S~^, ~}~
+                  ~2&Schemas:   ~{~S~^, ~}~
                   ~&Wire-type: ~S~
-                  ~&Remote: ~S~
+                  ~&Remote:    ~S~
                   ~@[~2&Connectors:~
                   ~&~{~A~^~&~}~]"
           object
