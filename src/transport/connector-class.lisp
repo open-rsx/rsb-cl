@@ -121,20 +121,32 @@
 
 ;;; Utility functions
 
-(defun+ %maybe-expand-option (class (&whole option name type &rest &ign))
+(defun+ %maybe-expand-option (class (&whole option name type &rest args))
   ;; Potentially expand the options description OPTION using
   ;; information from CLASS.
-  (or (unless (eq type '&slot)
-        option)
-      (when-let ((slot (find name (closer-mop:class-direct-slots class)
-                             :test #'member
-                             :key  #'closer-mop:slot-definition-initargs)))
-        `(,name
-          ,(closer-mop:slot-definition-type slot)
-          ,@(when-let ((initform (closer-mop:slot-definition-initform slot)))
-              `(:default ,initform))
-          ,@(when-let ((description (documentation slot t)))
-              `(:description ,description))))
-      (error "~@<~S specified for option ~S, but no slot with ~
-              initarg ~:*~S in class ~S.~@:>"
-             '&slot name class)))
+  (let+ (((&flet slot->option (slot)
+            `(,name
+              ,(closer-mop:slot-definition-type slot)
+              ,@(when-let ((initform (closer-mop:slot-definition-initform slot)))
+                  `(:default ,initform))
+              ,@(when-let ((description (documentation slot t)))
+                  `(:description ,description))))))
+    (cond
+      ((not (eq type '&slot))
+       option)
+      ((not args)
+       (if-let ((slot (find name (closer-mop:class-direct-slots class)
+                            :test #'member
+                            :key  #'closer-mop:slot-definition-initargs)))
+         (slot->option slot)
+         (error "~@<~S specified for option ~S, but no slot with ~
+                 initarg ~:*~S in class ~S.~@:>"
+                '&slot name class)))
+      (t
+       (let ((slot-name (first args)))
+         (if-let ((slot (find slot-name (closer-mop:class-direct-slots class)
+                              :key #'closer-mop:slot-definition-name)))
+           (slot->option slot)
+           (error "~@<~S with slot name ~S specified for option ~S, ~
+                   but no slot named ~2:*~S~* in class ~S.~@:>"
+                  '&slot slot-name name class)))))))

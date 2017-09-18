@@ -19,8 +19,7 @@
              :initform *default-host*
              :documentation
              "The name of the host on which the server is listener in case of clients and the bind address in case of the server.")
-   (port     :initarg  :port
-             :type     t  ; TODO (unsigned-byte 16)
+   (port     :type     (unsigned-byte 16)
              :reader   connector-port
              :initform *default-port*
              :documentation
@@ -31,16 +30,12 @@
              :initform nil
              :documentation
              "Optionally stores the name of a file (or \"-\" for standard-output) into which an automatically assigned port number should be written when acting as server on an arbitrary free port (indicated by port number 0).")
-   (server?  :initarg  :server
-             :initarg  :server?
-             :type     t ; TODO (or boolean (eql :auto))
+   (server?  :type     (or boolean (eql :auto))
              :reader   connector-server?
              :initform :auto
              :documentation
              "Controls whether the connector takes the server or client role for the bus.")
-   (nodelay? :initarg  :tcpnodelay
-             :initarg  :nodelay?
-             :type     t
+   (nodelay? :type     boolean
              :reader   connector-nodelay?
              :initform t
              :documentation
@@ -52,10 +47,10 @@
    :port (missing-required-initarg 'connector :port))
   (:options
    (:host       &slot)
-   (:port       &slot)
+   (:port       &slot port)
    (:portfile   &slot)
-   (:server     &slot)
-   (:tcpnodelay &slot))
+   (:server     &slot server?)
+   (:tcpnodelay &slot nodelay?))
   (:documentation
    "This class serves as a superclass for connector classes that
     employ socked-based bus access."))

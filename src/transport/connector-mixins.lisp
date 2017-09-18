@@ -1,6 +1,6 @@
 ;;;; connector-mixins.lisp --- Mixin for connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -199,8 +199,7 @@ converter."))
 ;;; `expose-transport-metrics-mixin'
 
 (defclass expose-transport-metrics-mixin ()
-  ((expose :initarg  :expose
-           :type     list
+  ((expose :type     list
            :accessor connector-expose
            :initform '()
            :documentation
@@ -209,7 +208,7 @@ connector should expose in events constructed from these
 notifications."))
   (:metaclass connector-class)
   (:options
-   (:expose &slot))
+   (:expose &slot expose))
   (:documentation
    "This class is intended to be mixed into connector classes that
 should be able to store transport metrics of received notifications in
