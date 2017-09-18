@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,8 +13,10 @@
   ((rsb::uri :reader   connector-url))
   (:documentation
    "A connector implements access to the bus by means of a particular
-mechanism. One example is a connector that makes use of the Spread
-group communication framework."))
+    mechanism.
+
+    One example is a connector that makes use of the Spread group
+    communication framework."))
 
 (defmethod shared-initialize :after ((instance connector) (slot-names t)
                                      &key
