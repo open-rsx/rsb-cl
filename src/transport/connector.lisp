@@ -11,6 +11,7 @@
 (defclass connector (uri-mixin
                      error-policy-mixin)
   ((rsb::uri :reader   connector-url))
+  (:metaclass connector-class)
   (:documentation
    "A connector implements access to the bus by means of a particular
     mechanism.
