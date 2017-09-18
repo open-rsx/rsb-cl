@@ -1,6 +1,6 @@
 ;;;; connector-class.lisp --- Metaclass for connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -69,6 +69,12 @@
   (if (slot-boundp connector 'transport)
       (slot-value connector 'transport)
       (some #'connector-transport
+            (closer-mop:class-direct-superclasses connector))))
+
+(defmethod connector-direction ((connector connector-class))
+  (if (slot-boundp connector 'direction)
+      (slot-value connector 'direction)
+      (some #'connector-direction
             (closer-mop:class-direct-superclasses connector))))
 
 (defmethod connector-direct-options ((connector connector-class))
