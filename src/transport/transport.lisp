@@ -77,12 +77,14 @@
                   ~&Wire-type: ~S~
                   ~&Remote:    ~S~
                   ~@[~2&Connectors:~
-                  ~&~{~A~^~&~}~]"
+                  ~&~{~A~^~&~}~]~
+                  ~@[~2&Documentation:~&~A~]"
           object
           (transport-schemas object)
           (transport-wire-type object)
           (transport-remote? object)
-          (service-provider:service-providers object)))
+          (service-provider:service-providers object)
+          (documentation object t)))
 
 (defmethod service-provider:provider-name ((provider transport))
   (service-provider:service-name provider))
