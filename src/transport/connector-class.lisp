@@ -12,7 +12,6 @@
               "Stores the transport instance to which the transport
                class and its instances belong.")
    (direction :type     direction
-              :reader   connector-direction
               :documentation
               "Stores the direction of instances of the connector
                class.")
