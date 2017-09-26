@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Unit tests for the connector class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,14 +17,14 @@
   connector-relative-url
 
   (ensure-cases (initargs scope expected-url)
-      '(((:host "azurit")                            "/foo/bar/"
-         "//azurit/foo/bar/")
+      '(((:schema :mock :host "azurit")              "/foo/bar/"
+         "mock://azurit/foo/bar/")
 
-        ((:port 5003)                                "/foo/bar/"
-         "//localhost:5003/foo/bar/")
+        ((:schema :mock :port 5003)                  "/foo/bar/"
+         "mock://localhost:5003/foo/bar/")
 
-        ((:host "azurit" :port 5003)                 "/foo/bar/"
-         "//azurit:5003/foo/bar/")
+        ((:schema :mock :host "azurit" :port 5003)   "/foo/bar/"
+         "mock://azurit:5003/foo/bar/")
 
         ((:schema :spread :host "azurit")            "/foo/bar/"
          "spread://azurit/foo/bar/")

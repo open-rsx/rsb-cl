@@ -1,6 +1,6 @@
 ;;;; bus.lisp --- Unit tests for the bus* classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,6 +8,7 @@
 
 (defun make-socket-connector (class host port &key server? portfile)
   (let ((connector (apply #'make-instance class
+                          :schema   :socket
                           :host      host
                           :port      port
                           :converter :fundamental-null

@@ -12,6 +12,8 @@
                      error-policy-mixin)
   ((rsb::uri :reader   connector-url))
   (:metaclass connector-class)
+  (:default-initargs
+   :schema (missing-required-initarg 'connector :schema))
   (:documentation
    "A connector implements access to the bus by means of a particular
     mechanism.

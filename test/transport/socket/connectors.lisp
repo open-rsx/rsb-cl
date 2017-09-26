@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,6 +20,7 @@
 
   (flet ((do-it (server?)
            (make-instance 'connector
+                          :schema   :socket
                           :host      "localhost"
                           :port      1
                           :converter nil
@@ -42,7 +43,8 @@
                        class-name)))
 
            (define-basic-connector-test-cases ,class-name
-             :initargs           (list :host      "localhost"
+             :initargs           (list :schema    :socket
+                                       :host      "localhost"
                                        :port      *next-port*
                                        :converter :fundamental-null)
              :expected-schemas   '(:socket)

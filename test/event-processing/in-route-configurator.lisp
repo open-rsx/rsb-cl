@@ -1,6 +1,6 @@
 ;;;; in-route-configurator.lisp --- Unit tests for the in-route-configurator class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -16,7 +16,9 @@
   ()
   (:metaclass rsb.transport:connector-class)
   (:transport :mock)
-  (:direction :in-pull))
+  (:direction :in-pull)
+  (:default-initargs
+   :schema :mock))
 
 (deftestsuite in-route-configurator-root (event-processing-root)
   ((configurator (make-instance 'in-route-configurator
