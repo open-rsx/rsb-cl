@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the transport module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -67,14 +67,20 @@
           (ensure (typep option 'list)))))
 
 (defun check-connector (connector
+                        expected-schemas
                         expected-wire-type
                         expected-remote?
                         expected-direction )
-  (let ((wire-type (transport-wire-type connector))
-        (remote?   (transport-remote?   connector))
-        (direction (connector-direction connector))
-        (url       (connector-url connector))
+  (let ((schemas   (transport-schemas      connector))
+        (wire-type (transport-wire-type    connector))
+        (remote?   (transport-remote?      connector))
+        (direction (connector-direction    connector))
+        (url       (connector-url          connector))
         (rel-url   (connector-relative-url connector "/foo")))
+    ;; Check schemas.
+    (iter (for schema in schemas)
+          (ensure (typep schema 'keyword)))
+    (ensure-same schemas expected-schemas :test #'set-equal)
     ;; Check wire-type.
     (ensure (typep wire-type 'wire-type))
     (ensure-same wire-type expected-wire-type :test #'type=)
@@ -86,6 +92,7 @@
     ;; Check URLs.
     (ensure (typep url 'puri:uri))
     (ensure (typep rel-url 'puri:uri))
+    (ensure (eq (puri:uri-scheme url) (first expected-schemas)))
     (ensure-same (puri:uri-path rel-url) "/foo/"
                  :test #'string=)))
 
@@ -158,6 +165,7 @@
 
        (let ((instance (apply #'make-instance ',class ,initargs)))
          (check-connector instance
+                          ,expected-schemas
                           ,expected-wire-type
                           ,expected-remote?
                           ,expected-direction)))
