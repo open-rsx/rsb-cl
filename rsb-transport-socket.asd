@@ -40,11 +40,7 @@
                               (:file       "bus-client")
                               (:file       "bus-server")
 
-                              (:file       "connector")
-                              (:file       "in-connector")
-                              (:file       "in-pull-connector")
-                              (:file       "in-push-connector")
-                              (:file       "out-connector"))))
+                              (:file       "connectors"))))
 
   :in-order-to ((test-op (test-op :rsb-transport-socket/test))))
 
