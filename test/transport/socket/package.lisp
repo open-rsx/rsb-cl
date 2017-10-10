@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -24,8 +24,10 @@
    #:rsb.transport.test)
 
   (:import-from #:rsb.transport.socket
-   #:in-pull-connector
-   #:out-connector
+   #:tcp-connector
+   #:tcp-in-push-connector
+   #:tcp-in-pull-connector
+   #:tcp-out-connector
 
    #:bus-connectors
    #:bus-connections
@@ -33,8 +35,7 @@
    #:transport-ensure-bus)
 
   (:shadowing-import-from #:rsb.transport.socket
-   #:connector
-   #:in-push-connector)
+   #:connector)
 
   (:documentation
    "This package contains unit tests for the transport.socket
@@ -64,9 +65,15 @@ socket. Should be incremented after each use.")
                old *next-port*)))
      *next-port*))
   (:function
-   (make-socket-url (server? options)
-     (format nil "socket://localhost:~D/rsbtest/transport/socket~@[?~{~A=~A~^&~}~]"
-             *next-port* (append (when server? (list "server" "1")) options))))
+   (make-socket-url (schema server? options)
+     (format nil "~(~A~):~{~@?~}/rsbtest/transport/socket~@[?~{~A=~A~^&~}~]"
+             schema
+             (ecase schema
+               ((:socket :tcp-socket)
+                (list "//localhost:~D" *next-port*))
+               ((:unix :unix-socket)
+                (list "")))
+             (append (when server? (list "server" "1")) options))))
   ;; Prior to running each individual test case, clear bus clients and
   ;; servers and choose a new port.
   (:setup

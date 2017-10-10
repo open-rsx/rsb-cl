@@ -31,28 +31,6 @@
 
 ;;; Connection options
 
-(defun make-connection-options (connector)
-  "Return a plist of connection options that should be used by
-   connections associated to CONNECTOR."
-  (let+ (((&structure-r/o connector- portfile nodelay?) connector))
-    (list* :nodelay? nodelay?
-           (when portfile
-             (list :portfile portfile)))))
-
-(defun check-connection-options (bus-options options)
-  "Signal an error if the option plists BUS-OPTIONS and OPTIONS
-   contain conflicting properties."
-  (with-simple-restart (continue "~@<Ignore the incompatibility and ~
-                                  use the existing bus object.~@:>")
-    (iter (for (key value) on options :by #'cddr)
-          (when (eq key :portfile)
-            (next-iteration))
-          (let ((bus-value (getf bus-options key)))
-            (unless (equalp bus-value value)
-              (error "~@<Incompatible values for option ~S: current ~
-                      bus uses value ~S; requested value is ~S.~@:>"
-                     key bus-value value))))))
-
 (#-sbcl defvar #+sbcl sb-ext:defglobal **written-port-files**
   ;; Associates to `bus' instances lists of port-files that have been
   ;; written for the respective instances.
@@ -103,9 +81,8 @@
 (defun print-socket (stream socket &optional colon? at?)
   "Print ENDPOINT to STREAM."
   (declare (ignore at?))
-  (format stream "~{~:[ADDRESS?~;~:*~A~]:~:[PORT?~;~:*~D~]~}"
-          (handler-case (multiple-value-list
-                         (if colon?
-                             (usocket:get-local-name socket)
-                             (usocket:get-peer-name  socket)))
-            (error () '(nil nil)))))
+  (format stream "~:[?~;~:*~{~A~^ ~}~]"
+          (ignore-errors (multiple-value-list
+                          (if colon?
+                              (usocket:get-local-name socket)
+                              (usocket:get-peer-name  socket))))))

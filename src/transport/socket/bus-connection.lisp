@@ -117,21 +117,14 @@
 (defmethod initialize-instance :after ((instance bus-connection)
                                        &key
                                        socket
-                                       host
-                                       port
-                                       (nodelay? t)
+                                       make-socket
                                        handshake)
-  ;; Install socket (opening it, if specified via HOST and PORT).
+  ;; Install socket (opening it, if specified necessary).
   (setf (connection-%socket instance)
         (cond
           (socket)
-          ((and host port)
-           (usocket:socket-connect host port
-                                   :element-type '(unsigned-byte 8)))))
-
-  ;; Set requested TCPNODELAY behavior.
-  (setf (usocket:socket-option (connection-socket instance) :tcp-nodelay)
-        nodelay?)
+          (make-socket
+           (funcall make-socket))))
 
   ;; If requested, perform handshake in the requested role.
   (when handshake

@@ -35,3 +35,15 @@
   (:documentation
    "This package contains a transport implementation that uses
     multiple point-to-point socket connections to simulate a bus."))
+
+(cl:in-package #:rsb.transport.socket)
+
+(define-constant +backscatter-warning+
+    #.(format
+       nil
+       "Since currently all events are independently delivered to all ~
+        processes, regardless of whether the individual processes ~
+        actually contain participants, this transport cannot work ~
+        efficiently with participants distributed across many ~
+        processes.")
+    :test #'string=)

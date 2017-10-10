@@ -16,15 +16,11 @@
 
 (defmethod initialize-instance :after ((instance bus-client)
                                        &key
-                                       host
-                                       port
-                                       options)
+                                       make-socket)
   ;; Add a single connection to INSTANCE. The returned connection is
   ;; guaranteed to have completing the handshake and thus receives all
   ;; events published on the bus afterward.
   (setf (bus-connections instance)
-        (list (apply #'make-instance 'bus-connection
-                     :host      host
-                     :port      port
-                     :handshake :receive
-                     options))))
+        (list (make-instance 'bus-connection
+                             :make-socket make-socket
+                             :handshake   :receive))))

@@ -1,6 +1,6 @@
 ;;;; rsb-transport-socket.asd --- System containing the socket transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -40,7 +40,10 @@
                               (:file       "bus-client")
                               (:file       "bus-server")
 
-                              (:file       "connectors"))))
+                              (:file       "connectors")
+
+                              (:file       "transport-tcp")
+                              (:file       "connectors-tcp"))))
 
   :in-order-to ((test-op (test-op :rsb-transport-socket/test))))
 
@@ -61,7 +64,9 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "bus")
-                              (:file       "connectors")))))
+
+                              (:file       "transport-tcp")
+                              (:file       "connectors-tcp")))))
 
 (defmethod perform ((operation test-op)
                     (component (eql (find-system :rsb-transport-socket/test))))

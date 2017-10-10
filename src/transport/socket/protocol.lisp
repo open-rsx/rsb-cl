@@ -8,11 +8,41 @@
 
 ;;; Transport protocol
 
-(defgeneric transport-ensure-bus (transport host port role connector)
+(defgeneric make-connection-address (transport connector)
   (:documentation
-   "Return (creating it if necessary), a `bus-server' or `bus-client'
-    instance for the endpoint designated by HOST and PORT and attach
-    CONNECTOR to it.
+   "Return a suitable address for TRANSPORT and CONNECTOR.
+
+    The address contains information that uniquely identifies the
+    socket used by CONNECTOR. For example, a TCP socket is identified
+    the combination of a hostname or IP address and a port."))
+
+(defgeneric make-connection-options (transport connector)
+  (:documentation
+   "Return a plists of options for TRANSPORT and CONNECTOR.
+
+    These options contain information that should be passed to the
+    socket used by CONNECTOR but is not necessary to uniquely identify
+    it (i.e. not part of the address). For example, the TCP_NODELAY
+    option has to be passed to the socket but is not part of its
+    address."))
+
+(defgeneric check-connection-options (transport bus-options connector-options)
+  (:documentation
+   "Signal an error if the option plists BUS-OPTIONS and
+    CONNECTOR-OPTIONS contain conflicting properties."))
+
+(defgeneric transport-ensure-bus (transport role connector address
+                                  &rest options)
+  (:documentation
+   "Return, maybe create, a bus for TRANSPORT, ROLE, CONNECTOR and ADDRESS.
+
+    Return (creating it if necessary), a `bus-server' or `bus-client'
+    instance for the endpoint designated by ADDRESS as well as OPTIONS
+    and attach CONNECTOR to it.
+
+    If such a bus already exists, ensure, in a manner specific to
+    TRANSPORT, that OPTIONS are compatible to options of the existing
+    bus.
 
     Attaching CONNECTOR marks the `bus-client' or `bus-client'
     instance as being in use and protects it from being destroyed in a
@@ -41,6 +71,19 @@
 
       Try to act as client, establishing a restart to try acting as
       server in case of a problem."))
+
+;;; Default behavior
+
+(defmethod check-connection-options :around ((transport          t)
+                                             (bus-options        t)
+                                             (connectorr-options t))
+  (with-simple-restart (continue "~@<Ignore the incompatibility and ~
+                                  use the existing bus object.~@:>")
+    (call-next-method)))
+
+(defmethod check-connection-options ((transport         t)
+                                     (bus-options       t)
+                                     (connector-options t)))
 
 ;;; Connection shutdown protocol
 

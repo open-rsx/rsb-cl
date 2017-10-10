@@ -31,12 +31,9 @@
 
 (defmethod initialize-instance :after ((instance bus-server)
                                        &key
-                                       host
-                                       port)
+                                       make-socket)
   ;; Setup the listening socket.
-  (setf (bus-%socket instance)
-        (usocket:socket-listen host port
-                               :element-type '(unsigned-byte 8)))
+  (setf (bus-%socket instance) (funcall make-socket))
   (log:info "~@<~A has opened listen socket~@:>" instance)
 
   (log:info "~@<~A is starting acceptor thread~@:>" instance)
@@ -67,6 +64,7 @@
 
 (defmethod receive-messages ((bus bus-server))
   (let+ (((&structure bus- connections options (server-socket socket) state) bus)
+         ((&plist-r/o (nodelay? :nodelay?)) options)
          ((&flet accept ()
             ;; Try to accept a client. In case of an error, check
             ;; whether the bus socket has been removed, indicating
@@ -83,6 +81,9 @@
     ;; Main processing loop. Wait for activity on the server socket.
     (log:debug "~@<~A is starting to accept connections~:@>" bus)
     (iter (when-let ((client-socket (accept)))
+            ;; Set requested TCPNODELAY behavior.
+            (setf (usocket:socket-option client-socket :tcp-nodelay) nodelay?)
+
             ;; Since we create and add the new connection with the bus
             ;; lock held, all events published on BUS after the
             ;; handshake of the new connection completes are
@@ -90,10 +91,9 @@
             ;; note that the server role of the handshake, sending 4
             ;; bytes, usually does not involve blocking.
             (with-locked-bus (bus)
-              (push (apply #'make-instance 'bus-connection
-                           :socket    client-socket
-                           :handshake :send
-                           (remove-from-plist options :portfile))
+              (push (make-instance 'bus-connection
+                                   :socket    client-socket
+                                   :handshake :send)
                     connections))
             (log:info "~@<~A accepted bus client ~
                        ~/rsb.transport.socket::print-socket/~@:>"

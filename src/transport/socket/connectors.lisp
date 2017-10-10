@@ -10,104 +10,55 @@
 
 (defclass connector (rsb.transport:connector
                      conversion-mixin)
-  ((bus      :accessor connector-bus
-             :documentation
-             "Stores the bus object representing the socked-based bus
-              to which the connector provides access.")
+  ((bus     :accessor connector-bus
+            :documentation
+            "Stores the bus object representing the socked-based bus
+             to which the connector provides access.")
    ;; Option slots
-   (host     :initarg  :host
-             :type     string
-             :reader   connector-host
-             :initform *default-host*
-             :documentation
-             "The name of the host on which the server is listener in case of clients and the bind address in case of the server.")
-   (port     :type     (unsigned-byte 16)
-             :reader   connector-port
-             :initform *default-port*
-             :documentation
-             "The port on which the server is listening in case of clients and the port on which connections should be accepted in case of the server.")
-   (portfile :initarg  :portfile
-             :type     (or null string)
-             :reader   connector-portfile
-             :initform nil
-             :documentation
-             "Optionally stores the name of a file (or \"-\" for standard-output) into which an automatically assigned port number should be written when acting as server on an arbitrary free port (indicated by port number 0).")
-   (server?  :type     (or boolean (eql :auto))
-             :reader   connector-server?
-             :initform :auto
-             :documentation
-             "Controls whether the connector takes the server or client role for the bus.")
-   (nodelay? :type     boolean
-             :reader   connector-nodelay?
-             :initform t
-             :documentation
-             "Controls whether decreased throughput should be traded for reduced latency by the connector. For TCP connections this means the TCP_NODELAY option should be set on the socket implementing the bus connection."))
+   (server? :type     (or boolean (eql :auto))
+            :reader   connector-server?
+            :initform :auto
+            :documentation
+            "Controls whether the connector takes the server or client
+             role for the bus."))
   (:metaclass connector-class)
-  (:transport :socket)
-  (:default-initargs
-      :host (missing-required-initarg 'connector :host)
-    :port (missing-required-initarg 'connector :port))
   (:options
-   (:host       &slot)
-   (:port       &slot port)
-   (:portfile   &slot)
-   (:server     &slot server?)
-   (:tcpnodelay &slot nodelay?))
+   (:server &slot server?))
   (:documentation
    "Superclass for socked-based connector classes."))
 
 ;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
 (defmethod initialize-instance :after ((instance connector)
                                        &key
-                                       port
-                                       portfile
                                        server?
-                                       server
-                                       tcpnodelay
-                                       nodelay?)
-  (let ((port     (etypecase port
-                    (string
-                     (parse-integer port))
-                    ((unsigned-byte 16)
-                     port)))
-        (server?  (let ((value (or server? server)))
-                    (etypecase value
-                      ((member t nil :auto)
-                       value)
-                      (string
-                       (cond
-                         ((string= value "0")    nil)
-                         ((string= value "1")    t)
-                         ((string= value "auto") :auto))))))
-        (nodelay? (let ((value (or tcpnodelay nodelay?)))
-                    (etypecase value
-                      (boolean value)
-                      (string
-                       (cond
-                         ((string= value "0") nil)
-                         ((string= value "1") t)
-                         (t                   (error "~@<Invalid value ~S.~@:>"
-                                                     value))))))))
-    (when (and (not (eq server? t)) portfile)
-      (incompatible-initargs 'connector
-                             :portfile portfile
-                             :server?  server?))
-    (setf (slot-value instance 'port)     port
-          (slot-value instance 'server?)  server?
-          (slot-value instance 'nodelay?) nodelay?)))
+                                       server)
+  (setf (slot-value instance 'server?)
+        (let ((value (or server? server)))
+          (etypecase value
+            ((member t nil :auto)
+             value)
+            (string
+             (cond
+               ((string= value "0")    nil)
+               ((string= value "1")    t)
+               ((string= value "auto") :auto)))))))
 
 (defmethod notify ((connector connector)
                    (scope     scope)
                    (action    (eql :attached)))
-  (let+ (((&structure connector- transport host port server? bus) connector)
-         (role (case server?
-                 ((t)   :server)
-                 ((nil) :client)
-                 (t     server?))))
+  (let+ (((&structure connector- transport server? bus) connector)
+         (role    (case server?
+                    ((t)   :server)
+                    ((nil) :client)
+                    (t     server?)))
+         (address (make-connection-address transport connector))
+         (options (make-connection-options transport connector)))
     ;; Depending on whether connecting to the socket-based bus as a
     ;; client or server has been requested, request a suitable bus
     ;; access provider.
-    (setf bus (transport-ensure-bus transport host port role connector))
+    (setf bus (apply #'transport-ensure-bus
+                     transport role connector address
+                     options))
 
     ;; Notify the bus access provider of the added connector.
     ;; ensure-bus-* already attached CONNECTOR.
@@ -212,9 +163,7 @@
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
-   "In-direction, push-style communication over a socket."))
-
-(register-connector :socket :in-pull 'in-pull-connector)
+   "Superclass in-direction, push-style socket connectors."))
 
 (defmethod handle ((connector in-pull-connector)
                    (data      notification))
@@ -265,9 +214,7 @@
   (:metaclass connector-class)
   (:direction :in-push)
   (:documentation
-   "In-direction, push-style communication over a socket."))
-
-(register-connector :socket :in-push 'in-push-connector)
+   "Superclass for in-direction, push-style socket connectors."))
 
 (defmethod handle ((connector in-push-connector)
                    (data      notification))
@@ -285,9 +232,7 @@
   (:metaclass connector-class)
   (:direction :out)
   (:documentation
-   "Out-direction communication over a socket."))
-
-(register-connector :socket :out 'out-connector)
+   "Superclass for out-direction socket connectors."))
 
 (defmethod handle ((connector out-connector)
                    (event     event))

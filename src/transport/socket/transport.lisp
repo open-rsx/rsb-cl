@@ -1,36 +1,28 @@
 ;;;; transport.lisp --- Socket transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
 
-(defvar *default-host* "localhost"
-  "Default host used by the socket-based transport.")
-
-(defvar *default-port* 55555
-  "Default port used by the socket-based transport.")
-
 (defclass socket-transport (transport)
-  ((servers :reader   transport-servers
-            :initform (make-hash-table :test #'equalp)
-            :documentation
-            "Map host names and ports to `bus-servers' instances.")
-   (clients :reader   transport-clients
-            :initform (make-hash-table :test #'equalp)
-            :documentation
-            "Map host names and ports to `bus-client' instances.")
-   (lock    :reader   transport-lock
-            :initform (bt:make-recursive-lock "Bus clients+servers lock")
-            :documentation
-            "Protects accesses to clients and servers slots."))
+  ((address-family :allocation :class
+                   :reader   transport-address-family)
+   (servers        :reader   transport-servers
+                   :initform (make-hash-table :test #'equalp)
+                   :documentation
+                   "Map addresses to `bus-servers' instances.")
+   (clients        :reader   transport-clients
+                   :initform (make-hash-table :test #'equalp)
+                   :documentation
+                   "Map addresses to `bus-client' instances.")
+   (lock           :reader   transport-lock
+                   :initform (bt:make-recursive-lock "Bus clients+servers lock")
+                   :documentation
+                   "Protects accesses to clients and servers slots."))
   (:documentation
-   "The (usually singleton) instance of this represents the socket
-    transport.
-
-    The instances manages bus clients and servers corresponding to
-    different connector configurations."))
+   "Superclass for socket-based transport classes."))
 
 (defmethod print-items:print-items append ((object socket-transport))
   `((:client-count ,(hash-table-count (transport-clients object)) " (C ~D)"
@@ -38,132 +30,111 @@
     (:server-count ,(hash-table-count (transport-servers object)) " (S ~D)"
                    ((:after :client-count)))))
 
-;;; Transport registration
-
-(register-transport
- :socket
- :transport-class 'socket-transport
- :schemas         :socket
- :wire-type       'nibbles:octet-vector
- :remote?         t
- :documentation
- "TCP-Socket-based transport for small numbers of communicating processes.
-
-  One of the communicating processes acts as the server, opening a
-  TCP-listen-socket. Other processes connect to this socket to send
-  and receive events. Within each processes, arbitrary numbers of
-  participants can share the respective socket connection of the
-  process.
-
-  Since currently all events are independently delivered to all
-  processes, regardless of whether the individual processes actually
-  contain participants, this transport cannot work efficiently with
-  participants distributed across many processes.")
-
 ;;; Ensuring bus clients and servers
 ;;;
-;;; Depending on the ROLE parameter, find a bus provider for HOST and
-;;; PORT and add CONNECTOR to it. If ROLE is :AUTO, first try to
-;;; create a server provider and try to fall back to a client provider
-;;; if that fails.
+;;; Depending on the ROLE parameter, find a bus provider ADDRESS and
+;;; add CONNECTOR to it. If ROLE is :AUTO, first try to create a
+;;; server provider and try to fall back to a client provider if that
+;;; fails.
 
-;; Act as server unconditionally.
+;;; Act as client/server unconditionally.
+
+(macrolet
+    ((define-ensure-bus-method (role slot bus-class)
+       `(defmethod transport-ensure-bus ((transport socket-transport)
+                                         (role      (eql ,role))
+                                         (connector t)
+                                         (address   t)
+                                         &rest options)
+          (log:trace "~@<~A is trying to obtain ~A bus ~A at ~{~S ~S~^ ~
+                     ~} for ~A~@:>"
+                     transport role
+                     (transport-address-family transport) address connector)
+          (let+ (((&structure-r/o transport- address-family ,slot lock)
+                  transport)
+                 ((&flet make-socket ()
+                    ,(ecase role
+                       (:server!
+                        `(let+ (((&plist-r/o (host :host) (port :port)) address)
+                                ((&plist-r/o (backlog        :backlog)
+                                             (reuse-address? :reuse-address?))
+                                 options))
+                           (usocket:socket-listen host port
+                                                  :element-type  '(unsigned-byte 8)
+                                                  :backlog       (or backlog 5)
+                                                  :reuse-address reuse-address?)))
+                       (:client!
+                        `(let+ (((&plist-r/o (host :host) (port :port)) address)
+                                ((&plist-r/o (nodelay? :nodelay?)) options))
+                           (usocket:socket-connect host port
+                                                  :element-type  '(unsigned-byte 8)
+                                                  :nodelay       nodelay?))))))
+                 (key (cons address-family address)))
+            (bt:with-recursive-lock-held (lock)
+              (or (when-let ((candidate (gethash key ,slot)))
+                    (with-locked-bus (candidate)
+                      (when (bus-connectors candidate)
+                        (check-connection-options
+                         transport (bus-options candidate) options)
+                        (notify connector candidate :attached)
+                        candidate)))
+                  (let ((bus (make-instance ',bus-class
+                                            :make-socket #'make-socket
+                                            :options     options)))
+                    (notify connector bus :attached)
+                    (setf (gethash key ,slot) bus))))))))
+
+  (define-ensure-bus-method :server! servers bus-server)
+  (define-ensure-bus-method :client! clients bus-client))
+
+;;; Try as client/server and flip in case of error
 
 (defmethod transport-ensure-bus ((transport socket-transport)
-                                 (host      string)
-                                 (port      integer)
-                                 (role      (eql :server!))
-                                 (connector t))
-  (log:trace "~@<~A is trying to obtain bus server ~A:~D for ~A~@:>"
-             transport host port connector)
-  (let+ ((options   (make-connection-options connector))
-         (port-file (getf options :portfile))
-         (host      "0.0.0.0")
-         (key       (cons host port))
-         ((&structure-r/o transport- servers lock) transport))
-    (bt:with-recursive-lock-held (lock)
-      (or (when-let ((candidate (gethash key servers)))
-            (with-locked-bus (candidate)
-              (when (bus-connectors candidate)
-                (check-connection-options (bus-options candidate) options)
-                (maybe-write-port-file port-file candidate)
-                (notify connector candidate :attached)
-                candidate)))
-          (let ((bus (make-instance 'bus-server
-                                    :host    host
-                                    :port    port
-                                    :options options)))
-            (maybe-write-port-file port-file bus)
-            (notify connector bus :attached)
-            (setf (gethash key servers) bus))))))
-
-(defmethod transport-ensure-bus ((transport socket-transport)
-                                 (host      string)
-                                 (port      integer)
                                  (role      (eql :server))
-                                 (connector t))
+                                 (connector t)
+                                 (address   t)
+                                 &rest options)
   (restart-case
-      (transport-ensure-bus transport host port :server! connector)
+      (apply #'transport-ensure-bus transport :server! connector address
+             options)
     (retry-as-client ()
       :report (lambda (stream)
-                (format stream "~@<Try connecting to the bus at ~
-                                ~A:~D as client.~@:>"
-                        host port))
-      (transport-ensure-bus transport host port :client! connector))))
-
-;; Act as client unconditionally.
-
-(defmethod transport-ensure-bus ((transport socket-transport)
-                                 (host      string)
-                                 (port      integer)
-                                 (role      (eql :client!))
-                                 (connector t))
-  (log:trace "~@<~A is trying to obtain bus client ~S:~D for ~A~@:>"
-             transport host port connector)
-  (let+ ((options (make-connection-options connector))
-         (key     (cons host port))
-         ((&structure-r/o transport- clients lock) transport))
-    (bt:with-recursive-lock-held (lock)
-      (or (when-let ((candidate (gethash key clients)))
-            (with-locked-bus (candidate)
-              (when (bus-connectors candidate)
-                (check-connection-options (bus-options candidate) options)
-                (notify connector candidate :attached)
-                candidate)))
-          (let ((bus (make-instance 'bus-client
-                                    :host    host
-                                    :port    port
-                                    :options options)))
-            (notify connector bus :attached)
-            (setf (gethash key clients) bus))))))
+                (format stream "~@<Try connecting to the ~A bus at ~
+                                ~{~S ~S~^ ~} as client.~@:>"
+                        (transport-address-family transport) address))
+      (apply #'transport-ensure-bus transport :client! connector address
+             options))))
 
 (defmethod transport-ensure-bus ((transport socket-transport)
-                                 (host      string)
-                                 (port      integer)
                                  (role      (eql :client))
-                                 (connector t))
+                                 (connector t)
+                                 (address   t)
+                                 &rest options)
   (restart-case
-      (transport-ensure-bus transport host port :client! connector)
+      (apply #'transport-ensure-bus transport :client! connector address
+             options)
     (retry-as-server ()
       :report (lambda (stream)
-                (format stream "~@<Try to create a server for the ~
-                                bus at ~A:~D.~@:>"
-                        host port))
-      (transport-ensure-bus transport host port :server! connector))))
+                (format stream "~@<Try to create a server for the ~A ~
+                                bus at ~{~S ~S~^ ~}.~@:>"
+                        (transport-address-family transport) address))
+      (apply #'transport-ensure-bus transport :server! connector address
+             options))))
 
-;; Automatically decide whether to act as bus server or client
+;;; Automatically decide whether to act as bus server or client
 
 (defmethod transport-ensure-bus ((transport socket-transport)
-                                 (host      string)
-                                 (port      integer)
                                  (role      (eql :auto))
-                                 (connector t))
+                                 (connector t)
+                                 (address   t)
+                                 &rest options)
   ;; Try to create a server bus provider and fall back to connecting
   ;; via a client bus provider if the server bus provider could not be
   ;; created.
   (bt:with-recursive-lock-held ((transport-lock transport))
     (handler-case
-        (transport-ensure-bus transport host port :server! connector)
+        (apply #'transport-ensure-bus transport :server! connector address
+               options)
       ((or usocket:address-in-use-error
            usocket:address-not-available-error
            #+sbcl sb-bsd-sockets:socket-error)
@@ -180,4 +151,5 @@
                                  ~&~<> ~@;~A~:>"
               :format-arguments (list (list server-condition)
                                       (list client-condition))))
-          (transport-ensure-bus transport host port :client! connector))))))
+          (apply #'transport-ensure-bus transport :client! connector address
+                 options))))))

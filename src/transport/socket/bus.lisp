@@ -59,9 +59,8 @@
                          closing after having been removed from the
                          bus."))
   (:default-initargs
-   :host    (missing-required-initarg 'bus :host)
-   :port    (missing-required-initarg 'bus :port)
-   :options (missing-required-initarg 'bus :options))
+   :make-socket (missing-required-initarg 'bug :make-socket)
+   :options     (missing-required-initarg 'bus :options))
   (:documentation
    "This class is intended to be used as a superclass of client and
     server providers of bus access.
