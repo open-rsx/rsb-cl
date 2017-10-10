@@ -27,8 +27,16 @@
    #:tcp-connector
    #:tcp-in-push-connector
    #:tcp-in-pull-connector
-   #:tcp-out-connector
+   #:tcp-out-connector)
 
+  #+(and sbcl linux)
+  (:import-from #:rsb.transport.socket
+   #:unix-connector
+   #:unix-in-push-connector
+   #:unix-in-pull-connector
+   #:unix-out-connector)
+
+  (:import-from #:rsb.transport.socket
    #:bus-connectors
    #:bus-connections
 
@@ -77,10 +85,11 @@ socket. Should be incremented after each use.")
   ;; Prior to running each individual test case, clear bus clients and
   ;; servers and choose a new port.
   (:setup
-   (let ((transport (service-provider:find-provider
-                     'rsb.transport:transport :socket)))
-     (clrhash (rsb.transport.socket::transport-clients transport))
-     (clrhash (rsb.transport.socket::transport-servers transport)))
+   (dolist (transport '(:tcp-socket :unix-socket))
+     (let ((transport (service-provider:find-provider
+                       'rsb.transport:transport transport)))
+       (clrhash (rsb.transport.socket::transport-clients transport))
+       (clrhash (rsb.transport.socket::transport-servers transport))))
    (next-port))
   (:run-setup :once-per-test-case)
   (:documentation

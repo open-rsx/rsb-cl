@@ -44,7 +44,14 @@
 
                               (:file       "socket-tcp")
                               (:file       "transport-tcp")
-                              (:file       "connectors-tcp"))))
+                              (:file       "connectors-tcp")
+
+                              (:file       "socket-unix"
+                                           :if-feature (:and :sbcl :linux))
+                              (:file       "transport-unix"
+                                           :if-feature (:and :sbcl :linux))
+                              (:file       "connectors-unix"
+                                           :if-feature (:and :sbcl :linux)))))
 
   :in-order-to ((test-op (test-op :rsb-transport-socket/test))))
 
@@ -67,7 +74,12 @@
                               (:file       "bus")
 
                               (:file       "transport-tcp")
-                              (:file       "connectors-tcp")))))
+                              (:file       "connectors-tcp")
+
+                              (:file       "transport-unix"
+                                           :if-feature (:and :sbcl :linux))
+                              (:file       "connectors-unix"
+                                           :if-feature (:and :sbcl :linux))))))
 
 (defmethod perform ((operation test-op)
                     (component (eql (find-system :rsb-transport-socket/test))))
