@@ -63,8 +63,7 @@
 ;;; Accepting clients
 
 (defmethod receive-messages ((bus bus-server))
-  (let+ (((&structure bus- connections options (server-socket socket) state) bus)
-         ((&plist-r/o (nodelay? :nodelay?)) options)
+  (let+ (((&structure bus- connections (server-socket socket) state) bus)
          ((&flet accept ()
             ;; Try to accept a client. In case of an error, check
             ;; whether the bus socket has been removed, indicating
@@ -81,9 +80,6 @@
     ;; Main processing loop. Wait for activity on the server socket.
     (log:debug "~@<~A is starting to accept connections~:@>" bus)
     (iter (when-let ((client-socket (accept)))
-            ;; Set requested TCPNODELAY behavior.
-            (setf (usocket:socket-option client-socket :tcp-nodelay) nodelay?)
-
             ;; Since we create and add the new connection with the bus
             ;; lock held, all events published on BUS after the
             ;; handshake of the new connection completes are

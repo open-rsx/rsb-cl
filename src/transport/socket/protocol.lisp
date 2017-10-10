@@ -109,3 +109,21 @@
     unconditionally.
 
     HANDSHAKE can be either nil, :send or :receive."))
+
+;;; Socket service
+
+(service-provider:define-service socket
+  (:documentation
+   "Providers of this service create different kinds of sockets.
+
+    The kind of socket to create is specified as a pair of the desired
+    address family and an indication of whether an active or passive
+    socket should be created."))
+
+(defun make-socket (address-family connect
+                    &rest options &key &allow-other-keys)
+  (log:debug "~@<Creating ~A ~A socket with options ~{~S~^ ~}~@:>"
+             address-family connect options)
+  (let ((key (list address-family connect)))
+    (declare (dynamic-extent key))
+    (apply #'service-provider:make-provider 'socket key options)))

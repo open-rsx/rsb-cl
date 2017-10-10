@@ -40,7 +40,7 @@
 ;;; Act as client/server unconditionally.
 
 (macrolet
-    ((define-ensure-bus-method (role slot bus-class)
+    ((define-ensure-bus-method (role slot bus-class socket)
        `(defmethod transport-ensure-bus ((transport socket-transport)
                                          (role      (eql ,role))
                                          (connector t)
@@ -53,22 +53,8 @@
           (let+ (((&structure-r/o transport- address-family ,slot lock)
                   transport)
                  ((&flet make-socket ()
-                    ,(ecase role
-                       (:server!
-                        `(let+ (((&plist-r/o (host :host) (port :port)) address)
-                                ((&plist-r/o (backlog        :backlog)
-                                             (reuse-address? :reuse-address?))
-                                 options))
-                           (usocket:socket-listen host port
-                                                  :element-type  '(unsigned-byte 8)
-                                                  :backlog       (or backlog 5)
-                                                  :reuse-address reuse-address?)))
-                       (:client!
-                        `(let+ (((&plist-r/o (host :host) (port :port)) address)
-                                ((&plist-r/o (nodelay? :nodelay?)) options))
-                           (usocket:socket-connect host port
-                                                  :element-type  '(unsigned-byte 8)
-                                                  :nodelay       nodelay?))))))
+                    (apply #'make-socket address-family ,socket
+                           (append address options))))
                  (key (cons address-family address)))
             (bt:with-recursive-lock-held (lock)
               (or (when-let ((candidate (gethash key ,slot)))
@@ -84,8 +70,8 @@
                     (notify connector bus :attached)
                     (setf (gethash key ,slot) bus))))))))
 
-  (define-ensure-bus-method :server! servers bus-server)
-  (define-ensure-bus-method :client! clients bus-client))
+  (define-ensure-bus-method :server! servers bus-server :passive)
+  (define-ensure-bus-method :client! clients bus-client :active))
 
 ;;; Try as client/server and flip in case of error
 

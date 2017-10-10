@@ -42,6 +42,7 @@
 
                               (:file       "connectors")
 
+                              (:file       "socket-tcp")
                               (:file       "transport-tcp")
                               (:file       "connectors-tcp"))))
 
