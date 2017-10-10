@@ -1,6 +1,6 @@
 ;;;; informer.lisp --- Informers put events onto a bus.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,14 +18,16 @@
                               :initform t
                               :documentation
                               "Stores the type specifying the type of
-event payloads supported by the informer.")
+                               event payloads supported by the
+                               informer.")
    (sequence-number-generator :type     function
                               :reader   informer-%sequence-number-generator
                               :initform (make-sequence-number-generator)
                               :documentation
                               "Stores a thread-safe sequence number
-generation function which is used to generate sequence numbers for
-events sent by this informer."))
+                               generation function which is used to
+                               generate sequence numbers for events
+                               sent by this informer."))
   (:documentation
    "A participant that publishes events to a specific channel.
 
