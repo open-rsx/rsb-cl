@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Unit tests for macros.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -152,12 +152,11 @@
       (ensure-condition rsb.transform:transform-error
         (test-case))
 
-     ;; With `continue' error policy, sending the event should proceed
-     ;; without the failing transformation.
-      #+TODO-enable-when-fixed
+      ;; With `continue' error policy, sending the event should proceed
+      ;; without the failing transformation.
       (let ((result (test-case (lambda (condition)
                                  (push condition calls)
                                  (continue condition)))))
         (ensure (typep result 'event))
         (ensure-same (length calls) 1)
-        (ensure (typep (first calls) 'rsb.event-processing:transform-error))))))
+        (ensure (typep (first calls) 'rsb.transform:transform-error))))))

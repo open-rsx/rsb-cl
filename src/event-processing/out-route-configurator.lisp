@@ -16,7 +16,9 @@
     The client generally is an event-sending participant."))
 
 (defmethod collect-processor-mixins append ((configurator out-route-configurator))
-  '(broadcast-processor))
+  '(error-policy-handler-mixin
+    restart-handler-mixin
+    broadcast-processor))
 
 ;;; Connectors
 
