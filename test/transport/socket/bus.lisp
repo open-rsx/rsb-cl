@@ -99,8 +99,8 @@ connection.")
         (transport-ensure-bus transport host port :client! connector-1))
 
       ;; Create a bus server.
-      (with-participant (dummy :reader (make-socket-url t nil)
-                               :converters '((t . :fundamental-null)))
+      (with-participant (nil :reader (make-socket-url t nil)
+                             :converters '((t . :fundamental-null)))
         ;; We should be able to create a bus clients now. We create
         ;; two connectors and request a bus client for each of
         ;; them. The first request should cause the bus client to be
