@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -86,9 +86,8 @@
 
 (defmethod make-scope ((thing string) &key intern?)
   (unless (starts-with-/ thing)
-    (error 'type-error
-           :datum         thing
-           :expected-type '(satisfies starts-with-/)))
+    (scope-parse-error
+     thing 0 "~@<\"~A\" does not start with a \"/\".~@:>" thing))
   (let ((components (split-sequence #\/ thing :remove-empty-subseqs t)))
     (make-scope components :intern? intern?)))
 

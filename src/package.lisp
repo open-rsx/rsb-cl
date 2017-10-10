@@ -41,6 +41,10 @@
    #:rsb-warning
    #:rsb-error
 
+   #:scope-parse-error
+   #:scope-parse-error-string
+   #:scope-parse-error-position
+
    #:communication-error
 
    #:participant-creation-error

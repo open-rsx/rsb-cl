@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Unit tests for scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,12 +68,12 @@
 
   (ensure-cases (string expected-components)
       '(;; Some invalid cases.
-        ("foo"         type-error) ; missing leading "/"
-        ("foo/bar"     type-error) ; likewise
-        ("/foo "       type-error) ; invalid character: space
-        ("/!@#/+1"     type-error) ; invalid characters: !@#+
-        ("/foo/+1"     type-error) ; in second component
-        (""            type-error) ; empty string
+        ("foo"         error) ; missing leading "/"
+        ("foo/bar"     error) ; likewise
+        ("/foo "       error) ; invalid character: space
+        ("/!@#/+1"     error) ; invalid characters: !@#+
+        ("/foo/+1"     error) ; in second component
+        (""            error) ; empty string
 
         ;; These are valid.
         ("///Foo//BAR" ("Foo" "BAR"))
@@ -87,10 +87,10 @@
         ("/_/foo/"     ("_" "foo"))
         ("/"           ()))
     (case expected-components
-      (type-error (ensure-condition 'type-error (make-scope string)))
-      (t          (ensure-same (scope-components (make-scope string))
-                               expected-components
-                               :test #'equal)))))
+      (error (ensure-condition 'error (make-scope string)))
+      (t     (ensure-same (scope-components (make-scope string))
+                          expected-components
+                          :test #'equal)))))
 
 (addtest (scope-root
           :documentation

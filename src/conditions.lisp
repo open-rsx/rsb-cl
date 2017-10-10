@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in cl-rsb.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2010-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,6 +33,46 @@
   (:documentation
    "This class should be mixed into all RSB-related error condition
     classes."))
+
+;;; Scope-related conditions
+
+(define-condition scope-parse-error (parse-error
+                                     rsb-error
+                                     simple-condition)
+  ((string   :initarg :string
+             :type    string
+             :reader  scope-parse-error-string
+             :documentation
+             "Stores the invalid scope string.")
+   (position :initarg :position
+             :type    array-index
+             :reader  scope-parse-error-position
+             :documentation
+             "Stores the position of the first invalid character."))
+  (:default-initargs
+   :string   (missing-required-initarg 'scope-parse-error :string)
+   :position (missing-required-initarg 'scope-parse-error :position))
+  (:report
+   (lambda (condition stream)
+     (let+ (((&structure-r/o scope-parse-error- string position) condition))
+       (format stream "~@<The string~@:_~
+                       ~@:_~
+                       ~2@T~A~@:_~
+                       ~2@T~V@T^~@:_~
+                       ~@:_~
+                       could not be parsed as a scope~
+                       ~/more-conditions:maybe-print-explanation/~@:>"
+               string position condition))))
+  (:documentation
+   "This error is signaled when string cannot be parsed as a scope."))
+
+(defun scope-parse-error (string position
+                          &optional format-control &rest format-arguments)
+  (error 'scope-parse-error
+         :string           string
+         :position         position
+         :format-control   format-control
+         :format-arguments format-arguments))
 
 ;;; Communication related conditions
 
