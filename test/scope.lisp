@@ -68,12 +68,12 @@
 
   (ensure-cases (string expected-components)
       '(;; Some invalid cases.
-        ("foo"         error) ; missing leading "/"
-        ("foo/bar"     error) ; likewise
-        ("/foo "       error) ; invalid character: space
-        ("/!@#/+1"     error) ; invalid characters: !@#+
-        ("/foo/+1"     error) ; in second component
-        (""            error) ; empty string
+        ("foo"         scope-parse-error) ; missing leading "/"
+        ("foo/bar"     scope-parse-error) ; likewise
+        ("/foo "       scope-parse-error) ; invalid character: space
+        ("/!@#/+1"     scope-parse-error) ; invalid characters: !@#+
+        ("/foo/+1"     scope-parse-error) ; in second component
+        (""            scope-parse-error) ; empty string
 
         ;; These are valid.
         ("///Foo//BAR" ("Foo" "BAR"))
@@ -87,10 +87,11 @@
         ("/_/foo/"     ("_" "foo"))
         ("/"           ()))
     (case expected-components
-      (error (ensure-condition 'error (make-scope string)))
-      (t     (ensure-same (scope-components (make-scope string))
-                          expected-components
-                          :test #'equal)))))
+      (scope-parse-error
+       (ensure-condition 'scope-parse-error (make-scope string)))
+      (t
+       (ensure-same (scope-components (make-scope string)) expected-components
+                    :test #'equal)))))
 
 (addtest (scope-root
           :documentation

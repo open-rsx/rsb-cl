@@ -11,7 +11,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass scope ()
     ((components :initarg  :components
-                 :type     scope-components
+                 :type     list ; actually scope-components
                  :reader   scope-components
                  :documentation
                  "The name components of the scope.")
@@ -21,7 +21,8 @@
                  :initform nil
                  :documentation
                  "Non-nil if the scope has been interned.")
-     (%string    :type     (or null string)
+     (%string    :initarg  :%string
+                 :type     (or null string)
                  :accessor scope-%string
                  :initform nil
                  :documentation
@@ -75,21 +76,51 @@
 (defmethod make-scope ((thing list) &key intern?)
   (check-type thing scope-components "a list of component strings")
 
-  (make-scope (make-instance 'scope :components thing) :intern? intern?))
+  (let ((scope (make-instance 'scope :components thing)))
+    (if intern?
+        (intern-scope scope)
+        scope)))
 
 (defmethod make-scope ((thing sequence) &key intern?)
   (make-scope (coerce thing 'list) :intern? intern?))
 
-(declaim (inline starts-with-/))
 (defun starts-with-/ (string)
   (starts-with #\/ string))
 
 (defmethod make-scope ((thing string) &key intern?)
-  (unless (starts-with-/ thing)
+  (declare (type (not (simple-array nil)) thing))
+  (when (or (zerop (length thing)) (char/= (aref thing 0) #\/))
     (scope-parse-error
      thing 0 "~@<\"~A\" does not start with a \"/\".~@:>" thing))
-  (let ((components (split-sequence #\/ thing :remove-empty-subseqs t)))
-    (make-scope components :intern? intern?)))
+
+  (let ((scope
+         (loop :with string = thing
+            :with length = (length thing)
+            :with from :of-type array-index = 1
+            :for to :of-type array-index :from 1 :below length
+            :for character = (aref thing to)
+
+            :if (char= character #\/)
+            :if (>= from to)
+            :do (setf from (1+ to) string nil)
+            :else :collect (subseq thing from to) :into components
+            :and :do (setf from (1+ to))
+            :else
+            :unless (scope-component-character? character)
+            :do (scope-parse-error
+                 thing to
+                 "~@<The character ~A (~A) at position ~D is illegal.~@:>"
+                 character (char-name character) to)
+            :when (and (= to (1- length)) (> length from))
+            :collect (subseq thing from length) :into components
+            :and do (setf string nil)
+
+            :finally (return (make-instance 'scope
+                                            :components components
+                                            :%string    string)))))
+    (if intern?
+        (intern-scope scope)
+        scope)))
 
 (declaim (ftype (function (t) (values scope &optional)) ensure-scope)
          (inline ensure-scope))
