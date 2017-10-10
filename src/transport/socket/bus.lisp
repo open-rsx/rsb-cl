@@ -69,9 +69,7 @@
     It manages a list of connections to remote processes using the bus
     and a list of local connectors connected to the bus."))
 
-(defmethod shared-initialize :after ((instance   bus)
-                                     (slot-names t)
-                                     &key)
+(defmethod initialize-instance :after ((instance bus) &key)
   (setf (bus-%proxy instance)
         (lambda (connection data)
           (handle instance (cons connection data)))))

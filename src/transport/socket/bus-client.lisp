@@ -14,12 +14,11 @@
    "Instances of this class provide access to a bus by means of a
     client socket."))
 
-(defmethod shared-initialize :after ((instance   bus-client)
-                                     (slot-names t)
-                                     &key
-                                     host
-                                     port
-                                     options)
+(defmethod initialize-instance :after ((instance bus-client)
+                                       &key
+                                       host
+                                       port
+                                       options)
   ;; Add a single connection to INSTANCE. The returned connection is
   ;; guaranteed to have completing the handshake and thus receives all
   ;; events published on the bus afterward.

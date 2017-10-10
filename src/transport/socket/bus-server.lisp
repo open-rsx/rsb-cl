@@ -1,6 +1,6 @@
 ;;;; bus-server.lisp --- A class that accepts connections from bus clients.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -29,11 +29,10 @@
     added to the list of connections. These objects are removed when
     the connections are closed."))
 
-(defmethod shared-initialize :after ((instance   bus-server)
-                                     (slot-names t)
-                                     &key
-                                     host
-                                     port)
+(defmethod initialize-instance :after ((instance bus-server)
+                                       &key
+                                       host
+                                       port)
   ;; Setup the listening socket.
   (setf (bus-%socket instance)
         (usocket:socket-listen host port
