@@ -68,11 +68,11 @@
                       :documentation
                       ,(format nil "Test constructing `~(~A~)' instances."
                                class-name))
-                     construct/invalid
+              construct/invalid
 
-                     ;; Missing :converter initarg.
-                     (ensure-condition 'missing-required-initarg
-                                       (make-instance ',class-name)))))))
+              ;; Missing :converter initarg.
+              (ensure-condition 'missing-required-initarg
+                (make-instance ',class-name)))))))
 
   (define-connector-suite :out)
   (define-connector-suite :in-pull)
