@@ -27,7 +27,15 @@
                           :server?   server?
                           :portfile  "-")))
     (ensure-condition 'incompatible-initargs (do-it nil))
-    (ensure-condition 'incompatible-initargs (do-it :auto))))
+    (ensure-condition 'incompatible-initargs (do-it :auto)))
+
+  (let ((instance (make-instance 'tcp-connector
+                                 :schema    :tcp-socket
+                                 :host      "foo"
+                                 :port      1
+                                 :converter nil)))
+    (ensure-same (connector-host instance) "foo" :test #'equal)
+    (ensure-same (connector-port instance) 1     :test #'eql)))
 
 ;;; Connector subclasses
 

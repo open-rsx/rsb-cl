@@ -10,7 +10,8 @@
 
 (defclass tcp-connector (connector)
   (;; Option slots
-   (host     :type     string
+   (host     :initarg  :host
+             :type     string
              :reader   connector-host
              :initform *default-host*
              :documentation

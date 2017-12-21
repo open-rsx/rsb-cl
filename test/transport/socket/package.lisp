@@ -27,7 +27,10 @@
    #:tcp-connector
    #:tcp-in-push-connector
    #:tcp-in-pull-connector
-   #:tcp-out-connector)
+   #:tcp-out-connector
+
+   #:connector-host
+   #:connector-port)
 
   #+(and sbcl linux)
   (:import-from #:rsb.transport.socket
