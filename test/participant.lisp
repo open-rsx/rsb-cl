@@ -1,6 +1,6 @@
 ;;;; participant.lisp --- Unit tests for the participant class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,7 +14,7 @@
 (addtest (participant-root
           :documentation
           "Test method on `participant-converter' for the
-`participant' class.")
+           `participant' class.")
   participant-converter
 
   (ensure-cases (converters query error? expected)
@@ -59,3 +59,31 @@
                           :error-policy #'continue
                           :handlers     handlers)
               (declare (ignore listener)))))))
+
+(defclass mock-cleanup-participant (participant)
+  ((cleanup :initarg  :cleanup
+            :reader   cleanup)))
+
+(defmethod shared-initialize :after ((instance   mock-cleanup-participant)
+                                     (slot-names t)
+                                     &key)
+  (error "something went wrong"))
+
+(defmethod detach ((participant mock-cleanup-participant))
+  (funcall (cleanup participant))
+  (error "another thing went wrong"))
+
+(addtest (participant-root
+          :documentation
+          "Ensure that `detach' is called when an error is signaled
+           during initialization.")
+  failed-construction-cleanup
+
+  ;; Make that the cleanup code in the `detach' method is executed.
+  (let+ ((cleanup? nil)
+         ((&flet cleanup () (setf cleanup? t))))
+    (ensure-condition 'error
+      (make-instance 'mock-cleanup-participant
+                     :scope   "/participantroot/failedconstructioncleanup"
+                     :cleanup #'cleanup))
+    (ensure cleanup?)))

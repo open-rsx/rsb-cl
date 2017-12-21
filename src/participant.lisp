@@ -1,6 +1,6 @@
 ;;;; participant.lisp --- A superclass for participant classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -34,6 +34,12 @@
     (format stream "~A~@[~/print-items:format-print-items/~]"
             (scope-string (participant-scope object))
             (remove :id (print-items:print-items object) :key #'first))))
+
+(defmethod initialize-instance :around ((instance participant) &key)
+  (unwind-protect-case ()
+      (call-next-method)
+    (:abort
+     (ignore-errors (detach instance)))))
 
 ;;; Participant creation
 

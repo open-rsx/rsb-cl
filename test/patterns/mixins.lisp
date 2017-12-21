@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Unit tests for mixin classes in the pattern module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 
@@ -45,6 +45,35 @@
     (ensure-same (mock-participant-state child) :attached)
     (detach parent)
     (ensure-same (mock-participant-state child) :detached)))
+
+(defclass mock-cleanup-composite-participant (participant
+                                              composite-participant-mixin)
+  ((children :initarg  :children
+             :accessor participant-children)))
+
+(defmethod shared-initialize :after
+    ((instance   mock-cleanup-composite-participant)
+     (slot-names t)
+     &key)
+  (error "something went wrong"))
+
+(addtest (composite-participant-mixin-root
+          :documentation
+          "Ensure that `detach' is called on all already registered
+           child participants when an error is signaled during
+           initialization.")
+  failed-construction-cleanup
+
+  ;; Make sure that `detach' is called for all children that were
+  ;; already registered at the time of the error.
+  (let ((children (list (make-participant :mock "/compositeparticipantmixinroot/child"))))
+    (ensure-condition 'error
+      (make-instance 'mock-cleanup-composite-participant
+                     :scope    "/compositeparticipantmixinroot"
+                     :children children))
+    (ensure (every (lambda (child)
+                     (eq (mock-participant-state child) :detached))
+                   children))))
 
 ;;; `child-container-mixin'
 
