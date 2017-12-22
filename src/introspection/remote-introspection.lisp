@@ -339,7 +339,7 @@
                                     :if-does-not-exist nil)))
     (prog1
         (call-next-method)
-      (when existing
+      (unless (or (not existing) (typep existing 'participant-entry-proxy))
         (hooks:run-hook (database-change-hook introspection)
                         existing :participant-removed)))))
 
@@ -369,7 +369,8 @@
          (parent (if parent-id
                      (ensure-participant
                       parent-id sink (list 'participant-entry-proxy
-                                           :id parent-id))
+                                           :id     parent-id
+                                           :parent sink))
                      sink))
          (entry  (ensure-participant id sink (list 'participant-entry
                                                    :info   info
