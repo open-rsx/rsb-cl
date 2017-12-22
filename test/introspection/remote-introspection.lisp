@@ -1,6 +1,6 @@
 ;;;; remote-introspection.lisp --- Unit tests for the remote-introspection class.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -244,18 +244,18 @@
            parallel.")
   stress
 
-  (with-participant (introspection :remote-introspection +introspection-scope+
-                                   :update-interval .01)
-    (with-participant (introspection :local-introspection +introspection-scope+)
-      (let+ ((configuration *configuration*)
-             ((&flet participant-noise ()
-                (let ((*configuration* configuration)
-                      (*local-database* introspection))
-                  (iter (repeat 30)
-                        (sleep (random .01))
-                        (with-participant (server :local-server (string (gensym "/")))
-                          (with-methods (server)
-                              (("echo" (x) x) ("echo2" (x) x) ("echo3" (x) x))))))))
-             (threads (map-into (make-list 10) (curry #'bt:make-thread
-                                                      #'participant-noise))))
-        (mapc #'bt:join-thread threads)))))
+  (with-participants ((nil           :remote-introspection +introspection-scope+
+                                     :update-interval .01)
+                      (introspection :local-introspection +introspection-scope+))
+    (let+ ((configuration *configuration*)
+           ((&flet participant-noise ()
+              (let ((*configuration* configuration)
+                    (*local-database* introspection))
+                (iter (repeat 30)
+                      (sleep (random .01))
+                      (with-participant (server :local-server (string (gensym "/")))
+                        (with-methods (server)
+                            (("echo" (x) x) ("echo2" (x) x) ("echo3" (x) x))))))))
+           (threads (map-into (make-list 10) (curry #'bt:make-thread
+                                                    #'participant-noise))))
+      (mapc #'bt:join-thread threads))))
