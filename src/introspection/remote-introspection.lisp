@@ -494,6 +494,10 @@
                            :receiver receiver
                            :parent   introspection)))))
 
+(defmethod update-using-info ((info host-entry) (new-info host-info))
+  (update-using-info (node-info info) new-info)
+  info)
+
 (defmethod rsb.ep:handle ((sink host-entry) (data event))
   (when-let ((sinks (if (typep (event-data data) 'hello)
                         (let ((process  (hello-process (event-data data)))
@@ -611,37 +615,6 @@
                                      machine-type machine-version
                                      software-type software-version)
           host)
-         ((&flet update-entry (entry)
-            (let+ ((info (node-info entry))
-                   ((&flet new-slot-value (slot current new)
-                      (cond
-                        ((emptyp current)
-                         new)
-                        ((equal current new)
-                         new)
-                        (t
-                         (log:info "~@<In ~A slot ~A: new value ~S is ~
-                                    different from current value ~
-                                    ~S.~@:>"
-                                   info slot new current)
-                         current)))))
-              (macrolet
-                  ((update ()
-                     (flet ((make-initarg (name)
-                              (let ((keyword  (make-keyword name))
-                                    (accessor (symbolicate
-                                               '#:host-info- name)))
-                                `(,keyword (new-slot-value
-                                            ',name (,accessor info) ,name)))))
-                       `(reinitialize-instance
-                         info
-                         ,@(make-initarg 'hostname)
-                         ,@(make-initarg 'machine-type)
-                         ,@(make-initarg 'machine-version)
-                         ,@(make-initarg 'software-type)
-                         ,@(make-initarg 'software-version)))))
-                (update)))
-            entry))
          ((&flet make-info ()
             (make-instance 'remote-host-info
                            :id               id1
@@ -652,7 +625,7 @@
                            :software-version software-version
                            :state            :up))))
     (if-let ((entry (find-host id introspection)))
-      (update-entry entry)
+      (update-using-info entry host)
       (setf (find-host id introspection)
             (make-instance
              'host-entry

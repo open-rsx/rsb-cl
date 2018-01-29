@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the model module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -47,6 +47,10 @@
    #:host-info-machine-version
    #:host-info-software-type
    #:host-info-software-version)
+
+  ;; Info update protocol
+  (:export
+   #:update-using-info)
 
   ;; "Node" model protocol and classes
   (:export

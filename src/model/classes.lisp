@@ -1,6 +1,6 @@
 ;;;; classes.lisp --- Classes of the model module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -245,6 +245,29 @@
                                  (:after :software-type)))
       ,@(when (and clock-offset (> (abs clock-offset) 0.001))
           `((:clock-offset ,clock-offset " ~,3@F s" ((:after :host-state))))))))
+
+(defmethod update-using-info ((info     remote-host-info)
+                              (new-info host-info))
+  (let+ (((&flet+ maybe-new-value ((initarg . accessor))
+            (let ((current (funcall accessor info))
+                  (new     (funcall accessor new-info)))
+              (cond
+                ((emptyp current)
+                 (list initarg new))
+                ((equal current new)
+                 '())
+                (t
+                 (log:info "~@<In ~A, slot ~A: new value ~S is ~
+                            different from current value ~S.~@:>"
+                           info initarg new current)
+                 '())))))
+         (slots '((:hostname         . host-info-hostname)
+                  (:machine-type     . host-info-machine-type)
+                  (:machine-version  . host-info-machine-version)
+                  (:software-type    . host-info-software-type)
+                  (:software-version . host-info-software-version))))
+    (apply #'reinitialize-instance info
+           (mappend #'maybe-new-value slots))))
 
 ;;; `node' and `{participant,process,host}-node' subclasses
 
