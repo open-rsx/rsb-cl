@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Unit tests for mixin classes in the pattern module.
 ;;;;
-;;;; Copyright (C) 2015, 2017 Jan Moringen
+;;;; Copyright (C) 2015, 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 
@@ -150,6 +150,26 @@
                           override-initargs))
            (result (plist-alist (remove-from-plist result :error-policy))))
       (ensure-same result expected :test (rcurry #'set-equal :test #'equal)))))
+
+(addtest (configuration-inheritance-mixin-root
+          :documentation
+          "Ensure that the current value of `*configuration*' does not
+           affect child participants created using
+           `configuration-inheritance-mixin'.")
+  no-*configuration*-leakage
+
+  (let* ((class           (find-class 'mock-composite-participant/configuration-inheritance-mixin))
+         (parent          (progn
+                            (c2mop:finalize-inheritance class)
+                            (make-participant-using-class
+                             class (c2mop:class-prototype class)
+                             (make-scope "/foo"))))
+         ;; If `*configuration*' leaks into the
+         ;; `make-child-participant' call, an error will be signaled
+         ;; since the requested transport does not exist.
+         (*configuration* '(((:transport :does-not-exist :enabled) . t))))
+    (with-active-participant
+        (nil (make-child-participant parent :foo :listener)))))
 
 ;;; `lazy-child-making-mixin'
 

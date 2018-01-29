@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixin classes for communication pattern implementations.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -212,6 +212,13 @@
               (list :introspection? introspection?-option))
             (when (next-method-p)
               (call-next-method)))))
+
+(defmethod make-child-participant :around ((participant configuration-inheritance-mixin)
+                                           (which       t)
+                                           (kind        t)
+                                           &key)
+  (let ((*configuration* '()))
+    (call-next-method)))
 
 ;;; `lazy-child-making-mixin'
 
