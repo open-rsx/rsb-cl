@@ -1,6 +1,6 @@
 ;;;; connector.lisp --- Superclass for spread connectors.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -24,21 +24,26 @@
   (:options
    (:name string
     :description
-    "The name of the spread daemon. Has to be either of the form PORT@HOSTNAME or just PORT. Mutually exclusive with HOST and PORT.")
+    #.(format nil "The name of the spread daemon. Has to be either of ~
+       the form PORT@HOSTNAME or just PORT. Mutually exclusive with ~
+       HOST and PORT."))
    (:host string
     :description
-    "The hostname of the spread daemon. Mutually exclusive with NAME.")
+    #.(format nil "The hostname of the spread daemon. Mutually ~
+       exclusive with NAME."))
    (:port (integer 0 65534)
     :default network.spread.daemon:*default-port*
     :description
-    "The port number of the spread daemon. Mutually exclusive with NAME.")
+    #.(format nil "The port number of the spread daemon. Mutually ~
+       exclusive with NAME."))
    (:tcpnodelay boolean
     :default t
     :description
-    "Should the TCP_NODELAY option be set on the socket used for Spread communication? Note: currently ignored by Lisp implementation."))
+    #.(format nil "Should the TCP_NODELAY option be set on the socket ~
+       used for Spread communication? Note: currently ignored by Lisp ~
+       implementation.")))
   (:documentation
-   "This class serves as a superclass for spread in and out
-connectors."))
+   "Superclass for Spread in and out connectors."))
 
 (defmethod initialize-instance :before ((instance connector)
                                         &key

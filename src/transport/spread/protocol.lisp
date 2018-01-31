@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol used by the spread transport implementation.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -76,9 +76,10 @@
 (defgeneric add-fragment! (assembly fragment)
   (:documentation
    "Integrate the notification FRAGMENT into the partial assembly
-    ASSEMBLY. Warning conditions are signaled if FRAGMENT cannot be
-    integrated for some reason. The (possibly) modified ASSEMBLY is
-    returned."))
+    ASSEMBLY.
+
+    Warning conditions are signaled if FRAGMENT cannot be integrated
+    for some reason. The (possibly) modified ASSEMBLY is returned."))
 
 ;;; Partial assembly storage protocol
 
@@ -93,7 +94,8 @@
 
 (defgeneric merge-fragment (pool notification)
   (:documentation
-   "Merge NOTIFICATION into the appropriate assembly within POOL. If
-    NOTIFICATION completes the assembly, return a notification
+   "Merge NOTIFICATION into the appropriate assembly within POOL.
+
+    If NOTIFICATION completes the assembly, return a notification
     instance built from the complete assembly. Otherwise, return
     nil."))

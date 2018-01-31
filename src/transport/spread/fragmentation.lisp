@@ -1,6 +1,6 @@
 ;;;; fragmentation.lisp --- Fragmentation and assembly of data/notifications.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -59,12 +59,12 @@
 
 (defun assembly-complete? (assembly)
   "Return non-nil if all expected fragments have been merged into
-ASSEMBLY."
+   ASSEMBLY."
   (notany #'null (assembly-fragments assembly)))
 
 (defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
-fragments of ASSEMBLY. ASSEMBLY has to be complete."
+   fragments of ASSEMBLY. ASSEMBLY has to be complete."
   (declare #.cl-rsb-system:+optimization-fast+unsafe+)
   (let* ((fragments (map 'list (compose #'notification-data
                                         #'fragmented-notification-notification)
@@ -120,11 +120,10 @@ fragments of ASSEMBLY. ASSEMBLY has to be complete."
                :initform (make-hash-table :test #'equalp)
                :documentation
                "This hash-table maps event ids to `assembly'
-instances."))
+                instances."))
   (:documentation
-   "Instances of this class create and update `assembly' instances as
-necessary when fragments are submitted by calls to
-`merge-fragment'."))
+   "Creates and update `assembly' instances as necessary when
+    fragments are submitted by calls to `merge-fragment'."))
 
 (defmethod detach ((participant assembly-pool)))
 
@@ -165,14 +164,14 @@ necessary when fragments are submitted by calls to
               :initform (bt:make-lock "Assemblies Lock")
               :documentation
               "This lock protects the collection of `assembly'
-instances from concurrent modification by the pruning thread and calls
-to `merge-fragment'.")
+               instances from concurrent modification by the pruning
+               thread and calls to `merge-fragment'.")
    (age-limit :initarg  :age-limit
               :type     positive-real
               :accessor assembly-pool-age-limit
               :documentation
               "Controls the minimum age in seconds that `assembly'
-instances have to reach before they can be pruned."))
+               instances have to reach before they can be pruned."))
   (:default-initargs
    :age-limit 10)
   (:documentation

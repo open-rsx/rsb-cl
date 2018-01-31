@@ -1,6 +1,6 @@
 ;;;; transport.lisp --- Spread transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,7 +12,7 @@
  :wire-type 'nibbles:octet-vector
  :remote?   t
  :documentation
- "A transport implementation using the Spread group communication framework.
+ "A transport using the Spread group communication framework.
 
   This transport maps scopes to Spread groups to allow multicast-based
   distribution of events to interested processes.")

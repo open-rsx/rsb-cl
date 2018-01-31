@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- Superclass for in-direction connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,7 @@
   (:metaclass connector-class)
   (:documentation
    "This class is intended to be used as a superclass of in-direction
-connector classes for Spread."))
+    connector classes for Spread."))
 
 (defmethod notify ((recipient in-connector)
                    (subject   scope)

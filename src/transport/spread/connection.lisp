@@ -1,6 +1,6 @@
 ;;;; connection.lisp --- Spread connections with membership management.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,9 +32,10 @@
                     The buffer is allocated lazily to avoid wasting
                     memory for send-only connections."))
   (:documentation
-   "Instances of this class represent connections to the Spread
-    communication system and maintain a list of the Spread multicast
-    groups in which they are members."))
+   "A connection to the Spread communication system.
+
+    Maintains a list of the Spread multicast groups in which the is a
+    member."))
 
 (defmethod initialize-instance :before ((instance connection)
                                         &key

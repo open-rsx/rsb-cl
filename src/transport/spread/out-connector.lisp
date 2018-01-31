@@ -1,6 +1,6 @@
 ;;;; out-connector.lisp --- Out-direction connector for Spread transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,13 @@
                         :reader   connector-max-fragment-size
                         :initform 100000
                         :documentation
-                        "The maximum payload size that may be send in a single notification. The value of this options has to be chosen such that the combined sizes of payload and envelope data of notifications remain below the maximum message size allowed by spread.")
+                        #.(format nil "The maximum payload size that ~
+                           may be send in a single notification. The ~
+                           value of this options has to be chosen such ~
+                           that the combined sizes of payload and ~
+                           envelope data of notifications remain below ~
+                           the maximum message size allowed by ~
+                           Spread."))
    (scope->groups-cache :reader   connector-%scope->groups-cache
                         :initform (make-scope->groups-cache)))
   (:metaclass connector-class)
