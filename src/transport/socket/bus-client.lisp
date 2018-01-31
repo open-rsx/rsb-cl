@@ -1,6 +1,6 @@
-;;;; bus-client.lisp --- A bus provider that used a client socket.
+;;;; bus-client.lisp --- A bus provider that uses a client socket.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

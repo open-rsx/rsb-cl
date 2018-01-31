@@ -1,6 +1,6 @@
 ;;;; bus-server.lisp --- A class that accepts connections from bus clients.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,8 +22,8 @@
            "Stores the state of the bus server. Currently only used
             during shutdown."))
   (:documentation
-   "An instance of this class provides access to a bus through a
-    listening socket to which bus clients connect.
+   "Provides access to a bus through a listen socket to which bus
+    clients connect.
 
     Each client connection causes a `bus-connection' instance to be
     added to the list of connections. These objects are removed when
