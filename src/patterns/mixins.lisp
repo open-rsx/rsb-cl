@@ -217,7 +217,14 @@
                                            (which       t)
                                            (kind        t)
                                            &key)
-  (let ((*configuration* '()))
+  (let* ((old-configuration         *configuration*)
+         (old-make-participant-hook *make-participant-hook*)
+         (*make-participant-hook*
+          (list (lambda (&rest args)
+                  (let ((*configuration*         old-configuration)
+                        (*make-participant-hook* old-make-participant-hook))
+                    (apply #'hooks:run-hook '*make-participant-hook* args)))))
+         (*configuration* '()))
     (call-next-method)))
 
 ;;; `lazy-child-making-mixin'
