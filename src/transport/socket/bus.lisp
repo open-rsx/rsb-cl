@@ -6,8 +6,7 @@
 
 (cl:in-package #:rsb.transport.socket)
 
-(defclass bus (broadcast-processor
-               print-items:print-items-mixin)
+(defclass bus (print-items:print-items-mixin)
   ((connections         :type     list
                         :accessor bus-connections
                         :initform '()
