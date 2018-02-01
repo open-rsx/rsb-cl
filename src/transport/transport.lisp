@@ -1,6 +1,6 @@
 ;;;; transport.lisp --- First class transport objects.
 ;;;;
-;;;; Copyright (C) 2015, 2016, 2017 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,11 +12,12 @@
 ;;;                    TRANSPORT-SERVICE   TRANSPORT-INSTANCE : `transport'
 ;;;   (make-provider            │                     │
 ;;;    'transport               │                     │
-;;;    (TRANSPORT . DIRECTION)) │                     │
+;;;    (SCHEMA . DIRECTION))    │                     │
 ;;;   ─────────────────────────▷│                     │
 ;;;                             │ (make-provider      │
 ;;;                             │  TRANSPORT-INSTANCE │
-;;;                             │  DIRECTION)         │
+;;;                             │  DIRECTION          │
+;;;                             │  :schema SCHEMA)    │
 ;;;                             │────────────────────▷│
 ;;;                             │                     │
 ;;;                             │                     │──▷CONNECTOR-INSTANCE

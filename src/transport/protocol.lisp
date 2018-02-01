@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol of the transport module.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -45,10 +45,7 @@
      &rest args &key)
   (let+ (((schema . direction) provider))
     (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
-    (apply #'call-next-method service provider
-           :schema    schema
-           :direction direction
-           args)))
+    (apply #'call-next-method service provider :schema schema args)))
 
 ;;; Transport protocol
 
