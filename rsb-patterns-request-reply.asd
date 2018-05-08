@@ -1,6 +1,6 @@
 ;;;; rsb-patterns-request-reply.asd --- System definition for rsb-patterns-request-reply system.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "A Common Lisp implementation of RSB."
+  :description "Request-Reply communication pattern for RSB."
   :depends-on  (:alexandria
                 :iterate
                 (:version :let-plus                      "0.2")

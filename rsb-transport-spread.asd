@@ -1,6 +1,6 @@
 ;;;; rsb-transport-spread.asd --- System containing the Spread-based transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,8 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "This system provides a RSB transport based on the
-                Spread group communication system."
+  :description "RSB transport based on the Spread group communication system."
   :depends-on  (:nibbles
                 :ironclad
                 :cl-protobuf

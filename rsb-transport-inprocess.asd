@@ -1,6 +1,6 @@
 ;;;; rsb-transport-inprocess.asd --- System containing the inprocess transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "This system provides a simple inprocess transport."
+  :description "Simple and efficient in-process transport for RSB."
   :depends-on  ((:version :cl-rsb #.(version/string :revision? t)))
   :encoding    :utf-8
   :components  ((:module     "inprocess"

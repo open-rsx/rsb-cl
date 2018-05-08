@@ -1,6 +1,6 @@
 ;;;; rsb-transport-socket.asd --- System containing the socket transport.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "This system provides a simple socket-based transport."
+  :description "Socket-based transport for RSB."
   :depends-on  ((:version :usocket      "0.6.4") ; for `socket-shutdown'
                 :cl-protobuf
 

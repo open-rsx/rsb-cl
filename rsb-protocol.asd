@@ -1,6 +1,6 @@
 ;;;; rsb-protocol.asd --- System for loading the native RSB communication protocol.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,8 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "This system provides the Google protocol buffer-based
-                communication protocol."
+  :description "Google protocol buffer-based communication protocol."
   :defsystem-depends-on (:cl-protobuf)
   :encoding    :utf-8
   :components  ((:protocol-buffer-descriptor-directory "protocol"

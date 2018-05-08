@@ -1,6 +1,6 @@
 ;;;; rsb-filter-regex.asd --- System containing regex-based filter.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,8 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "This system provides a regular expression filter for
-                events with text payloads."
+  :description "Regular expression filter for events with text payloads."
   :depends-on  (:cl-ppcre
 
                 (:version :cl-rsb #.(version/string :revision? t)))

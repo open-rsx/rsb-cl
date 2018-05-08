@@ -1,6 +1,6 @@
 ;;;; rsb-xpath-filter.asd --- System containing XPath-based filter.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,8 +15,7 @@
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LGPLv3" ; see COPYING file for details.
-  :description "This system provides a filter class that uses XPath
-                expressions to discriminate events."
+  :description "Filter that uses XPath expressions to discriminate events."
   :depends-on  (:xpath
                 (:version :architecture.builder-protocol.xpath "0.7")
 
