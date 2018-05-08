@@ -10,14 +10,15 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-protocol
+(defsystem "rsb-protocol"
+  :description "Google protocol buffer-based communication protocol."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Google protocol buffer-based communication protocol."
-  :defsystem-depends-on (:cl-protobuf)
-  :encoding    :utf-8
+  :defsystem-depends-on ("cl-protobuf")
+
   :components  ((:protocol-buffer-descriptor-directory "protocol"
                  :pathname   #.+protocol-directory+
                  :serial     t

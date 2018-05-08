@@ -10,14 +10,15 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-transport-inprocess
+(defsystem "rsb-transport-inprocess"
+  :description "Simple and efficient in-process transport."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Simple and efficient in-process transport for RSB."
-  :depends-on  ((:version :cl-rsb #.(version/string :revision? t)))
-  :encoding    :utf-8
+  :depends-on  ((:version "cl-rsb" #.(version/string :revision? t)))
+
   :components  ((:module     "inprocess"
                  :pathname   "src/transport/inprocess"
                  :serial     t
@@ -25,29 +26,29 @@
                               (:file       "transport")
                               (:file       "connectors"))))
 
-  :in-order-to ((test-op (test-op :rsb-transport-inprocess/test))))
+  :in-order-to ((test-op (test-op "rsb-transport-inprocess/test"))))
 
-(defsystem :rsb-transport-inprocess/test
+(defsystem "rsb-transport-inprocess/test"
+  :description "Unit Tests for the rsb-transport-inprocess system."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Unit Tests for the rsb-transport-inprocess system."
-  :depends-on  ((:version :lift                 "1.7.1")
+  :depends-on  ((:version "lift"                 "1.7.1")
 
-                (:version :rsb-transport-inprocess #.(version/string))
+                (:version "rsb-transport-inprocess" #.(version/string))
 
-                (:version :cl-rsb/test          #.(version/string)))
-  :encoding    :utf-8
+                (:version "cl-rsb/test"          #.(version/string)))
+
   :components  ((:module     "inprocess"
                  :pathname   "test/transport/inprocess"
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "connectors")))))
+                              (:file       "connectors"))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :rsb-transport-inprocess/test))))
-  (eval (read-from-string "(log:config :warn)")) ; less noise
-  (eval (read-from-string
-         "(lift:run-tests :config (lift::lift-relative-pathname
-                                   \"lift-transport-inprocess.config\"))")))
+  :perform     (test-op (operation component)
+                 (eval (read-from-string "(log:config :warn)")) ; less noise
+                 (eval (read-from-string
+                        "(lift:run-tests :config (lift::lift-relative-pathname
+                                                  \"lift-transport-inprocess.config\"))"))))

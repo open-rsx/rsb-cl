@@ -1,6 +1,6 @@
 ;;;; rsb-model.asd --- System definition for model for RSB.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,19 +10,20 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-model
+(defsystem "rsb-model"
+  :description "Modeling of and inference on RSB systems."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Modeling of and inference on RSB systems."
-  :depends-on  (:alexandria
-                :let-plus
-                :more-conditions
-                :utilities.print-items
 
-                (:version :cl-rsb #.(version/string)))
-  :encoding    :utf-8
+  :version     #.(version/string)
+  :depends-on  ("alexandria"
+                "let-plus"
+                "more-conditions"
+                "utilities.print-items"
+
+                (:version "cl-rsb" #.(version/string)))
+
   :components  ((:module     "model"
                  :pathname   "src/model"
                  :serial     t
@@ -41,20 +42,21 @@
                               (:file       "util")
                               (:file       "inference"))))
 
-  :in-order-to ((test-op (test-op :rsb-model/test))))
+  :in-order-to ((test-op (test-op "rsb-model/test"))))
 
-(defsystem :rsb-model/test
+(defsystem "rsb-model/test"
+  :description "Unit tests for the rsb-model system."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Unit tests for the rsb-model system."
-  :depends-on  ((:version :lift        "1.7.1")
+  :depends-on  ((:version "lift"        "1.7.1")
 
-                (:version :rsb-model   #.(version/string))
+                (:version "rsb-model"   #.(version/string))
 
-                (:version :cl-rsb/test #.(version/string)))
-  :encoding    :utf-8
+                (:version "cl-rsb/test" #.(version/string)))
+
   :components  ((:module     "model"
                  :pathname   "test/model"
                  :serial     t
@@ -66,10 +68,9 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "util")
-                              (:file       "inference")))))
+                              (:file       "inference"))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :rsb-model/test))))
-  (eval (read-from-string "(lift:run-tests :config
-                             (asdf:system-relative-pathname
-                              :rsb-model/test \"lift-model.config\"))")))
+  :perform     (test-op (component operation)
+                 (eval (read-from-string "(lift:run-tests :config
+                                           (asdf:system-relative-pathname
+                                            :rsb-model/test \"lift-model.config\"))"))))

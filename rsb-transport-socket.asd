@@ -10,18 +10,19 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-transport-socket
+(defsystem "rsb-transport-socket"
+  :description "Socket-based transport for RSB."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Socket-based transport for RSB."
-  :depends-on  ((:version :usocket      "0.6.4") ; for `socket-shutdown'
-                :cl-protobuf
 
-                (:version :cl-rsb       #.(version/string :revision? t))
-                (:version :rsb-protocol #.(version/string :revision? t)))
-  :encoding    :utf-8
+  :version     #.(version/string)
+  :depends-on  ((:version "usocket"      "0.6.4") ; for `socket-shutdown'
+                "cl-protobuf"
+
+                (:version "cl-rsb"       #.(version/string :revision? t))
+                (:version "rsb-protocol" #.(version/string :revision? t)))
+
   :components  ((:module     "socket"
                  :pathname   "src/transport/socket"
                  :serial     t
@@ -53,20 +54,21 @@
                               (:file       "connectors-unix"
                                            :if-feature (:and :sbcl :linux)))))
 
-  :in-order-to ((test-op (test-op :rsb-transport-socket/test))))
+  :in-order-to ((test-op (test-op "rsb-transport-socket/test"))))
 
-(defsystem :rsb-transport-socket/test
+(defsystem "rsb-transport-socket/test"
+  :description "Unit Tests for the rsb-transport-socket system."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Unit Tests for the rsb-transport-socket system."
-  :depends-on  ((:version :lift                 "1.7.1")
+  :depends-on  ((:version "lift"                 "1.7.1")
 
-                (:version :rsb-transport-socket #.(version/string))
+                (:version "rsb-transport-socket" #.(version/string))
 
-                (:version :cl-rsb/test          #.(version/string)))
-  :encoding    :utf-8
+                (:version "cl-rsb/test"          #.(version/string)))
+
   :components  ((:module     "socket"
                  :pathname   "test/transport/socket"
                  :serial     t
@@ -79,11 +81,10 @@
                               (:file       "transport-unix"
                                            :if-feature (:and :sbcl :linux))
                               (:file       "connectors-unix"
-                                           :if-feature (:and :sbcl :linux))))))
+                                           :if-feature (:and :sbcl :linux)))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :rsb-transport-socket/test))))
-  (eval (read-from-string "(log:config :warn)")) ; less noise
-  (eval (read-from-string
-         "(lift:run-tests :config (lift::lift-relative-pathname
-                                   \"lift-transport-socket.config\"))")))
+  :perform     (test-op (operation component)
+                 (eval (read-from-string "(log:config :warn)")) ; less noise
+                 (eval (read-from-string
+                        "(lift:run-tests :config (lift::lift-relative-pathname
+                                                  \"lift-transport-socket.config\"))"))))

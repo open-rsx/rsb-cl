@@ -120,33 +120,34 @@
 
 ;;; System definitions
 
-(defsystem :cl-rsb
+(defsystem "cl-rsb"
+  :description "Common Lisp implementation of RSB."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Common Lisp implementation of RSB."
-  :depends-on  (:alexandria
-                :split-sequence
-                :iterate
-                (:version :let-plus                      "0.2")
-                :more-conditions
-                (:version :utilities.print-items         "0.1")
-                (:version :utilities.binary-dump         "0.1")
+  :depends-on  ("alexandria"
+                "split-sequence"
+                "iterate"
+                (:version "let-plus"                      "0.2")
+                "more-conditions"
+                (:version "utilities.print-items"         "0.1")
+                (:version "utilities.binary-dump"         "0.1")
 
-                (:version :bordeaux-threads              "0.8.4")
-                (:version :lparallel                     "2.3.2")
-                :trivial-garbage
-                :closer-mop
-                :cl-hooks
-                (:version :architecture.service-provider "0.4")
-                :log4cl
+                (:version "bordeaux-threads"              "0.8.4")
+                (:version "lparallel"                     "2.3.2")
+                "trivial-garbage"
+                "closer-mop"
+                "cl-hooks"
+                (:version "architecture.service-provider" "0.4")
+                "log4cl"
 
-                :nibbles
-                :puri
-                :uuid
-                :local-time)
-  :encoding    :utf-8
+                "nibbles"
+                "puri"
+                "uuid"
+                "local-time")
+
   :components  ((:module     "src-early"
                  :pathname   "src"
                  :serial     t
@@ -285,19 +286,20 @@
                               (:file       "protocol")
                               (:file       "mixins"))))
 
-  :in-order-to ((test-op (test-op :cl-rsb/test))))
+  :in-order-to ((test-op (test-op "cl-rsb/test"))))
 
-(defsystem :cl-rsb/test
+(defsystem "cl-rsb/test"
+  :description "Unit tests for the cl-rsb system."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Unit tests for the cl-rsb system."
-  :depends-on  ((:version :lift                    "1.7.1")
 
-                (:version :cl-rsb                  #.(version/string))
-                (:version :rsb-transport-inprocess #.(version/string)))
-  :encoding    :utf-8
+  :version     #.(version/string)
+  :depends-on  ((:version "lift"                    "1.7.1")
+
+                (:version "cl-rsb"                  #.(version/string))
+                (:version "rsb-transport-inprocess" #.(version/string)))
+
   :components  ((:module     "test"
                  :serial     t
                  :components ((:file       "package")
@@ -388,9 +390,8 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "protocol")
-                              (:file       "mixins")))))
+                              (:file       "mixins"))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :cl-rsb/test))))
-  (eval (read-from-string "(log:config :warn)")) ; less noise
-  (eval (read-from-string "(lift:run-tests :config :generic)")))
+  :perform (test-op (operation component)
+             (eval (read-from-string "(log:config :warn)")) ; less noise
+             (eval (read-from-string "(lift:run-tests :config :generic)"))))

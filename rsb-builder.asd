@@ -1,6 +1,6 @@
 ;;;; rsb-builder.asd --- Builder support for RSB objects.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,42 +10,45 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-builder
+(defsystem "rsb-builder"
+  :description "Builder support for RSB objects such as events."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Builder support for RSB objects such as events."
-  :depends-on  (:alexandria
-                :let-plus
+  :depends-on  ("alexandria"
+                "let-plus"
 
-                (:version :architecture.builder-protocol                   "0.3")
-                (:version :architecture.builder-protocol.universal-builder "0.3")
+                (:version "architecture.builder-protocol"                   "0.3")
+                (:version "architecture.builder-protocol.universal-builder" "0.3")
 
-                (:version :cl-rsb                                          #.(version/string)))
+                (:version "cl-rsb"                                          #.(version/string)))
+
   :components  ((:module     "src"
                  :components ((:file       "builder"))))
 
-  :in-order-to ((test-op (test-op :rsb-builder/test))))
+  :in-order-to ((test-op (test-op "rsb-builder/test"))))
 
-(defsystem :rsb-builder/test
+(defsystem "rsb-builder/test"
+  :description "Unit tests for the rsb-builder system."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Unit tests for the rsb-builder system."
-  :depends-on  ((:version :lift                               "1.7.1")
+  :depends-on  ((:version "lift"                               "1.7.1")
 
-                (:version :architecture.builder-protocol/test "0.3")
+                (:version "architecture.builder-protocol/test" "0.3")
 
-                (:version :rsb-builder                        #.(version/string))
+                (:version "rsb-builder"                        #.(version/string))
 
-                (:version :cl-rsb/test                        #.(version/string)))
+                (:version "cl-rsb/test"                        #.(version/string)))
+
   :components  ((:module     "test"
-                 :components ((:file       "builder")))))
+                 :components ((:file       "builder"))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :rsb-builder/test))))
-  (eval (read-from-string "(lift:run-tests :config
-                             (asdf:system-relative-pathname
-                              :rsb-builder/test \"lift-builder.config\"))")))
+  :perform (test-op (operation component)
+             (eval (read-from-string "(lift:run-tests :config
+                                        (asdf:system-relative-pathname
+                                         :rsb-builder/test \"lift-builder.config\"))"))))

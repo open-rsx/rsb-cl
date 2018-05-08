@@ -10,15 +10,16 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-converter-protocol-buffer
+(defsystem "rsb-converter-protocol-buffer"
+  :description "Converter for Google protocol buffer payloads."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Converter for Google protocol buffer payloads."
-  :depends-on  ((:version :cl-rsb #.(version/string :revision? t))
-                :cl-protobuf)
-  :encoding    :utf-8
+  :depends-on  ((:version "cl-rsb" #.(version/string :revision? t))
+                "cl-protobuf")
+
   :components  ((:module     "converter"
                  :pathname   "src/converter"
                  :components ((:file       "protocol-buffers")))))

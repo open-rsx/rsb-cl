@@ -1,6 +1,6 @@
 ;;;; rsb-introspection.asd --- System definition for introspection for RSB.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,20 +10,21 @@
 
 (cl:in-package #:cl-rsb-system)
 
-(defsystem :rsb-introspection
+(defsystem "rsb-introspection"
+  :description "Introspection support for RSB."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Introspection support for RSB."
-  :defsystem-depends-on (:cl-protobuf)
-  :depends-on  (:utilities.print-items
-                (:version :uiop                       "3") ; for portable platform information
 
-                (:version :cl-rsb                     #.(version/string))
-                (:version :rsb-model                  #.(version/string))
-                (:version :rsb-patterns-request-reply #.(version/string)))
-  :encoding    :utf-8
+  :version     #.(version/string)
+  :defsystem-depends-on ("cl-protobuf")
+  :depends-on  ("utilities.print-items"
+                (:version "uiop"                       "3") ; for portable platform information
+
+                (:version "cl-rsb"                     #.(version/string))
+                (:version "rsb-model"                  #.(version/string))
+                (:version "rsb-patterns-request-reply" #.(version/string)))
+
   :components  ((:protocol-buffer-descriptor-directory "protocol"
                  :pathname   #.+protocol-directory+
                  :components ((:file       "Hello"
@@ -65,21 +66,22 @@
                               (:file       "reloading"
                                :if-feature :sbcl))))
 
-  :in-order-to ((test-op (test-op :rsb-introspection/test))))
+  :in-order-to ((test-op (test-op "rsb-introspection/test"))))
 
-(defsystem :rsb-introspection/test
+(defsystem "rsb-introspection/test"
+  :description "Unit tests for the rsb-introspection system."
+  :license     "LGPLv3" ; see COPYING file for details.
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "LGPLv3" ; see COPYING file for details.
-  :description "Unit tests for the rsb-introspection system."
-  :depends-on  ((:version :lift              "1.7.1")
+  :depends-on  ((:version "lift"              "1.7.1")
 
-                (:version :rsb-introspection #.(version/string))
+                (:version "rsb-introspection" #.(version/string))
 
-                (:version :cl-rsb/test       #.(version/string))
-                (:version :rsb-model/test    #.(version/string)))
-  :encoding    :utf-8
+                (:version "cl-rsb/test"       #.(version/string))
+                (:version "rsb-model/test"    #.(version/string)))
+
   :components  ((:module     "introspection"
                  :pathname   "test/introspection"
                  :serial     t
@@ -94,11 +96,10 @@
                               (:file       "remote-introspection")
 
                               (:file       "reloading"
-                               :if-feature :sbcl)))))
+                               :if-feature :sbcl))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :rsb-introspection/test))))
-  (eval (read-from-string "(log:config :warn)")) ; less noise
-  (eval (read-from-string "(lift:run-tests :config
-                             (asdf:system-relative-pathname
-                              :rsb-introspection/test \"lift-introspection.config\"))")))
+  :perform     (test-op (operation component)
+                 (eval (read-from-string "(log:config :warn)")) ; less noise
+                 (eval (read-from-string "(lift:run-tests :config
+                                            (asdf:system-relative-pathname
+                                             :rsb-introspection/test \"lift-introspection.config\"))"))))
