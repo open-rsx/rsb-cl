@@ -1,5 +1,3 @@
 /build*
 # Produced by example compilation
 *.fasl
-/version-string.sexp
-/version-details.sexp
