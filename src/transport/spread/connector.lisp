@@ -59,19 +59,21 @@
 (defmethod shared-initialize :after ((instance connector) (slot-names t)
                                      &key
                                      connection
-                                     name
-                                     host
-                                     port)
-  (let+ (((&structure-r/o connector- url) instance)
-         ((&values name host port) (normalize-daemon-endpoint name host port)))
-    ;; Normalize URL.
-    (when host
-      (setf (puri:uri-host url) host))
-    (setf (puri:uri-port url) port)
+                                     (name nil name-supplied?)
+                                     (host nil host-supplied?)
+                                     (port nil port-supplied?))
+  (when (or name-supplied? host-supplied? port-supplied?)
+    (let+ (((&structure-r/o connector- url) instance)
+           ((&values name host port)
+            (normalize-daemon-endpoint name host port)))
+      ;; Normalize URL.
+      (when host
+        (setf (puri:uri-host url) host))
+      (setf (puri:uri-port url) port)
 
-    (setf (connector-%configuration instance)
-          (list :connection connection
-                :name name :host host :port port))))
+      (setf (connector-%configuration instance)
+            (list :connection connection
+                  :name name :host host :port port)))))
 
 ;;; (Dis)connecting
 
