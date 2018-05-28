@@ -1,6 +1,6 @@
 ;;;; processor-mixins.lisp --- Mixin classes for processor classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2016, 2017 Jan Moringen
+;;;; Copyright (C) 2013-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -162,7 +162,7 @@
 
 (defmethod handle :before ((processor deliver-timestamp-mixin)
                            (event     event))
-  "Attach a :deliver timestamp to EVENT."
+  ;; Attach a :deliver timestamp to EVENT.
   (setf (timestamp event :deliver) (local-time:now)))
 
 ;;; `transform-mixin' class
@@ -176,8 +176,7 @@
   (:default-initargs
    :transform (missing-required-initarg 'transform-mixin :transform))
   (:documentation
-   "Adds to processor classes the ability to apply a transform (in the
-    sense of being usable with `transform!') to all handled data."))
+   "Adds the ability to apply a transform to all handled data."))
 
 (defmethod handle :around ((sink transform-mixin) (data t))
   (call-next-method sink (rsb.transform:transform! (processor-transform sink) data)))
