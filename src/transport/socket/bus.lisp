@@ -1,12 +1,13 @@
 ;;;; bus.lisp --- Superclass for bus provider classes.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.socket)
 
-(defclass bus (print-items:print-items-mixin)
+(defclass bus (sink-dispatcher-mixin
+               print-items:print-items-mixin)
   ((connections         :type     list
                         :accessor bus-connections
                         :initform '()
@@ -31,12 +32,6 @@
                         "Stores a lock that can be used to protect the
                          connector list of the bus from concurrent
                          modification.")
-   (in-connectors       :type     rsb.ep:sink-scope-trie
-                        :reader   bus-%in-connectors
-                        :initform (rsb.ep:make-sink-scope-trie)
-                        :documentation
-                        "Stores a trie of local in-direction
-                         connectors connected to the bus.")
    (options             :initarg  :options
                         :type     list
                         :accessor bus-options
@@ -173,13 +168,11 @@
 (defmethod dispatch ((processor bus) (event notification))
   ;; Dispatch incoming or outgoing notification EVENT to interested
   ;; connectors.
-  (let+ ((scope (make-scope
-                 (bytes->string (notification-scope event))))
-         ((&flet do-scope (scope connectors)
-            (declare (ignore scope))
-            (handle connectors event))))
-    (declare (dynamic-extent #'do-scope))
-    (rsb.ep:scope-trie-map #'do-scope scope (bus-%in-connectors processor))))
+  (let* ((scope           (make-scope
+                           (bytes->string (notification-scope event))))
+         (scope-and-event (rsb.ep:scope-and-event scope event)))
+    (declare (dynamic-extent scope-and-event))
+    (dispatch processor scope-and-event)))
 
 (defmethod handle ((sink bus) (data notification))
   ;; Send outgoing notification DATA to remote peer(s).

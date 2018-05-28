@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Superclasses for socket-based connectors.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -103,20 +103,12 @@
 (defmethod notify :after ((connector in-connector)
                           (bus       bus)
                           (action    (eql :attached)))
-  (rsb.ep:sink-scope-trie-add
-   (bus-%in-connectors bus) (connector-scope connector) connector)
-  (log:debug "~@<Scope trie of ~A after adding ~
-              ~A:~@:_~/rsb.ep::print-trie/~@:>"
-             bus connector (bus-%in-connectors bus)))
+  (notify bus connector (rsb.ep:subscribed (connector-scope connector))))
 
 (defmethod notify :after ((connector in-connector)
                           (bus       bus)
                           (action    (eql :detached)))
-  (rsb.ep:sink-scope-trie-remove
-   (bus-%in-connectors bus) (connector-scope connector) connector)
-  (log:debug "~@<Scope trie of ~A after removing ~
-              ~A:~@:_~/rsb.ep::print-trie/~@:>"
-             bus connector (bus-%in-connectors bus)))
+  (notify bus connector (rsb.ep:unsubscribed (connector-scope connector))))
 
 (defmethod notification->event ((connector    in-connector)
                                 (notification notification)
