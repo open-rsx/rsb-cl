@@ -1,6 +1,6 @@
 ;;;; processor-mixins.lisp --- Unit tests for processor mixin classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -174,3 +174,50 @@
          (ensure-condition 'rsb.transform:transform-error (do-it)))
         (t
          (ensure-same (do-it) expected :test #'equal))))))
+
+;;; `sink-dispatcher-mixin'
+
+(deftestsuite rsb.event-processing.sink-dispatcher-mixin-root (event-processing-root)
+  ()
+  (:documentation
+   "Unit test for the `sink-dispatcher-mixin' processor mixin class."))
+
+(addtest (rsb.event-processing.sink-dispatcher-mixin-root
+          :documentation
+          "Smoke test for the `sink-dispatcher-mixin' processor mixin
+           class.")
+  smoke
+
+  (let+ ((dispatcher (make-instance 'sink-dispatcher-mixin))
+         ((&flet subscribe (subject scope)
+            (notify dispatcher subject (subscribed (make-scope scope)))))
+         ((&flet unsubscribe (subject scope)
+            (notify dispatcher subject (unsubscribed (make-scope scope)))))
+         ((&flet dispatch (scope event)
+            (dispatch dispatcher (scope-and-event
+                                  (make-scope scope) event)))))
+    ;; Simple scenario with two sinks.
+    (let* ((events1  '())
+           (handler1 (lambda (event) (push event events1)))
+           (events2  '())
+           (handler2 (lambda (event) (push event events2))))
+      (subscribe handler1 "/foo")
+      (subscribe handler2 "/foo/bar")
+
+      (dispatch "/" 1)
+      (ensure-same events1 '() :test #'equal)
+      (ensure-same events2 '() :test #'equal)
+
+      (dispatch "/foo" 2)
+      (ensure-same events1 '(2) :test #'equal)
+      (ensure-same events2 '() :test #'equal)
+
+      (dispatch "/foo/bar" 3)
+      (ensure-same events1 '(3 2) :test #'equal)
+      (ensure-same events2 '(3) :test #'equal)
+
+      (unsubscribe handler1 "/foo")
+
+      (dispatch "/foo/bar" 4)
+      (ensure-same events1 '(3 2) :test #'equal)
+      (ensure-same events2 '(4 3) :test #'equal))))

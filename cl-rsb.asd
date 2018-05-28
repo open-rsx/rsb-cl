@@ -171,6 +171,7 @@
                  :depends-on ("src-early")
                  :serial     t
                  :components ((:file       "package")
+                              (:file       "types")
                               (:file       "util")
                               (:file       "protocol")
 

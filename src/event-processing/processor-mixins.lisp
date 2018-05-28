@@ -180,3 +180,42 @@
 
 (defmethod handle :around ((sink transform-mixin) (data t))
   (call-next-method sink (rsb.transform:transform! (processor-transform sink) data)))
+
+;;; `sink-dispatcher-mixin'
+
+(defclass sink-dispatcher-mixin ()
+  ((sinks :accessor processor-%sinks
+          :initform (make-sink-scope-trie)
+          :documentation
+          "Maps scopes to subscribed sinks."))
+  (:documentation
+   "Intended to be mixed into classes which dispatch based on a scope tree."))
+
+(defmethod notify ((recipient sink-dispatcher-mixin)
+                   (subject   t)
+                   (action    subscribed))
+  (let ((sinks (processor-%sinks recipient))
+        (scope (subscription-scope action)))
+    (sink-scope-trie-add sinks scope subject)
+    (log:debug "~@<Scope trie of ~A after adding ~
+                ~A:~@:_~/rsb.ep::print-trie/~@:>"
+               recipient subject sinks)))
+
+(defmethod notify ((recipient sink-dispatcher-mixin)
+                   (subject   t)
+                   (action    unsubscribed))
+  (let ((sinks (processor-%sinks recipient))
+        (scope (subscription-scope action)))
+    (sink-scope-trie-remove sinks scope subject)
+    (log:debug "~@<Scope trie of ~A after removing ~
+                ~A:~@:_~/rsb.ep::print-trie/~@:>"
+               recipient subject sinks)))
+
+(defmethod dispatch ((processor sink-dispatcher-mixin)
+                     (event     scope-and-event))
+  (let+ ((scope (scope-and-event-scope event))
+         ((&flet do-scope (components sinks)
+            (declare (ignore components))
+            (handle sinks (scope-and-event-event event)))))
+    (declare (dynamic-extent #'do-scope))
+    (scope-trie-map #'do-scope scope (processor-%sinks processor))))

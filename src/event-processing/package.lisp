@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for event-processing module.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,6 +20,19 @@
   ;; Variables
   (:export
    #:*event-parts*)
+
+  ;; Subscription-related types
+  (:export
+   #:subscription
+   #:subscription-scope
+   #:subscribed
+   #:unsubscribed)
+
+  ;; Dispatching-related types
+  (:export
+   #:scope-and-event
+   #:scope-and-event-scope
+   #:scope-and-event-event)
 
   ;; Push source protocol
   (:export
@@ -117,6 +130,10 @@
   (:export
    #:transform-mixin
    #:processor-transform)
+
+  ;; `sink-dispatcher-mixin'
+  (:export
+   #:sink-dispatcher-mixin)
 
   ;; `client' class and protocol
   (:export
