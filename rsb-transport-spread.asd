@@ -10,6 +10,11 @@
 
 (cl:in-package #:cl-rsb-system)
 
+(defparameter *spread-port*
+  (or (let ((value (uiop:getenv "SPREAD_PORT")))
+        (when value (read-from-string value)))
+      5678))
+
 (defsystem "rsb-transport-spread"
   :description "RSB transport based on the Spread group communication system."
   :license     "LGPLv3" ; see COPYING file for details.
@@ -63,10 +68,6 @@
 
                 (:version "cl-rsb/test"          #.(version/string)))
 
-  :properties  ((:spread-port  . #.(or (let ((value (uiop:getenv "SPREAD_PORT")))
-                                         (when value (read-from-string value)))
-                                       5678)))
-
   :components  ((:module     "spread"
                  :pathname   "test/transport/spread"
                  :serial     t
@@ -79,9 +80,6 @@
   :perform     (test-op (operation component)
                  (eval (read-from-string "(log:config :warn)")) ; less noise
                  (eval (read-from-string
-                        "(network.spread.daemon:with-daemon
-                             (:port (asdf:component-property
-                                     (asdf:find-system :rsb-transport-spread/test)
-                                     :spread-port))
+                        "(network.spread.daemon:with-daemon (:port cl-rsb-system::*spread-port*)
                            (lift:run-tests :config (lift::lift-relative-pathname
                                                     \"lift-transport-spread.config\")))"))))

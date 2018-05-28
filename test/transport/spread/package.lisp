@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the transport.spread module.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -61,8 +61,7 @@ module"))
 ;;; Root test suite
 
 (deftestsuite transport-spread-root (transport-root)
-  ((spread-port (asdf:component-property
-                 (asdf:find-system :rsb-transport-spread/test) :spread-port))
+  ((spread-port cl-rsb-system::*spread-port*)
    common-args)
   (:setup
    (setf common-args `(:schema    :spread
