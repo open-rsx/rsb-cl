@@ -1,6 +1,6 @@
 ;;;; platform-sbcl-linux.lisp --- Platform-specific functions for SBCL on Linux.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,7 +74,10 @@
     (let+ (((&flet maybe-read-file (filename)
               (ignore-errors
                 (when (probe-file filename)
-                  (remove #\Newline (read-file-into-string filename))))))
+                  (let* ((content (read-file-into-string filename))
+                         (trimmed (remove #\Newline content)))
+                    (unless (emptyp trimmed)
+                      trimmed))))))
            (files '("/etc/machine-id"
                     "/var/lib/dbus/machine-id")))
       (or (some #'maybe-read-file files)
