@@ -1,6 +1,6 @@
 ;;;; configuration.lisp --- Configuration of RSB participants.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -72,8 +72,8 @@
                        "Current directory file"))
 
                 (+config-file-user-placeholder+
-                 (list #+unix  #P"~/.config/rsb.conf"
-                       #+win32 (merge-pathnames "rsb.conf" (user-homedir-pathname))
+                 (list (merge-pathnames ".config/rsb.conf"
+                                        (user-homedir-pathname))
                        "User config file"))
 
                 (+config-file-system-placeholder+
