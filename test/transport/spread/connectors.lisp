@@ -71,7 +71,20 @@
 
               ;; Missing :host, :port, :name or :connection initarg.
               (ensure-condition 'missing-required-initarg
-                (make-instance ',class-name)))))))
+                (make-instance ',class-name :schema    :spread
+                                            :converter :fundamental-null
+                                            :port      nil)))
+
+            (addtest (,suite-name
+                      :documentation
+                      ,(format nil "Test connecting `~(~A~)' instances."
+                               class-name))
+              connect/soke
+
+              (let ((connector (apply #'make-instance ',class-name common-args))
+                    (scope     (make-scope "/foo")))
+                (rsb.ep:notify connector scope :attached)
+                (rsb.ep:notify connector scope :detached)))))))
 
   (define-connector-suite :out)
   (define-connector-suite :in-pull)
