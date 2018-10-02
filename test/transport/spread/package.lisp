@@ -81,19 +81,23 @@ module"))
     (sequence (coerce data 'octet-vector))
     (t        data)))
 
-(defun make-fragment (sequence-number length id data)
-  (let* ((event-id     (make-instance
-                        'rsb.protocol:event-id
-                        :sender-id       (uuid:uuid-to-byte-array
-                                          (uuid:make-null-uuid))
-                        :sequence-number sequence-number))
-         (notification (make-instance 'rsb.protocol:notification
-                                      :event-id event-id
-                                      :data     data)))
-    (make-instance 'rsb.protocol:fragmented-notification
-                   :notification   notification
-                   :num-data-parts length
-                   :data-part      id)))
+(defun a-notification (sequence-number data &key (scope "/foo") wire-schema)
+  (let ((event-id (make-instance 'rsb.protocol:event-id
+                                 :sender-id       (uuid:uuid-to-byte-array
+                                                   (uuid:make-null-uuid))
+                                 :sequence-number sequence-number)))
+    (apply #'make-instance 'rsb.protocol:notification
+           :scope    (octetify scope)
+           :event-id event-id
+           :data     data
+           (when wire-schema
+             (list :wire-schema (octetify wire-schema))))))
+
+(defun a-fragment (sequence-number length id data)
+  (make-instance 'rsb.protocol:fragmented-notification
+                 :notification   (a-notification sequence-number data)
+                 :num-data-parts length
+                 :data-part      id))
 
 (defun make-event* (data)
   (let ((event (make-event "/foo" (octetify data))))

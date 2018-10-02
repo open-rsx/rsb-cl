@@ -1,6 +1,6 @@
 ;;;; fragmentation.lisp --- Unit test for fragmentation/assembly.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -32,7 +32,7 @@ instance.")
     ;; We repeat the assembly for all permutation of the fragments.
     (let ((fragments (iter (for part in parts)
                            (for i    in part-ids)
-                           (collect (make-fragment
+                           (collect (a-fragment
                                      sequence-number num-parts i (octetify part))))))
       (map-permutations
        (lambda (permutation)
@@ -102,15 +102,15 @@ are added to an assembly.")
 
   (let ((sequence-number 0)
         (pool            (make-instance 'assembly-pool)))
-    (merge-fragment pool (make-fragment
+    (merge-fragment pool (a-fragment
                           sequence-number 3 0 (octetify "foo")))
 
     (ensure-condition 'invalid-fragment-id
-      (merge-fragment pool (make-fragment
+      (merge-fragment pool (a-fragment
                             sequence-number 3 5 (octetify "foo"))))
 
     (ensure-condition 'duplicate-fragment
-      (merge-fragment pool (make-fragment
+      (merge-fragment pool (a-fragment
                             sequence-number 3 0 (octetify "foo"))))))
 
 (deftestsuite assembly-root (fragmentation-root)
@@ -155,7 +155,7 @@ are added to an assembly.")
 
   (let ((pool (make-instance 'pruning-assembly-pool
                              :age-limit 1)))
-    (merge-fragment pool (make-fragment 0 2 0 (octetify "bla")))
+    (merge-fragment pool (a-fragment 0 2 0 (octetify "bla")))
     (let ((count (assembly-pool-count pool)))
       (ensure-same
        count 1
