@@ -51,6 +51,9 @@
 
                               (:file       "sender-receiver")
 
+                              (:file       "bus-mixins")
+                              (:file       "bus")
+
                               (:file       "connector")
                               (:file       "in-connector")
                               (:file       "in-push-connector")
