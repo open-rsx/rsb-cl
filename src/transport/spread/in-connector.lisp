@@ -92,8 +92,8 @@
       (setf notification (or (assemble-notification assembly-pool notification)
                              (return-from notification->event nil))))
 
-    ;; Convert the `notification' instance NOTIFICATION, and its
-    ;; payload, into an `event' instance.
+    ;; Convert the `incoming-notification' instance NOTIFICATION,
+    ;; and its payload, into an `event' instance.
     ;; * If the payload conversion succeeds, return the `event'
     ;;   instance.
     ;; * If the payload conversion fails, signal an appropriate error.
@@ -108,6 +108,8 @@
                          :format-arguments `(,(with-output-to-string (stream)
                                                 (describe notification stream)))
                          :cause            condition))))
-      (one-notification->event converter notification (notification-data notification)
-                               :expose-wire-schema?  expose-wire-schema?
-                               :expose-payload-size? expose-payload-size?))))
+      (let+ (((&structure-r/o incoming-notification- notification wire-data)
+              notification))
+        (one-notification->event converter notification wire-data
+                                 :expose-wire-schema?  expose-wire-schema?
+                                 :expose-payload-size? expose-payload-size?)))))

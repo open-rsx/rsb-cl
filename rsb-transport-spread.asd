@@ -1,6 +1,6 @@
 ;;;; rsb-transport-spread.asd --- System containing the Spread-based transport.
 ;;;;
-;;;; Copyright (C) 2011-2016, 2018 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -35,6 +35,8 @@
                  :pathname   "src/transport/spread"
                  :serial     t
                  :components ((:file       "package")
+
+                              (:file       "notifications")
                               (:file       "conditions")
                               (:file       "protocol")
 

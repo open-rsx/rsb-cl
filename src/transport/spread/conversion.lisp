@@ -80,17 +80,19 @@
   (if (<= (fragmented-notification-num-data-parts notification) 1)
       ;; When the event has been transmitted as a single notification,
       ;; an assembly step is not required.
-      (fragmented-notification-notification notification)
+      (let* ((notification (fragmented-notification-notification notification))
+             (data         (notification-data notification)))
+        (make-incoming-notification notification data))
       ;; When the event has been fragmented into multiple
       ;; notifications, try to assemble for each
       ;; notification. `merge-fragment' returns nil until all
       ;; fragments have arrived.
-      (when-let ((assembly (merge-fragment pool notification)))
-        (let ((notification (fragmented-notification-notification
-                             (aref (assembly-fragments assembly) 0)))
-              (data         (assembly-concatenated-data assembly)))
-          (setf (notification-data notification) data)
-          notification))))
+      (when-let* ((assembly       (merge-fragment pool notification))
+                  (first-fragment (aref (assembly-fragments assembly) 0))
+                  (data           (assembly-concatenated-data assembly)))
+        (make-incoming-notification
+         (fragmented-notification-notification first-fragment)
+         data))))
 
 (defun one-notification->event (converter notification data
                                 &key

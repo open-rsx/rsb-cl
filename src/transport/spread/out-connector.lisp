@@ -61,6 +61,6 @@
          ((group-names . notifications) notification))
     (iter (for notification in notifications)
           (let* ((buffer       (pb:pack* notification))
-                 (notification (make-wire-notification
-                                buffer (length buffer))))
+                 (notification (make-destined-wire-notification
+                                group-names buffer (length buffer))))
             (send-message connection group-names notification)))))
