@@ -48,6 +48,9 @@
                               (:file       "connection")
 
                               (:file       "assembly-mixin")
+
+                              (:file       "sender-receiver")
+
                               (:file       "connector")
                               (:file       "in-connector")
                               (:file       "in-push-connector")
@@ -77,6 +80,9 @@
                               (:file       "util")
                               (:file       "fragmentation")
                               (:file       "connection")
+
+                              (:file       "sender-receiver")
+
                               (:file       "connectors"))))
 
   :perform     (test-op (operation component)

@@ -45,6 +45,9 @@
    #:make-notification
    #:split-notification
 
+   #:message-receiver
+   #:message-sender
+
    #:connection
 
    #:in-connector
