@@ -39,28 +39,48 @@
   (notify recipient t action))
 
 (defmethod handle ((sink out-connector) (data event))
-  (let+ (((&structure-r/o connector- (cache %scope->groups-cache)) sink)
-         (group-names   (scope->groups (event-scope data) cache))
-         (notifications (event->notification sink data)))
-    ;; Due to large events being fragmented into multiple
-    ;; notifications, we obtain a list of notifications here.
-    (send-notification sink (cons group-names notifications))))
+  (let* ((notification  (event->notification sink data))
+         (notifications (event->notification sink notification)))
+    (declare (type function notifications))
+    (loop :for notification = (funcall notifications)
+          :while notification
+          :do (send-notification sink notification))))
 
 (defmethod event->notification ((connector out-connector) (event event))
-  ;; Delegate conversion to `event->notifications'. The primary
-  ;; purpose of this method is performing the conversion with restarts
-  ;; installed.
-  (event->notifications
-   connector event (connector-max-fragment-size connector)))
+  (let+ (((&structure-r/o connector- converter (cache %scope->groups-cache))
+          connector)
+         ((&structure-r/o
+           event- origin sequence-number scope method timestamps causes data)
+          event)
+         (meta-data (rsb:event-meta-data event))
+         (group-names (scope->groups scope cache))
+         ((&values wire-data wire-schema)
+          (rsb.converter:domain->wire converter data))
+         (notification (make-notification
+                        sequence-number origin scope method
+                        wire-schema meta-data timestamps causes)))
+    (make-outgoing-notification scope group-names notification wire-data)))
 
-(defmethod send-notification ((connector out-connector) (notification cons))
-  ;; Send each notification using `send-message'. The primary purpose
-  ;; of this method is sending the notifications with restarts
-  ;; installed.
-  (let+ (((&accessors-r/o (connection connector-connection)) connector)
-         ((group-names . notifications) notification))
-    (iter (for notification in notifications)
-          (let* ((buffer       (pb:pack* notification))
+(defmethod event->notification ((connector out-connector)
+                                (event     outgoing-notification))
+  (let+ (((&structure-r/o connector- max-fragment-size) connector)
+         ((&structure-r/o
+           outgoing-notification- destination notification wire-data)
+          event)
+         (splitter (split-notification notification wire-data max-fragment-size)))
+    (lambda ()
+      (let+ (((&values fragment part num-parts) (funcall splitter)))
+        (when fragment
+          (let* ((buffer       (pb:pack* fragment))
                  (notification (make-destined-wire-notification
-                                group-names buffer (length buffer))))
-            (send-message connection group-names notification)))))
+                                destination buffer (length buffer))))
+            (declare (type simple-octet-vector buffer))
+            (values notification part num-parts)))))))
+
+(defmethod send-notification ((connector    out-connector)
+                              (notification destined-wire-notification))
+  ;; Send NOTIFICATION using `send-message'. The primary purpose of
+  ;; this method is sending the notifications with restarts installed.
+  (let+ (((&accessors-r/o (connection connector-connection)) connector)
+         ((&structure-r/o destined-wire-notification- destination) notification))
+    (send-message connection destination notification)))

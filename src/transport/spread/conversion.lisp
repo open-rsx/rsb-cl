@@ -163,127 +163,147 @@
 
 ;;; Event -> Notification
 
-(declaim (ftype (function (t event positive-fixnum) list) event->notifications))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun make-notification (sequence-number origin
+                            &optional
+                            scope method wire-schema
+                            meta-data timestamps causes)
+    "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
+     ORIGIN and optionally SCOPE, METHOD, WIRE-SCHEMA, META-DATA and
+     CAUSES."
+    (let+ ((full?     scope)
+           (event-id (make-instance 'event-id
+                                    :sender-id       (uuid:uuid-to-byte-array origin)
+                                    :sequence-number sequence-number))
+           ((&flet make-meta-data ()
+              (let ((result (make-instance 'event-meta-data)))
+                ;; Add META-DATA.
+                (iter (for (key value) on meta-data :by #'cddr)
+                  (vector-push-extend
+                   (make-instance 'user-info
+                                  :key   (keyword->bytes key)
+                                  :value (string->bytes value))
+                   (event-meta-data-user-infos result)))
 
-(defun event->notifications (converter event max-fragment-size)
-  "Convert EVENT into one or more notifications.
-
-   More than one notification is required when data contained in event
-   does not fit into one notification."
-  ;; Put EVENT into one or more notifications.
-  (let+ (((&accessors-r/o (origin          event-origin)
-                          (sequence-number event-sequence-number)
-                          (scope           event-scope)
-                          (method          event-method)
-                          (data            event-data)
-                          (meta-data       rsb:event-meta-data)
-                          (timestamps      event-timestamps)
-                          (causes          event-causes)) event)
-         ((&values wire-data wire-schema)
-          (rsb.converter:domain->wire converter data))
-         (data-size (length wire-data)))
-    (declare (type octet-vector wire-data))
-
-    (iter (with remaining     =     data-size)
-          (with offset        =     0)
-          (for  i             :from 0)
-          (let* ((notification  (apply #'make-notification
-                                      sequence-number origin
-                                      (when (first-iteration-p)
-                                        (list scope method wire-schema
-                                              meta-data timestamps causes))))
-                 (fragment      (make-instance 'fragmented-notification
-                                               :notification   notification
-                                               :num-data-parts 1
-                                               :data-part      i))
-                 (packed-size   (pb:packed-size fragment))
-                 (room          (- max-fragment-size packed-size))
-                 (fragment-size (if (< room 5) ;; conservative
-                                               ;; estimate of required
-                                               ;; number of bytes to
-                                               ;; encode a bit of
-                                               ;; payload
-                                  (error 'insufficient-room
-                                         :required  (+ packed-size 5)
-                                         :available max-fragment-size)
-                                  (min (- room 4) remaining))))
-
-            (setf (notification-data notification)
-                  (%make-data-fragment wire-data offset fragment-size))
-            (incf offset    fragment-size)
-            (decf remaining fragment-size)
-
-            (collect fragment :into fragments)
-            (while (plusp remaining))
-            (finally
-             (unless (length= 1 fragments)
-               (iter (for fragment in fragments)
-                     (setf (fragmented-notification-num-data-parts fragment)
-                           (1+ i))))
-             (return fragments))))))
-
-(defun make-notification (sequence-number origin
-                          &optional
-                          scope method wire-schema
-                          meta-data timestamps causes)
-  "Make and return a `rsb.protocol:notification' instance with SEQUENCE-NUMBER,
-   ORIGIN and optionally SCOPE, METHOD, WIRE-SCHEMA, META-DATA and
-   CAUSES."
-  (let+ ((full?     scope)
-         (event-id (make-instance 'event-id
-                                  :sender-id       (uuid:uuid-to-byte-array origin)
-                                  :sequence-number sequence-number))
-         ((&flet make-meta-data ()
-            (let ((result (make-instance 'event-meta-data)))
-              ;; Add META-DATA.
-              (iter (for (key value) on meta-data :by #'cddr)
+                ;; Add framework timestamps in TIMESTAMPS.
+                (macrolet
+                    ((set-timestamp (which accessor)
+                       `(when-let ((value (getf timestamps ,which)))
+                          (setf (,accessor result)
+                                (timestamp->unix-microseconds value)))))
+                  (set-timestamp :create  event-meta-data-create-time)
+                  (set-timestamp :send    event-meta-data-send-time)
+                  (set-timestamp :receive event-meta-data-receive-time)
+                  (set-timestamp :deliver event-meta-data-deliver-time))
+                ;; Add "user timestamps" in TIMESTAMPS.
+                (iter (for (key value) on timestamps :by #'cddr)
+                  ;; Framework timestamps are stored in dedicated fields of
+                  ;; the notification.
+                  (unless (member key *framework-timestamps* :test #'eq)
                     (vector-push-extend
-                     (make-instance 'user-info
-                                    :key   (keyword->bytes key)
-                                    :value (string->bytes value))
-                     (event-meta-data-user-infos result)))
+                     (make-instance 'user-time
+                                    :key       (keyword->bytes key)
+                                    :timestamp (timestamp->unix-microseconds value))
+                     (event-meta-data-user-times result))))
+                result)))
+           (notification (if full?
+                             (make-instance 'notification
+                                            :event-id    event-id
+                                            :scope       (string->bytes (scope-string scope))
+                                            :wire-schema (wire-schema->bytes wire-schema)
+                                            :meta-data   (make-meta-data))
+                             (make-instance 'notification :event-id event-id))))
+      (when full?
+        ;; Store the method of the event in the new notification if the
+        ;; event has one.
+        (when method
+          (setf (notification-method notification) (keyword->bytes method)))
 
-              ;; Add framework timestamps in TIMESTAMPS.
-              (macrolet
-                  ((set-timestamp (which accessor)
-                     `(when-let ((value (getf timestamps ,which)))
-                        (setf (,accessor result)
-                              (timestamp->unix-microseconds value)))))
-                (set-timestamp :create  event-meta-data-create-time)
-                (set-timestamp :send    event-meta-data-send-time)
-                (set-timestamp :receive event-meta-data-receive-time)
-                (set-timestamp :deliver event-meta-data-deliver-time))
-              ;; Add "user timestamps" in TIMESTAMPS.
-              (iter (for (key value) on timestamps :by #'cddr)
-                    ;; Framework timestamps are stored in dedicated fields of
-                    ;; the notification.
-                    (unless (member key *framework-timestamps* :test #'eq)
-                      (vector-push-extend
-                       (make-instance 'user-time
-                                      :key       (keyword->bytes key)
-                                      :timestamp (timestamp->unix-microseconds value))
-                       (event-meta-data-user-times result))))
-              result)))
-         (notification (if full?
-                           (make-instance 'notification
-                                          :event-id    event-id
-                                          :scope       (string->bytes (scope-string scope))
-                                          :wire-schema (wire-schema->bytes wire-schema)
-                                          :meta-data   (make-meta-data))
-                           (make-instance 'notification :event-id event-id))))
-    (when full?
-      ;; Store the method of the event in the new notification if the
-      ;; event has one.
-      (when method
-        (setf (notification-method notification) (keyword->bytes method)))
+        ;; Add CAUSES.
+        (iter (for (origin-id . sequence-number) in causes)
+          (vector-push-extend
+           (make-instance 'event-id
+                          :sender-id       (uuid:uuid-to-byte-array
+                                            origin-id)
+                          :sequence-number sequence-number)
+           (notification-causes notification))))
 
-      ;; Add CAUSES.
-      (iter (for (origin-id . sequence-number) in causes)
-            (vector-push-extend
-             (make-instance 'event-id
-                            :sender-id       (uuid:uuid-to-byte-array
-                                              origin-id)
-                            :sequence-number sequence-number)
-             (notification-causes notification))))
+      notification)))
 
-    notification))
+(declaim (type message-length-limit *max-other-fragment-overhead*
+               *max-payload-overhead*))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (let* ((max-fragments       16383)
+         (notification        (make-notification 0 (uuid:make-null-uuid)))
+         (fragment            (make-instance 'fragmented-notification
+                                             :notification   notification
+                                             :num-data-parts max-fragments
+                                             :data-part      max-fragments))
+         (no-payload-overhead (pb:packed-size fragment))
+         (fragment-overhead   (progn
+                                (setf (notification-data notification)
+                                      (nibbles:make-octet-vector
+                                       network.spread:+maximum-message-data-length+))
+                                (- (pb:packed-size fragment)
+                                   network.spread:+maximum-message-data-length+))))
+
+    (defparameter *max-other-fragment-overhead*
+      fragment-overhead
+      "Maximum overhead in octets for non-first fragments.")
+
+    (defparameter *max-payload-overhead*
+      (- fragment-overhead no-payload-overhead)
+      "Maximum overhead in octets added by the payload.")))
+
+(declaim (ftype (function (notification simple-octet-vector message-length-limit)
+                          (values function &optional))
+                split-notification))
+(defun split-notification (notification wire-data max-fragment-size)
+  (let ((event-id                    (notification-event-id notification))
+        (data-size                   (length wire-data))
+        (offset                      0)
+        (i                           0)
+        (num-parts                   0)
+        (other-fragment-payload-size (- max-fragment-size
+                                        *max-other-fragment-overhead*)))
+    (declare (type array-index offset i num-parts))
+    (flet ((make-fragment ()
+             (unless (or (zerop i) (< i num-parts))
+               (return-from make-fragment))
+             (let* ((notification  (if (zerop i)
+                                       notification
+                                       (make-instance 'notification
+                                                      :event-id event-id)))
+                    (fragment      (make-instance 'fragmented-notification
+                                                  :notification   notification
+                                                  :num-data-parts num-parts
+                                                  :data-part      i))
+                    (payload-size  (if (zerop i)
+                                       (- max-fragment-size
+                                          (the message-length-limit
+                                               (pb:packed-size fragment))
+                                          *max-payload-overhead*)
+                                       other-fragment-payload-size))
+                    (payload-size  (min payload-size (- data-size offset))))
+               (when (minusp payload-size)
+                 (error 'insufficient-room
+                        :available max-fragment-size
+                        :required  (+ (the message-length-limit
+                                           (pb:packed-size fragment))
+                                      *max-payload-overhead*)))
+               ;; After constructing the initial fragment, calculate
+               ;; the required number of fragments.
+               (when (zerop i)
+                 (setf num-parts
+                       (1+ (ceiling (- data-size payload-size)
+                                    other-fragment-payload-size))
+                       (fragmented-notification-num-data-parts fragment)
+                       num-parts))
+               ;; Stores slice of WIRE-DATA as payload for the fragment.
+               (setf (notification-data notification)
+                     (subseq wire-data offset (+ offset payload-size)))
+               (incf offset payload-size)
+               (incf i)
+               (values fragment (1- i) num-parts))))
+      #'make-fragment)))

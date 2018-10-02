@@ -48,45 +48,55 @@ instance.")
 
 (addtest (fragmentation-root
           :documentation
-          "Smoke test for the `event->notifications' function.")
+          "Smoke test for the `split-notification' function.")
   fragment-smoke
 
-  (ensure-cases (data chunk-size error?)
-      `((""                   90 nil)
-        ("foobarbazfezwhoop"  85 nil)
-        ("foobarbazb"         88 nil)
-        ("fooobaar"           89 nil)
-        (,(make-string 1000) 100 nil)
+  (ensure-cases (data fragment-size-limit &optional expected)
+      `((""                   90)
+        ("foobarbazfezwhoop"  85)
+        ("foobarbazb"         88)
+        ("fooobaar"           89)
+        (,(make-string 1000) 100)
 
-        (""                   20 t)
-        ("bla"                20 t))
+        (""                   20 insufficient-room)
+        ("bla"                20 insufficient-room))
 
-    (let ((event (make-event* data)))
-      (if error?
-          (ensure-condition 'insufficient-room
-            (event->notifications :fundamental-null event chunk-size))
-          (let ((result (event->notifications
-                         :fundamental-null event chunk-size)))
-            (ensure (every (compose (rcurry #'<= chunk-size)
-                                    #'pb:packed-size)
-                           result)))))))
+    (let+ ((notification (make-notification
+                          0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
+                          nil :utf-8-string '() `(:create ,(local-time:now))))
+           ((&flet do-it ()
+              (collect-fragments (split-notification
+                                  notification (octetify data)
+                                  fragment-size-limit)))))
+      (case expected
+        (insufficient-room
+         (ensure-condition 'insufficient-room (do-it)))
+        (t
+         (ensure (every (compose (rcurry #'<= fragment-size-limit)
+                                 #'pb:packed-size)
+                        (do-it))))))))
 
 (addtest (fragmentation-root
           :documentation
           "Do full roundtrips of fragmenting data using
-`event->notifications' and then re-assemble the fragments using
-`merge-fragments'.")
+           `split-notification' and then re-assemble the fragments
+           using `merge-fragments'.")
   roundtrip
 
-  (ensure-cases (data chunk-size)
+  (ensure-cases (data fragment-size-limit)
       `((""                   90)
         ("foobarbazfezwhoop"  85)
         ("foobarbazb"         88)
         ("fooobaar"           89)
         (,(make-string 1000) 100))
 
-    (let* ((event         (make-event* (octetify data)))
-           (notifications (event->notifications :fundamental-null event chunk-size))
+    (let* ((notification  (make-notification
+                           0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
+                           nil :utf-8-string '() `(:create ,(local-time:now))))
+           (notifications (collect-fragments
+                           (split-notification
+                            notification (octetify data)
+                            fragment-size-limit)))
            (pool          (make-instance 'assembly-pool))
            (result        (assembly-concatenated-data
                            (lastcar (map 'list (curry #'merge-fragment pool)

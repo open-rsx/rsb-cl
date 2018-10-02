@@ -42,7 +42,8 @@
    #:assembly-pool
    #:pruning-assembly-pool
 
-   #:event->notifications
+   #:make-notification
+   #:split-notification
 
    #:connection
 
@@ -98,6 +99,11 @@ module"))
                  :notification   (a-notification sequence-number data)
                  :num-data-parts length
                  :data-part      id))
+
+(defun collect-fragments (generator)
+  (loop :for fragment = (funcall generator)
+        :while fragment
+        :collect fragment))
 
 (defun make-event* (data)
   (let ((event (make-event "/foo" (octetify data))))
