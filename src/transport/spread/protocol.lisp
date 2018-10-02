@@ -99,3 +99,17 @@
     If NOTIFICATION completes the assembly, return a notification
     instance built from the complete assembly. Otherwise, return
     nil."))
+
+;;; Transport protocol
+
+(defgeneric ensure-access (transport options connector)
+  (:documentation
+   "Ensure access for CONNECTOR to the bus described by OPTIONS using TRANSPORT.
+
+    Return an existing or newly created bus object the configuration
+    of which matches OPTIONS. In any case, CONNECTOR is already
+    attached to the returned bus.
+
+    CONNECTOR may share a Spread connection with other connectors. A
+    new Spread connection is only established if a connection
+    compatible with OPTIONS is not yet present in TRANSPORT."))
