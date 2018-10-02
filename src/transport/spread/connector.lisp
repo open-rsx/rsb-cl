@@ -12,10 +12,10 @@
                   :documentation
                   "Stores the parameters that should be used when
                    establishing the actual Spread connection.")
-   (connection    :initarg  :connection
-                  :type     (or null connection)
-                  :reader   connector-connection
-                  :accessor connector-%connection
+   (bus           :initarg  :bus
+                  :type     (or null bus)
+                  :reader   bus
+                  :accessor %bus
                   :initform nil
                   :documentation
                   "Stores the connection used by this connector."))
@@ -41,27 +41,36 @@
     :description
     #.(format nil "Should the TCP_NODELAY option be set on the socket ~
        used for Spread communication? Note: currently ignored by Lisp ~
-       implementation.")))
+       implementation."))
+   (:age-limit positive-real
+    :default 10
+    :description
+    #.(format nil "The amount of time after which incomplete ~
+       assemblies are pruned. Supplying this option only makes sense ~
+       in conjunction with an unreliable communication mode since ~
+       incomplete assemblies are never pruned in reliable ~
+       communication modes.")))
   (:documentation
    "Superclass for Spread in and out connectors."))
 
 (defmethod initialize-instance :before ((instance connector)
                                         &key
-                                        connection
+                                        bus
                                         name
                                         port)
-  ;; Make sure that at least one of CONNECTION, NAME and PORT is
+  ;; Make sure that at least one of BUS, NAME and PORT is
   ;; supplied.
-  (unless (or connection name port)
-    (missing-required-initarg
-     'connector :either-connection-or-name-or-port)))
+  (unless (or bus name port)
+    (missing-required-initarg 'connector :either-bus-or-name-or-port)))
 
 (defmethod shared-initialize :after ((instance connector) (slot-names t)
                                      &key
-                                     connection
+                                     bus
                                      (name nil name-supplied?)
                                      (host nil host-supplied?)
-                                     (port nil port-supplied?))
+                                     (port nil port-supplied?)
+                                     tcpnodelay
+                                     age-limit)
   (when (or name-supplied? host-supplied? port-supplied?)
     (let+ (((&structure-r/o connector- url) instance)
            ((&values name host port)
@@ -72,27 +81,28 @@
       (setf (puri:uri-port url) port)
 
       (setf (connector-%configuration instance)
-            (list :connection connection
-                  :name name :host host :port port)))))
+            (list :bus bus :name name :host host :port port
+                  :tcpnodelay tcpnodelay :age-limit age-limit)))))
 
 ;;; (Dis)connecting
 
 (defmethod notify ((recipient connector)
                    (subject   (eql t))
                    (action    (eql :attached)))
-  (let+ (((&structure-r/o
-           connector-
-           ((&plist (connection :connection) (name :name)) %configuration))
-          recipient))
-
+  (let+ (((&structure-r/o connector- transport (options %configuration))
+          recipient)
+         ((&plist-r/o (bus :bus)) options))
     ;; Unless a connection has been supplied, connect to the spread
-    ;; daemon designated by NAME.
-    (setf (connector-%connection recipient)
-          (or connection (make-instance 'connection :name name)))))
+    ;; daemon designated by OPTIONS.
+    (setf (%bus recipient) (or bus
+                               (ensure-access transport options recipient)))))
 
 (defmethod notify ((recipient connector)
                    (subject   (eql t))
                    (action    (eql :detached)))
-  (let+ (((&structure connector- (connection %connection)) recipient))
-    (detach connection)
-    (setf connection nil)))
+  (let+ (((&accessors (bus %bus)) recipient))
+    (notify recipient bus :detached)
+    (setf bus nil)))
+
+(defmethod notify ((recipient connector) (subject scope) (action t))
+  (notify recipient t action))

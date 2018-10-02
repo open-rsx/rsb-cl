@@ -1,14 +1,18 @@
 ;;;; in-pull-connector.lisp --- An in-direction, pull-based connector for spread.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.spread)
 
-(defclass in-pull-connector (error-handling-pull-receiver-mixin
-                             in-connector)
-  ()
+(defclass in-pull-connector (in-connector
+                             error-handling-pull-receiver-mixin)
+  ((queue :type     lparallel.queue:queue
+          :reader   queue
+          :initform (lparallel.queue:make-queue)
+          :documentation
+          "Stores notifications as they arrive via the message bus."))
   (:metaclass connector-class)
   (:direction :in-pull)
   (:documentation
@@ -16,37 +20,24 @@
 
 (register-connector :spread :in-pull 'in-pull-connector)
 
-(defmethod notify ((recipient in-pull-connector)
-                   (subject   scope)
-                   (action    (eql :attached)))
-  ;; Connect if necessary.
-  (unless (connector-connection recipient)
-    (notify recipient t :attached))
+(defmethod handle ((connector in-pull-connector)
+                   (data      bus-notification))
+  ;; Put DATA into the queue of CONNECTOR for later retrieval.
+  (lparallel.queue:push-queue data (queue connector)))
 
-  (let+ (((&structure-r/o connector- connection) recipient)
-         ((&values &ign &ign promise)
-          (ref-group (connector-connection recipient) (scope->group subject)
-                     :waitable? t)))
-    ;; If necessary, wait for the Spread group joining operation to
-    ;; complete.
-    (iter (until (lparallel:fulfilledp promise))
-          (receive-message connection nil))))
+(defmethod receive-notification ((connector in-pull-connector)
+                                 (block?    (eql nil)))
+  ;; Extract and return one event from the queue maintained by
+  ;; CONNECTOR, if there are any. If there are no queued events,
+  ;; return nil.
+  (lparallel.queue:try-pop-queue (queue connector)))
 
-(defmethod notify ((recipient in-pull-connector)
-                   (subject   scope)
-                   (action    (eql :detached)))
-  (let+ (((&structure-r/o connector- connection) recipient)
-         ((&values &ign group-count promise)
-          (unref-group (connector-connection recipient) (scope->group subject)
-                       :waitable? t)))
-    ;; If necessary, wait for the Spread group leaving operation to
-    ;; complete.
-    (iter (until (lparallel:fulfilledp promise))
-          (receive-message connection nil))
-    ;; If this was the final reference to the final group of the
-    ;; connection, detach RECIPIENT.
-    (when (zerop group-count)
-      (notify recipient t :detached))))
+(defmethod receive-notification ((connector in-pull-connector)
+                                 (block?    t))
+  ;; Extract and return one event from the queue maintained by
+  ;; CONNECTOR, if there are any. If there are no queued events,
+  ;; block.
+  (lparallel.queue:pop-queue (queue connector)))
 
 (defmethod emit ((source in-pull-connector) (block? t))
   ;; Maybe block until a notification is received. Try to convert into
@@ -56,7 +47,6 @@
                (event (when notification
                         (notification->event
                          source notification :undetermined))))
-
           ;; Due to fragmentation of large events into multiple
           ;; notifications, non-blocking receive mode and error
           ;; handling policies, we may not obtain an `event' instance

@@ -47,8 +47,6 @@
                               (:file       "transport")
                               (:file       "connection")
 
-                              (:file       "assembly-mixin")
-
                               (:file       "sender-receiver")
 
                               (:file       "bus-mixins")

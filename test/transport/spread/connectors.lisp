@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,26 +20,29 @@
           "Test `notification->event' method.")
   notification->event
 
-  (ensure-cases (notification wire-schema connector-args expected)
+  (ensure-cases (payload-data wire-schema connector-args expected)
       `(;; In these cases, protocol buffer unpacking fails.
-        (,a-string           :foo (:error-policy nil)          decoding-error)
-        (,a-string           :foo (:error-policy ,#'continue)  nil)
+        (,a-string           "foo"          (:error-policy nil)         decoding-error)
+        (,a-string           "foo"          (:error-policy ,#'continue) nil)
 
         ;; Protocol buffer unpacking succeeds, but conversion to event
         ;; fails.
-        (,empty-notification :foo (:error-policy nil)          decoding-error)
-        (,empty-notification :foo (:error-policy ,#'continue)  nil))
+        (,a-string           "utf-8-string" ()                          "foobarbaz"))
 
-    (let+ ((connector    (apply #'make-instance 'in-pull-connector ; TODO(jmoringe): class
+    (let+ ((connector    (apply #'make-instance 'in-pull-connector
+                                :converter :fundamental-utf-8-string
                                 (append common-args connector-args)))
-           (notification (make-wire-notification
-                          notification (length notification)))
+           (notification (rsb.transport.spread::make-incoming-notification
+                          (a-notification 0 payload-data :wire-schema wire-schema)
+                          payload-data))
            ((&flet do-it ()
               (rsb.ep:with-error-policy (connector)
                 (notification->event connector notification wire-schema)))))
       (case expected
         (decoding-error (ensure-condition 'decoding-error (do-it)))
-        ((nil           (ensure-null (do-it))))))))
+        ((nil)          (ensure-null (do-it)))
+        (t              (ensure-same (event-data (do-it)) expected
+                                     :test #'equal))))))
 
 ;;; Connector classes
 
@@ -69,7 +72,7 @@
                                class-name))
               construct/invalid
 
-              ;; Missing :host, :port, :name or :connection initarg.
+              ;; Missing :host, :port, :name or :bus initarg.
               (ensure-condition 'missing-required-initarg
                 (make-instance ',class-name :schema    :spread
                                             :converter :fundamental-null

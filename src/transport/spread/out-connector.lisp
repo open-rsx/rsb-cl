@@ -39,12 +39,7 @@
   (notify recipient t action))
 
 (defmethod handle ((sink out-connector) (data event))
-  (let* ((notification  (event->notification sink data))
-         (notifications (event->notification sink notification)))
-    (declare (type function notifications))
-    (loop :for notification = (funcall notifications)
-          :while notification
-          :do (send-notification sink notification))))
+  (handle (bus sink) (event->notification sink data)))
 
 (defmethod event->notification ((connector out-connector) (event event))
   (let+ (((&structure-r/o connector- converter (cache %scope->groups-cache))
@@ -60,27 +55,3 @@
                         sequence-number origin scope method
                         wire-schema meta-data timestamps causes)))
     (make-outgoing-notification scope group-names notification wire-data)))
-
-(defmethod event->notification ((connector out-connector)
-                                (event     outgoing-notification))
-  (let+ (((&structure-r/o connector- max-fragment-size) connector)
-         ((&structure-r/o
-           outgoing-notification- destination notification wire-data)
-          event)
-         (splitter (split-notification notification wire-data max-fragment-size)))
-    (lambda ()
-      (let+ (((&values fragment part num-parts) (funcall splitter)))
-        (when fragment
-          (let* ((buffer       (pb:pack* fragment))
-                 (notification (make-destined-wire-notification
-                                destination buffer (length buffer))))
-            (declare (type simple-octet-vector buffer))
-            (values notification part num-parts)))))))
-
-(defmethod send-notification ((connector    out-connector)
-                              (notification destined-wire-notification))
-  ;; Send NOTIFICATION using `send-message'. The primary purpose of
-  ;; this method is sending the notifications with restarts installed.
-  (let+ (((&accessors-r/o (connection connector-connection)) connector)
-         ((&structure-r/o destined-wire-notification- destination) notification))
-    (send-message connection destination notification)))
