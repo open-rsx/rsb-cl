@@ -1,0 +1,61 @@
+#+OPTIONS: toc:nil num:nil
+
+* Introduction
+
+  This repository contains the Common Lisp implementation of the
+  [[https://github.com/open-rsx][Robotics Service Bus]] middleware.
+
+* Dependencies
+
+  At the moment, the code is not portable and can only be used with
+  the [[http://sbcl.org][SBCL]] implementation of Common Lisp.
+
+  The only dependencies not available via [[https://www.quicklisp.org/beta/][Quicklisp]] are
+
+  + [[https://github.com/scymtym/network.spread][network.spread]] for using the [[http://www.spread.org][Spread]] transport
+
+  + [[https://github.com/scymtym/cl-protobuf][cl-protobuf]] for sending [[https://developers.google.com/protocol-buffers/][Protocol Buffers]] data
+
+* Building
+
+  Load the system that provides the desired transport (or multiple):
+
+  + ~rsb-transport-inprocess~ :: All participant live in the same
+       process
+
+  + ~rsb-transport-socket~ :: Two or a small number of processes, on
+       the same or on multiple machines.
+
+  + ~rsb-transport-spread~ :: Many processes, potentially on many
+       machines. Uses the [[http://www.spread.org/][Spread group communication framework]].
+
+  Other systems provide additional converters, filters or transforms.
+
+* Using
+
+  The [[file:./examples][examples]] directory has a few example.
+
+  For more information, see the full documentation mentioned [[*Introduction][above]].
+
+* Contributing
+
+  If you want to contribute to this project, please
+
+  + Submit your intended changes as coherent pull requests.
+
+  + Rebase onto the master branch and squash any fixups and
+    corrections.
+
+  + Make sure the unit tests pass.
+
+* Acknowledgments
+
+  The development of this software has been supported as follows:
+
+  + The development of this software was supported by CoR-Lab,
+    Research Institute for Cognition and Robotics Bielefeld
+    University.
+
+  + This work was supported by the Cluster of Excellence Cognitive
+    Interaction Technology ‘CITEC’ (EXC 277) at Bielefeld University,
+    which is funded by the German Research Foundation (DFG).
