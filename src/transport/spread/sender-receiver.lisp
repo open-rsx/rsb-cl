@@ -28,7 +28,7 @@
                   :documentation
                   "Stores the `assembly-pool' instances used for
                    assembling notifications.")
-   (state         :type     (member :active :shutdown)
+   (state         :type     (member :active :shutdown :abort)
                   :accessor %state
                   :initform :active
                   :documentation
@@ -57,7 +57,8 @@
 (defmethod notify ((recipient message-receiver)
                    (subject   (eql t))
                    (action    (eql :detaching)))
-  (setf (%state recipient) :shutdown))
+  (loop :while (eq (%state recipient) :active)
+        :do (sb-ext:cas (slot-value recipient 'state) :active :shutdown)))
 
 (defmethod notify ((recipient message-receiver)
                    (subject   (eql t))
@@ -81,8 +82,20 @@
   (let+ (((&values &ign group-count promise)
           (unref-group (connection recipient) (scope->group subject)
                        :waitable? t)))
-    ;; Wait for the Spread group joining operation to complete.
+    ;; Wait for the Spread group leaving operation to complete.
+    (when (eq (%state recipient) :abort)
+      (log:warn "~@<Receiver thread aborted, not waiting for ~
+                 confirmation for group leaving operation for ~
+                 ~A.~@:>"
+                subject)
+      (return-from notify))
     (values (lparallel:force promise) (zerop group-count))))
+
+(defmethod receive-messages :around ((connector message-receiver))
+  (unwind-protect
+       (call-next-method)
+    (loop :while (eq (%state connector) :active)
+          :do (sb-ext:cas (slot-value connector 'state) :active :abort))))
 
 (defmethod receive-notification ((connector message-receiver) (block? t))
   ;; Delegate receiving a notification to the connection of CONNECTOR.
