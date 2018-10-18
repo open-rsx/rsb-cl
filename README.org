@@ -1,5 +1,8 @@
 #+OPTIONS: toc:nil num:nil
 
+#+ATTR_HTML: :alt "build status image" :title Build Status
+[[https://travis-ci.org/open-rsx/rsb-cl][https://travis-ci.org/open-rsx/rsb-cl.svg]]
+
 * Introduction
 
   This repository contains the Common Lisp implementation of the

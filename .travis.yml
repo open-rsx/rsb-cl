@@ -1,0 +1,41 @@
+language: lisp
+dist: xenial
+env: PREFIX="$(pwd)/sbcl"
+     SBCL_HOME="$(pwd)/sbcl/lib/sbcl"
+     SBCL="$(pwd)/sbcl/bin/sbcl"
+     SBCL_OPTIONS="--noinform --no-userinit"
+
+install:
+  - curl -L "${SBCL_DOWNLOAD_URL}" | tar -xj
+  - ( cd sbcl-* && INSTALL_ROOT="${PREFIX}" sh install.sh )
+
+  - curl -o cl "${CL_LAUNCH_DOWNLOAD_URL}"
+  - chmod +x cl
+
+  - curl -o quicklisp.lisp "${QUICKLISP_DOWNLOAD_URL}"
+  - ./cl -L quicklisp.lisp '(quicklisp-quickstart:install)'
+
+script:
+  - (
+      cd "${HOME}/quicklisp/local-projects"
+        && git clone https://github.com/scymtym/cl-protobuf
+        && git clone https://github.com/scymtym/network.spread
+    )
+  - ./cl
+      -S '(:source-registry (:directory "'$(pwd)'") :ignore-inherited-configuration)'
+      -Q
+      -s cl-protobuf
+      -s rsb-builder/test -s rsb-filter-regex/test
+      -s rsb-filter-xpath/test -s rsb-introspection/test
+      -s rsb-model-builder/test -s rsb-model/test
+      -s rsb-patterns-request-reply/test
+      -s rsb-transport-inprocess/test
+      -s rsb-transport-socket/test -s cl-rsb/test
+      '(or (mapc (function asdf:test-system)
+                 (list :rsb-builder/test :rsb-filter-regex/test
+                       :rsb-filter-xpath/test :rsb-introspection/test
+                       :rsb-model-builder/test :rsb-model/test
+                       :rsb-patterns-request-reply/test
+                       :rsb-transport-inprocess/test
+                       :rsb-transport-socket/test :cl-rsb/test))
+            (uiop:quit -1))'
