@@ -26,7 +26,7 @@
                 (:version "rsb-patterns-request-reply" #.(version/string)))
 
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-                 :pathname   #.+protocol-directory+
+                 :pathname   "data"
                  :components ((:file       "Hello"
                                :pathname   "rsb/protocol/introspection/Hello")
                               (:file       "Bye"

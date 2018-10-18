@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011-2016 Jan Moringen
+# Copyright (C) 2011-2018 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -141,14 +141,6 @@ if(NOT DEFINED RSB_VERSION_PATCH)
 endif()
 
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
-
-# Dependencies
-find_package(RSBProtocol "${RSB_VERSION_MAJOR}.${RSB_VERSION_MINOR}.8" REQUIRED)
-
-message(STATUS "Protocol directory: ${RSBProtocol_DIR}")
-
-file(WRITE "${CMAKE_SOURCE_DIR}/protocol-directory.sexp"
-           "\"${RSBProtocol_DIR}/\"")
 
 # Tests
 enable_testing()

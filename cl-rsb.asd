@@ -14,9 +14,6 @@
    #:version/string)
 
   (:export
-   #:+protocol-directory+)
-
-  (:export
    #:+optimization-fast+unsafe+))
 
 (cl:in-package #:cl-rsb-system)
@@ -95,23 +92,6 @@
                              (relative-from-components
                               (rest (pathname-directory relative)))
                              (relative-from-components ups)))))))
-
-(defparameter +protocol-directory+
-  (make-relative
-   (parse-namestring
-    (cond
-      ((boundp 'cl-user::*rsb.protocol-directory*)
-       (symbol-value 'cl-user::*rsb.protocol-directory*))
-      ((let* ((protocol-directory-file
-                (merge-pathnames "protocol-directory.sexp" *load-truename*))
-              (stream (when (probe-file protocol-directory-file)
-                        (open protocol-directory-file))))
-         (unwind-protect
-              (when stream (read stream))
-           (when stream (ignore-errors (close stream))))))
-      (t "data/")))
-   *load-truename*)
-  "Directory from which protocol definitions should be loaded.")
 
 (defparameter +optimization-fast+unsafe+
   (if (boundp '+optimization-fast+unsafe+)

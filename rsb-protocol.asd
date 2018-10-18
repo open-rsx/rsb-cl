@@ -20,7 +20,7 @@
   :defsystem-depends-on ("cl-protobuf")
 
   :components  ((:protocol-buffer-descriptor-directory "protocol"
-                 :pathname   #.+protocol-directory+
+                 :pathname   "data"
                  :serial     t
                  :components ((:file       "EventId"
                                :pathname   "rsb/protocol/EventId")
