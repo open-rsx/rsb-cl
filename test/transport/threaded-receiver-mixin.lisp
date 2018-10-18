@@ -23,13 +23,6 @@
           "Smoke test for the `threaded-receiver-mixin' class.")
   smoke
 
-  ;; As a workaround for https://bugs.launchpad.net/asdf/+bug/507378,
-  ;; force `receive-messages' to be updated.
-  #+sbcl (handler-case
-             (sb-ext:with-timeout .1
-               (receive-messages (make-instance 'mock-receiver)))
-           (sb-ext:timeout (condition) (declare (ignore condition))))
-
   ;; We try attaching and detaching with different timing behaviors.
   (let ((receiver (make-instance 'mock-receiver)))
     (iter (repeat 4)
