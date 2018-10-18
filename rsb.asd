@@ -64,32 +64,6 @@
   (declare (ignore revision? commit?))
   (format nil "~{~A.~A~^.~A~^-~A~}" (apply #'version/list args)))
 
-;;; Settings
-
-;; Return a relative pathname which, when MERGE-PATHNAMESed with
-;; ANCHOR, yields DIRECTORY.
-(defun make-relative (directory anchor)
-  (assert (and (pathname-directory directory)
-               (not (pathname-name directory))))
-  (when (eq :relative (first (pathname-directory directory)))
-    (return-from make-relative directory))
-
-  (labels ((from-components (pathname)
-             (make-pathname :directory pathname))
-           (relative-from-components (components)
-             (from-components (list* :relative components))))
-    (let ((initial (from-components (pathname-directory anchor))))
-      (loop for current = initial then (from-components
-                                        (butlast (pathname-directory current)))
-            for relative = (parse-namestring
-                            (enough-namestring directory current))
-            while (equal relative directory)
-            collect :up into ups
-            finally (return (merge-pathnames
-                             (relative-from-components
-                              (rest (pathname-directory relative)))
-                             (relative-from-components ups)))))))
-
 ;;; System definitions
 
 (defsystem "rsb"
