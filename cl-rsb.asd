@@ -11,10 +11,7 @@
 
   (:export
    #:version/list
-   #:version/string)
-
-  (:export
-   #:+optimization-fast+unsafe+))
+   #:version/string))
 
 (cl:in-package #:cl-rsb-system)
 
@@ -92,11 +89,6 @@
                              (relative-from-components
                               (rest (pathname-directory relative)))
                              (relative-from-components ups)))))))
-
-(defparameter +optimization-fast+unsafe+
-  (if (boundp '+optimization-fast+unsafe+)
-      (symbol-value '+optimization-fast+unsafe+)
-      '(optimize (speed 3) (compilation-speed 0) (space 0) (debug 0) (safety 0))))
 
 ;;; System definitions
 

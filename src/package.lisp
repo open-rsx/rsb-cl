@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Main package definition for the rsb system.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2010-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,6 +13,10 @@
    #:let-plus
    #:hooks
    #:more-conditions)
+
+  ;; Optimization settings
+  (:export
+   #:+optimization-fast+unsafe+)
 
   ;; Types
   (:export
@@ -267,10 +271,6 @@
    #:uri-mixin
 
    #:maybe-shorten-sequence)
-
-  ;; Optimization settings
-  (:import-from #:cl-rsb-system
-   #:+optimization-fast+unsafe+)
 
   (:documentation
    "This package contains most of the basic programming interface of rsb:

@@ -1,17 +1,22 @@
 ;;;; util.lisp ---
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb)
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter +optimization-fast+unsafe+
+    (if (boundp '+optimization-fast+unsafe+)
+        (symbol-value '+optimization-fast+unsafe+)
+        '(optimize (speed 3) (compilation-speed 0) (space 0) (debug 0) (safety 0)))))
 
 ;;; Sequence number functions
 
 (declaim (ftype (function (&optional sequence-number)
                           (function () sequence-number))
                 make-sequence-number-generator))
-
 (defun make-sequence-number-generator (&optional (start 0))
   "Return a function that returns increasing numbers starting with
 START."

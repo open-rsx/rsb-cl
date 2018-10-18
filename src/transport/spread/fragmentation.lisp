@@ -65,7 +65,7 @@
 (defun assembly-concatenated-data (assembly)
   "Return an octet-vector containing the concatenated bytes from all
    fragments of ASSEMBLY. ASSEMBLY has to be complete."
-  (declare #.cl-rsb-system:+optimization-fast+unsafe+)
+  (declare #.rsb:+optimization-fast+unsafe+)
   (let* ((fragments (map 'list (compose #'notification-data
                                         #'fragmented-notification-notification)
                          (assembly-fragments assembly)))
