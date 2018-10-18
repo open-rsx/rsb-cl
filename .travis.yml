@@ -30,12 +30,12 @@ script:
       -s rsb-model-builder/test -s rsb-model/test
       -s rsb-patterns-request-reply/test
       -s rsb-transport-inprocess/test
-      -s rsb-transport-socket/test -s cl-rsb/test
+      -s rsb-transport-socket/test -s rsb/test
       '(or (mapc (function asdf:test-system)
                  (list :rsb-builder/test :rsb-filter-regex/test
                        :rsb-filter-xpath/test :rsb-introspection/test
                        :rsb-model-builder/test :rsb-model/test
                        :rsb-patterns-request-reply/test
                        :rsb-transport-inprocess/test
-                       :rsb-transport-socket/test :cl-rsb/test))
+                       :rsb-transport-socket/test :rsb/test))
             (uiop:quit -1))'

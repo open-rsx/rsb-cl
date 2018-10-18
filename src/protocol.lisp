@@ -1,6 +1,6 @@
-;;;; protocol.lisp --- Main client-facing protocol provided by cl-rsb.
+;;;; protocol.lisp --- Main client-facing protocol provided by rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

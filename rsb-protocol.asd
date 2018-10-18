@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-protocol"
   :description "Google protocol buffer-based communication protocol."

@@ -1,6 +1,6 @@
-;;;; uris.lisp --- URI-related functions used in cl-rsb.
+;;;; uris.lisp --- URI-related functions used in rsb.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

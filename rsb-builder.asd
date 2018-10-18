@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-builder"
   :description "Builder support for RSB objects such as events."
@@ -23,7 +23,7 @@
                 (:version "architecture.builder-protocol"                   "0.3")
                 (:version "architecture.builder-protocol.universal-builder" "0.3")
 
-                (:version "cl-rsb"                                          #.(version/string)))
+                (:version "rsb"                                             #.(version/string)))
 
   :components  ((:module     "src"
                  :components ((:file       "builder"))))
@@ -43,7 +43,7 @@
 
                 (:version "rsb-builder"                        #.(version/string))
 
-                (:version "cl-rsb/test"                        #.(version/string)))
+                (:version "rsb/test"                           #.(version/string)))
 
   :components  ((:module     "test"
                  :components ((:file       "builder"))))

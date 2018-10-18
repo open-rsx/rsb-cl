@@ -1,6 +1,6 @@
 ;;;; model.lisp --- Model classes used by the introspection module.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,7 +23,7 @@
        :commandline-arguments arguments
        :start-time            (current-process-start-time)
        :executing-user        (current-user)
-       :rsb-version           (cl-rsb-system:version/string :commit? t)
+       :rsb-version           (rsb-system:version/string :commit? t)
        :display-name          (option-value '(:introspection :displayname))))))
 
 ;;; Functions related to `host-info'

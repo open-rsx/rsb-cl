@@ -4,11 +4,11 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-#.(unless (find-package '#:cl-rsb-system)
-    (load (merge-pathnames "cl-rsb.asd" *load-truename*))
+#.(unless (find-package '#:rsb-system)
+    (load (merge-pathnames "rsb.asd" *load-truename*))
     (values))
 
-(cl:in-package #:cl-rsb-system)
+(cl:in-package #:rsb-system)
 
 (defsystem "rsb-patterns-request-reply"
   :description "Request-Reply communication pattern for RSB."
@@ -19,14 +19,14 @@
   :version     #.(version/string)
   :depends-on  ("alexandria"
                 "iterate"
-                (:version "let-plus"                      "0.2")
+                (:version "let-plus"              "0.2")
                 "more-conditions"
-                (:version "utilities.print-items"         "0.1")
+                (:version "utilities.print-items" "0.1")
 
-                (:version "bordeaux-threads"              "0.8.4")
+                (:version "bordeaux-threads"      "0.8.4")
                 "closer-mop"
 
-                (:version "cl-rsb"                        #.(version/string)))
+                (:version "rsb"                    #.(version/string)))
 
   :components  ((:module     "patterns-request-reply"
                  :pathname   "src/patterns/request-reply"
@@ -59,7 +59,7 @@
                 (:version "rsb-patterns-request-reply" #.(version/string))
                 (:version "rsb-transport-inprocess"    #.(version/string))
 
-                (:version "cl-rsb/test"                #.(version/string)))
+                (:version "rsb/test"                   #.(version/string)))
 
   :components  ((:module     "patterns-request-reply"
                  :pathname   "test/patterns/request-reply"

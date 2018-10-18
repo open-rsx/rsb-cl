@@ -1,6 +1,6 @@
 ;;;; examples.lisp --- Tests of example programs.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -57,7 +57,7 @@
 (defun example-files ()
   (directory (merge-pathnames "**/*.lisp"
                               (asdf:system-relative-pathname
-                               :cl-rsb "examples/"))))
+                               :rsb "examples/"))))
 
 (deftestsuite examples-root (root)
   ()

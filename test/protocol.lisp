@@ -1,6 +1,6 @@
-;;;; protocol.lisp --- Unit tests for the protocol of the cl-rsb system.
+;;;; protocol.lisp --- Unit tests for the protocol of the rsb system.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 

@@ -1,6 +1,6 @@
-;;;; util.lisp --- Unit tests for utilities used by the cl-rsb system.
+;;;; util.lisp --- Unit tests for utilities used by the rsb system.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
