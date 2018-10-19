@@ -89,6 +89,6 @@
   :perform     (test-op (operation component)
                  (eval (read-from-string "(log:config :warn)")) ; less noise
                  (eval (read-from-string
-                        "(network.spread.daemon:with-daemon (:port cl-rsb-system::*spread-port*)
+                        "(network.spread.daemon:with-daemon (:port rsb-system::*spread-port*)
                            (lift:run-tests :config (lift::lift-relative-pathname
                                                     \"lift-transport-spread.config\")))"))))

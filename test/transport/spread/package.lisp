@@ -65,7 +65,7 @@ module"))
 ;;; Root test suite
 
 (deftestsuite transport-spread-root (transport-root)
-  ((spread-port cl-rsb-system::*spread-port*)
+  ((spread-port rsb-system::*spread-port*)
    common-args)
   (:setup
    (setf common-args `(:schema    :spread
