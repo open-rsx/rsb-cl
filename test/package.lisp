@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition rsb unit tests.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,10 +26,6 @@
   ;; Root test suite
   (:export
    #:root)
-
-  ;; Test environment
-  (:export
-   #:spread-port)
 
   ;; Test utilities
   (:export
