@@ -10,28 +10,39 @@
 
 (defclass connector (rsb.transport:connector
                      conversion-mixin)
-  ((bus     :accessor connector-bus
-            :documentation
-            "Stores the bus object representing the socked-based bus
-             to which the connector provides access.")
+  ((bus                     :accessor connector-bus
+                            :documentation
+                            "Stores the bus object representing the
+                             socked-based bus to which the connector
+                             provides access.")
    ;; Option slots
-   (server? :type     (or boolean (eql :auto))
-            :reader   connector-server?
-            :initform :auto
-            :documentation
-            "Controls whether the connector takes the server or client
-             role for the bus."))
+   (server?                 :type     (or boolean (eql :auto))
+                            :reader   connector-server?
+                            :initform :auto
+                            :documentation
+                            "Controls whether the connector takes the
+                             server or client role for the bus.")
+   (if-leftover-connections :type     leftover-connections-policy
+                            :reader   connector-if-leftover-connections
+                            :initform :wait
+                            :documentation
+                            "Controls whether a serer created for this
+                             connector delays its shutdown until for
+                             all client connections are closed."))
   (:metaclass connector-class)
   (:options
-   (:server &slot server?))
+   (:server                  &slot server?)
+   (:if-leftover-connections &slot if-leftover-connections))
   (:documentation
    "Superclass for socked-based connector classes."))
 
 ;; TODO(jmoringe, 2011-12-14): temp solution until config system works properly
-(defmethod initialize-instance :after ((instance connector)
-                                       &key
-                                       server?
-                                       server)
+(defmethod initialize-instance :after
+    ((instance connector)
+     &key
+     server?
+     server
+     (if-leftover-connections nil if-leftover-connections-supplied?))
   (setf (slot-value instance 'server?)
         (let ((value (or server? server)))
           (etypecase value
@@ -41,12 +52,25 @@
              (cond
                ((string= value "0")    nil)
                ((string= value "1")    t)
-               ((string= value "auto") :auto)))))))
+               ((string= value "auto") :auto))))))
+  (when if-leftover-connections-supplied?
+    (setf (slot-value instance 'if-leftover-connections)
+          (let ((value if-leftover-connections))
+            (etypecase value
+              (leftover-connections-policy
+               value)
+              (string
+               (switch (value :test #'string=)
+                 ("close" :close)
+                 ("wait"  :wait)
+                 (t       (error "~@<Invalid value ~S.~@:>" value)))))))))
 
 (defmethod notify ((connector connector)
                    (scope     scope)
                    (action    (eql :attached)))
-  (let+ (((&structure connector- transport server? bus) connector)
+  (let+ (((&structure connector-
+                      transport server? if-leftover-connections bus)
+          connector)
          (role    (case server?
                     ((t)   :server)
                     ((nil) :client)
@@ -58,6 +82,7 @@
     ;; access provider.
     (setf bus (apply #'transport-ensure-bus
                      transport role connector address
+                     :if-leftover-connections if-leftover-connections
                      options))
 
     ;; Notify the bus access provider of the added connector.

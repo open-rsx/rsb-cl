@@ -1,6 +1,6 @@
 ;;;; connectors-tcp.lisp --- Unit tests for TCP connector classes.
 ;;;;
-;;;; Copyright (C) 2012-2017 Jan Moringen
+;;;; Copyright (C) 2012-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,16 +18,21 @@
           "Test constructing instances of the `tcp-connector' class.")
   construction/smoke
 
-  (flet ((do-it (server?)
-           (make-instance 'tcp-connector
-                          :schema    :tcp-socket
-                          :host      "localhost"
-                          :port      1
-                          :converter nil
-                          :server?   server?
-                          :portfile  "-")))
-    (ensure-condition 'incompatible-initargs (do-it nil))
-    (ensure-condition 'incompatible-initargs (do-it :auto)))
+  (flet ((do-it (&rest args)
+           (apply #'make-instance 'tcp-connector
+                  :schema    :tcp-socket
+                  :host      "localhost"
+                  :port      1
+                  :converter nil
+                  args)))
+    (ensure-condition 'incompatible-initargs
+      (do-it :server? nil :portfile "-"))
+    (ensure-condition 'incompatible-initargs
+      (do-it :server? :auto :portfile "-"))
+    (ensure-condition 'error
+      (do-it :if-leftover-connections :foo))
+    (ensure-condition 'error
+      (do-it :if-leftover-connections "foo")))
 
   (let ((instance (make-instance 'tcp-connector
                                  :schema    :tcp-socket

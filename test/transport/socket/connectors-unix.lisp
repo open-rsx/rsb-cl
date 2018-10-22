@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for UNIX connector classes.
 ;;;;
-;;;; Copyright (C) 2017 Jan Moringen
+;;;; Copyright (C) 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,6 +17,17 @@
           :documentation
           "Test constructing instances of the `unix-connector' class.")
   construction/smoke
+
+  (flet ((do-it (&rest args)
+           (apply #'make-instance 'unix-connector
+                  :schema    :unix-socket
+                  :name      "foo"
+                  :converter nil
+                  args)))
+    (ensure-condition 'error
+      (do-it :if-leftover-connections :foo))
+    (ensure-condition 'error
+      (do-it :if-leftover-connections "foo")))
 
   (flet ((do-it (server?)
            (make-instance 'unix-connector

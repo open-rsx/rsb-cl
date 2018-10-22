@@ -1,6 +1,6 @@
 ;;;; transport.lisp --- Socket transport.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -45,12 +45,15 @@
                                          (role      (eql ,role))
                                          (connector t)
                                          (address   t)
-                                         &rest options)
+                                         &rest options
+                                         ,@(when (eq role :server!)
+                                             '(&key (if-leftover-connections :wait))))
           (log:trace "~@<~A is trying to obtain ~A bus ~A at ~{~S ~S~^ ~
                      ~} for ~A~@:>"
                      transport role
                      (transport-address-family transport) address connector)
-          (let+ (((&structure-r/o transport- address-family ,slot lock)
+          (let+ ((options (remove-from-plist options :if-leftover-connections))
+                 ((&structure-r/o transport- address-family ,slot lock)
                   transport)
                  ((&flet make-socket ()
                     (apply #'make-socket address-family ,socket
@@ -64,9 +67,12 @@
                          transport (bus-options candidate) options)
                         (notify connector candidate :attached)
                         candidate)))
-                  (let ((bus (make-instance ',bus-class
-                                            :make-socket #'make-socket
-                                            :options     options)))
+                  (let ((bus (make-instance
+                              ',bus-class
+                              :make-socket #'make-socket
+                              :options     options
+                              ,@(when (eq role :server!)
+                                  `(:if-leftover-connections if-leftover-connections)))))
                     (notify connector bus :attached)
                     (setf (gethash key ,slot) bus))))))))
 
