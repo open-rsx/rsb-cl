@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixins classes used/provided by the rsb module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -80,7 +80,7 @@
 ;;; `direction-mixin'
 
 (defclass direction-mixin ()
-  ((direction :type     (member :in-pull :in-push :out)
+  ((direction :type     direction
               :allocation :class
               :reader   participant-direction))
   (:documentation
