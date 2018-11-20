@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Main client-facing protocol provided by rsb.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -350,18 +350,6 @@ RECEIVER."))
   (:documentation
    "Set the list of filters associated to the receiving participant
 RECEIVER to NEW-VALUE."))
-
-;;; Reader protocol
-
-(defgeneric receive (reader
-                     &key
-                     block?)
-  (:documentation
-   "Receive data from the channel in which READER is
-participating. When data is received, it is returned in form of an
-`event' instance. If BLOCK? is non-nil, wait for data to become
-available if there is none. If BLOCK? is nil and no data is available,
-nil is returned."))
 
 ;;; Informer protocol
 

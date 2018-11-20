@@ -1,12 +1,12 @@
 ;;;; reader.lisp --- Pull-based receiving participant class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb)
+(cl:in-package #:rsb.patterns.reader)
 
-(defclass reader (receiving-client)
+(defclass reader (rsb::receiving-client)
   ((direction :allocation :class
               :initform :in-pull))
   (:documentation
@@ -15,7 +15,7 @@
     The client makes blocking or non-blocking calls to `receive' to
     receive the next event."))
 
-(register-participant-class 'reader)
+(rsb::register-participant-class 'reader)
 
 (defmethod receive ((reader reader)
                     &key

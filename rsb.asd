@@ -217,7 +217,6 @@
                               (:file       "participant")
                               (:file       "receiving-client")
                               (:file       "listener")
-                              (:file       "reader")
                               (:file       "informer")
 
                               (:file       "macros")
@@ -231,7 +230,15 @@
                  :components ((:file       "package")
                               (:file       "conditions")
                               (:file       "protocol")
-                              (:file       "mixins"))))
+                              (:file       "mixins")))
+
+                (:module     "reader"
+                 :pathname   "src/patterns/reader"
+                 :depends-on  ("src" "patterns")
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "protocol")
+                              (:file       "reader"))))
 
   :in-order-to ((test-op (test-op "rsb/test"))))
 
@@ -262,7 +269,6 @@
                               (:file       "mixins")
                               (:file       "participant")
                               (:file       "listener")
-                              (:file       "reader")
                               (:file       "informer")
                               (:file       "macros")))
 
@@ -337,7 +343,14 @@
                  :serial     t
                  :components ((:file       "package")
                               (:file       "protocol")
-                              (:file       "mixins"))))
+                              (:file       "mixins")))
+
+                (:module     "reader"
+                 :pathname   "test/patterns/reader"
+                 :depends-on ("test")
+                 :serial     t
+                 :components ((:file       "package")
+                              (:file       "reader"))))
 
   :perform (test-op (operation component)
              (eval (read-from-string "(log:config :warn)")) ; less noise

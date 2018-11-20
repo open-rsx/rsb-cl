@@ -1,10 +1,10 @@
 ;;;; reader.lisp --- Unit tests for the reader class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsb.test)
+(cl:in-package #:rsb.patterns.reader.test)
 
 (deftestsuite reader-root (root
                            participant-suite)
@@ -86,13 +86,12 @@ mode.")
       (ensure-random-cases 32 ((data a-string))
         (send informer data)
         (let ((received
-               (iter (for received next (receive reader :block? nil))
-                     (when received
-                       (return received)))))
+                (loop :for received = (receive reader :block? nil)
+                      :when received :do (return received))))
           (check-event received
                        "/rsbtest/reader/receive/non-blocking" data))))))
 
-(define-error-hook-test-case (reader)
+(rsb.test::define-error-hook-test-case (reader)
   ;; Force an error during dispatch by injecting a signaling
   ;; pseudo-filter.
   (push (lambda (event)

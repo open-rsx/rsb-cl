@@ -1,6 +1,6 @@
 ;;;; reader.lisp --- An example program demonstrating the reader.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,7 @@
 ;; Note: this form will block until an event is received.
 ;; mark-start::with-participant
 (rsb:with-participant (reader :reader "/example/informer")
-  (let ((event (rsb:receive reader)))
+  (let ((event (rsb.patterns.reader:receive reader)))
     (format t "Received event: ~A~%" event)
     event)) ; return the event
 ;; mark-end::with-participant
@@ -31,15 +31,15 @@
 (defvar *reader* (rsb:make-participant :reader "/example/informer"))
 
 ;; mark-start::receive/block
-(let ((event (rsb:receive *reader* :block? t))) ; block? defaults to t
+(let ((event (rsb.patterns.reader:receive *reader* :block? t))) ; block? defaults to t
   (format t "Received event: ~A~%" event)
   event) ; return the event
 ;; mark-end::receive/block
 
-;; It is also possible to use `rsb:receive' in a non-blocking mode. In
-;; that case, an `event' or nil is returned.
+;; It is also possible to use `rsb.patterns.reader:receive' in a
+;; non-blocking mode. In that case, an `event' or nil is returned.
 ;; mark-start::receive/noblock
-(let ((event (rsb:receive *reader* :block? nil)))
+(let ((event (rsb.patterns.reader:receive *reader* :block? nil)))
   (format t "~:[Did not receive an event~;Received event: ~:*~A~]~%"
           event)
   event) ; return the event, or nil
