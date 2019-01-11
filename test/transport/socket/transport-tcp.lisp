@@ -1,6 +1,6 @@
 ;;;; transport-tcp.lisp --- Unit tests for TCP transport and bus.
 ;;;;
-;;;; Copyright (C) 2012-2017 Jan Moringen
+;;;; Copyright (C) 2012-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,12 +38,10 @@
   (ensure-cases (connector-class schema address)
       (mappend (lambda+ ((class schema address))
                  (make-list 10 :initial-element `(,class ,schema ,address)))
-               `((tcp-in-pull-connector :tcp-socket
-                                        (:host "localhost" :port ,*next-port*))
-                 (tcp-in-push-connector :tcp-socket
-                                        (:host "localhost" :port ,*next-port*))
-                 (tcp-out-connector     :tcp-socket
-                                        (:host "localhost" :port ,*next-port*))))
+               `((tcp-in-connector  :tcp-socket
+                                    (:host "localhost" :port ,*next-port*))
+                 (tcp-out-connector :tcp-socket
+                                    (:host "localhost" :port ,*next-port*))))
 
     (let ((transport   (service-provider:find-provider
                         'rsb.transport:transport schema))
@@ -81,12 +79,10 @@
   (ensure-cases (connector-class schema address)
       (mappend (lambda+ ((class schema address))
                  (make-list 10 :initial-element `(,class ,schema ,address)))
-               `((tcp-in-pull-connector :tcp-socket
-                                        (:host "localhost" :port ,*next-port*))
-                 (tcp-in-push-connector :tcp-socket
-                                        (:host "localhost" :port ,*next-port*))
-                 (tcp-out-connector     :tcp-socket
-                                        (:host "localhost" :port ,*next-port*))))
+               `((tcp-in-connector :tcp-socket
+                                   (:host "localhost" :port ,*next-port*))
+                 (tcp-out-connector :tcp-socket
+                                    (:host "localhost" :port ,*next-port*))))
 
     (let ((transport   (service-provider:find-provider
                         'rsb.transport:transport :tcp-socket))

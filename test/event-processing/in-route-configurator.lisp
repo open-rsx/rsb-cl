@@ -1,6 +1,6 @@
 ;;;; in-route-configurator.lisp --- Unit tests for the in-route-configurator class.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -16,14 +16,14 @@
   ()
   (:metaclass rsb.transport:connector-class)
   (:transport :mock)
-  (:direction :in-pull)
+  (:direction :in)
   (:default-initargs
    :schema :mock))
 
 (deftestsuite in-route-configurator-root (event-processing-root)
   ((configurator (make-instance 'in-route-configurator
                                 :scope     "/foo/bar"
-                                :direction :in-pull)))
+                                :direction :in)))
   (:function
    (check-configurator (configurator scope direction configurator-filters processor-filters)
      (ensure-same (configurator-scope configurator) (make-scope scope)
@@ -49,11 +49,11 @@ and removing filters to an `in-route-configurator' instance.")
     ;; Adding and removing a filter should not have an effect when
     ;; there are no connectors.
     (notify configurator filter :filter-added)
-    (check-configurator configurator "/foo/bar" :in-pull
+    (check-configurator configurator "/foo/bar" :in
                         (list filter) nil)
 
     (notify configurator filter :filter-removed)
-    (check-configurator configurator "/foo/bar" :in-pull nil nil)
+    (check-configurator configurator "/foo/bar" :in nil nil)
 
     ;; However, when there is a connector, the filter should get
     ;; propagated to the processor.
@@ -61,8 +61,8 @@ and removing filters to an `in-route-configurator' instance.")
           (configurator-connectors configurator))
 
     (notify configurator filter :filter-added)
-    (check-configurator configurator "/foo/bar" :in-pull
+    (check-configurator configurator "/foo/bar" :in
                         (list filter) (list filter))
 
     (notify configurator filter :filter-removed)
-    (check-configurator configurator "/foo/bar" :in-pull nil nil)))
+    (check-configurator configurator "/foo/bar" :in nil nil)))

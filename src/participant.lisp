@@ -1,6 +1,6 @@
 ;;;; participant.lisp --- A superclass for participant classes.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,8 +74,8 @@
                            (list (cons t converters))))
          (configurator (make-instance
                         (ecase direction
-                          ((:in-push :in-pull) 'rsb.ep:in-route-configurator)
-                          (:out                'rsb.ep:out-route-configurator))
+                          (:in  'rsb.ep:in-route-configurator)
+                          (:out 'rsb.ep:out-route-configurator))
                         :scope     scope
                         :direction direction
                         :transform transform))

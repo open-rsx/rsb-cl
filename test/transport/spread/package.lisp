@@ -51,9 +51,6 @@
    #:connection
 
    #:in-connector
-
-   #:in-pull-connector
-
    #:out-connector)
 
   (:documentation

@@ -79,6 +79,5 @@
               (ensure-condition 'missing-required-initarg
                 (make-instance ',class-name)))))))
 
-  (define-connector-suite :out)
-  (define-connector-suite :in-pull)
-  (define-connector-suite :in-push))
+  (define-connector-suite :in)
+  (define-connector-suite :out))

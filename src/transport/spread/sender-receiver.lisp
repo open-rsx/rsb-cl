@@ -19,7 +19,7 @@
 (defclass message-receiver (connection-user-mixin
                             threaded-message-receiver-mixin
                             restart-notification-receiver-mixin
-                            error-handling-push-receiver-mixin
+                            error-handling-receiver-mixin
                             rsb.ep:broadcast-processor)
   ((assembly-pool :initarg  :assembly-pool
                   :type     assembly-pool

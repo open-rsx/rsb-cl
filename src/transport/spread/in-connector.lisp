@@ -14,9 +14,11 @@
                         expose-transport-metrics-mixin)
   ()
   (:metaclass connector-class)
+  (:direction :in)
   (:documentation
-   "This class is intended to be used as a superclass of in-direction
-    connector classes for Spread."))
+   "Delivers events received via the Spread bus."))
+
+(register-connector :spread :in 'in-connector)
 
 (defmethod notify ((recipient in-connector)
                    (subject   scope)
@@ -29,6 +31,11 @@
                    (action    (eql :detached)))
   (notify (bus recipient) recipient (unsubscribed subject))
   (call-next-method))
+
+(defmethod handle ((sink in-connector) (data bus-notification))
+  ;; Turn the assembled notification in DATA into an `event' instance
+  ;; and dispatch to handlers.
+  (dispatch sink (notification->event sink data :whatever)))
 
 (defmethod notification->event ((connector    in-connector)
                                 (notification bus-notification)

@@ -29,7 +29,7 @@
         ;; fails.
         (,a-string           "utf-8-string" ()                          "foobarbaz"))
 
-    (let+ ((connector    (apply #'make-instance 'in-pull-connector
+    (let+ ((connector    (apply #'make-instance 'in-connector
                                 :converter :fundamental-utf-8-string
                                 (append common-args connector-args)))
            (notification (rsb.transport.spread::make-incoming-notification
@@ -89,6 +89,5 @@
                 (rsb.ep:notify connector scope :attached)
                 (rsb.ep:notify connector scope :detached)))))))
 
-  (define-connector-suite :out)
-  (define-connector-suite :in-pull)
-  (define-connector-suite :in-push))
+  (define-connector-suite :in)
+  (define-connector-suite :out))

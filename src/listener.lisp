@@ -1,6 +1,6 @@
 ;;;; listener.lisp --- Listeners receive events that are broadcast on a bus.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,7 +8,7 @@
 
 (defclass listener (receiving-client)
   ((direction :allocation :class
-              :initform :in-push)
+              :initform :in)
    (handlers  :type     list
               :accessor rsb.ep:handlers
               :initform '()

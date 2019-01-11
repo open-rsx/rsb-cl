@@ -1,6 +1,6 @@
 ;;;; error-handling-mixins.lisp --- Unit tests for the transport-related error handling mixins.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -37,18 +37,7 @@
               ,@invoke)))))
 
   (define-error-handling-mixin-tests
-      error-handling-pull-receiver-mixin
-      (emit ((block? t))
-            (restart-case
-                (error "~@<emit signaled an error.~@:>")
-              (continue (&optional condition)
-                (declare (ignore condition))
-                nil)))
-
-    (emit simple-handler t))
-
-  (define-error-handling-mixin-tests
-      error-handling-push-receiver-mixin
+      error-handling-receiver-mixin
       (receive-messages ()
             (restart-case
                 (error "~@<receive-messages signaled an error.~@:>")

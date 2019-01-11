@@ -1,6 +1,6 @@
 ;;;; connectors-unix.lisp --- UNIX-domain-socket-based transport.
 ;;;;
-;;;; Copyright (C) 2014, 2017 Jan Moringen
+;;;; Copyright (C) 2014, 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -51,20 +51,12 @@
 
 ;;; Direction-specific connector classes
 
-(defclass unix-in-pull-connector (unix-connector
-                                  in-pull-connector)
+(defclass unix-in-connector (unix-connector
+                             in-connector)
   ()
   (:metaclass connector-class))
 
-(register-connector :unix-socket :in-pull 'unix-in-pull-connector)
-
-(defclass unix-in-push-connector (unix-connector
-                                  in-push-connector)
-  ()
-  (:metaclass connector-class))
-
-
-(register-connector :unix-socket :in-push 'unix-in-push-connector)
+(register-connector :unix-socket :in 'unix-in-connector)
 
 (defclass unix-out-connector (unix-connector
                               out-connector)

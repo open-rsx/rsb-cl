@@ -103,6 +103,8 @@
 ;;; `in-connector'
 
 (defclass in-connector (connector
+                        error-policy-handler-mixin
+                        restart-handler-mixin
                         restart-notification-receiver-mixin
                         restart-dispatcher-mixin
                         timestamping-receiver-mixin
@@ -113,11 +115,12 @@
           :documentation
           "Stores the scope to which the connector is attached."))
   (:metaclass connector-class)
+  (:direction :in)
   (:documentation
    "Superclass for in-direction socket connectors.
 
     Instances of this class observe a bus (which owns the actual
-    socket) when attached and queue received events for delivery."))
+    socket) when attached and deliver received events."))
 
 (defmethod notify ((connector in-connector)
                    (scope     scope)
@@ -134,6 +137,12 @@
                           (bus       bus)
                           (action    (eql :detached)))
   (notify bus connector (rsb.ep:unsubscribed (connector-scope connector))))
+
+(defmethod handle ((connector in-connector)
+                   (data      notification))
+  ;; TODO(jmoringe): condition translation?
+  (when-let ((event (notification->event connector data :undetermined)))
+    (dispatch connector event)))
 
 (defmethod notification->event ((connector    in-connector)
                                 (notification notification)
@@ -167,77 +176,6 @@
        converter notification
        :expose-wire-schema?  expose-wire-schema?
        :expose-payload-size? expose-payload-size?))))
-
-;;; `in-pull-connector'
-
-(defclass in-pull-connector (error-handling-pull-receiver-mixin
-                             in-connector)
-  ((queue :type     lparallel.queue:queue
-          :reader   connector-queue
-          :initform (lparallel.queue:make-queue)
-          :documentation
-          "Stores notifications as they arrive via the message bus."))
-  (:metaclass connector-class)
-  (:direction :in-pull)
-  (:documentation
-   "Superclass in-direction, push-style socket connectors."))
-
-(defmethod handle ((connector in-pull-connector)
-                   (data      notification))
-  ;; Put DATA into the queue of CONNECTOR for later retrieval.
-  (lparallel.queue:push-queue data (connector-queue connector)))
-
-(defmethod receive-notification ((connector in-pull-connector)
-                                 (block?    (eql nil)))
-  ;; Extract and return one event from the queue maintained by
-  ;; CONNECTOR, if there are any. If there are no queued events,
-  ;; return nil.
-  (lparallel.queue:try-pop-queue (connector-queue connector)))
-
-(defmethod receive-notification ((connector in-pull-connector)
-                                 (block?    t))
-  ;; Extract and return one event from the queue maintained by
-  ;; CONNECTOR, if there are any. If there are no queued events,
-  ;; block.
-  (lparallel.queue:pop-queue (connector-queue connector)))
-
-(defmethod emit ((connector in-pull-connector) (block? t))
-  ;; Maybe block until a notification is received. Try to convert into
-  ;; an event and return the event in case of success. In blocking
-  ;; mode, wait for the next notification.
-  (iter (let* ((payload (receive-notification connector block?))
-               (event   (when payload
-                          (notification->event
-                           connector payload :undetermined))))
-
-          ;; Due to non-blocking receive mode and error handling
-          ;; policies, we may not obtain an `event' instance from the
-          ;; notification.
-          (when event
-            (dispatch connector event))
-          (when (or event (not block?))
-            (return event)))))
-
-(defmethod print-items:print-items append ((object in-pull-connector))
-  (let ((count (lparallel.queue:queue-count (connector-queue object))))
-    `((:queue-count ,count " (~D)" ((:after :url))))))
-
-;;; `in-push-connector'
-
-(defclass in-push-connector (error-policy-handler-mixin
-                             restart-handler-mixin
-                             in-connector)
-  ()
-  (:metaclass connector-class)
-  (:direction :in-push)
-  (:documentation
-   "Superclass for in-direction, push-style socket connectors."))
-
-(defmethod handle ((connector in-push-connector)
-                   (data      notification))
-  ;; TODO(jmoringe): condition translation?
-  (when-let ((event (notification->event connector data :undetermined)))
-    (dispatch connector event)))
 
 ;;; `out-connector'
 

@@ -14,9 +14,9 @@
 
     Each transport is implemented by associated connector classes for
     incoming and outgoing communication. The \"directions\" of
-    connector classes are :in-push, :in-pull and :out. Instances of
-    connector classes of a particular transport are created to
-    actually perform communication."))
+    connector classes are :in and :out. Instances of connector classes
+    of a particular transport are created to actually perform
+    communication."))
 
 (defmethod service-provider:find-provider
     ((service  (eql (service-provider:find-service 'transport)))
@@ -32,7 +32,7 @@
      (provider cons)
      &key if-does-not-exist)
   (let+ (((schema . direction) provider))
-    (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
+    (check-type direction direction "one of :IN, :OUT")
     (when-let ((provider (service-provider:find-provider
                           service schema
                           :if-does-not-exist if-does-not-exist)))
@@ -44,7 +44,7 @@
      (provider cons)
      &rest args &key)
   (let+ (((schema . direction) provider))
-    (check-type direction direction "one of :IN-PUSH, :IN-PULL, :OUT")
+    (check-type direction direction "one of :IN, :OUT")
     (apply #'call-next-method service provider :schema schema args)))
 
 ;;; Transport protocol

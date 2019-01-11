@@ -1,42 +1,26 @@
 ;;;; connectors.lisp --- Unit tests for the connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.inprocess.test)
 
-;;; `in-pull-connector'
+;;; `in-connector'
 
-(deftestsuite in-pull-connector-root (transport-inprocess-root)
+(deftestsuite in-connector-root (transport-inprocess-root)
   ()
   (:documentation
-   "Root unit tests suite for the `in-pull-connector' class."))
+   "Root unit tests suite for the `in-connector' class."))
 
-(define-basic-connector-test-cases in-pull-connector
+(define-basic-connector-test-cases in-connector
   :initargs           '(:schema :inprocess)
 
   :expected-schemas   '(:inprocess)
   :expected-wire-type 't
   :expected-remote?    nil
 
-  :expected-direction :in-pull)
-
-;;; `in-push-connector'
-
-(deftestsuite in-push-connector-root (transport-inprocess-root)
-  ()
-  (:documentation
-   "Root unit tests suite for the `in-push-connector' class."))
-
-(define-basic-connector-test-cases in-push-connector
-  :initargs           '(:schema :inprocess)
-
-  :expected-schemas   '(:inprocess)
-  :expected-wire-type 't
-  :expected-remote?    nil
-
-  :expected-direction :in-push)
+  :expected-direction :in)
 
 ;;; `out-connector'
 

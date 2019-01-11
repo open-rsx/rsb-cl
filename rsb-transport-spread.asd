@@ -54,8 +54,6 @@
 
                               (:file       "connector")
                               (:file       "in-connector")
-                              (:file       "in-push-connector")
-                              (:file       "in-pull-connector")
                               (:file       "out-connector"))))
 
   :in-order-to ((test-op (test-op "rsb-transport-spread/test"))))

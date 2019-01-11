@@ -1,6 +1,6 @@
 ;;;; connector-class.lisp --- Unit tests for the connector-class class.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,7 +66,7 @@
                        :documentation
                        "doc"))
           '((:transport :mock)
-            (:direction :in-push)
+            (:direction :in)
             (:options (:an-option &slot)))))
 
 (addtest (connector-class-root
@@ -82,7 +82,7 @@
   (with-mock-connector-class (foo class)
     (ensure-same (transport-schemas class)   '(:whoop))
     (ensure-same (transport-wire-type class) 'string)
-    (ensure-same (connector-direction class) :in-push)
+    (ensure-same (connector-direction class) :in)
     (ensure-same (connector-options class)   '((:an-option boolean
                                                 :default     t
                                                 :description "doc")))))
@@ -107,7 +107,7 @@
     (with-mock-connector-class (sub class)
       (ensure-same (transport-schemas class)   '(:whoop))
       (ensure-same (transport-wire-type class) 'string)
-      (ensure-same (connector-direction class) :in-push)
+      (ensure-same (connector-direction class) :in)
       (ensure-same (connector-options class)   '((:another-option integer)
                                                  (:an-option boolean
                                                   :default     t

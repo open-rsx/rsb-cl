@@ -1,6 +1,6 @@
 ;;;; bus-connection.lisp --- Connection class used by bus provider.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -59,7 +59,7 @@
 (defclass bus-connection (broadcast-processor
                           threaded-message-receiver-mixin
                           restart-notification-receiver-mixin
-                          error-handling-push-receiver-mixin
+                          error-handling-receiver-mixin
                           restart-notification-sender-mixin
                           error-handling-sender-mixin
                           print-items:print-items-mixin)

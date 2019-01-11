@@ -1,6 +1,6 @@
 ;;;; transport-unix.lisp --- Unit tests for UNIX transport and bus.
 ;;;;
-;;;; Copyright (C) 2017 Jan Moringen
+;;;; Copyright (C) 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,9 +25,8 @@
       (mappend (lambda+ ((class schema address))
                  (make-list 10 :initial-element `(,class ,schema ,address)))
                (let ((name (funcall (random-string (constantly 8)))))
-                 `((unix-in-pull-connector :unix-socket (:name ,name))
-                   (unix-in-push-connector :unix-socket (:name ,name))
-                   (unix-out-connector     :unix-socket (:name ,name)))))
+                 `((unix-in-connector  :unix-socket (:name ,name))
+                   (unix-out-connector :unix-socket (:name ,name)))))
 
     (let ((transport   (service-provider:find-provider
                         'rsb.transport:transport schema))
@@ -66,9 +65,8 @@
       (mappend (lambda+ ((class schema address))
                  (make-list 10 :initial-element `(,class ,schema ,address)))
                (let ((name (funcall (random-string (constantly 8)))))
-                 `((unix-in-pull-connector :unix-socket (:name ,name))
-                   (unix-in-push-connector :unix-socket (:name ,name))
-                   (unix-out-connector     :unix-socket (:name ,name)))))
+                 `((unix-in-connector  :unix-socket (:name ,name))
+                   (unix-out-connector :unix-socket (:name ,name)))))
 
     (let ((transport   (service-provider:find-provider
                         'rsb.transport:transport :unix-socket))

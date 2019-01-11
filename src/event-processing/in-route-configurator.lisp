@@ -1,6 +1,6 @@
 ;;;; in-route-configurator.lisp --- Configurator for incoming event route.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,14 +18,12 @@
     The client generally is an event receiving participant."))
 
 (defmethod collect-processor-mixins append ((configurator in-route-configurator))
-  `(error-policy-handler-mixin
+  '(error-policy-handler-mixin
     restart-handler-mixin
     restart-dispatcher-mixin
     filtering-processor-mixin
     deliver-timestamp-mixin
-    ,(ecase (configurator-direction configurator)
-       (:in-push 'broadcast-processor)
-       (:in-pull 'pull-processor))))
+    broadcast-processor))
 
 ;;; Connectors
 

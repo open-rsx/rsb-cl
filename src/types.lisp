@@ -1,6 +1,6 @@
 ;;;; types.lisp --- Types used in the rsb system.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -79,7 +79,7 @@ event."
   '(member :implemented :not-implemented))
 
 (deftype direction ()
-  '(member :in-push :in-pull :out))
+  '(member :in :out))
 
 (deftype wire-type ()
   "A certain type of data exchanged \"on the wire\" of a transport

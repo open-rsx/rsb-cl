@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,8 +25,7 @@
 
   (:import-from #:rsb.transport.socket
    #:tcp-connector
-   #:tcp-in-push-connector
-   #:tcp-in-pull-connector
+   #:tcp-in-connector
    #:tcp-out-connector
 
    #:connector-host
@@ -35,8 +34,7 @@
   #+(and sbcl linux)
   (:import-from #:rsb.transport.socket
    #:unix-connector
-   #:unix-in-push-connector
-   #:unix-in-pull-connector
+   #:unix-in-connector
    #:unix-out-connector)
 
   (:import-from #:rsb.transport.socket

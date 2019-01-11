@@ -85,10 +85,12 @@
               :reader   participant-direction))
   (:documentation
    "This mixin class is intended to be mixed into classes to which a
-    communication direction can be associated. Examples are
+    communication direction can be associated.
 
-      `reader'   -> :in-pull
-      `listener' -> :in-push
+    Examples are
+
+      `reader'   -> :in
+      `listener' -> :in
       `informer' -> :out"))
 
 ;;; meta-data and timestamp plist mixins

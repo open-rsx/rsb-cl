@@ -1,6 +1,6 @@
 ;;;; connectors-tcp.lisp --- TCP/IP-based socket transport.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -94,20 +94,12 @@
 
 ;;; Direction-specific connector classes
 
-(defclass tcp-in-pull-connector (tcp-connector
-                                 in-pull-connector)
+(defclass tcp-in-connector (tcp-connector
+                            in-connector)
   ()
   (:metaclass connector-class))
 
-(register-connector :tcp-socket :in-pull 'tcp-in-pull-connector)
-
-(defclass tcp-in-push-connector (tcp-connector
-                                 in-push-connector)
-  ()
-  (:metaclass connector-class))
-
-
-(register-connector :tcp-socket :in-push 'tcp-in-push-connector)
+(register-connector :tcp-socket :in 'tcp-in-connector)
 
 (defclass tcp-out-connector (tcp-connector
                              out-connector)

@@ -162,7 +162,6 @@
                               "filter" "transform") ; for {filter,transform}-mixin
                  :serial     t
                  :components ((:file       "broadcast-processor")
-                              (:file       "pull-processor")
 
                               (:file       "processor-mixins")
 

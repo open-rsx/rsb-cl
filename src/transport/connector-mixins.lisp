@@ -1,36 +1,21 @@
 ;;;; connector-mixins.lisp --- Mixin for connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport)
 
-;;; Mixin class `error-handling-pull-receiver-mixin'
+;;; Mixin class `error-handling-receiver-mixin'
 
-(defclass error-handling-pull-receiver-mixin (error-policy-mixin)
+(defclass error-handling-receiver-mixin (error-policy-mixin)
   ()
   (:documentation
-   "This class is intended to be mixed into in-direction, pull-style
-connector classes to provide client-supplied error handling policies
-for the `emit' method."))
+   "This class is intended to be mixed into in-direction connector
+    classes to provide client-supplied error handling policies for the
+    `receive-messages' method."))
 
-(defmethod emit :around ((connector error-handling-pull-receiver-mixin)
-                         (block?    t))
-  ;; Call the actual `emit' method with a condition handler that
-  ;; applies the error policy of CONNECTOR.
-  (with-error-policy (connector) (call-next-method)))
-
-;;; Mixin class `error-handling-push-receiver-mixin'
-
-(defclass error-handling-push-receiver-mixin (error-policy-mixin)
-  ()
-  (:documentation
-   "This class is intended to be mixed into in-direction, push-style
-connector classes to provide client-supplied error handling policies
-for the `receive-messages' method."))
-
-(defmethod receive-messages :around ((connector error-handling-push-receiver-mixin))
+(defmethod receive-messages :around ((connector error-handling-receiver-mixin))
   ;; Call the actual `receive-messages' method with a condition
   ;; handler that applies the error policy of CONNECTOR.
   (with-error-policy (connector) (call-next-method)))
@@ -172,9 +157,7 @@ converter."))
    "This class is intended to be mixed into connector classes that
     perform two tasks:
     1) receive notifications
-    2) decode received notifications
-    The associated protocol is designed to be
-    direction-agnostic (i.e. should work for both push and pull)."))
+    2) decode received notifications"))
 
 (defmethod notification->event :around ((connector    timestamping-receiver-mixin)
                                         (notification t)

@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Connectors of the inprocess transport.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,12 +28,18 @@
 
 ;;; `in-connector'
 
-(defclass in-connector (connector)
+(defclass in-connector (broadcast-processor
+                        error-policy-handler-mixin
+                        restart-handler-mixin
+                        restart-dispatcher-mixin
+                        connector)
   ()
   (:metaclass connector-class)
+  (:direction :in)
   (:documentation
-   "Superclass for in-direction connector classes of the inprocess
-    transport."))
+   "Receives events from the in-process bus."))
+
+(register-connector :inprocess :in 'in-connector)
 
 (defmethod notify ((connector in-connector)
                    (scope     scope)
@@ -55,75 +61,7 @@
     (log:debug "~@<Scope trie after removing ~A:~@:_~/rsb.ep::print-trie/~@:>"
                connector scope-sinks)))
 
-;;; `in-pull-connector' class
-
-(defclass in-pull-connector (broadcast-processor
-                             error-handling-pull-receiver-mixin
-                             restart-dispatcher-mixin
-                             in-connector)
-  ((queue :type     lparallel.queue:queue
-          :reader   connector-queue
-          :initform (lparallel.queue:make-queue)
-          :documentation
-          "Stores events as they arrive via the message bus."))
-  (:metaclass connector-class)
-  (:direction :in-pull)
-  (:documentation
-   "Instances of this connector class deliver RSB events within a
-    process."))
-
-(register-connector :inprocess :in-pull 'in-pull-connector)
-
-(defmethod handle ((connector in-pull-connector)
-                   (event     event))
-  ;; Put EVENT into the queue maintained by CONNECTOR.
-  (lparallel.queue:push-queue event (connector-queue connector)))
-
-(defmethod receive-notification ((connector in-pull-connector)
-                                 (block?    (eql nil)))
-  ;; Extract and return one event from the queue maintained by
-  ;; CONNECTOR, if there are any. If there are no queued events,
-  ;; return nil.
-  (lparallel.queue:try-pop-queue (connector-queue connector)))
-
-(defmethod receive-notification ((connector in-pull-connector)
-                                 (block?    t))
-  ;; Extract and return one event from the queue maintained by
-  ;; CONNECTOR, if there are any. If there are no queued events,
-  ;; block.
-  (lparallel.queue:pop-queue (connector-queue connector)))
-
-(defmethod emit ((connector in-pull-connector) (block? t))
-  (when-let ((event (receive-notification connector block?)))
-    (setf (timestamp event :receive) (local-time:now))
-    (dispatch connector event)
-    t))
-
-(defmethod print-object ((object in-pull-connector) stream)
-  (print-unreadable-object (object stream :identity t)
-    (format stream "~A ~A (~D)"
-            (connector-direction object)
-            (connector-relative-url object "/")
-            (lparallel.queue:queue-count
-             (connector-queue object)))))
-
-;;; `in-push-connector' class
-
-(defclass in-push-connector (broadcast-processor
-                             error-policy-handler-mixin
-                             restart-handler-mixin
-                             restart-dispatcher-mixin
-                             in-connector)
-  ()
-  (:metaclass connector-class)
-  (:direction :in-push)
-  (:documentation
-   "Instances of this connector class deliver RSB events within a
-    process."))
-
-(register-connector :inprocess :in-push 'in-push-connector)
-
-(defmethod handle :before ((connector in-push-connector)
+(defmethod handle :before ((connector in-connector)
                            (event     event))
   (setf (timestamp event :receive) (local-time:now)))
 
@@ -138,8 +76,7 @@
   (:metaclass connector-class)
   (:direction :out)
   (:documentation
-   "Instances of this connector class deliver RSB events within a
-    process."))
+   "Send events to the in-process bus."))
 
 (register-connector :inprocess :out 'out-connector)
 

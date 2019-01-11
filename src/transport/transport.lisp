@@ -31,7 +31,7 @@
 ;;;    registered under the name 'transport)
 ;;;
 ;;; 2) a service the providers of which are connectors for different
-;;;    directions (i.e. :in-pull, :in-pull and :out)
+;;;    directions (i.e. :in and :out)
 
 ;;; `transport' class
 

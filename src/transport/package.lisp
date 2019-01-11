@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the transport module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -134,9 +134,7 @@
 
   ;; Error handling mixin classes
   (:export
-   #:error-handling-push-receiver-mixin
-
-   #:error-handling-pull-receiver-mixin
+   #:error-handling-receiver-mixin
 
    #:error-handling-sender-mixin)
 
