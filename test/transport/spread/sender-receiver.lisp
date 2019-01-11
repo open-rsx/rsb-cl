@@ -51,6 +51,7 @@
 (addtest (message-sender-root
           :documentation
           "Test `event->notification' method.")
+  event->notification
 
   (let* ((connector    (apply #'make-instance 'message-sender
                               :connection nil '()))
