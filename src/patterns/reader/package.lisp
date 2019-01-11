@@ -8,7 +8,8 @@
   (:use
    #:cl
 
-   #:rsb)
+   #:rsb
+   #:rsb.patterns)
 
   ;; Reader protocol and `reader' class
   (:export

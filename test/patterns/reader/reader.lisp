@@ -1,6 +1,6 @@
 ;;;; reader.lisp --- Unit tests for the reader class.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -55,6 +55,11 @@
 
   `("/rsbtest/reader/construction?foo=bar"
     ()
+    "/rsbtest/reader/construction")
+
+  ;; Filters
+  `("/rsbtest/reader/construction"
+    (:filters (list (lambda (event) (declare (ignore event)))))
     "/rsbtest/reader/construction")
 
   ;; No transports => error

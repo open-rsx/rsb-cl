@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Unit tests for the protocol of the rsb system.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -121,18 +121,28 @@
           "Smoke test for `*make-participant-hook*'.")
   make-participant-hook/smoke
 
-  (ensure-cases ((kind scope &rest args) expected)
+  (ensure-cases ((kind scope &rest args) &rest expected)
       `(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
-         (:converters :transports :introspection?))
+         (:converters :transports :introspection?)
+         (:introspection? :parent :handlers :error-policy
+          :transports :converters :transform))
         ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
                          :parent ,*simple-parent*)
-         (:converters :transports :introspection? :parent))
+         (:converters :transports :introspection? :parent)
+         (:introspection? :parent :handlers :error-policy
+          :transports :converters :transform))
+        ;; Hook calls caused by introspection stuff interfere too
+        ;; much.
+        ;; ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
+        ;;                  :introspection? t)
+        ;;  (:converters :transports :introspection?)
+        ;;  (:introspection? :parent :handlers :error-policy
+        ;;   :transports :converters :transform))
         ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :introspection? t)
-         (:converters :transports :introspection?))
-        ((:reader        "inprocess:/rsbtest/make-participant-hook/smoke"
-                         :transform nil)
-         (:converters :transports :introspection? :transform))
+          :transform nil)
+         (:converters :transports :introspection? :transform)
+         (:introspection? :parent :handlers :error-policy
+          :transports :converters :transform))
 
         ((:listener      "inprocess:/rsbtest/make-participant-hook/smoke")
          (:converters :transports :introspection?))
@@ -183,13 +193,19 @@
                          :transform nil)
          (:converters :transports :introspection? :transform)))
 
-    (let ((participant))
+    (let ((participant)
+          (child))
       (ensure-same
        (with-hook-call-tracking (*make-participant-hook*)
          (with-active-participant (participant1 (apply #'make-participant
                                                        kind scope args))
-           (setf participant participant1)))
-       (list (list participant expected))
+           (setf participant participant1)
+           (when (typep participant1 'rsb.patterns.reader:reader)
+             (setf child (rsb.patterns:participant-child
+                          participant1 nil :listener)))))
+       (append (when child
+                 (list (list child (second expected))))
+               (list (list participant (first expected))))
        :test (lambda (calls expected)
                (every
                 (lambda+ ((call-participant     call-initargs)
@@ -251,11 +267,17 @@
         (:local-server  "inprocess:/rsbtest/participant-state-change-hook/smoke")
         (:remote-server "inprocess:/rsbtest/participant-state-change-hook/smoke"))
 
-    (let ((participant))
+    (let ((participant)
+          (child))
       (ensure-same
        (with-hook-call-tracking (*participant-state-change-hook*)
          (with-active-participant
              (participant1 (apply #'make-participant kind scope args))
-           (setf participant participant1)))
-       (list (list participant :detached))
+           (setf participant participant1)
+           (when (typep participant1 'rsb.patterns.reader:reader)
+             (setf child (rsb.patterns:participant-child
+                          participant1 nil :listener)))))
+       (append (when child
+                 (list (list child :detached)))
+               (list (list participant :detached)))
        :test #'equal))))
