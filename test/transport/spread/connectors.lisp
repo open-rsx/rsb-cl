@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for connector classes.
 ;;;;
-;;;; Copyright (C) 2012-2018 Jan Moringen
+;;;; Copyright (C) 2012-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,7 @@
 (addtest (in-connector-root
           :documentation
           "Test `notification->event' method.")
-  notification->event
+  notification->event/in-connector
 
   (ensure-cases (payload-data wire-schema connector-args expected)
       `(;; In these cases, protocol buffer unpacking fails.

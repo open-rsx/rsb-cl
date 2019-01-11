@@ -1,6 +1,6 @@
 ;;;; sender-receiver.lisp --- Unit tests for message sender/receiver classes.
 ;;;;
-;;;; Copyright (C) 2012-2018 Jan Moringen
+;;;; Copyright (C) 2012-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,7 @@
 (addtest (message-receiver-root
           :documentation
           "Test `notification->event' method.")
-  notification->event
+  notification->event/message-receiver
 
   (ensure-cases (notification wire-schema args expected)
       `(;; In these cases, protocol buffer unpacking fails.
