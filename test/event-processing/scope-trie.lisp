@@ -1,6 +1,6 @@
 ;;;; scope-trie.lisp --- Tests for the scope-trie and sink-scope-trie classes.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -95,7 +95,7 @@
 
 (defun cleanup-test (thunk)
   (let* ((count        100)
-         (random-scope (random-scope :length (random-integer 0 4)))
+         (random-scope (gen-scope :length (gen-integer :min 0 :max 4)))
          (queue        (map-into (make-list count) random-scope))
          (trie         (make-scope-trie))
          (thunk        (ensure-function thunk)))

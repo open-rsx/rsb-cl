@@ -64,18 +64,13 @@
 
   ;; Random testing utilities
   (:export
-   #:random-boolean
-   #:random-integer
-   ; #:random-element TODO later
-   #:random-sequence
-   #:random-character
-   #:random-string
-   #:random-list
+   #:gen-boolean
+   #:gen-sequence
 
-   #:random-scope-component
-   #:random-scope
+   #:gen-scope-component
+   #:gen-scope
 
-   #:random-kind)
+   #:gen-kind)
 
   (:documentation
    "This package contains unit tests for the rsb system."))

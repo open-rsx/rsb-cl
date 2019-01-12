@@ -97,7 +97,7 @@
           (let ((error (make-condition 'simple-error
                                        :format-control   "I hate ~A"
                                        :format-arguments (list event))))
-            (push error expected-errors)
+            (push error rsb.test::expected-errors)
             (error error)))
         (receiver-filters reader))
 

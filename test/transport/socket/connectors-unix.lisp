@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for UNIX connector classes.
 ;;;;
-;;;; Copyright (C) 2017, 2018 Jan Moringen
+;;;; Copyright (C) 2017, 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
 
 (def-suite unix-connector-root
   :in transport-socket-root
-  :describe
+  :description
   "Unit tests for the `unix-connector' class.")
 (in-suite unix-connector-root)
 
@@ -23,10 +23,8 @@
                   :name      "foo"
                   :converter nil
                   args)))
-    (ensure-condition 'error
-      (do-it :if-leftover-connections :foo))
-    (ensure-condition 'error
-      (do-it :if-leftover-connections "foo")))
+    (signals error (do-it :if-leftover-connections :foo))
+    (signals error (do-it :if-leftover-connections "foo")))
 
   (flet ((do-it (server?)
            (make-instance 'unix-connector
@@ -44,11 +42,11 @@
        (let ((class-name (format-symbol :rsb.transport.socket "UNIX-~A-CONNECTOR" direction))
              (suite-name (format-symbol *package* "UNIX-~A-CONNECTOR-ROOT" direction)))
          `(progn
-            (def-suite ,suite-name (transport-socket-root)
-              ()
-              (:documentation
-               ,(format nil "Test suite for the `~(~A~)' class."
-                        class-name)))
+            (def-suite ,suite-name
+              :in transport-socket-root
+              :description
+              ,(format nil "Test suite for the `~(~A~)' class."
+                       class-name))
             (in-suite ,suite-name)
 
             (define-basic-connector-test-cases ,class-name

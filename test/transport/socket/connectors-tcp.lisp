@@ -27,7 +27,7 @@
     (signals incompatible-initargs (do-it :server? nil :portfile "-"))
     (signals incompatible-initargs (do-it :server? :auto :portfile "-"))
     (signals error                 (do-it :if-leftover-connections :foo))
-    (signals error                 (do-it :if-leftover-connections "foo")))
+    (signals error                 (do-it :if-leftover-connections "foo"))
 
     (let ((instance (make-instance 'tcp-connector
                                    :schema    :tcp-socket

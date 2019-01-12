@@ -140,8 +140,9 @@
             calls expected))
 
          (append (when child
-                   (list (list child (second expected))))
-                 (list (list participant expected))) calls))))
+                   (list (list child expected)))
+                 (list (list participant expected)))
+         calls))))
 
    `(((:reader        "inprocess:/rsbtest/make-participant-hook/smoke")
       (:converters :transports :introspection?))

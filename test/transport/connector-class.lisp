@@ -1,6 +1,6 @@
 ;;;; connector-class.lisp --- Unit tests for the connector-class class.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -76,7 +76,7 @@
    :schemas   :whoop
    :wire-type 'string)
 
-  (let ((class (find-class 'foo)))
+  (with-mock-connector-class (foo class)
     (is (equal '(:whoop) (transport-schemas class)))
     (is (eq    'string   (transport-wire-type class)))
     (is (eq    :in-push  (connector-direction class)))
