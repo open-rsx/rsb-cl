@@ -77,25 +77,24 @@
 
 (cl:in-package #:rsb.test)
 
-(defparameter +test-configuration+
-  '(((:transport :inprocess :enabled) . t)
-    ((:introspection :enabled)        . nil)))
-
 (def-suite root
   :description
   "Root unit test suite of the rsb system.")
-
-(def-fixture with-configuration
-    (&optional (configuration +test-configuration+))
-  (let ((*configuration* configuration))
-    (&body)))
-;; TODO
-;; (:timeout 60)
 
 (defun run-tests ()
   (run! 'root))
 
 ;;; Utilities
+
+(defparameter +test-configuration+
+  '(((:transport :inprocess :enabled) . t)
+    ((:introspection :enabled)        . nil)))
+
+(def-fixture with-configuration (&optional (configuration +test-configuration+))
+  (let ((*configuration* configuration))
+    (&body)))
+;; TODO
+;; (:timeout 60)
 
 (defun make-id (source)
   (uuid:make-uuid-from-string source))
@@ -264,9 +263,11 @@
    CLASS."
   (let+ (((class &key suite (check-transport-urls? t))
           (ensure-list class-and-options))
-         (kind (make-keyword class)))
+         (kind (make-keyword class))
+         ((&flet test-name (name)
+            (symbolicate class '#:/ name))))
     `(progn
-       (test (construction/make-participant
+       (test (,(test-name '#:construction/make-participant)
               ,@(when suite `(:suite ,suite))
               :fixture with-configuration)
          ,(format nil "Test constructing a ~(~A~) using `~(~A~)'."
@@ -285,7 +286,7 @@
           (list ,@cases)))
 
        (define-restart-test-case
-           (make-participant-restart/scope
+           (,(test-name '#:make-participant-restart/scope)
             :restarts   (retry (use-scope (make-scope "/rsbtest/noerror")))
             :condition  participant-creation-error-caused-by-restart-test-error
             ,@(when suite `(:suite ,suite))
@@ -294,7 +295,7 @@
           (make-participant ,kind +restart-test-scope+)))
 
        (define-restart-test-case
-           (make-participant-restart/uri
+           (,(test-name '#:make-participant-restart/uri)
             :restarts   (retry (use-uri (puri:uri "inprocess:/rsbtest/noerror")))
             :condition  participant-creation-error-caused-by-restart-test-error
             ,@(when suite `(:suite ,suite))
@@ -302,7 +303,7 @@
          (detach/ignore-errors
           (make-participant ,kind +restart-test-uri+)))
 
-       (test (print
+       (test (,(test-name '#:print)
               ,@(when suite `(:suite ,suite))
               :fixture with-configuration)
          ,(format nil "Test `print-object' method on `~(~A~)' class."

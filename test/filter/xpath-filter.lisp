@@ -1,16 +1,15 @@
 ;;;; xpath-filter.lisp --- Unit tests for the xpath-filter class.
 ;;;;
-;;;; Copyright (C) 2015, 2016, 2017 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2017, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite xpath-filter-root
+(def-suite* xpath-filter-root
   :in filter-root
   :description
   "Unit tests for the `xpath-filter' class.")
-(in-suite xpath-filter-root)
 
 (define-basic-filter-tests (xpath-filter :xpath)
   '(;; Some invalid cases.

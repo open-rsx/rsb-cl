@@ -1,16 +1,15 @@
 ;;;; adjust-timestamps.lisp --- Unit tests for the adjust-timestamps transform.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transform.test)
 
-(def-suite rsb.transform.adjust-timestamps-root
+(def-suite* rsb.transform.adjust-timestamps-root
   :in rsb.transform-root
   :description
   "Test suite for the `adjust-timestamps' transform.")
-(in-suite rsb.transform.adjust-timestamps-root)
 
 (test construct
   "Test constructing `adjust-timestamps' instances."

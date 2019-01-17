@@ -1,16 +1,15 @@
 ;;;; drop-payload.lisp --- Unit tests for the drop-payload transform.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transform.test)
 
-(def-suite rsb.transform.drop-payload-root
+(def-suite* rsb.transform.drop-payload-root
   :in rsb.transform-root
   :description
   "Unit tests for the `drop-payload' transform.")
-(in-suite rsb.transform.drop-payload-root)
 
 (test smoke
   "Smoke test for the `drop-payload' transform."

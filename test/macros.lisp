@@ -6,11 +6,10 @@
 
 (cl:in-package #:rsb.test)
 
-(def-suite macros-root
+(def-suite* macros-root
   :in root
   :description
   "Unit tests for macros provided by the rsb system.")
-(in-suite macros-root)
 
 (test (with-participant/anonymous :fixture with-configuration)
   "Test creating an anonymous participant using the `with-participant'

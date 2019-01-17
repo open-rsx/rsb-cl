@@ -1,16 +1,15 @@
 ;;;; uris.lisp --- Unit tests for URI-related functions.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite uris-root
+(def-suite* uris-root
   :in root
   :description
   "Unit tests for URI-related functions.")
-(in-suite uris-root)
 
 (test uri-options-smoke
   "Smoke test for the `uri-options' function."

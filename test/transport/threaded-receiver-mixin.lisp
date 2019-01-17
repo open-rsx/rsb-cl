@@ -1,6 +1,6 @@
 ;;;; threaded-receiver-mixin.lisp --- Unit tests for the threaded-receive-mixin class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,11 +13,10 @@
   ;; not work properly.
   (sleep most-positive-fixnum))
 
-(def-suite threaded-receiver-mixin-root
+(def-suite* threaded-receiver-mixin-root
   :in transport-root
   :description
   "Unit tests for the `threaded-receiver-mixin' class.")
-(in-suite threaded-receiver-mixin-root)
 
 (test smoke
   "Smoke test for the `threaded-receiver-mixin' class."

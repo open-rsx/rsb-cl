@@ -1,16 +1,15 @@
 ;;;; prefix-scope.lisp --- Unit tests for the prefix-scope transform.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transform.test)
 
-(def-suite rsb.transform.prefix-scope-root
+(def-suite* rsb.transform.prefix-scope-root
   :in rsb.transform-root
   :description
   "Unit tests for the `prefix-scope' transform.")
-(in-suite rsb.transform.prefix-scope-root)
 
 (test construct
   "Test constructing `prefix-scope' instances."

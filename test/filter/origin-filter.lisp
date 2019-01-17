@@ -1,16 +1,15 @@
 ;;;; origin-filter.lisp --- Unit tests for origin filter.
 ;;;;
-;;;; Copyright (C) 2012, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite origin-filter-root
+(def-suite* origin-filter-root
   :in filter-root
   :description
   "Test suite for the `origin-filter' class.")
-(in-suite origin-filter-root)
 
 (define-basic-filter-tests (origin-filter :origin)
   `(;; Some invalid cases.

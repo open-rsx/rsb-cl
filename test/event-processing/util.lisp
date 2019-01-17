@@ -1,12 +1,12 @@
 ;;;; util.lisp --- Unit tests for utility functions of the event-processing module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.event-processing.test)
 
-(def-suite util-root
+(def-suite* util-root
   :in event-processing-root
   :description
   "Unit tests for the utility functions of the event-processing module.")

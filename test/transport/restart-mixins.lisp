@@ -1,6 +1,6 @@
 ;;;; restart-mixins.lisp --- Unit tests for restart mixins.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,11 +8,10 @@
 
 ;;; Tests for `restart-notification-receiver-mixin' class
 
-(def-suite restart-notification-receiver-mixin-root
+(def-suite* restart-notification-receiver-mixin-root
   :in transport-root
   :description
   "Unit tests for the `restart-notification-receiver-mixin' class.")
-(in-suite restart-notification-receiver-mixin-root)
 
 (define-restart-test-method receive-notification
     ((connector restart-notification-receiver-mixin)
@@ -33,11 +32,10 @@
 
 ;;; Tests for `restart-notification-sender-mixin' class
 
-(def-suite restart-notification-sender-mixin-root
+(def-suite* restart-notification-sender-mixin-root
   :in transport-root
   :description
   "Unit tests for the `restart-notification-sender-mixin' class.")
-(in-suite restart-notification-sender-mixin-root)
 
 (define-restart-test-method send-notification
     ((connector    restart-notification-sender-mixin)

@@ -32,11 +32,10 @@
 
 ;;; `scope-trie'
 
-(def-suite event-processing-scope-trie-root
+(def-suite* event-processing-scope-trie-root
   :in event-processing-root
   :description
   "Test suite for the `scope-trie' data structure.")
-(in-suite event-processing-scope-trie-root)
 
 (test smoke
   "Smoke test for the `scope-trie' data structure."
@@ -225,7 +224,7 @@
 
 ;;; `sink-scope-trie'
 
-(def-suite event-processing-sink-scope-trie-root
+(def-suite* event-processing-sink-scope-trie-root
   :in event-processing-root
   :description
   "Test suite for the `sink-scope-trie' class.")

@@ -1,16 +1,15 @@
 ;;;; caching.lisp --- Unit test for the caching-converter class.
 ;;;;
-;;;; Copyright (C) 2016 Jan Moringen
+;;;; Copyright (C) 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter.test)
 
-(def-suite caching-root
+(def-suite* caching-root
   :in converter-root
   :description
   "Unit tests for the `caching-converter' class.")
-(in-suite caching-root)
 
 (define-basic-converter-test-cases
     (:caching

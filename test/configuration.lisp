@@ -1,16 +1,15 @@
 ;;;; configuration.lisp --- Unit tests for configuration functions.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite configuration-root
+(def-suite* configuration-root
   :in root
   :description
   "Unit tests for configuration functions.")
-(in-suite configuration-root)
 
 (test transport-options/smoke
   "Smoke test for the `transport-options'."

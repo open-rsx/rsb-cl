@@ -1,12 +1,12 @@
 ;;;; method-filter.lisp --- Unit tests for the method-filter class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite method-filter-root
+(def-suite* method-filter-root
   :in filter-root
   :description
   "Test suite for the `method-filter' class.")

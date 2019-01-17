@@ -1,6 +1,6 @@
 ;;;; error-handling-mixins.lisp --- Unit tests for the transport-related error handling mixins.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,11 +15,10 @@
             (defmethod ,method-name ((connector ,class) ,@method-args)
               ,@method-body)
 
-            (def-suite ,suite-name
+            (def-suite* ,suite-name
               :in transport-root
               :description
               ,(format nil "Unit tests for the `~(~A~)' class." class))
-            (in-suite ,suite-name)
 
             (test smoke
               `(format nil "Smoke test for the error handling ~

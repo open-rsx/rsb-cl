@@ -1,16 +1,15 @@
 ;;;; cause-filter.lisp --- Unit tests for the cause-filter class.
 ;;;;
-;;;; Copyright (C) 2016 Jan Moringen
+;;;; Copyright (C) 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite cause-filter-root
+(def-suite* cause-filter-root
   :in filter-root
   :description
   "Test suite for the `cause-filter' class.")
-(in-suite cause-filter-root)
 
 (define-basic-filter-tests (cause-filter :cause)
   `(;; Some invalid cases.

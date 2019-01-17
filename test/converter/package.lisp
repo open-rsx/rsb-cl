@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the converter module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.DE>
 
@@ -37,7 +37,7 @@
 
 (cl:in-package #:rsb.converter.test)
 
-(def-suite converter-root
+(def-suite* converter-root
   :in root
   :description
   "Root unit test suite for the converter module.")

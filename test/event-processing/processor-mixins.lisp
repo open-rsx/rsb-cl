@@ -8,11 +8,10 @@
 
 ;;; `error-policy-mixin' test suite
 
-(def-suite error-policy-mixin-root
+(def-suite* error-policy-mixin-root
   :in event-processing-root
   :description
   "Test suite for the `error-policy-mixin' class.")
-(in-suite error-policy-mixin-root)
 
 (defun error-policy-mixin.signaling-function (&optional recursive?)
   "A function that unconditionally signals an error."
@@ -70,12 +69,11 @@
               (restart-suite-name
                (symbolicate restart-class-name '#:-root)))
          `(progn
-            (def-suite ,error-policy-suite-name
+            (def-suite* ,error-policy-suite-name
               :in event-processing-root
               :description
               ,(format nil "Test suite for the `~(~A~)' class."
                        error-policy-class-name))
-            (in-suite ,error-policy-suite-name)
 
             (test smoke
               ,(format nil "Smoke test for the `~(~A~)' class."
@@ -103,12 +101,11 @@
                             (declare (ignore condition))
                             :continue-restart))))))
 
-            (def-suite ,restart-suite-name
+            (def-suite* ,restart-suite-name
               :in event-processing-root
               :description
               ,(format nil "Test suite for the `~(~A~)' class."
                        restart-class-name))
-            (in-suite ,restart-suite-name)
 
             (test smoke
               ,(format nil "Smoke test for the `~(~A~)' class."
@@ -133,13 +130,12 @@
 
 ;;; `transform-mixin' tests
 
-(def-suite rsb.event-processing.transform-mixin-root
+(def-suite* rsb.event-processing.transform-mixin-root
   :in event-processing-root
   :description
   "Unit tests for the `transform-mixin' processor mixin class.
 
    See test suite for `transform!' generic function.")
-(in-suite rsb.event-processing.transform-mixin-root)
 
 (defclass transform-mock-processor (transform-mixin
                                     mock-processor)
@@ -173,7 +169,7 @@
 
 ;;; `sink-dispatcher-mixin'
 
-(def-suite rsb.event-processing.sink-dispatcher-mixin-root
+(def-suite* rsb.event-processing.sink-dispatcher-mixin-root
   :in event-processing-root
   :description
   "Unit test for the `sink-dispatcher-mixin' processor mixin class.")

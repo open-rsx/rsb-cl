@@ -8,11 +8,10 @@
 
 ;;; Tests for the `make-participant' generic function
 
-(def-suite make-participant-root
+(def-suite* make-participant-root
   :in root
   :description
   "Unit tests for the `participant-hook' generic function.")
-(in-suite make-participant-root)
 
 (defclass nested-mock-participant.inner (participant) ())
 (rsb::register-participant-class 'nested-mock-participant.inner)
@@ -86,12 +85,11 @@
 
 ;;; Hook tests
 
-(def-suite hooks-root
+(def-suite* hooks-root
   :in root
   :description
   "Unit tests for `*make-participant-hook*' and
    `*participant-state-change-hook*'.")
-(in-suite hooks-root)
 
 (defun call-with-hook-call-tracking (hook thunk &key handler)
   (let ((hook-calls '()))

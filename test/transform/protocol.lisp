@@ -1,16 +1,15 @@
 ;;;; protocol.lisp --- Unit tests for the protocol provided by the transform module.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transform.test)
 
-(def-suite rsb.transform.transform!-root
+(def-suite* rsb.transform.transform!-root
   :in rsb.transform-root
   :description
   "Unit tests for the `transform!' generic function.")
-(in-suite rsb.transform.transform!-root)
 
 (test default-behavior
   "Test default behavior of the `transform!' generic function."
@@ -55,11 +54,10 @@
    '((continue      1)
      ((use-value 2) 2))))
 
-(def-suite rsb.transform.make-transform-root
+(def-suite* rsb.transform.make-transform-root
   :in rsb.transform-root
   :description
   "Unit tests for the `make-transform' generic function.")
-(in-suite rsb.transform.make-transform-root)
 
 (test smoke
   "Smoke test for the `make-transform' generic function."

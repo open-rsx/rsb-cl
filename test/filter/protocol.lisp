@@ -1,12 +1,12 @@
 ;;;; protocol.lisp --- Unit tests for the filter module protocol functions.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite protocol-root
+(def-suite* protocol-root
   :in filter-root
   :description
   "Unit test suite for the protocol functions of the filter module

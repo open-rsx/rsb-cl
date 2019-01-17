@@ -1,16 +1,15 @@
 ;;;; informer.lisp --- Unit tests for informer class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite informer-root
+(def-suite* informer-root
   :in root
   :description
   "Unit tests for the `informer' class.")
-(in-suite informer-root)
 
 (define-basic-participant-test-cases informer
   '("/rsbtest/informer/construction"

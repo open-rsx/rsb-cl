@@ -1,12 +1,12 @@
 ;;;; mixins.lisp --- Unit tests for mixins classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite uuid-mixin-root
+(def-suite* uuid-mixin-root
   :in root
   :description
   "Test suite for the `uuid-mixin' class.")

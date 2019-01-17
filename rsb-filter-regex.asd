@@ -47,4 +47,5 @@
 
   :perform     (test-op (operation component)
                  (symbol-call '#:log '#:config :warn) ; less noise
-                 (symbol-call '#:rsb.filter.regex.test '#:run-tests)))
+                 (symbol-call '#:fiveam '#:run!
+                              (find-symbol "REGEX-FILTER-ROOT" "RSB.FILTER.TEST"))))

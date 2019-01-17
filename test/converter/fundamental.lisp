@@ -1,24 +1,22 @@
 ;;;; fundamental.lisp --- Unit tests for "fundamental" converters.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.converter.test)
 
-(def-suite fundamental-root
+(def-suite* fundamental-root
   :in converter-root
   :description
   "Root unit test suite for fundamental converters.")
-(in-suite fundamental-root)
 
 ;;; Converter fundamental-void
 
-(def-suite fundamental-void-root
+(def-suite* fundamental-void-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-void' converter.")
-(in-suite fundamental-void-root)
 
 (define-basic-converter-test-cases (:fundamental-void)
     `((,(octetify #())  :void ,+no-value+)
@@ -29,11 +27,10 @@
 
 ;;; Converter fundamental-null
 
-(def-suite fundamental-null-root
+(def-suite* fundamental-null-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-null' converter.")
-(in-suite fundamental-null-root)
 
 (define-basic-converter-test-cases (:fundamental-null)
     `((nil                     t nil)
@@ -44,11 +41,10 @@
 
 ;;; Converter fundamental-bool
 
-(def-suite fundamental-bool-root
+(def-suite* fundamental-bool-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-bool' converter.")
-(in-suite fundamental-bool-root)
 
 (define-basic-converter-test-cases (:fundamental-bool)
     `((,(octetify #(0)) :bool nil)
@@ -58,11 +54,10 @@
 
 ;;; Converter fundamental-int32
 
-(def-suite fundamental-int32-root
+(def-suite* fundamental-int32-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-int32' converter.")
-(in-suite fundamental-int32-root)
 
 (define-basic-converter-test-cases (:fundamental-int32)
     `((,(octetify #(0 0 0 0))         :int32 0)
@@ -73,11 +68,10 @@
 
 ;;; Converter fundamental-ascii-string
 
-(def-suite fundamental-ascii-string-root
+(def-suite* fundamental-ascii-string-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-ascii-string' converter.")
-(in-suite fundamental-ascii-string-root)
 
 (define-basic-converter-test-cases (:fundamental-ascii-string)
     `((,(octetify #())         :ascii-string "")
@@ -88,11 +82,10 @@
 
 ;;; Converter fundamental-utf-8-string
 
-(def-suite fundamental-utf-8-string-root
+(def-suite* fundamental-utf-8-string-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-utf-8-string' converter.")
-(in-suite fundamental-utf-8-string-root)
 
 (define-basic-converter-test-cases (:fundamental-utf-8-string)
     `((,(octetify #())           :utf-8-string "")
@@ -103,11 +96,10 @@
 
 ;;; Converter fundamental-bytes
 
-(def-suite fundamental-bytes-root
+(def-suite* fundamental-bytes-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-bytes' converter.")
-(in-suite fundamental-bytes-root)
 
 (define-basic-converter-test-cases (:fundamental-bytes)
     `((,(octetify #())         :bytes ,(octetify #()))
@@ -116,11 +108,10 @@
 
 ;;; Converter fundamental-scope
 
-(def-suite fundamental-scope-root
+(def-suite* fundamental-scope-root
   :in fundamental-root
   :description
   "Unit tests for the `fundamental-scope' converter.")
-(in-suite fundamental-scope-root)
 
 (define-basic-converter-test-cases (:fundamental-scope
                                     :domain-test scope=)

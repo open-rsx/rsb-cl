@@ -1,16 +1,15 @@
 ;;;; regex-filter.lisp --- Unit tests for the regex-filter class.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite regex-filter-root
+(def-suite* regex-filter-root
   :in filter-root
   :description
   "Unit tests for the `regex-filter' class.")
-(in-suite regex-filter-root)
 
 (define-basic-filter-tests (regex-filter :regex)
   '(;; Some invalid cases.

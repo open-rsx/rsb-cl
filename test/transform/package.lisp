@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the transform module.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,7 +23,7 @@
 
 (cl:in-package #:rsb.transform.test)
 
-(def-suite rsb.transform-root
+(def-suite* rsb.transform-root
   :in root
   :description
   "Root unit test suite for the transform module.")

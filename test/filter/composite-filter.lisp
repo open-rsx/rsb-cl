@@ -1,6 +1,6 @@
 ;;;; composite-filter.lisp --- Unit test for composite filter classes.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,7 +8,7 @@
 
 ;;; `complement-filter'
 
-(def-suite complement-filter-root
+(def-suite* complement-filter-root
   :in filter-root
   :description
   "Unit tests for the `complement-filter' class.")
@@ -28,7 +28,7 @@
 
 ;;; `conjoin-filter'
 
-(def-suite conjoin-filter-root
+(def-suite* conjoin-filter-root
   :in filter-root
   :description
   "Unit tests for the `conjoin-filter' class.")
@@ -51,7 +51,7 @@
 
 ;;; `disjoin-filter'
 
-(def-suite disjoin-filter-root
+(def-suite* disjoin-filter-root
   :in filter-root
   :description
   "Unit tests for the `disjoin-filter' class.")

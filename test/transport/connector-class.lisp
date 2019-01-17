@@ -6,11 +6,10 @@
 
 (cl:in-package #:rsb.transport.test)
 
-(def-suite connector-class-root
+(def-suite* connector-class-root
   :in transport-root
   :description
   "Test suite for the `connector-class' class.")
-(in-suite connector-class-root)
 
 (defgeneric mock-connector-class (which))
 

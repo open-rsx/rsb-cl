@@ -29,7 +29,7 @@
 
 (cl:in-package #:rsb.builder.test)
 
-(def-suite rsb-builder-root
+(def-suite* rsb-builder-root
   :description
   "Unit tests for builder support.")
 

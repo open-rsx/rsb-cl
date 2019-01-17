@@ -1,6 +1,6 @@
 ;;;; in-route-configurator.lisp --- Unit tests for the in-route-configurator class.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,11 +28,10 @@
   (is (equal  processor-filters    (processor-filters
                                     (configurator-processor configurator)))))
 
-(def-suite in-route-configurator-root
+(def-suite* in-route-configurator-root
     :in event-processing-root
   :description
   "Root test suite for the `in-route-configurator-root' class.")
-(in-suite in-route-configurator-root)
 
 (test adding/removing-filters
   "Test the required state transitions and updates when adding and

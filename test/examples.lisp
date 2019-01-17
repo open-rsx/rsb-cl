@@ -1,6 +1,6 @@
 ;;;; examples.lisp --- Tests of example programs.
 ;;;;
-;;;; Copyright (C) 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2014, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -59,7 +59,7 @@
                               (asdf:system-relative-pathname
                                :rsb "examples/"))))
 
-(def-suite examples-root
+(def-suite* examples-root
   :in root
   :description
   "Test suite for compiling and loading example files in the examples

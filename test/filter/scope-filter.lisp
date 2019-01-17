@@ -1,16 +1,15 @@
 ;;;; scope-filter.lisp --- Unit tests for the scope-filter class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.filter.test)
 
-(def-suite scope-filter-root
+(def-suite* scope-filter-root
   :in filter-root
   :description
   "Unit tests for the `scope-filter' class.")
-(in-suite scope-filter-root)
 
 (define-basic-filter-tests (scope-filter :scope)
   '(;; Some invalid cases.

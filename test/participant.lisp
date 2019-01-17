@@ -1,16 +1,15 @@
 ;;;; participant.lisp --- Unit tests for the participant class.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite participant-root
+(def-suite* participant-root
   :in root
   :description
   "Test suite for the `participant' class.")
-(in-suite participant-root)
 
 (test participant-converter
   "Test method on `participant-converter' for the `participant'

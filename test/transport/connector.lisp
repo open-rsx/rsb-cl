@@ -1,16 +1,15 @@
 ;;;; connector.lisp --- Unit tests for the connector class.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2017, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.test)
 
-(def-suite connector-root
+(def-suite* connector-root
   :in transport-root
   :description
   "Unit test for the `connector' class.")
-(in-suite connector-root)
 
 (test connector-relative-url
   "Test `connector-relative-url'."

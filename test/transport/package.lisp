@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the transport module.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -127,49 +127,55 @@
 
    EXPECTED-DIRECTION specifies the expected direction of the
    connector class. "
-  `(progn
-     (test (find-connector-class ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test whether `find-connector-class' can find ~
-                     the ~A connector class."
-                    class)
+  (flet ((test-name (name)
+           (symbolicate class '#:/ name)))
+    `(progn
+       (test (,(test-name '#:find-connector-class)
+              ,@(when suite `(:suite ,suite)))
+         ,(format nil "Test whether `find-connector-class' can find ~
+                       the ~A connector class."
+                  class)
 
-       (let* ((transport (service-provider:find-provider
-                          'rsb.transport::transport ',name))
-              (provider  (service-provider:find-provider
-                          transport ,expected-direction))
-              (class     (service-provider:provider-class provider)))
-         (is (eq class (find-class ',class)))))
+         (let* ((transport (service-provider:find-provider
+                            'rsb.transport::transport ',name))
+                (provider  (service-provider:find-provider
+                            transport ,expected-direction))
+                (class     (service-provider:provider-class provider)))
+           (is (eq class (find-class ',class)))))
 
-     (test (class ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test basic properties of the ~A connector ~
-                     class."
-                class)
+       (test (,(test-name '#:class)
+              ,@(when suite `(:suite ,suite)))
+         ,(format nil "Test basic properties of the ~A connector ~
+                       class."
+                  class)
 
-       (check-connector-class (find-class ',class)
-                              ,expected-schemas
-                              ,expected-wire-type
-                              ,expected-remote?
-                              ,expected-direction))
+         (check-connector-class (find-class ',class)
+                                ,expected-schemas
+                                ,expected-wire-type
+                                ,expected-remote?
+                                ,expected-direction))
 
-     (test (construct ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test basic properties of a ~A connector ~
-                     instance."
-                class)
+       (test (,(test-name '#:construct)
+              ,@(when suite `(:suite ,suite)))
+         ,(format nil "Test basic properties of a ~A connector ~
+                       instance."
+                  class)
 
-       (let ((instance (apply #'make-instance ',class ,initargs)))
-         (check-connector instance
-                          ,expected-schemas
-                          ,expected-wire-type
-                          ,expected-remote?
-                          ,expected-direction)))
+         (let ((instance (apply #'make-instance ',class ,initargs)))
+           (check-connector instance
+                            ,expected-schemas
+                            ,expected-wire-type
+                            ,expected-remote?
+                            ,expected-direction)))
 
-     (test (print ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test printing a ~A connector instance."
-                    class)
+       (test (,(test-name '#:print)
+              ,@(when suite `(:suite ,suite)))
+         ,(format nil "Test printing a ~A connector instance."
+                  class)
 
-       (let ((instance (apply #'make-instance ',class ,initargs)))
-         (is (not (emptyp (with-output-to-string (stream)
-                            (print-object instance stream)))))))))
+         (let ((instance (apply #'make-instance ',class ,initargs)))
+           (is (not (emptyp (with-output-to-string (stream)
+                              (print-object instance stream))))))))))
 
 ;;; Utility functions
 

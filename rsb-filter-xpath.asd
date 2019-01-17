@@ -49,4 +49,5 @@
 
   :perform     (test-op (operation component)
                  (symbol-call '#:log '#:config :warn) ; less noise
-                 (symbol-call '#:rsb.filter.xpath.test '#:run-tests)))
+                 (symbol-call '#:fiveam '#:run!
+                              (find-symbol "XPATH-FILTER-ROOT" "RSB.FILTER.TEST"))))

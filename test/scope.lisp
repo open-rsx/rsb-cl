@@ -1,18 +1,17 @@
 ;;;; scope.lisp --- Unit tests for scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite scope-root
+(def-suite* scope-root
   :in root
   :description
   "Unit tests for the `scope' class.")
 ;; TODO (:setup
 ;;  (clrhash rsb::*scopes*))
-(in-suite scope-root)
 
 (test derive-scope-component
   "Test function `derive-scope-component'."

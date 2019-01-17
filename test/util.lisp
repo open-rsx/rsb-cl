@@ -1,15 +1,14 @@
 ;;;; util.lisp --- Unit tests for utilities used by the rsb system.
 ;;;;
-;;;; Copyright (C) 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite curry/weak-root
+(def-suite* curry/weak-root
   :in root
   :description "Test suite for the `curry/weak' function.")
-(in-suite curry/weak-root)
 
 (test smoke
   "Smoke test for the `curry/weak' function."
@@ -39,22 +38,20 @@
            ((:interval 1 :function ,,'#'+)                                      t)
            ((:interval 1 :function ,,'#'print :args (list 1 *standard-output*)) t)))))
 
-  (def-suite timed-executor-root
+  (def-suite* timed-executor-root
     :in root
     :description
     "Test suite for the `timed-executor' class.")
-  (in-suite timed-executor-root)
 
   (test construction
     "Test constructing `timed-executor' instances."
 
     (define-construction-cases timed-executor))
 
-  (def-suite timed-executor/weak-root
+  (def-suite* timed-executor/weak-root
     :in root
     :description
     "Test suite for the `timed-executor/weak' class.")
-  (in-suite timed-executor/weak-root)
 
   (test construction
     "Test constructing `timed-executor/weak' instances."

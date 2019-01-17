@@ -1,12 +1,12 @@
 ;;;; listener.lisp --- Unit tests for listener.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.test)
 
-(def-suite listener-root
+(def-suite* listener-root
   :in root
   :description
   "Unit tests for the `listener' class.")
