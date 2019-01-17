@@ -6,12 +6,11 @@
 
 (cl:in-package #:rsb.transport.spread.test)
 
-(def-suite fragmentation-root
+(def-suite* fragmentation-root
   :in transport-spread-root
   :description
   "Unit tests for the fragmentation and assembly of
    data/notifications.")
-(in-suite fragmentation-root)
 
 (test assemble-smoke
   "Smoke test for the `merge-fragment' with an `assembly-pool'
@@ -54,7 +53,7 @@
   "Smoke test for the `split-notification' function."
 
   (mapc
-   (lambda+ ((data fragment-size-limit &optional expectec))
+   (lambda+ ((data fragment-size-limit &optional expected))
      (let+ ((notification (make-notification
                            0 (uuid:make-null-uuid) (rsb:make-scope "/foo")
                            nil :utf-8-string '() `(:create ,(local-time:now))))
@@ -79,7 +78,7 @@
      (""                   20 insufficient-room)
      ("bla"                20 insufficient-room))))
 
-(test roundtrip
+(test fragmentation/roundtrip
   "Do full roundtrips of fragmenting data using `split-notification'
    and then re-assemble the fragments using `merge-fragments'."
 
@@ -104,7 +103,7 @@
      ("fooobaar"           89)
      (,(make-string 1000) 100))))
 
-(test warnings
+(test fragmentation/warnings
   "Ensure that warnings are signaled when invalid fragments are added
    to an assembly."
 
@@ -122,13 +121,12 @@
       (merge-fragment pool (a-fragment
                             sequence-number 3 0 (octetify "foo"))))))
 
-(def-suite assembly-root
+(def-suite* assembly-root
   :in fragmentation-root
   :description
   "Unit tests for the `assembly' class.")
-(in-suite assembly-root)
 
-(test print-smoke
+(test assembly/print
   "Test `print-object' method on `assembly'."
 
   (is-false (emptyp
@@ -138,22 +136,20 @@
                                                      (uuid:make-null-uuid)))
                              :num-fragments 1)))))
 
-(def-suite assembly-pool-root
+(def-suite* assembly-pool-root
   :in fragmentation-root
   :description
   "Unit tests for the `assembly-pool' class.")
-(in-suite assembly-pool-root)
 
-(test print-smoke
+(test assembly-pool/print
   "Test `print-object' method on `assembly-pool'."
 
   (is-false (emptyp (princ-to-string (make-instance 'assembly-pool)))))
 
-(def-suite pruning-assembly-pool-root
+(def-suite* pruning-assembly-pool-root
   :in fragmentation-root
   :description
   "Unit tests for the `pruning-assembly-pool' class.")
-(in-suite pruning-assembly-pool-root)
 
 (test prune
   "Check that old incomplete assemblies actually get pruned."
@@ -173,7 +169,7 @@
            pruned, the count of the pool was ~D, not ~D.~@:>"
           count 0))))
 
-(test print-smoke
+(test pruning-assembly-pool/print
   "Test `print-object' method on `pruning-assembly-pool'."
 
   (is (not (emptyp (princ-to-string

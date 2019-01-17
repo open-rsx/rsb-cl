@@ -23,6 +23,9 @@
    #:rsb.test
    #:rsb.transport.test)
 
+  (:shadow
+   #:run-tests)
+
   (:import-from #:rsb.transport.spread
    #:normalize-daemon-endpoint
 
@@ -66,22 +69,20 @@ module"))
 ;;; Root test suite
 
 (def-suite transport-spread-root
-  :in transport-root
   :description
   "Root unit test suite for the transport.spread module.")
-
-#+TODO((spread-port rsb-system::*spread-port*)
-       common-args)
-#+TODO(:setup
-       (setf common-args `(:schema    :spread
-                           :port      ,spread-port
-                           :converter :fundamental-null)))
 
 (defun run-tests ()
   (network.spread.daemon:with-daemon (:port rsb-system::*spread-port*)
     (run! 'transport-spread-root)))
 
 ;;; Test utilities
+
+(defvar *spread-port* rsb-system::*spread-port*)
+
+(defvar *common-args* `(:schema    :spread
+                        :port      ,*spread-port*
+                        :converter :fundamental-null))
 
 (defvar *simple-group-name*
   (concatenate 'string "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" '(#\Nul)))

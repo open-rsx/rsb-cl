@@ -8,59 +8,55 @@
 
 ;;; `in-connector' superclass
 
-(def-suite in-connector-root
+(def-suite* in-connector-root
   :in transport-spread-root
   :description
   "Tests for the `in-connector' class and associated methods.")
-(in-suite in-connector-root)
 
-#+TODO (a-string           (octetify "foobarbaz"))
-#+TODO (empty-notification (nth-value 1
-                            (pb:pack (make-instance
-                                      'rsb.protocol:notification))))
-
-(test notification->event
+(test in-connector/notification->event
   "Test `notification->event' method."
 
   (mapc
    (lambda+ ((payload-data wire-schema connector-args expected))
      (let+ ((connector    (apply #'make-instance 'in-pull-connector
                                  :converter :fundamental-utf-8-string
-                                 (append common-args connector-args)))
+                                 (append *common-args* connector-args)))
             (notification (rsb.transport.spread::make-incoming-notification
-                           a-notification 0 payload-data :wire-schema wire-schema)
-                          payload-data)
+                           (a-notification 0 payload-data :wire-schema wire-schema)
+                           payload-data))
             ((&flet do-it ()
                (rsb.ep:with-error-policy (connector)
                  (notification->event connector notification wire-schema)))))
        (case expected
          (decoding-error (signals decoding-error (do-it)))
          ((nil           (is (null (do-it)))))
-         (t              (is (equal expected (event-data (do-it))))))
+         (t              (is (equal expected (event-data (do-it))))))))
 
-    `(;; In these cases, protocol buffer unpacking fails.
-      (,a-string           "foo"          (:error-policy nil)         decoding-error)
-      (,a-string           "foo"          (:error-policy ,#'continue) nil)
+   `(;; In these cases, protocol buffer unpacking fails.
+     (,(octetify "foobarbaz") "foo"          (:error-policy nil)         decoding-error)
+     (,(octetify "foobarbaz") "foo"          (:error-policy ,#'continue) nil)
 
-      ;; Protocol buffer unpacking succeeds, but conversion to event
-      ;; fails.
-      (,a-string           "utf-8-string" ()                          "foobarbaz"))))
+     ;; Protocol buffer unpacking succeeds, but conversion to event
+     ;; fails.
+     (,(octetify "foobarbaz") "utf-8-string" ()                          "foobarbaz"))))
 
 ;;; Connector classes
 
 (macrolet
     ((define-connector-suite (direction)
-       (let ((class-name (format-symbol :rsb.transport.spread "~A-CONNECTOR" direction))
-             (suite-name (format-symbol *package* "~A-CONNECTOR-ROOT" direction)))
+       (let+ ((class-name (format-symbol :rsb.transport.spread "~A-CONNECTOR" direction))
+              (suite-name (format-symbol *package* "~A-CONNECTOR-ROOT" direction))
+              ((&flet test-name (name)
+                 (symbolicate class-name '#:/ name))))
          `(progn
-            (def-suite ,suite-name
+            (def-suite* ,suite-name
               :in transport-spread-root
               :description
               ,(format nil "Test suite for the `~(~A~)' class."
                        class-name))
 
             (define-basic-connector-test-cases ,class-name
-              :initargs           common-args
+              :initargs           *common-args*
 
               :expected-schemas   '(:spread)
               :expected-wire-type 'octet-vector
@@ -68,7 +64,7 @@
 
               :expected-direction ,(make-keyword direction))
 
-            (test construct/invalid
+            (test ,(test-name '#:construct/invalid)
               ,(format nil "Test constructing `~(~A~)' instances." class-name)
 
               ;; Missing :host, :port, :name or :bus initarg.
@@ -77,10 +73,10 @@
                                             :converter :fundamental-null
                                             :port      nil)))
 
-            (test connect/soke
+            (test ,(test-name '#:connect/smoke)
               ,(format nil "Test connecting `~(~A~)' instances." class-name)
 
-              (let ((connector (apply #'make-instance ',class-name common-args))
+              (let ((connector (apply #'make-instance ',class-name *common-args*))
                     (scope     (make-scope "/foo")))
                 (finishes (rsb.ep:notify connector scope :attached))
                 (finishes (rsb.ep:notify connector scope :detached))))))))

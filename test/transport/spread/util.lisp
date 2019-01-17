@@ -1,16 +1,15 @@
 ;;;; util.lisp --- Unit tests for utilities used in the spread backend.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.transport.spread.test)
 
-(def-suite util-root
+(def-suite* util-root
   :in transport-spread-root
   :description
   "Test suite for the utility functions used in the spread backend.")
-(in-suite util-root)
 #+TODO   (:setup
           (clrhash *scope->groups-cache*))
 
@@ -18,19 +17,18 @@
   "Smoke test for the `normalize-daemon-endpoint' function."
 
   (mapc (lambda+ ((name host port
-                   expected-name &optional expected-host expected-port))
-         (case expected-name
-           (missing-required-argument
-            (signals missing-required-argument
-              (normalize-daemon-endpoint name host port)))
-           (t
-            (ensure-same (normalize-daemon-endpoint name host port)
-                         (values expected-name expected-host expected-port)
-                         :test #'equal))))
-                '((nil         nil    nil  missing-required-argument)
-                  ("4803@host" nil    nil  "4803@host" "host" 4803)
-                  (nil         "host" 4803 "4803@host" "host" 4803)
-                  (nil         nil    4803 "4803"      nil    4803))))
+                        expected-name &optional expected-host expected-port))
+          (case expected-name
+            (missing-required-argument
+             (signals missing-required-argument
+               (normalize-daemon-endpoint name host port)))
+            (t
+             (is (equal (values expected-name expected-host expected-port)
+                        (normalize-daemon-endpoint name host port))))))
+        '((nil         nil    nil  missing-required-argument)
+          ("4803@host" nil    nil  "4803@host" "host" 4803)
+          (nil         "host" 4803 "4803@host" "host" 4803)
+          (nil         nil    4803 "4803"      nil    4803))))
 
 (test scope->group/smoke
   "Smoke test for the `scope->group' function."

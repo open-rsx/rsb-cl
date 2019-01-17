@@ -8,50 +8,48 @@
 
 ;;; `message-receiver'
 
-(deftestsuite message-receiver-root (transport-spread-root)
-  ((a-string           (octetify "foobarbaz"))
-   (empty-notification (nth-value 1 (pb:pack (make-instance
-                                              'rsb.protocol:notification)))))
-  (:documentation
-   "Tests for the `message-receiver' class and associated methods."))
+(def-suite* message-receiver-root
+  :in transport-spread-root
+  :description
+  "Tests for the `message-receiver' class and associated methods.")
 
-(addtest (message-receiver-root
-          :documentation
-          "Test `notification->event' method.")
-  notification->event/message-receiver
+;; (empty-notification (nth-value 1 (pb:pack (make-instance
+;;                                            'rsb.protocol:notification))))
 
-  (ensure-cases (notification wire-schema args expected)
-      `(;; In these cases, protocol buffer unpacking fails.
-        (,a-string           :foo (:error-policy nil)          decoding-error)
-        (,a-string           :foo (:error-policy ,#'continue)  nil)
+(test message-receiver/notification->event
+  "Test `notification->event' method."
 
-        ;; Protocol buffer unpacking succeeds, but conversion to event
-        ;; fails.
-        (,empty-notification :foo (:error-policy nil)          decoding-error)
-        (,empty-notification :foo (:error-policy ,#'continue)  nil))
+  (mapc
+   (lambda+ ((notification wire-schema args expected))
+     (let+ ((connector    (apply #'make-instance 'message-receiver
+                                 :connection nil args))
+            (notification (rsb.transport:make-wire-notification
+                           notification (length notification)))
+            ((&flet do-it ()
+               (rsb.ep:with-error-policy (connector)
+                 (notification->event connector notification wire-schema)))))
+       (case expected
+         (decoding-error (signals decoding-error (do-it)))
+         ((nil)          (is (null (do-it)))))))
 
-    (let+ ((connector    (apply #'make-instance 'message-receiver
-                                :connection nil args))
-           (notification (rsb.transport:make-wire-notification
-                          notification (length notification)))
-           ((&flet do-it ()
-              (rsb.ep:with-error-policy (connector)
-                (notification->event connector notification wire-schema)))))
-      (case expected
-        (decoding-error (ensure-condition 'decoding-error (do-it)))
-        ((nil)          (ensure-null (do-it)))))))
+   `(;; In these cases, protocol buffer unpacking fails.
+     (,(octetify "foobarbaz") :foo (:error-policy nil)          decoding-error)
+     (,(octetify "foobarbaz") :foo (:error-policy ,#'continue)  nil)
+
+     ;; Protocol buffer unpacking succeeds, but conversion to event
+     ;; fails.
+     (,empty-notification     :foo (:error-policy nil)          decoding-error)
+     (,empty-notification     :foo (:error-policy ,#'continue)  nil))))
 
 ;;; `message-sender'
 
-(deftestsuite message-sender-root (transport-spread-root)
-  ()
-  (:documentation
-   "Tests for the `message-sender' class and associated methods."))
+(def-suite* message-sender-root
+  :in transport-spread-root
+  :description
+  "Tests for the `message-sender' class and associated methods.")
 
-(addtest (message-sender-root
-          :documentation
-          "Test `event->notification' method.")
-  event->notification
+(test message-sender/event->notification
+  "Test `event->notification' method."
 
   (let* ((connector    (apply #'make-instance 'message-sender
                               :connection nil '()))
