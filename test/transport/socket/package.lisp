@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the transport.socket module.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,6 +23,9 @@
 
    #:rsb.test
    #:rsb.transport.test)
+
+  (:shadow
+   #:run-tests)
 
   (:import-from #:rsb.transport.socket
    #:tcp-connector
@@ -70,7 +73,7 @@ socket. Should be incremented after each use.")
     (iter (until (port-usable? *next-port*))
           (incf *next-port*))
     (unless (= old *next-port*)
-      (format *lift-debug-output* "~&;; Port in use; Incrementing ~D -> ~D~&"
+      (format *debug-io* "~&;; Port in use; Incrementing ~D -> ~D~&"
               old *next-port*)))
   *next-port*)
 
@@ -96,6 +99,8 @@ socket. Should be incremented after each use.")
 #+TODO (:run-setup :once-per-test-case)
 
 (def-suite transport-socket-root
-  :in transport-root
   :description
   "Root unit test suite for the transport.socket module.")
+
+(defun run-tests ()
+  (run! 'transport-socket-root))

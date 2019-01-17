@@ -6,13 +6,12 @@
 
 (cl:in-package #:rsb.transport.socket.test)
 
-(def-suite transport-socket-unix-root
+(def-suite* transport-socket-unix-root
     :in transport-socket-root
     :description
     "Unit tests for the UNIX transport and bus.")
-(in-suite transport-socket-unix-root)
 
-(test client/smoke
+(test transport-unix/client/smoke
   "Test creating `bus-client' instances and attaching and detaching
    connectors to them.
 
@@ -53,7 +52,7 @@
                 (unix-in-push-connector :unix-socket (:name ,name))
                 (unix-out-connector     :unix-socket (:name ,name)))))))
 
-(test server/smoke
+(test transport-unix/server/smoke
   "Test creating `bus-server' instances and attaching and detaching
    connectors to them.
 

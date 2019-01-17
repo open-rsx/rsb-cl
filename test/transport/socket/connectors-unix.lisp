@@ -8,13 +8,12 @@
 
 ;;; `connector' class
 
-(def-suite unix-connector-root
+(def-suite* unix-connector-root
   :in transport-socket-root
   :description
   "Unit tests for the `unix-connector' class.")
-(in-suite unix-connector-root)
 
-(test construction/smoke
+(test unix-connector/construction/smoke
   "Test constructing instances of the `unix-connector' class."
 
   (flet ((do-it (&rest args)
@@ -42,12 +41,11 @@
        (let ((class-name (format-symbol :rsb.transport.socket "UNIX-~A-CONNECTOR" direction))
              (suite-name (format-symbol *package* "UNIX-~A-CONNECTOR-ROOT" direction)))
          `(progn
-            (def-suite ,suite-name
+            (def-suite* ,suite-name
               :in transport-socket-root
               :description
               ,(format nil "Test suite for the `~(~A~)' class."
                        class-name))
-            (in-suite ,suite-name)
 
             (define-basic-connector-test-cases ,class-name
               :name               :unix-socket
@@ -62,7 +60,7 @@
 
               :expected-direction ,(make-keyword direction))
 
-            (test construct/invalid
+            (test ,(symbolicate class-name '#:/construct/invalid)
               ,(format nil "Test constructing `~(~A~)' instances."
                            class-name)
 

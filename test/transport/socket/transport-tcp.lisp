@@ -6,13 +6,12 @@
 
 (cl:in-package #:rsb.transport.socket.test)
 
-(def-suite transport-socket-tcp-root
+(def-suite* transport-socket-tcp-root
     :in transport-socket-root
     :description
     "Unit tests for the TCP transport and bus.")
-(in-suite transport-socket-tcp-root)
 
-(test incompatible-options
+(test tcp-transport/incompatible-options
   "Test supplying incompatible options for a single connection."
 
   ;; Has to signal an error since the incompatible options are
@@ -23,7 +22,7 @@
          (nil :reader (make-socket-url :tcp-socket nil '("tcpnodelay" "0")))
          (nil :reader (make-socket-url :tcp-socket nil nil)))))) ; body is not important
 
-(test client/smoke
+(test tcp-transport/client/smoke
   "Test creating `bus-client' instances and attaching and detaching
    connectors to them.
 
@@ -68,7 +67,7 @@
               (tcp-out-connector     :tcp-socket
                                      (:host "localhost" :port ,*next-port*))))))
 
-(test server/smoke
+(test tcp-transport/server/smoke
   "Test creating `bus-server' instances and attaching and detaching
    connectors to them.
 
