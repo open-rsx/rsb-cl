@@ -29,7 +29,9 @@
    #:remote-introspection-database)
 
   (:export
-   #:rsb-introspection-builder-root)
+   #:rsb-introspection-builder-root
+
+   #:run-tests)
 
   (:documentation
    "This package contains test for the introspection.builder module."))
@@ -40,6 +42,9 @@
   :description
   "Unit test suite for the introspection model (un)builder support.")
 
+(defun run-tests ()
+  (run! 'rsb-introspection-builder-root))
+
 (defvar *stop-type* '(or number string uuid:uuid puri:uri scope))
 
 (defun check-un-build-calls (builder atom-type cases)
@@ -47,7 +52,7 @@
           (let+ (((&values &ign calls)
                   (record-un-build-calls/peeking
                    #'bp:walk-nodes builder atom-type object)))
-            (ensure-same calls expected-calls :test #'equal)))
+            (is (equal expected-calls calls))))
         cases))
 
 (test remote-introspection-database/smoke

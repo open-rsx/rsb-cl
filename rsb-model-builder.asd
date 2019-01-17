@@ -55,4 +55,5 @@
                  :components ((:file       "builder"))))
 
   :perform     (test-op (operation component)
-                 (symbol-call '#:rsb.model.builder.test '#:run-tests)))
+                 (symbol-call '#:rsb.model.builder.test '#:run-tests)
+                 (symbol-call '#:rsb.introspection.builder.test '#:run-tests)))
