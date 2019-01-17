@@ -1,6 +1,6 @@
 ;;;; builder.lisp --- Tests for model (un)builder.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,7 +33,7 @@
 
 (cl:in-package #:rsb.model.builder.test)
 
-(def-suite rsb-model-builder-root
+(def-suite* rsb-model-builder-root
   :description
   "Unit test suite for the model (un)builder support.")
 

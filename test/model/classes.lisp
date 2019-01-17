@@ -10,23 +10,23 @@
   :in rsb-model-root
   :description
   "Unit test suite for the model classes.")
-(in-suite rsb-model-classes-root)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro define-simple-model-class-tests (class-and-options &body cases)
     (let+ (((class &key (suite-prefix '#:rsb-model-classes-))
             (ensure-list class-and-options))
            (parent-suite-name (symbolicate suite-prefix '#:root))
-           (suite-name        (symbolicate suite-prefix class '#:-root)))
+           (suite-name        (symbolicate suite-prefix class '#:-root))
+           (construct-name    (symbolicate suite-prefix class '#:/construct))
+           (print-name        (symbolicate suite-prefix class '#:/print)))
       `(progn
-         (def-suite ,suite-name
+         (def-suite* ,suite-name
            :in ,parent-suite-name
            :description
            ,(format nil "Unit test suite for the `~(~A~)' model class."
                     class))
-         (in-suite ,suite-name)
 
-         (test construct
+         (test ,construct-name
            ,(format nil "Test constructing `~(~A~)' instances." class)
 
            (mapc (lambda+ ((initargs &optional expected-result &ign))
@@ -39,18 +39,17 @@
                         (finishes (do-it))))))
                (list ,@cases)))
 
-         (test print
+         (test ,print-name
            ,(format nil "Test printing `~(~A~)' instances." class)
 
            (mapc (lambda+ ((initargs &optional expected-result (expected-printed t)))
                    (let+ (((&flet do-it ()
                              (princ-to-string (apply #'make-instance ',class initargs)))))
-                     (case expected-result
-                       (missing-required-initarg)
-                       ((t)
-                        (finishes (do-it)))
-                       (t
-                        (is (search expected-printed (do-it)))))))
+                     (cond ((eq expected-result 'missing-required-initarg))
+                           ((eq expected-printed t)
+                            (finishes (do-it)))
+                           (t
+                            (is (search expected-printed (do-it)))))))
                  (list ,@cases)))))))
 
 ;;; `participant-info' classes

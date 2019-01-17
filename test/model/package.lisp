@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the model module.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,6 +19,9 @@
 
    #:rsb.test)
 
+  (:shadow
+   #:run-tests)
+
   (:import-from #:rsb.model
 
    #:basic-participant-node
@@ -27,7 +30,9 @@
 
   ;; Root test suite
   (:export
-   #:rsb-model-root)
+   #:rsb-model-root
+
+   #:run-tests)
 
   (:documentation
    "This package contains unit tests for the model module."))
@@ -37,6 +42,8 @@
 ;;; Test suite
 
 (def-suite rsb-model-root
-  :in root
   :description
   "Root unit test suite of the model module.")
+
+(defun run-tests ()
+  (run! 'rsb-model-root))

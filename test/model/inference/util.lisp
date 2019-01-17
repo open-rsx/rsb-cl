@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Tests for the utilities used in the model.inference module.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,7 +68,7 @@
                              right right-definitive?))))
             (case expected
               (incompatible-arguments
-               (ensure-condition 'incompatible-arguments (do-it)))
+               (signals incompatible-arguments (do-it)))
               (t
-               (ensure-same expected (do-it) :test #'equal)))))
+               (is (equal expected (do-it)))))))
         cases))

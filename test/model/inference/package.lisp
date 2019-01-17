@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the model.inference module.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,6 +31,9 @@
 
   (:import-from #:rsb.model.inference
    #:tri-and #:tri-or)
+
+  (:shadowing-import-from #:rsb.model.test
+   #:run-tests)
 
   ;; Root test suite
   (:export

@@ -1,6 +1,6 @@
 ;;;; inference.lisp --- Tests for the inference functions provided by the model.inference module.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -41,11 +41,10 @@
 
 ;;; `communication?'
 
-(def-suite rsb-model-inference-communication?-root
+(def-suite* rsb-model-inference-communication?-root
   :in rsb-model-inference-root
   :description
   "Root unit test suite for the `communication?' generic function.")
-(in-suite rsb-model-inference-communication?-root)
 
 (test smoke/scope+uri
   "Smoke test for the `communication?' generic function focusing on
