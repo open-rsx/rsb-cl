@@ -1,6 +1,6 @@
 ;;;; builder.lisp --- Tests for introspection model (un)builder.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,10 +36,9 @@
 
 (cl:in-package #:rsb.introspection.builder.test)
 
-(def-suite rsb-introspection-builder-root
+(def-suite* rsb-introspection-builder-root
   :description
   "Unit test suite for the introspection model (un)builder support.")
-(in-suite rsb-introspection-builder-root)
 
 (defvar *stop-type* '(or number string uuid:uuid puri:uri scope))
 

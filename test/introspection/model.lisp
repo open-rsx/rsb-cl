@@ -1,16 +1,15 @@
 ;;;; model.lisp --- Tests for model classes.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.introspection.test)
 
-(def-suite introspection-model-root
+(def-suite* introspection-model-root
   :in introspection-root
   :description
   "Unit test suite for the model classes.")
-(in-suite introspection-model-root)
 
 ;;; Functions related to `process-info' classes
 

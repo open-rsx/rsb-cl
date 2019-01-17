@@ -1,23 +1,23 @@
 ;;;; reloading.lisp --- Unit tests for introspection database reloading.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.introspection.test)
 
-(def-suite reloading-root
+(def-suite* reloading-root
   :in introspection-root
   :description
   "Unit test suite for the reloading the introspection database.")
-(in-suite reloading-root)
 
-(test smoke
+(test (reloading/smoke
+       :fixture (with-configuration +introspection-configuration+))
   "Smoke test for reinitializing the introspection database."
 
   ;; The listener forces a `local-introspection' database. Otherwise
   ;; `reinitialize-introspection' would be a noop.
-  (with-participant (listener :listener "inprocess:/rsbtest/introspection/reloading")
+  (with-participant (nil :listener "inprocess:/rsbtest/introspection/reloading")
     (let+ (((&flet introspection-data ()
               (rsb.introspection::with-local-database (database)
                 (values (rsb.introspection::introspection-host database)
@@ -26,5 +26,5 @@
            ((&values new-host new-process) (progn
                                              (reinitialize-introspection)
                                              (introspection-data))))
-      (ensure-different old-host    new-host    :test #'eq)
-      (ensure-different old-process new-process :test #'eq))))
+      (is (not (eq new-host    old-host)))
+      (is (not (eq new-process old-process))))))

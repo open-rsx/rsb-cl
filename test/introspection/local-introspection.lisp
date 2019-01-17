@@ -1,16 +1,15 @@
 ;;;; local-introspection.lisp --- Unit tests for the local-introspection class.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.introspection.test)
 
-(def-suite local-introspection-root
+(def-suite* local-introspection-root
   :in introspection-root
   :description
   "Unit test suite for the `local-introspection' class.")
-(in-suite local-introspection-root)
 
 (rsb.test:define-basic-participant-test-cases (rsb.introspection::local-introspection)
   '("/rsbtest/local-introspection/construction"
@@ -64,7 +63,7 @@
   ;; create the database.
   (let+ ((rsb.introspection::*local-database* nil)
          ((&flet do-it ()
-            (ensure-condition 'listener-creation-error-caused-by-local-introspection-creation-error
+            (signals listener-creation-error-caused-by-local-introspection-creation-error
               (make-participant :listener "/" :transports '((:inprocess :enabled t)
                                                             (t :enabled nil)))))))
     ;; `local-introspection' creation fails because configuration does
@@ -79,7 +78,8 @@
                              ((:introspection :enabled)                . t))))
       (do-it))))
 
-(test smoke
+(test (local-introspection/smoke
+       :fixture (with-configuration +introspection-configuration+))
   "Smoke test for the `local-introspection' class."
 
   (with-participant (introspection :local-introspection +introspection-scope+)
@@ -93,15 +93,16 @@
                          (rsb.patterns:participant-child
                           introspection :server :local-server))))
       (with-participant (server :remote-server server-scope)
-        (call server "echo" rsb.converter:+no-value+)))))
+        (finishes (call server "echo" rsb.converter:+no-value+))))))
 
-(test error-policy
+(test (local-introspection/error-policy
+       :fixture (with-configuration +introspection-configuration+))
   "Test application of the configured error policy in
    `local-introspection' instances."
 
   (with-condition-tracking (record-and-continue check-conditions)
-    (with-participant (introspection :local-introspection +introspection-scope+
-                                     :error-policy        #'record-and-continue)
+    (with-participant (nil :local-introspection +introspection-scope+
+                           :error-policy        #'record-and-continue)
       ;; All of the following are ignored because of the survey
       ;; filter.
       (send-introspection-event :foo)
@@ -151,7 +152,8 @@
          (introspection-protocol-error
           "not conform to the REQUEST role within the INTROSPECTION protocol"))))))
 
-(test stress
+(test (local-introspection/stress
+       :fixture (with-configuration +introspection-configuration+))
   "Stress test which surveys a `local-introspection' from multiple
    threads in parallel while creating and destroying participants in a
    second set of threads."

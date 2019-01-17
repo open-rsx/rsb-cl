@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the introspection module.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,6 +20,9 @@
 
    #:rsb.test)
 
+  (:shadow
+   #:run-tests)
+
   ;; Platform information functions
   (:import-from #:rsb.introspection
    #:current-process-id
@@ -28,11 +31,15 @@
 
    #:current-host-id
 
-   #:remote-introspection-database)
+   #:remote-introspection-database
+
+   #:*local-database*)
 
   ;; Root test suite
   (:export
-   #:introspection-root)
+   #:introspection-root
+
+   #:run-tests)
 
   (:documentation
    "This package contains unit tests for the introspection module."))
@@ -71,17 +78,16 @@
             ((&labels ,check-conditions-name (expected)
                (let ((num-calls    (length ,calls))
                      (num-expected (length expected)))
-                 (ensure-same num-calls num-expected :test #'=
-                              :report    "~@<~D call~:P but expected ~D~:@>"
-                              :arguments (num-calls num-expected)))
+                 (is (= num-expected num-calls)
+                     "~@<~D call~:P but expected ~D~:@>"
+                     num-calls num-expected))
                (mapc (lambda+ (call (expected-type &rest expected-substrings))
-                       (ensure (typep call expected-type))
+                       (is (typep call expected-type))
                        (let* ((*print-right-margin* most-positive-fixnum)
                               (*print-length*       most-positive-fixnum)
                               (text (princ-to-string call)))
                          (dolist (expected-substring expected-substrings)
-                           (ensure-same expected-substring text
-                                        :test #'search))))
+                           (is (search expected-substring text)))))
                      ,calls expected)
               (,clear-calls-name)))
            ((&labels ,clear-calls-name ()
@@ -94,6 +100,8 @@
   :in root
   :description
   "Root unit test suite of the introspection module.")
-(in-suite introspection-root)
 #+TODO   (:dynamic-variables
           (rsb:*configuration* +introspection-configuration+))
+
+(defun run-tests ()
+  (run! 'introspection-root))

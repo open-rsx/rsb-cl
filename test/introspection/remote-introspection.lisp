@@ -1,6 +1,6 @@
 ;;;; remote-introspection.lisp --- Unit tests for the remote-introspection class.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016, 2017 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,11 +8,10 @@
 
 ;;; Class `introspection-receiver'
 
-(def-suite introspection-receiver-root
+(def-suite* introspection-receiver-root
   :in introspection-root
   :description
   "Unit test suite for the `introspection-receiver' class.")
-(in-suite introspection-receiver-root)
 
 (define-basic-participant-test-cases (rsb.introspection::introspection-receiver
                                       :check-transport-urls? nil)
@@ -51,25 +50,23 @@
 
 ;;; Class `remote-introspection-database'
 
-(def-suite remote-introspection-database-root
+(def-suite* remote-introspection-database-root
   :in introspection-root
   :description
   "Unit test suite for the `remote-introspection-database' class.")
-(in-suite remote-introspection-database-root)
 
-(test print
+(test remote-introspection-database/print
   "Test printing `remote-introspection-database' instances."
 
   (let ((introspection (make-instance 'remote-introspection-database)))
-    (ensure (not (emptyp (princ-to-string introspection))))))
+    (is (not (emptyp (princ-to-string introspection))))))
 
 ;;; Class `remote-introspection'
 
-(def-suite remote-introspection-root
+(def-suite* remote-introspection-root
   :in introspection-root
   :description
   "Unit test suite for the `remote-introspection' class.")
-(in-suite remote-introspection-root)
 
 (define-basic-participant-test-cases (rsb.introspection::remote-introspection)
   '("/rsbtest/remote-introspection/construction"
@@ -113,20 +110,22 @@
     (:transports ((t :enabled nil)))
     error))
 
-(test update/smoke
+(test (update/smoke :fixture (with-configuration +introspection-configuration+))
   "Smoke test for timer-based updating of `remote-introspection'."
 
-  (with-participant (introspection :remote-introspection +introspection-scope+
-                                   :update-interval .2)
-    (sleep 1.0)))
+  (finishes
+    (with-participant (nil :remote-introspection +introspection-scope+
+                           :update-interval .2)
+      (sleep 1.0))))
 
-(test error-policy
+(test (remote-introspection/error-policy
+       :fixture (with-configuration +introspection-configuration+))
   "Test application of the configured error policy in
    `remote-introspection' instances."
 
   (with-condition-tracking (record-and-continue check-conditions)
-    (with-participant (introspection :remote-introspection +introspection-scope+
-                                     :error-policy #'record-and-continue)
+    (with-participant (nil :remote-introspection +introspection-scope+
+                           :error-policy #'record-and-continue)
       ;; "pong" replies should be ignored.
       (send-introspection-event
        "pong" :suffix-scope (format nil "/~A" (uuid:make-null-uuid)))
@@ -165,7 +164,7 @@
           "Payload is" "1"
           "(not RSB.PROTOCOL.INTROSPECTION:HELLO or RSB.PROTOCOL.INTROSPECTION:BYE or \"pong\")"))))))
 
-(test change-hook
+(test (change-hook :fixture (with-configuration +introspection-configuration+))
   "Test change-hook of the `remote-introspection' class."
 
   (let+ ((calls '())
@@ -187,20 +186,20 @@
             (let+ (((&flet+ check-call
                         ((call-object     call-subject     call-event)
                          (expected-object expected-subject expected-event))
-                      (ensure (typep call-object  expected-object)
-                              :report    "~@<Object ~A is not of type ~S~@:>"
-                              :arguments (call-object expected-object))
-                      (ensure (typep call-subject expected-subject)
-                              :report    "~@<Subject ~A is not of type ~S~@:>"
-                              :arguments (call-subject expected-subject))
-                      (ensure (typep call-event   expected-event)
-                              :report    "~@<Event ~A is not of type ~S~@:>"
-                              :arguments (call-event expected-event))))
+                      (is (typep call-object  expected-object)
+                          "~@<Object ~A is not of type ~S~@:>"
+                          call-object expected-object)
+                      (is (typep call-subject expected-subject)
+                          "~@<Subject ~A is not of type ~S~@:>"
+                          call-subject expected-subject)
+                      (is (typep call-event   expected-event)
+                          "~@<Event ~A is not of type ~S~@:>"
+                          call-event expected-event)))
                    (num-calls    (length calls))
                    (num-expected (length expected)))
-              (ensure-same num-calls num-expected
-                           :report    "~@<~D call~:P but expected ~D~:@>"
-                           :arguments (num-calls num-expected))
+              (is (= num-expected num-calls)
+                  "~@<~D call~:P but expected ~D~:@>"
+                  num-calls num-expected)
               (mapc #'check-call calls expected))
             (setf calls '()))))
 
@@ -231,7 +230,8 @@
            (host-entry    real (eql :clock-offset-changed))
            (host-entry    real (eql :latency-changed))))))))
 
-(test stress
+(test (remote-introspection/stress
+       :fixture (with-configuration +introspection-configuration+))
   "Stress test which sends introspection events to a
    `remote-introspection' instance from multiple threads in parallel."
 
@@ -240,7 +240,7 @@
                       (introspection :local-introspection +introspection-scope+))
     (let+ ((configuration *configuration*)
            ((&flet participant-noise ()
-              (let ((*configuration* configuration)
+              (let ((*configuration*  configuration)
                     (*local-database* introspection))
                 (iter (repeat 30)
                       (sleep (random .01))
@@ -249,4 +249,4 @@
                             (("echo" (x) x) ("echo2" (x) x) ("echo3" (x) x))))))))
            (threads (map-into (make-list 10) (curry #'bt:make-thread
                                                     #'participant-noise))))
-      (mapc #'bt:join-thread threads))))
+      (finishes (mapc #'bt:join-thread threads)))))
