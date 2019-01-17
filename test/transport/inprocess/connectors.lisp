@@ -1,6 +1,6 @@
 ;;;; connectors.lisp --- Unit tests for the connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2017, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,11 +8,10 @@
 
 ;;; `in-pull-connector'
 
-(def-suite in-pull-connector-root
+(def-suite* in-pull-connector-root
   :in transport-inprocess-root
   :description
   "Root unit tests suite for the `in-pull-connector' class.")
-(in-suite in-pull-connector-root)
 
 (define-basic-connector-test-cases in-pull-connector
   :initargs           '(:schema :inprocess)
@@ -25,11 +24,10 @@
 
 ;;; `in-push-connector'
 
-(def-suite in-push-connector-root
+(def-suite* in-push-connector-root
   :in transport-inprocess-root
   :description
   "Root unit tests suite for the `in-push-connector' class.")
-(in-suite in-push-connector-root)
 
 (define-basic-connector-test-cases in-push-connector
   :initargs           '(:schema :inprocess)
@@ -42,11 +40,10 @@
 
 ;;; `out-connector'
 
-(def-suite out-connector-root
+(def-suite* out-connector-root
   :in transport-inprocess-root
   :description
   "Root unit tests suite for the `out-connector' class.")
-(in-suite out-connector-root)
 
 (define-basic-connector-test-cases out-connector
   :initargs           '(:schema :inprocess)

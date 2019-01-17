@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the transport.inprocess module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,10 +14,18 @@
 
    #:rsb.transport.test)
 
+  (:shadow
+   #:run-tests)
+
   (:import-from #:rsb.transport.inprocess
    #:in-pull-connector
    #:in-push-connector
    #:out-connector)
+
+  (:export
+   #:transport-inprocess-root
+
+   #:run-tests)
 
   (:documentation
    "This package contains unit tests for the transport.inprocess
@@ -26,6 +34,8 @@
 (cl:in-package #:rsb.transport.inprocess.test)
 
 (def-suite transport-inprocess-root
-  :in transport-root
   :description
   "Root unit test suite for the transport.inprocess module.")
+
+(defun run-tests ()
+  (run! 'transport-inprocess-root))
