@@ -1,16 +1,15 @@
 ;;;; protocol.lisp --- Tests for the protocol of the patterns module.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.patterns.test)
 
-(def-suite rsb-patterns-protocol-root
+(def-suite* rsb-patterns-protocol-root
   :in patterns-root
   :description
   "Unit tests for the protocol functions of the patterns module.")
-(in-suite rsb-patterns-protocol-root)
 
 (defclass mock-composite-participant/protocol (child-container-mixin) ())
 

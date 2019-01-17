@@ -6,11 +6,10 @@
 
 (cl:in-package #:rsb.patterns.reader.test)
 
-(def-suite reader-root
+(def-suite* reader-root
   :in root
   :description
   "Unit tests for the `reader' class.")
-(in-suite reader-root)
 
 (define-basic-participant-test-cases reader
   '("/rsbtest/reader/construction"

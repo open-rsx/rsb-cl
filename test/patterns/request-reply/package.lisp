@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the patterns.request-reply module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,13 +19,18 @@
    #:rsb.test
    #:rsb.patterns.test)
 
+  (:shadow
+   #:run-tests)
+
   (:import-from #:rsb.patterns.request-reply
    #:method1
    #:local-method
    #:remote-method)
 
   (:export
-   #:patterns-request-reply-root)
+   #:patterns-request-reply-root
+
+   #:run-tests)
 
   (:documentation
    "This package contains unit tests for the patterns.request-reply
@@ -34,6 +39,8 @@
 (cl:in-package #:rsb.patterns.request-reply.test)
 
 (def-suite patterns-request-reply-root
-  :in patterns-root
   :description
   "Root unit test suite for the patterns.request-reply module.")
+
+(defun run-tests ()
+  (run! 'patterns-request-reply-root))

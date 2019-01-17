@@ -78,4 +78,4 @@
 
   :perform     (test-op (operation component)
                  (symbol-call '#:log '#:config :warn) ; less noise
-                 (symbol-call '#:rsb.transport.spread.test '#:run-tests)))
+                 (symbol-call '#:rsb.patterns.request-reply.test '#:run-tests)))

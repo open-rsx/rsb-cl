@@ -1,16 +1,15 @@
 ;;;; future.lisp --- Unit tests for the future class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.patterns.request-reply.test)
 
-(def-suite future-root
+(def-suite* future-root
   :in patterns-request-reply-root
   :description
   "Test suite for the future protocol and the `future' class.")
-(in-suite future-root)
 
 (test smoke/threads
   "Smoke test for the future class with result retrieval in a separate

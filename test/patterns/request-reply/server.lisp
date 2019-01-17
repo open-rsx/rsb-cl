@@ -1,16 +1,15 @@
 ;;;; server.lisp --- Unit tests for the method1 and server classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsb.patterns.request-reply.test)
 
-(def-suite method1-root
+(def-suite* method1-root
   :in patterns-request-reply-root
   :description
   "Test suite for `method1' class.")
-(in-suite method1-root)
 
 (test construction
   "Test constructing `method1' instances."
@@ -38,11 +37,10 @@
      ;; These are valid.
      ((:name "legal-name" :server t)   t))))
 
-(def-suite server-root
+(def-suite* server-root
   :in patterns-request-reply-root
   :description
   "Test suite for the `server' class.")
-(in-suite server-root)
 
 (test construction
   "Test constructing `server' instances."

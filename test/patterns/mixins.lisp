@@ -14,11 +14,10 @@
      print-items:print-items-mixin)
   ())
 
-(def-suite composite-participant-mixin-root
+(def-suite* composite-participant-mixin-root
   :in patterns-root
   :description
   "Unit tests for the `composite-participant-mixin' class.")
-(in-suite composite-participant-mixin-root)
 
 (test print/smoke
   "Smoke test for the `print-items:print-items' method specialized on
@@ -71,11 +70,10 @@
 
 ;;; `child-container-mixin'
 
-(def-suite child-container-mixin-root
+(def-suite* child-container-mixin-root
   :in patterns-root
   :description
   "Unit tests for the `child-container-mixin' class.")
-(in-suite child-container-mixin-root)
 
 (test participant-child/smoke
   "Smoke test for the `participant-child' and setf `participant-child'
@@ -96,11 +94,10 @@
      participant)
   ())
 
-(def-suite configuration-inheritance-mixin-root
+(def-suite* configuration-inheritance-mixin-root
   :in patterns-root
   :description
   "Unit tests for the `configuration-inheritance-mixin' class.")
-(in-suite configuration-inheritance-mixin-root)
 
 (test (make-child-initargs/smoke :fixture with-configuration)
   "Smoke test for the `make-child-initargs' method specialized on the
@@ -178,11 +175,10 @@
   (setf (mock-participant-args participant) (list* which kind initargs))
   (make-participant :mock "/foo"))
 
-(def-suite lazy-child-making-mixin-root
+(def-suite* lazy-child-making-mixin-root
   :in patterns-root
   :description
   "Unit tests for the `lazy-child-making-mixin' class.")
-(in-suite lazy-child-making-mixin-root)
 
 (test participant-child/smoke
   "Smoke test for the `participant-child' method specialized on

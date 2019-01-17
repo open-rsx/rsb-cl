@@ -1,6 +1,6 @@
 ;;;; local-server.lisp --- Unit tests for the local-server class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,13 +8,12 @@
 
 ;;; `local-method' tests
 
-(def-suite local-method-root
+(def-suite* local-method-root
   :in patterns-request-reply-root
   :description
   "Test suite for `local-method' class.")
-(in-suite local-method-root)
 
-(test construction
+(test local-method/construction
   "Test constructing `local-method' instances."
 
   ;; Missing :callback initarg
@@ -23,11 +22,10 @@
 
 ;;; `local-server' tests
 
-(def-suite local-server-root
+(def-suite* local-server-root
   :in patterns-request-reply-root
   :description
   "Test suite for the `local-server' class.")
-(in-suite local-server-root)
 
 (define-basic-participant-test-cases (:local-server
                                       :check-transport-urls? nil)
@@ -66,7 +64,7 @@
   ;; No transports => error
   '("/" (:transports ((t :enabled nil))) error))
 
-(test set-method
+(test (local-server/set-method :fixture with-configuration)
   "Test adding methods to a `local-server' instance."
 
   (with-participant (server :local-server "/rsbtest/localserver/set-method")

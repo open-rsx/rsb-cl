@@ -1,6 +1,6 @@
 ;;;; remote-server.lisp --- Unit tests for the remote-server class.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,13 +8,12 @@
 
 ;;; `remote-method' tests
 
-(def-suite remote-method-root
+(def-suite* remote-method-root
   :in patterns-request-reply-root
   :description
   "Test suite for `remote-method' class.")
-(in-suite remote-method-root)
 
-(test construction
+(test remote-method/construction
   "Test constructing `remote-method' instances."
 
   (make-instance 'remote-method
@@ -24,11 +23,10 @@
 
 ;;; `remote-server' tests
 
-(def-suite remote-server-root
+(def-suite* remote-server-root
   :in patterns-request-reply-root
   :description
   "Unit tests for the `remote-server' class.")
-(in-suite remote-server-root)
 
 (define-basic-participant-test-cases (:remote-server
                                       :check-transport-urls? nil)
@@ -67,7 +65,7 @@
   ;; No transports => error
   '("/" (:transports ((t :enabled nil))) error))
 
-(test set-method
+(test remote-server/set-method
   "Test adding methods to a `remote-server' instance."
 
   (with-participant (server :remote-server "/rsbtest/remoteserver/set-method")
