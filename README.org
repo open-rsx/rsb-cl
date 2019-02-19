@@ -19,6 +19,8 @@
 
   + [[https://github.com/scymtym/cl-protobuf][cl-protobuf]] for sending [[https://developers.google.com/protocol-buffers/][Protocol Buffers]] data
 
+  *The full documentation for RSB can be found [[https://open-rsx.github.io/rsb-manual/][here]].*
+
 * Building
 
   Load the system that provides the desired transport (or multiple):
