@@ -8,6 +8,8 @@
   This repository contains the Common Lisp implementation of the
   [[https://github.com/open-rsx][Robotics Service Bus]] middleware.
 
+  *The full documentation for RSB can be found [[https://open-rsx.github.io/rsb-manual/][here]].*
+
 * Dependencies
 
   At the moment, the code is not portable and can only be used with
@@ -18,8 +20,6 @@
   + [[https://github.com/scymtym/network.spread][network.spread]] for using the [[http://www.spread.org][Spread]] transport
 
   + [[https://github.com/scymtym/cl-protobuf][cl-protobuf]] for sending [[https://developers.google.com/protocol-buffers/][Protocol Buffers]] data
-
-  *The full documentation for RSB can be found [[https://open-rsx.github.io/rsb-manual/][here]].*
 
 * Building
 
