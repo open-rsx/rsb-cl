@@ -13,7 +13,7 @@
 
 (defclass mock-composite-participant/protocol (child-container-mixin) ())
 
-(test participant-child/smoke
+(test (participant-child/smoke :fixture with-configuration)
   "Smoke test for the `participant-child' generic function."
 
   (let+ ((participant (make-instance 'mock-composite-participant/protocol))
@@ -29,7 +29,7 @@
     (signals no-such-child-error (do-it :if-does-not-exist 'error))
     (signals no-such-child-error (do-it :if-does-not-exist #'error))))
 
-(test participant-child/restart
+(test (participant-child/restart :fixture with-configuration)
   "Test `use-value' restart established by the `participant-child'
    generic function."
 
@@ -43,7 +43,7 @@
       (is (eq :replacement (participant-child participant :no-such :mock
                                               :if-does-not-exist 'error))))))
 
-(test setf-participant-child/smoke
+(test (setf-participant-child/smoke :fixture with-configuration)
   "Smoke test for the setf `participant-child' generic function."
 
   (let+ ((participant (make-instance 'mock-composite-participant/protocol))

@@ -12,7 +12,8 @@
   "Integration test for `local-server' and `remote-server' classes.")
 
 (def-fixture with-url ()
-  (let ((url "inprocess:/rsbtest/server/integration"))
+  (let ((url             "inprocess:/rsbtest/server/integration")
+        (*configuration* rsb.test::+test-configuration+))
     (&body)))
 
 (test (smoke :fixture with-url)

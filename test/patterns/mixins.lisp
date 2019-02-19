@@ -53,7 +53,7 @@
      &key)
   (error "something went wrong"))
 
-(test failed-construction-cleanup
+(test (failed-construction-cleanup :fixture with-configuration)
   "Ensure that `detach' is called on all already registered child
    participants when an error is signaled during initialization."
 

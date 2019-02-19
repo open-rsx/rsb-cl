@@ -17,8 +17,8 @@
             (ensure-list class-and-options))
            (parent-suite-name (symbolicate suite-prefix '#:root))
            (suite-name        (symbolicate suite-prefix class '#:-root))
-           (construct-name    (symbolicate suite-prefix class '#:/construct))
-           (print-name        (symbolicate suite-prefix class '#:/print)))
+           ((&flet test-name (name)
+              (symbolicate class '#:/ name))))
       `(progn
          (def-suite* ,suite-name
            :in ,parent-suite-name
@@ -26,7 +26,7 @@
            ,(format nil "Unit test suite for the `~(~A~)' model class."
                     class))
 
-         (test ,construct-name
+         (test ,(test-name '#:construct)
            ,(format nil "Test constructing `~(~A~)' instances." class)
 
            (mapc (lambda+ ((initargs &optional expected-result &ign))
@@ -39,7 +39,7 @@
                         (finishes (do-it))))))
                (list ,@cases)))
 
-         (test ,print-name
+         (test ,(test-name '#:print)
            ,(format nil "Test printing `~(~A~)' instances." class)
 
            (mapc (lambda+ ((initargs &optional expected-result (expected-printed t)))

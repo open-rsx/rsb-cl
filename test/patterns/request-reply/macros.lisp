@@ -13,10 +13,10 @@
 
 ;;; Local server-related macros
 
-(test with-methods/smoke
+(test (with-methods/smoke :fixture with-configuration)
   "Smoke test for the `with-methods' macro."
 
-  (with-participant (server :local-server "inprocess:/rsbtest/patterns/request-reply/macros-root/with-methods/smoke")
+  (with-participant (server :local-server "/rsbtest/patterns/request-reply/macros-root/with-methods/smoke")
     (with-methods (server)
         ;; Normal method names
         (("mymethod"     (foo string) foo)
@@ -52,9 +52,9 @@
 
   (mapc (lambda+ ((method expected))
           (flet ((do-it () (macroexpand `(with-methods (server) (,method)))))
-           (case expected
-             (type-error (signals type-error (do-it)))
-             (t          (finishes (do-it))))))
+            (case expected
+              (type-error (signals type-error (do-it)))
+              (t          (finishes (do-it))))))
 
         '( ;; Some invalid constructions.
           (("invalid name" (foo string) foo) type-error)
@@ -75,7 +75,7 @@
           ((nil            (foo :event) foo) t)
           ((nil            ()        :const) t))))
 
-(test with-participant/local-server/error-policy
+(test (with-participant/local-server/error-policy :fixture with-configuration)
   "Test handling of error-policy keyword parameter in
    `with-participant' macro when used with a :local-server
    participant."
@@ -84,12 +84,12 @@
     (macrolet
         ((test-case (&optional policy)
            `(with-participant (local-server :local-server
-                                            "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy"
+                                            "/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy"
                                             :transform `((:argument . ,#'mock-transform/error))
                                             ,@(when policy `(:error-policy ,policy)))
               (with-methods (local-server) (("echo" (arg) arg))
                 (with-participant (remote-server :remote-server
-                                                 "inprocess:/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy")
+                                                 "/rsbtest/patterns/request-reply/macros-root/with-local-server/error-policy")
                   (call remote-server "echo" 1))))))
 
       ;; Without an error policy, the transform error should just be
@@ -107,7 +107,7 @@
 
 ;;; Remote server-related macros
 
-(test with-participant/remote-server/error-policy
+(test (with-participant/remote-server/error-policy :fixture with-configuration)
   "Test handling of error-policy keyword parameter in
    `with-participant' macro when used with a :remote-server
    participant."
@@ -115,14 +115,15 @@
   (let ((calls '()))
     (macrolet
         ((test-case (&optional policy)
-           `(with-participant (remote-server :remote-server
-                                             "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
-                                             :transform `((:return . ,#'mock-transform/error))
-                                      ,@(when policy `(:error-policy ,policy)))
-              (with-participant (local-server :local-server
-                                              "inprocess:/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy")
-                (with-methods (local-server) (("echo" (arg) arg))
-                  (call remote-server "echo" 1))))))
+           `(with-participants
+                ((remote-server :remote-server
+                                "/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"
+                                :transform `((:return . ,#'mock-transform/error))
+                                ,@(when policy `(:error-policy ,policy)))
+                 (local-server :local-server
+                               "/rsbtest/patterns/request-reply/macros-root/with-remote-server/error-policy"))
+              (with-methods (local-server) (("echo" (arg) arg))
+                (call remote-server "echo" 1)))))
 
       ;; Without an error policy, the transform error should just be
       ;; signaled.
@@ -130,7 +131,6 @@
 
       ;; With `continue' error policy, calling the method should
       ;; proceed without the failing transformation.
-
       (let ((result (test-case (lambda (condition)
                                  (push condition calls)
                                  (continue condition)))))

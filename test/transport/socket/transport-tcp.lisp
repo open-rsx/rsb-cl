@@ -208,7 +208,10 @@
          (output    (with-open-stream (stream (sb-sys:make-fd-stream
                                                read-fd :input t))
                       (read-line stream))))
-    (is (typep (parse-integer output) '(unsigned-byte 16)))))
+
+    (is (typep (parse-integer output) '(unsigned-byte 16)))
+
+    (check-buses-and-connectors (list bus) (list connector))))
 
 (defvar *port-promise*)
 

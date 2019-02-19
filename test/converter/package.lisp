@@ -54,103 +54,105 @@
       (simple?        t))
      cases)
   "Emit basic test cases for CONVERTER in test suite SUITE-NAME."
-  `(progn
+  (let+ (((&flet test-name (name)
+            (symbolicate suite '#:/ name))))
+   `(progn
 
-     (test (wire->domain-applicability
-            ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test methods on `wire->domain?' for the `~(~A~)' converter."
-                converter)
+      (test (,(test-name '#:wire->domain-applicability)
+             ,@(when suite `(:suite ,suite)))
+        ,(format nil "Test methods on `wire->domain?' for the `~(~A~)' converter."
+                 converter)
 
-       (mapc
-        (lambda+ ((wire-data wire-schema domain-object))
-          (let+ ((converter ,make-converter)
-                 ((&flet do-it ()
-                    (wire->domain? converter wire-data wire-schema))))
-            (cond
-              ((member wire-data '(:error :not-applicable)))
-              ((eq domain-object :not-applicable)
-               (is (null  (do-it))))
-              (t
-               ,(if simple?
-                    `(is (eql converter (do-it)))
-                    `(is-true (do-it)))))))
-        ,cases))
+        (mapc
+         (lambda+ ((wire-data wire-schema domain-object))
+           (let+ ((converter ,make-converter)
+                  ((&flet do-it ()
+                     (wire->domain? converter wire-data wire-schema))))
+             (cond
+               ((member wire-data '(:error :not-applicable)))
+               ((eq domain-object :not-applicable)
+                (is (null  (do-it))))
+               (t
+                ,(if simple?
+                     `(is (eql converter (do-it)))
+                     `(is-true (do-it)))))))
+         ,cases))
 
-     (test (domain->wire-applicability
-            ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test methods on `domain->wire?' for the `~(~A~)' converter."
-                converter)
+      (test (,(test-name '#:domain->wire-applicability)
+             ,@(when suite `(:suite ,suite)))
+        ,(format nil "Test methods on `domain->wire?' for the `~(~A~)' converter."
+                 converter)
 
-       (mapc
-        (lambda+ ((wire-data wire-schema domain-object))
-          (let+ ((converter ,make-converter)
-                 ((&flet do-it ()
-                    (domain->wire? converter domain-object))))
-            (cond
-              ((member domain-object '(:error :not-applicable)))
-              ((eq wire-data :not-applicable)
-               (is (null (do-it))))
-              (t
-               (let+ (((&values converter* wire-type* wire-schema*) (do-it)))
-                 ,(if simple?
-                      `(is (eql converter converter*))
-                      `(is-true converter*))
-                 (unless (eq wire-data :error)
-                   (is (typep wire-data wire-type*)))
-                 (is (eql wire-schema wire-schema*)))))))
-        ,cases))
+        (mapc
+         (lambda+ ((wire-data wire-schema domain-object))
+           (let+ ((converter ,make-converter)
+                  ((&flet do-it ()
+                     (domain->wire? converter domain-object))))
+             (cond
+               ((member domain-object '(:error :not-applicable)))
+               ((eq wire-data :not-applicable)
+                (is (null (do-it))))
+               (t
+                (let+ (((&values converter* wire-type* wire-schema*) (do-it)))
+                  ,(if simple?
+                       `(is (eql converter converter*))
+                       `(is-true converter*))
+                  (unless (eq wire-data :error)
+                    (is (typep wire-data wire-type*)))
+                  (is (eql wire-schema wire-schema*)))))))
+         ,cases))
 
-     (test (wire->domain-smoke
-            ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test methods on `wire->domain' for the `~(~A~)' converter."
-                converter)
+      (test (,(test-name '#:wire->domain-smoke)
+             ,@(when suite `(:suite ,suite)))
+        ,(format nil "Test methods on `wire->domain' for the `~(~A~)' converter."
+                 converter)
 
-       (mapc (lambda+ ((wire-data wire-schema domain-object))
-               (let+ ((converter ,make-converter)
-                      ((&flet do-it ()
-                         (wire->domain converter wire-data wire-schema))))
-                 (cond
-                   ((member wire-data '(:error :not-applicable)))
-                   ((member domain-object '(:error :not-applicable))
-                    (signals error (do-it)))
-                   (t
-                    (is (,domain-test domain-object (do-it)))))))
-             ,cases))
+        (mapc (lambda+ ((wire-data wire-schema domain-object))
+                (let+ ((converter ,make-converter)
+                       ((&flet do-it ()
+                          (wire->domain converter wire-data wire-schema))))
+                  (cond
+                    ((member wire-data '(:error :not-applicable)))
+                    ((member domain-object '(:error :not-applicable))
+                     (signals error (do-it)))
+                    (t
+                     (is (,domain-test domain-object (do-it)))))))
+              ,cases))
 
-     (test (domain->wire-smoke
-            ,@(when suite `(:suite ,suite)))
-       ,(format nil "Test methods on `domain->wire' for the `~(~A~)' converter."
-                converter)
+      (test (,(test-name '#:domain->wire-smoke)
+             ,@(when suite `(:suite ,suite)))
+        ,(format nil "Test methods on `domain->wire' for the `~(~A~)' converter."
+                 converter)
 
-       (mapc (lambda+ ((wire-data wire-schema domain-object))
-               (let+ ((converter ,make-converter)
-                      ((&flet do-it ()
-                         (domain->wire converter domain-object))))
-                 (cond
-                   ((member domain-object '(:error :not-applicable)))
-                   ((member wire-data '(:error :not-applicable))
-                    (signals error (do-it)))
-                   (t
-                    (is (equalp (list wire-data wire-schema)
-                                (multiple-value-list (do-it))))))))
-             ,cases))
+        (mapc (lambda+ ((wire-data wire-schema domain-object))
+                (let+ ((converter ,make-converter)
+                       ((&flet do-it ()
+                          (domain->wire converter domain-object))))
+                  (cond
+                    ((member domain-object '(:error :not-applicable)))
+                    ((member wire-data '(:error :not-applicable))
+                     (signals error (do-it)))
+                    (t
+                     (is (equalp (list wire-data wire-schema)
+                                 (multiple-value-list (do-it))))))))
+              ,cases))
 
-     (test (roundtrip
-            ,@(when suite `(:suite ,suite)))
-       ,(format nil "Roundtrip test for the `~(~A~)' converter."
-                converter)
+      (test (,(test-name '#:roundtrip)
+             ,@(when suite `(:suite ,suite)))
+        ,(format nil "Roundtrip test for the `~(~A~)' converter."
+                 converter)
 
-       (mapc
-        (lambda+ ((wire-data wire-schema domain-object))
-          (unless (or (member wire-data '(:error :not-applicable))
-                      (member domain-object '(:error :not-applicable)))
-            (let+ ((converter ,make-converter)
-                   ((&values encoded encoded-wire-schema)
-                    (domain->wire converter domain-object))
-                   (decoded (wire->domain converter encoded encoded-wire-schema)))
-              (is (,domain-test domain-object decoded))
-              (is (eql wire-schema encoded-wire-schema)))))
-        ,cases))))
+        (mapc
+         (lambda+ ((wire-data wire-schema domain-object))
+           (unless (or (member wire-data '(:error :not-applicable))
+                       (member domain-object '(:error :not-applicable)))
+             (let+ ((converter ,make-converter)
+                    ((&values encoded encoded-wire-schema)
+                     (domain->wire converter domain-object))
+                    (decoded (wire->domain converter encoded encoded-wire-schema)))
+               (is (,domain-test domain-object decoded))
+               (is (eql wire-schema encoded-wire-schema)))))
+         ,cases)))))
 
 ;;; `tracking-converter'
 

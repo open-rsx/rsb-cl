@@ -236,7 +236,7 @@
     (handler-bind ((error #'continue))
       (do-it (rcurry #'check-participant :listener scope)))))
 
-(test participant-state-change-hook/smoke
+(test (participant-state-change-hook/smoke :fixture with-configuration)
   "Smoke test for `*participant-state-change-hook*'"
 
   (mapc

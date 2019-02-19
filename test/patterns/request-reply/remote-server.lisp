@@ -65,7 +65,7 @@
   ;; No transports => error
   '("/" (:transports ((t :enabled nil))) error))
 
-(test remote-server/set-method
+(test (remote-server/set-method :fixture with-configuration)
   "Test adding methods to a `remote-server' instance."
 
   (with-participant (server :remote-server "/rsbtest/remoteserver/set-method")
