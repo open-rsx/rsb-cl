@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2017, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -231,6 +231,8 @@
 
 (defvar *scopes-lock* (bt:make-lock "scopes lock")
   "Protects accesses to `*scopes*' during interning.")
+
+(declaim (ftype (function (scope) (values scope &optional)) intern-scope))
 
 (defun intern-scope (scope)
   "Return the canonical `scope' instance for SCOPE. May return SCOPE,

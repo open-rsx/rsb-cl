@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Main client-facing protocol provided by rsb.
 ;;;;
-;;;; Copyright (C) 2011-2016, 2018 Jan Moringen
+;;;; Copyright (C) 2011-2016, 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,7 +36,7 @@
   (:documentation
    "Parse string and return a `scope' instance."))
 
-(declaim (ftype (function (scope) (values scope &optional)) intern-scope))
+;; intern-scope
 
 ;;; Event protocol
 
