@@ -238,7 +238,7 @@
   "Return the canonical `scope' instance for SCOPE. May return SCOPE,
    if it becomes or already is the canonical instance."
   (if (scope-interned? scope)
-      scope
+      (values scope t)
       (bt:with-lock-held (*scopes-lock*)
         (ensure-gethash (scope-components scope) *scopes*
                         (progn
