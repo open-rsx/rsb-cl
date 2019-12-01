@@ -28,7 +28,7 @@
             ("_foo" "_foo")
             ("foo_" "foo_"))))
 
-(test construction/from-components
+(test scope/construction/from-components
   "Test constructing `scope' instances from lists of component
    strings."
 
@@ -56,7 +56,7 @@
           (("Bar" "Foo")        ("Bar" "Foo"))
           (("BAR" "FOO")        ("BAR" "FOO")))))
 
-(test construction/from-string
+(test scope/construction/from-string
   "Test constructing `scope' instances from strings."
 
   (mapc (lambda+ ((string expected-components))
@@ -86,14 +86,14 @@
           ("/_/foo/"     ("_" "foo"))
           ("/"           ()))))
 
-(test construction/invalid
+(test scope/construction/invalid
   "Test attempting to construct `scope' instance from unsuitable
    objects."
 
   (mapc (lambda (input) (signals type-error (make-scope input)))
         '(5 t :foo #\a)))
 
-(test relations
+(test scope/relations
   "Test relations between `scope' instances."
 
   (mapc (lambda+ ((left right relations equality))
@@ -215,7 +215,7 @@
           ("/a"               "/a/b"        error)
           ("/a/b"             "/a/b"        "/"))))
 
-(test intern
+(test scope/intern
   "Test interning of `scope' instances."
 
   (mapc (lambda (scope)
@@ -239,33 +239,33 @@
           ,(make-scope "/" :intern? t)
           ,(make-scope "/foo" :intern? t))))
 
-(test print
+(test scope/print
   "Test method on `print-object' for `scope' class."
 
-  (mapc  (lambda+ ((scope intern?))
-           (check-print (make-scope scope :intern? intern?)))
-         '(("/"         nil) ("/"         t)
-           ("/foo"      nil) ("/foo"      t)
-           ("/foo/bar/" nil) ("/foo/bar/" t)
-           ("/Foo/BAR/" nil) ("/Foo/BAR/" t))))
+  (mapc (lambda+ ((scope intern?))
+          (check-print (make-scope scope :intern? intern?)))
+        '(("/"         nil) ("/"         t)
+          ("/foo"      nil) ("/foo"      t)
+          ("/foo/bar/" nil) ("/foo/bar/" t)
+          ("/Foo/BAR/" nil) ("/Foo/BAR/" t))))
 
 (test intern-scope/stress
   "Stress test for the `intern-scope' function."
 
-  (loop :repeat 1000 :do
-     (let+ ((table      (make-hash-table :test #'equal))
-            (components (list "a" "b")) ; TODO use a random list
-            (string     (format nil "~{/~A~}/" components))
-            ((&flet intern-one ()
-               (let* ((rsb::*scopes* table)
-                      (scope         (intern-scope (make-scope components))))
-                 (values scope (princ-to-string scope)))))
-            (interned (mapcar #'bt:join-thread
-                              (map-into (make-list 10)
-                                        (curry #'bt:make-thread #'intern-one)))))
-       (is (= 1 (hash-table-count table)))
-       (is-true (every (compose (curry #'string= string) #'scope-string)
-                       interned))
-       (is-true (every (compose (curry #'equal components) #'scope-components)
-                       interned))
-       (is (= 1 (length (remove-duplicates interned :test #'eq)))))))
+  (loop :repeat 1000
+        :do (let+ ((table      (make-hash-table :test #'equal))
+                   (components (list "a" "b")) ; TODO use a random list
+                   (string     (format nil "~{/~A~}/" components))
+                   ((&flet intern-one ()
+                      (let* ((rsb::*scopes* table)
+                             (scope         (intern-scope (make-scope components))))
+                        (values scope (princ-to-string scope)))))
+                   (interned (mapcar #'bt:join-thread
+                                     (map-into (make-list 10)
+                                               (curry #'bt:make-thread #'intern-one)))))
+              (is (= 1 (hash-table-count table)))
+              (is-true (every (compose (curry #'string= string) #'scope-string)
+                              interned))
+              (is-true (every (compose (curry #'equal components) #'scope-components)
+                              interned))
+              (is (= 1 (length (remove-duplicates interned :test #'eq)))))))

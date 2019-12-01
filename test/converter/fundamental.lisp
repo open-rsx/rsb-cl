@@ -18,7 +18,8 @@
   :description
   "Unit tests for the `fundamental-void' converter.")
 
-(define-basic-converter-test-cases (:fundamental-void)
+(define-basic-converter-test-cases (:fundamental-void
+                                    :suite fundamental-void-root)
     `((,(octetify #())  :void ,+no-value+)
       (,(octetify #(1)) :void :not-applicable)
       (:not-applicable  :void t)
@@ -32,7 +33,8 @@
   :description
   "Unit tests for the `fundamental-null' converter.")
 
-(define-basic-converter-test-cases (:fundamental-null)
+(define-basic-converter-test-cases (:fundamental-null
+                                    :suite fundamental-null-root)
     `((nil                     t nil)
       (:foo                    t :foo)
       ("bar"                   t "bar")
@@ -46,7 +48,8 @@
   :description
   "Unit tests for the `fundamental-bool' converter.")
 
-(define-basic-converter-test-cases (:fundamental-bool)
+(define-basic-converter-test-cases (:fundamental-bool
+                                    :suite fundamental-bool-root)
     `((,(octetify #(0)) :bool nil)
       (,(octetify #(1)) :bool t)
       (:not-applicable  :bool "bar")
@@ -59,7 +62,8 @@
   :description
   "Unit tests for the `fundamental-int32' converter.")
 
-(define-basic-converter-test-cases (:fundamental-int32)
+(define-basic-converter-test-cases (:fundamental-int32
+                                    :suite fundamental-int32-root)
     `((,(octetify #(0 0 0 0))         :int32 0)
       (,(octetify #(1 0 0 0))         :int32 1)
       (,(octetify #(255 255 255 255)) :int32 -1)
@@ -73,7 +77,8 @@
   :description
   "Unit tests for the `fundamental-ascii-string' converter.")
 
-(define-basic-converter-test-cases (:fundamental-ascii-string)
+(define-basic-converter-test-cases (:fundamental-ascii-string
+                                    :suite fundamental-ascii-string-root)
     `((,(octetify #())         :ascii-string "")
       (:not-applicable         :ascii-string :not-a-string)
       (,(octetify #(65 65 65)) :ascii-string "AAA")
@@ -87,7 +92,8 @@
   :description
   "Unit tests for the `fundamental-utf-8-string' converter.")
 
-(define-basic-converter-test-cases (:fundamental-utf-8-string)
+(define-basic-converter-test-cases (:fundamental-utf-8-string
+                                    :suite fundamental-utf-8-string-root)
     `((,(octetify #())           :utf-8-string "")
       (:not-applicable           :utf-8-string :not-a-string)
       (,(octetify #(65 65 65))   :utf-8-string "AAA")
@@ -101,7 +107,8 @@
   :description
   "Unit tests for the `fundamental-bytes' converter.")
 
-(define-basic-converter-test-cases (:fundamental-bytes)
+(define-basic-converter-test-cases (:fundamental-bytes
+                                    :suite fundamental-bytes-root)
     `((,(octetify #())         :bytes ,(octetify #()))
       (:not-applicable         :bytes :not-an-octet-vector)
       (,(octetify #(65 65 65)) :bytes ,(octetify #(65 65 65)))))
@@ -114,6 +121,7 @@
   "Unit tests for the `fundamental-scope' converter.")
 
 (define-basic-converter-test-cases (:fundamental-scope
+                                    :suite       fundamental-scope-root
                                     :domain-test scope=)
     `((,(octetify #())                  :scope :error)
       (,(octetify #(102 111 111))       :scope :error)

@@ -19,7 +19,7 @@
   :description
   "Unit tests for the `composite-participant-mixin' class.")
 
-(test print/smoke
+(test composite-participant-mixin/print/smoke
   "Smoke test for the `print-items:print-items' method specialized on
    `composite-participant-mixin'."
 
@@ -30,7 +30,7 @@
           (make-participant :mock "/foo"))
     (is (search "(1)" (princ-to-string participant)))))
 
-(test detach/smoke
+(test composite-participant-mixin/detach/smoke
   "Smoke test for the `detach' method specialized on
    `composite-participant-mixin'."
 
@@ -53,7 +53,8 @@
      &key)
   (error "something went wrong"))
 
-(test (failed-construction-cleanup :fixture with-configuration)
+(test (composite-participant-mixin/failed-construction-cleanup
+       :fixture with-configuration)
   "Ensure that `detach' is called on all already registered child
    participants when an error is signaled during initialization."
 
@@ -75,7 +76,7 @@
   :description
   "Unit tests for the `child-container-mixin' class.")
 
-(test participant-child/smoke
+(test child-container-mixin/participant-child/smoke
   "Smoke test for the `participant-child' and setf `participant-child'
    methods specialized on `child-container-mixin'."
 
@@ -99,7 +100,8 @@
   :description
   "Unit tests for the `configuration-inheritance-mixin' class.")
 
-(test (make-child-initargs/smoke :fixture with-configuration)
+(test (configuration-inheritance-mixin/make-child-initargs/smoke
+       :fixture with-configuration)
   "Smoke test for the `make-child-initargs' method specialized on the
    `configuration-inheritance-mixin' class."
 
@@ -142,7 +144,8 @@
        (:transform      . 1-)
        (:introspection? . nil))))))
 
-(test (no-*configuration*-leakage :fixture with-configuration)
+(test (configuration-inheritance-mixin/no-*configuration*-leakage
+       :fixture with-configuration)
   "Ensure that the current value of `*configuration*' does not affect
    child participants created using `configuration-inheritance-mixin'."
 
@@ -180,7 +183,7 @@
   :description
   "Unit tests for the `lazy-child-making-mixin' class.")
 
-(test participant-child/smoke
+(test lazy-child-making-mixin/participant-child/smoke
   "Smoke test for the `participant-child' method specialized on
    `lazy-child-making-mixin'."
 

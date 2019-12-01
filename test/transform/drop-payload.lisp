@@ -11,7 +11,7 @@
   :description
   "Unit tests for the `drop-payload' transform.")
 
-(test smoke
+(test drop-payload.smoke
   "Smoke test for the `drop-payload' transform."
 
   (call-with-transform-checking-thunk

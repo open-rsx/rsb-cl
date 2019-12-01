@@ -327,13 +327,14 @@
 
    PARTICIPANT? controls whether a participant of class CLASS is created
    and bound to a variable named like the value of CLASS."
-  (let+ ((kind  (make-keyword class))
-         (scope (format nil "/rsbtest/~(~A~)/errorhook" class))
+  (let+ ((test-name (symbolicate class '#:/error-hook))
+         (kind      (make-keyword class))
+         (scope     (format nil "/rsbtest/~(~A~)/errorhook" class))
          ((&flet maybe-wrap (body)
             (if participant?
                 `((with-participant (,class ,kind ,scope) ,@body))
                 body))))
-    `(test (error-hook
+    `(test (,test-name
             ,@(when suite `(:suite ,suite))
             :fixture with-configuration)
        ,(format nil "Test the error-hook mechanism for the `~(~A~)' class."

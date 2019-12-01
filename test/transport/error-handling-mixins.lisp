@@ -10,7 +10,8 @@
     ((define-error-handling-mixin-tests (class
                                          (method-name (&rest method-args) &body method-body)
                                          &body invoke)
-       (let ((suite-name (symbolicate class "-ROOT")))
+       (let ((suite-name      (symbolicate class '#:-root))
+             (smoke-test-name (symbolicate class '#:/smoke)))
          `(progn
             (defmethod ,method-name ((connector ,class) ,@method-args)
               ,@method-body)
@@ -20,7 +21,7 @@
               :description
               ,(format nil "Unit tests for the `~(~A~)' class." class))
 
-            (test smoke
+            (test ,smoke-test-name
               `(format nil "Smoke test for the error handling ~
                             performed by the `~(~A~)' class."
                        class)

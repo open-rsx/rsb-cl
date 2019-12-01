@@ -11,7 +11,7 @@
   :description
   "Unit tests for the `event' class.")
 
-(test construction
+(test event/construction
   "Test construction of `event' instances."
 
   (mapc
@@ -84,7 +84,7 @@
     (check-event event "/" "foo")
     (is (typep (timestamp event :foo) 'local-time:timestamp))))
 
-(test id-computation
+(test event/id-computation
   "Test computation of event sequence numbers."
 
   ;; Test some examples. Note that event ids cannot be computed
@@ -106,7 +106,7 @@
            ,(make-id "BF948D47-618F-4B04-AAC5-0AB5A1A79267")
            ,(make-id "BD27BE7D-87DE-5336-BECA-44FC60DE46A0")))))
 
-(test comparison
+(test event/comparison
   "Test comparing events for equality using `event='."
 
   (mapc
@@ -155,16 +155,14 @@
      ("/foo" "bar" nil     "/" "bar" nil     nil nil nil nil nil)
      ("/"    "baz" nil     "/" "bar" nil     nil nil nil nil nil))))
 
-(test print
+(test event/print
   "Test `print-object' method on `event' class."
 
   (mapc (lambda+ ((args expected))
-          (let+ ((event  (apply #'make-event args))
+          (let* ((event  (apply #'make-event args))
                  (string (let ((*print-length* 10))
-                           (princ-to-string event)))
-                 ((&flet search/flipped (string expected)
-                    (search expected string))))
-            (is (search/flipped expected string))))
+                           (princ-to-string event))))
+            (is (search expected string))))
         `((("/foo/bar" "baz")
            "/foo/bar/ \"baz\" (3)")
           (("/foo/bar" ,(make-string 1000 :initial-element #\a))

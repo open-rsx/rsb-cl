@@ -40,15 +40,15 @@
             (setf (processor-error-policy processor) #'continue)
             ,@call-form))))
 
-  (define-smoke-test smoke/function
+  (define-smoke-test error-policy-mixin/smoke/function
     (call-with-error-policy
      processor #'error-policy-mixin.signaling-function))
 
-  (define-smoke-test smoke/macro
+  (define-smoke-test error-policy-mixin/smoke/macro
     (with-error-policy (processor)
       (error-policy-mixin.signaling-function)))
 
-  (define-smoke-test recursive-error
+  (define-smoke-test error-policy-mixin/recursive-error
     (with-error-policy (processor)
       (error-policy-mixin.signaling-function t))))
 
@@ -61,13 +61,17 @@
 (macrolet
     ((define-error-policy+restart-mixins-tests (method name)
        (let* ((error-policy-class-name
-               (symbolicate '#:error-policy- name '#:-mixin))
+                (symbolicate '#:error-policy- name '#:-mixin))
               (error-policy-suite-name
-               (symbolicate error-policy-class-name '#:-root))
+                (symbolicate error-policy-class-name '#:-root))
+              (error-policy-smoke-test-name
+                (symbolicate error-policy-class-name '#:/smoke))
               (restart-class-name
-               (symbolicate '#:restart- name '#:-mixin))
+                (symbolicate '#:restart- name '#:-mixin))
               (restart-suite-name
-               (symbolicate restart-class-name '#:-root)))
+                (symbolicate restart-class-name '#:-root))
+              (restart-smoke-test-name
+                (symbolicate restart-class-name '#:/smoke)))
          `(progn
             (def-suite* ,error-policy-suite-name
               :in event-processing-root
@@ -75,7 +79,7 @@
               ,(format nil "Test suite for the `~(~A~)' class."
                        error-policy-class-name))
 
-            (test smoke
+            (test ,error-policy-smoke-test-name
               ,(format nil "Smoke test for the `~(~A~)' class."
                        error-policy-class-name)
 
@@ -107,7 +111,7 @@
               ,(format nil "Test suite for the `~(~A~)' class."
                        restart-class-name))
 
-            (test smoke
+            (test ,restart-smoke-test-name
               ,(format nil "Smoke test for the `~(~A~)' class."
                        restart-class-name)
 
@@ -141,7 +145,7 @@
                                     mock-processor)
   ())
 
-(test smoke
+(test transform-mixin/smoke
   "Smoke test for the `transform-mixin' processor mixin class."
 
   (mapc
@@ -174,7 +178,7 @@
   :description
   "Unit test for the `sink-dispatcher-mixin' processor mixin class.")
 
-(test smoke
+(test sink-dispatcher-mixin/smoke
   "Smoke test for the `sink-dispatcher-mixin' processor mixin class."
 
   (let+ ((dispatcher (make-instance 'sink-dispatcher-mixin))

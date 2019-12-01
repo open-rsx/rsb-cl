@@ -11,7 +11,7 @@
   :description
   "Unit tests for the `transform!' generic function.")
 
-(test default-behavior
+(test transform!.default-behavior
   "Test default behavior of the `transform!' generic function."
 
   (mapc
@@ -32,7 +32,7 @@
      ((,#'1+ ,(curry #'* 2)) 1                3)
      ((,(curry #'* 2) ,#'1+) 1                4))))
 
-(test restarts
+(test transform!.restarts
   "Test restarts established by default methods on the `transform!'
    generic function."
 
@@ -59,7 +59,7 @@
   :description
   "Unit tests for the `make-transform' generic function.")
 
-(test smoke
+(test make-transform.smoke
   "Smoke test for the `make-transform' generic function."
 
   (mapc (lambda+ ((spec expected))

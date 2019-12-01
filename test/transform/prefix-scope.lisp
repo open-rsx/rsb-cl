@@ -11,13 +11,13 @@
   :description
   "Unit tests for the `prefix-scope' transform.")
 
-(test construct
+(test prefix-scope.construct
   "Test constructing `prefix-scope' instances."
 
   (signals transform-creation-error (make-transform :prefix-scope))
   (signals transform-creation-error (make-transform :prefix-scope :prefix 1)))
 
-(test smoke
+(test prefix-scope.smoke
   "Smoke test for the `prefix-scope' transform."
 
   (mapc
@@ -38,7 +38,7 @@
      ("/baz/fez" "/foo"     "/baz/fez/foo")
      ("/baz/fez" "/foo/bar" "/baz/fez/foo/bar"))))
 
-(test print
+(test prefix-scope.print
   "Test printing `prefix-scope' instances."
 
   (let ((transform (make-transform :prefix-scope :prefix "/foo")))

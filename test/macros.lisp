@@ -73,7 +73,7 @@
     (is (= 1 (length received)))))
 
 ;;; Reader-related macros
-
+;; TODO move to patterns?
 (test (with-participant/reader/smoke :fixture with-configuration)
   "Smoke test for the `with-participant' macro with a :reader
    participant."

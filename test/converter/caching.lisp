@@ -13,6 +13,7 @@
 
 (define-basic-converter-test-cases
     (:caching
+     :suite          caching-root
      :make-converter (make-instance 'rsb.converter:caching-converter
                                     :target :fundamental-void)
      :simple?        nil)

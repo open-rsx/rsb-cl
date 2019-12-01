@@ -11,7 +11,7 @@
   :description
   "Test suite for the `adjust-timestamps' transform.")
 
-(test construct
+(test adjust-timestamps.construct
   "Test constructing `adjust-timestamps' instances."
 
   (mapc
@@ -44,7 +44,7 @@
      ((:adjustments ((:send   (+ (+ :create -1) 5))))           t)
      ((:adjustments ((:send   :self)))                          t))))
 
-(test smoke
+(test adjust-timestamps.smoke
   "Smoke test for the `adjust-timestamps' transform."
 
   (mapc (lambda+ ((adjustments expected))
@@ -84,7 +84,7 @@
           (((:create (+ :self -1)))
            (:create)))))
 
-(test print
+(test adjust-timestamps.print
   "Test printing `adjust-timestamps' instances."
 
   (let ((transform (make-transform :adjust-timestamps

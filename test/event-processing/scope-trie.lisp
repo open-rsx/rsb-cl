@@ -37,7 +37,7 @@
   :description
   "Test suite for the `scope-trie' data structure.")
 
-(test smoke
+(test scope-trie/smoke
   "Smoke test for the `scope-trie' data structure."
 
   ;; Order of additions and removals must not matter.
@@ -141,7 +141,7 @@
                               (values new new)))
                           scope trie))))
 
-(test stress.1
+(test scope-trie/stress.1
   "Multi-threaded stress test for the `scope-trie' data structure
    exercising concurrent insertions."
 
@@ -161,7 +161,7 @@
                       :key (lambda (scope)
                              (length (scope-trie-get scope trie)))))))))
 
-(test stress.2
+(test scope-trie/stress.2
   "Multi-threaded stress test for the `scope-trie' data structure
    exercising concurrent insertions and deletions."
 
@@ -187,7 +187,7 @@
                     (null (scope-trie-get scope trie)))
                   scopes)))))
 
-(test stress.3
+(test scope-trie/stress.3
   "Multi-threaded stress test for the `scope-trie' data structure
    exercising concurrent insertions, deletions and queries."
 
@@ -229,7 +229,7 @@
   :description
   "Test suite for the `sink-scope-trie' class.")
 
-(test smoke
+(test sink-scope-trie/smoke
   "Smoke test for the `sink-scope-trie' data structure."
 
   (let+ ((trie (make-sink-scope-trie))

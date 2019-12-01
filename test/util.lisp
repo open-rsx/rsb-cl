@@ -43,7 +43,7 @@
     :description
     "Test suite for the `timed-executor' class.")
 
-  (test construction
+  (test timed-executor/construction
     "Test constructing `timed-executor' instances."
 
     (define-construction-cases timed-executor))
@@ -53,7 +53,7 @@
     :description
     "Test suite for the `timed-executor/weak' class.")
 
-  (test construction
+  (test timed-executor/weak/construction
     "Test constructing `timed-executor/weak' instances."
 
     (define-construction-cases timed-executor/weak)))

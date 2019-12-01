@@ -12,6 +12,7 @@
   "Unit tests for the `annotating' converter class.")
 
 (define-basic-converter-test-cases (:annotating
+                                    :suite          annotating-root
                                     :make-converter (make-instance 'rsb.converter::annotating))
     `((:some-wire-data :some-wire-schema
        ,(rsb.converter::make-annotated :some-wire-data :some-wire-schema))
