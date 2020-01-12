@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011-2017, 2019 Jan Moringen
+;;;; Copyright (C) 2011-2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -129,7 +129,7 @@
       thing
       (the (values scope &optional) (make-scope thing))))
 
-(declaim (ftype (function (scope scope) (values * &optional)) scope=/no-coerce)
+(declaim (ftype (function (scope scope) (values t &optional)) scope=/no-coerce)
          (inline scope=/no-coerce))
 (defun scope=/no-coerce (scope1 scope2)
   (or (eq scope1 scope2)
@@ -140,7 +140,7 @@
   "Return non-nil if THING1 is the same scope as THING2."
   (scope=/no-coerce (ensure-scope thing1) (ensure-scope thing2)))
 
-(declaim (ftype (function (scope scope) (values * &optional)) sub-scope?/no-coerce)
+(declaim (ftype (function (scope scope) (values t &optional)) sub-scope?/no-coerce)
          (inline sub-scope?/no-coerce))
 (defun sub-scope?/no-coerce (scope1 scope2)
   (or (eq scope1 scope2)
@@ -152,7 +152,7 @@
   "Return non-nil if SUB is a sub-scope of SUPER."
   (sub-scope?/no-coerce (ensure-scope sub) (ensure-scope super)))
 
-(declaim (ftype (function (scope scope) (values * &optional)) super-scope?/no-coerce)
+(declaim (ftype (function (scope scope) (values t &optional)) super-scope?/no-coerce)
          (inline super-scope?/no-coerce))
 (defun super-scope?/no-coerce (super sub)
   (sub-scope?/no-coerce sub super))
