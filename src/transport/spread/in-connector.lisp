@@ -1,6 +1,6 @@
 ;;;; in-connector.lisp --- Superclass for in-direction connector classes.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,7 +11,9 @@
 (defclass in-connector (connector
                         timestamping-receiver-mixin
                         restart-notification-receiver-mixin
-                        expose-transport-metrics-mixin)
+                        expose-transport-metrics-mixin
+                        broadcast-processor
+                        error-policy-mixin)
   ()
   (:metaclass connector-class)
   (:direction :in)
