@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Tests for the protocol of the patterns module.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -61,7 +61,7 @@
          (child2      (make-participant :mock "/" :introspection? nil))
          (child3      (make-participant :mock "/" :introspection? nil))
          ((&flet put-it (child &rest args)
-            (apply '(setf participant-child) child participant :foo :mock
+            (apply #'(setf participant-child) child participant :foo :mock
                    args)))
          ((&flet get-it (&rest args)
             (apply #'participant-child participant :foo :mock args))))
