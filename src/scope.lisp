@@ -1,6 +1,6 @@
 ;;;; scope.lisp --- Scope class and related functions.
 ;;;;
-;;;; Copyright (C) 2011-2020 Jan Moringen
+;;;; Copyright (C) 2011-2021 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,30 +8,29 @@
 
 ;;; `scope' class
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defclass scope ()
-    ((components :initarg  :components
-                 :type     list ; actually scope-components
-                 :reader   scope-components
-                 :documentation
-                 "The name components of the scope.")
-     (interned?  :initarg  :interned?
-                 :type     boolean
-                 :accessor scope-interned?
-                 :initform nil
-                 :documentation
-                 "Non-nil if the scope has been interned.")
-     (%string    :initarg  :%string
-                 :type     (or null string)
-                 :accessor scope-%string
-                 :initform nil
-                 :documentation
-                 "Caches the string representation of the scope."))
-    (:default-initargs
-     :components (missing-required-initarg 'scope :components))
-    (:documentation
-     "Instances of this class consist of a hierarchy of zero or more
-      names.")))
+(defclass scope ()
+  ((components :initarg  :components
+               :type     list ; actually scope-components
+               :reader   scope-components
+               :documentation
+               "The name components of the scope.")
+   (interned?  :initarg  :interned?
+               :type     boolean
+               :accessor scope-interned?
+               :initform nil
+               :documentation
+               "Non-nil if the scope has been interned.")
+   (%string    :initarg  :%string
+               :type     (or null string)
+               :accessor scope-%string
+               :initform nil
+               :documentation
+               "Caches the string representation of the scope."))
+  (:default-initargs
+   :components (missing-required-initarg 'scope :components))
+  (:documentation
+   "Instances of this class consist of a hierarchy of zero or more
+      names."))
 
 (defmethod scope-string ((scope scope))
   (or (scope-%string scope)
@@ -47,12 +46,8 @@
     (format stream "~A~:[~; !~]"
             (scope-string object) (scope-interned? object))))
 
-(defconstant +root-scope+
-  (if (boundp '+root-scope+)
-      (symbol-value '+root-scope+)
-      (make-instance 'scope
-                     :components '()
-                     :interned?  t))
+(defvar +root-scope+
+  (make-instance 'scope :components '() :interned? t)
   "The singleton instance of the root scope.")
 
 ;; scope methods
